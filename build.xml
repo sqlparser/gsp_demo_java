@@ -2,7 +2,7 @@
 
 
 	<property name="listGSPInfo-main-class"  value="demos.listGSPInfo.listGSPInfo"/>
-	<property name="demos.dir"   	value="src/demos"/>
+	<property name="demos.dir"   	value="src/main/java/demos"/>
 	<property name="build.dir"   	value="build"/>
 	<property name="classes.dir" 	value="${build.dir}/classes"/>
 	<property name="jar.demos.dir"     	value="${build.dir}/jar/demos"/>
