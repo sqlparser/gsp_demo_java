@@ -6,6 +6,60 @@ import junit.framework.TestCase;
 
 public class testMySQL extends TestCase
 {
+    public void testSelectModifier1( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );
+        sqlparser.sqltext = "select SQL_CALC_FOUND_ROWS concat('1','-','2') from test";
+
+        sqlparser.parse( );
+
+        //System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void testSelectModifier2( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );
+        sqlparser.sqltext = "select SQL_CALC_FOUND_ROWS distinct concat('3','-','2') from test ";
+
+        sqlparser.parse( );
+
+       // System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void testSelectModifier3( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );
+        sqlparser.sqltext = "select SQL_CALC_FOUND_ROWS distinct 1 from dual";
+
+        sqlparser.parse( );
+
+        // System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void testSelectModifier4( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );
+        sqlparser.sqltext = "select distinct SQL_CALC_FOUND_ROWS 1 from dual";
+
+        sqlparser.parse( );
+
+        // System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void testCastFunction( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );
+        sqlparser.sqltext = "select cast (test.string as json) from test";
+
+        sqlparser.parse( );
+
+        // System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
 
     public void testOnduplicate( )
     {

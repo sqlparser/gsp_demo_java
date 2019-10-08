@@ -203,6 +203,9 @@ public class runGetTableColumn
 			}
 		}
 
+		System.out.println("Processing "+vendor.toString()+"...");
+
+
 		TGetTableColumn getTableColumn = new TGetTableColumn( vendor );
 		getTableColumn.showDetail = false;
 		getTableColumn.showSummary = true;

@@ -2,7 +2,7 @@ package test.oracle;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.oracle.TXMLPassingClause;
+import gudusoft.gsqlparser.nodes.TXMLPassingClause;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 

@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.nodes.TMultiTarget;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.couchbase.TObjectConstruct;
 import gudusoft.gsqlparser.nodes.couchbase.TPair;
-import gudusoft.gsqlparser.stmt.couchbase.TUpsertStmt;
+import gudusoft.gsqlparser.stmt.TUpsertStmt;
 import junit.framework.TestCase;
 
 public class testUpsert extends TestCase {

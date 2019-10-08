@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TResultColumn;
-import gudusoft.gsqlparser.nodes.oracle.TXMLAttributesClause;
+import gudusoft.gsqlparser.nodes.TXMLAttributesClause;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 

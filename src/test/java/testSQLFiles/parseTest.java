@@ -86,6 +86,7 @@ void parsefiles(EDbVendor db,String dir)  {
 
     public  void testMdx(){
         parsefiles(EDbVendor.dbvmdx,test.gspCommon.BASE_SQL_DIR+"mdx");
+        parsefiles(EDbVendor.dbvmdx,test.gspCommon.BASE_SQL_DIR+"java/mdx/passed");
     }
 
     public  void testNetezza(){
