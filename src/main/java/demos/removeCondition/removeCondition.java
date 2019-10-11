@@ -24,6 +24,31 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Replace user defined variable in where clause with specified value,
+ * If no value is specified, then the condition include the variable will be removed
+ * <pre>
+ *     {@code
+ *  d.id = summit.mstr.id
+ * AND d.system_gift_type IN ( 'OG', 'PLP', 'PGP' )
+ * AND d.fund_coll_attrb IN ( '$Institute$' )
+ * AND d.fund_acct IN ( '$Fund$' )
+ * AND d.cntrb_date >= '$From_Date$'
+ * AND d.cntrb_date <= '$Thru_Date$'
+ *     }
+ * </pre>
+ *
+ * After specify the value for variable: $Institute$ and $Fund$,
+ * the where condition becomes something like this:
+ * <pre>
+ *     {@code
+ *  d.id = summit.mstr.id
+ * 	AND d.system_gift_type IN ( 'OG', 'PLP', 'PGP' )
+ * 	AND d.fund_coll_attrb IN ( 'ShanXi University' )
+ * 	AND d.fund_acct IN ( 'Eclipse.org' )
+ *     }
+ * </pre>
+ */
 public class removeCondition
 {
 

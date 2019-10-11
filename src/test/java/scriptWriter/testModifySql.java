@@ -9,6 +9,18 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import junit.framework.TestCase;
 
+/**
+ * Illustrates how to modify SQL clauses.
+ *
+ * <ul>
+ *     <li>{@link #testSimpleConverter}: turn {@code "where t1.f1=t2.f2" } into {@code "t1 LEFT JOIN t2 ON t1.f1 = t2.f2"}</li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * @see <a href="http://support.sqlparser.com/tutorials/gsp-howto-script-writer/">http://support.sqlparser.com/tutorials/gsp-howto-script-writer/</a>
+ */
 public class testModifySql extends TestCase {
 
     private TGSqlParser parser = null;

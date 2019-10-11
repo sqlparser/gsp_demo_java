@@ -29,6 +29,9 @@ public class testModifyExpr extends TestCase {
         super.tearDown();
     }
 
+    /**
+     * set the status of an expression to be removed from the parent expression.
+     */
     public void testRemoveObjectExpr() {
         TExpression expression = parser.parseExpression("columnA");
         assertTrue(expression.getExpressionType() == EExpressionType.simple_object_name_t);
@@ -36,6 +39,9 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.getExpressionType() == EExpressionType.removed_t);
     }
 
+    /**
+     * Remove an expression which includes a function call from the parent expression.
+     */
     public void testRemoveFunctionCallExpr() {
         TExpression expression = parser.parseExpression("fx(columnA)");
         assertTrue(expression.getExpressionType() == EExpressionType.function_t);
@@ -43,6 +49,10 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.getExpressionType() == EExpressionType.removed_t);
     }
 
+    /**
+     * Remove <code>columnC</code> in <code>fx(columnA,columnB,fx2(1+columnC))</code> cause the whole function
+     * removed from the parent expression.
+     */
     public void testRemoveColumnInFunctionCall() {
         TExpression expression = parser.parseExpression("fx(columnA,columnB,fx2(1+columnC))");
         assertTrue(expression.getExpressionType() == EExpressionType.function_t);
@@ -55,6 +65,13 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.getExpressionType() == EExpressionType.removed_t);
     }
 
+    /**
+     * Remove <code>columnB</code> in
+     * {@code
+     * columnA+(columnB*2)+columnC
+     * }
+     * will cause the whole expression removed from the parent expression or parse tree node.
+     */
     public void testSearchColumn() {
         TExpression expression = parser.parseExpression("columnA+(columnB*2)+columnC");
         TExpressionList resultList = expression.searchColumn("columnB");
@@ -68,6 +85,15 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.toScript().equalsIgnoreCase(""));
     }
 
+    /**
+     * Remove <code>columnA</code> in
+     * <pre>
+     * {@code
+     * columnA+(columnB*2)>columnC
+     * }
+     * </pre>
+     * will cause the whole expression removed from the parent expression or parse tree node.
+     */
     public void testColumnInComparision() {
         TExpression expression = parser.parseExpression("columnA+(columnB*2)>columnC");
         TExpressionList resultList = expression.searchColumn("columnA");
@@ -81,6 +107,18 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.toScript().equalsIgnoreCase(""));
     }
 
+    /**
+     * Remove <code>columnA</code> in
+     * <pre>{@code columnA+(columnB*2)>columnC and columnD=columnE-9}</pre>
+     * will cause the expression
+     * <pre>
+     * {@code columnA+(columnB*2)>columnC}
+     * </pre>
+     * removed from the parent expression and keep this expression unchange:
+     * <pre>
+     * {@code columnD = columnE - 9}
+     * </pre>
+     */
     public void testColumnInAndOr() {
         TExpression expression = parser.parseExpression("columnA+(columnB*2)>columnC and columnD=columnE-9");
         TExpressionList resultList = expression.searchColumn("columnA");
@@ -94,6 +132,22 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.toScript().equalsIgnoreCase("columnD = columnE - 9"));
     }
 
+    /**
+     * Remove column: <code>application_location_id</code> from the where condition,
+     * <pre>
+     * {@code
+     *     (pal.application_location_id = pualr.application_location_id +
+     *                        AND pu.jbp_uid = pualr.jbp_uid" +
+     *                        AND pu.username = 'USERID')
+     * }
+     * </pre>
+     * Keep the following condition unchanged:
+     * <pre>
+     *     {@code
+     *     (pu.jbp_uid = pualr.jbp_uid  and  pu.username = 'USERID')
+     *     }
+     * </pre>
+     */
     public void testColumnInAndOr1(){
         parser.sqltext = "select *\n" +
                 "from table1 pal, table2 pualr, table3 pu\n" +
@@ -116,6 +170,26 @@ public class testModifyExpr extends TestCase {
     }
 
 
+    /**
+     * Remove the right operand of a condition in where clause.
+     * <pre>
+     *     {@code
+     *     m.id = ?  and  m.id = altname.id(+)  and  m.id = ccu.id(+)
+     *     }
+     * </pre>
+     * After remove the right operand, the condition become like this:
+     * <pre>
+     *     {@code
+     *     m.id = ?  and  m.id = altname.id(+)
+     *     }
+     * </pre>
+     * then, remove the right operand again, the condition become like this:
+     * <pre>
+     *     {@code
+     *     m.id = ?
+     *     }
+     * </pre>
+     */
     public void testColumnInAndOr2(){
         parser.sqltext = "SELECT m.*, \n" +
                 "       altname.last_name  last_name_student, \n" +
@@ -146,7 +220,26 @@ public class testModifyExpr extends TestCase {
         assertTrue(expression.toScript().equalsIgnoreCase("m.id = ?"));
     }
 
-
+    /**
+     * Remove those columns from the condition: lst.soort_adres, nat.prs_id, adr.id, prs.id
+     * <pre>
+     *     {@code
+     *   pas.soort_adres = lst.soort_adres
+     *   and prs.id(+) = nat.prs_id
+     *   and adr.id = pas.adr_id
+     *   and prs.id = pas.prs_id
+     *     and lst.persoonssoort = 'PERSOON'
+     *      and pas.einddatumrelatie is null;
+     *     }
+     * </pre>
+     * The result condition is:
+     * <pre>
+     *     {@code
+     *     lst.persoonssoort = 'PERSOON'
+     *            and pas.einddatumrelatie is null"
+     *     }
+     * </pre>
+     */
     public void testColumnInAndOr3(){
         parser.sqltext = "select *\n" +
                 "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n" +

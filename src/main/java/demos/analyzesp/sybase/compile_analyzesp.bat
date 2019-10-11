@@ -22,7 +22,7 @@ call setenv\setenv.bat
     echo eg. JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
     echo ***************************
     echo.
-    cd src\demos\analyzesp\sybase
+    cd src\main\java\demos\analyzesp\sybase
     pause
     goto END
     )
@@ -32,12 +32,12 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
-%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\demos\analyzesp\sybase\Analyze_SP.java
+%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\analyzesp\sybase\Analyze_SP.java
 
 echo Completed.
 
 REM # Change directory to the original directory
-cd src\demos\analyzesp\sybase
+cd src\main\java\demos\analyzesp\sybase
 
 pause
 

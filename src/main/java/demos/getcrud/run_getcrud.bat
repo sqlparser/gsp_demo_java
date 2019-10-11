@@ -6,7 +6,7 @@ REM # the setenv/setenv.bat file
 REM # before running this script/batch file
 
 REM # Change directory to gsp Demo Home directory
-cd ..\..\..
+cd ..\..\..\..\..
 
 REM # Run the setenv to set the environment variables.
 call setenv\setenv.bat
@@ -20,7 +20,7 @@ call setenv\setenv.bat
     echo eg. JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
     echo ***************************
     echo.
-    cd src\demos\getcrud
+    cd src\main\java\demos\getcrud
     pause
     goto END
     )
@@ -29,7 +29,7 @@ REM # Run the gsp demo
 %JAVA_CMD% -cp %CLASSPATH% demos.getcrud.getcrud  %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 REM # Change back to the original directory
-cd src\demos\getcrud
+cd src\main\java\demos\getcrud
 
 pause
 

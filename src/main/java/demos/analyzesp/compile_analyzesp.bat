@@ -8,7 +8,7 @@ REM # Set the target directory where the compiled class should be copied.
 set targetdir=build
 
 REM # Change directory to gsp Demo Home directory
-cd ..\..\..
+cd ..\..\..\..\..
 
 REM # Run the setenv to set the environment variables.
 call setenv\setenv.bat
@@ -22,7 +22,7 @@ call setenv\setenv.bat
     echo eg. JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
     echo ***************************
     echo.
-    cd src\demos\analyzesp
+    cd src\main\java\demos\analyzesp
     pause
     goto END
     )
@@ -32,12 +32,12 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
-%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\demos\analyzesp\Analyze_SP.java
+%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\analyzesp\Analyze_SP.java
 
 echo Completed.
 
 REM # Change directory to the original directory
-cd src\demos\analyzesp
+cd src\main\java\demos\analyzesp
 
 pause
 
