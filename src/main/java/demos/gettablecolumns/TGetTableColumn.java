@@ -450,7 +450,7 @@ public class TGetTableColumn{
                 for(int i=0;i<infoList.size();i++){
                     if (infoList.get(i).getDbObjectType() == EDbObjectType.table){
                         TTable lcTable = infoList.get(i).getTable();
-                        if (lcTable.getEffectType() == tableEffectTypes.get(j)){
+                        if (lcTable.getEffectType() == tableEffectTypes.get(j) && lcTable.getSubquery()==null && lcTable.getTableName()!=null){
                         	outputResult("\t\t" + lcTable.toString()+ "("+lcTable.getTableName().coordinate()+")");
                         }
                     }

@@ -135,7 +135,7 @@ public class runGetTableColumn
 			return;
 		}
 
-		EDbVendor vendor = EDbVendor.dbvoracle;
+		EDbVendor vendor = EDbVendor.dbvmssql;
 
 		int index = argList.indexOf( "/t" );
 
