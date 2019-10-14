@@ -3817,80 +3817,89 @@ public class DataFlowAnalyzer
 			if ( model instanceof Table )
 			{
 				Table tableModel = (Table) model;
-				Element tableElement = doc.createElement( "table" );
-				tableElement.setAttribute( "id",
-						String.valueOf( tableModel.getId( ) ) );
-				tableElement.setAttribute( "name", tableModel.getFullName( ) );
-				tableElement.setAttribute( "type", "table" );
-				if ( tableModel.getParent( ) != null )
-				{
-					tableElement.setAttribute( "parent", tableModel.getParent( ) );
-				}
-				if ( tableModel.getAlias( ) != null
-						&& tableModel.getAlias( ).trim( ).length( ) > 0 )
-				{
-					tableElement.setAttribute( "alias", tableModel.getAlias( ) );
-				}
-				if ( tableModel.getStartPosition( ) != null
-						&& tableModel.getEndPosition( ) != null )
-				{
-					tableElement.setAttribute( "coordinate",
-							tableModel.getStartPosition( )
-									+ ","
-									+ tableModel.getEndPosition( ) );
-				}
-				dlineageResult.appendChild( tableElement );
-
-				List<TableColumn> columns = tableModel.getColumns( );
-				for ( int j = 0; j < columns.size( ); j++ )
-				{
-					TableColumn columnModel = columns.get( j );
-					if ( !columnModel.getStarLinkColumns( ).isEmpty( ) )
-					{
-						for ( int k = 0; k < columnModel.getStarLinkColumns( )
-								.size( ); k++ )
-						{
-							Element columnElement = doc.createElement( "column" );
-							columnElement.setAttribute( "id",
-									String.valueOf( columnModel.getId( ) )
-											+ "_"
-											+ k );
-							columnElement.setAttribute( "name",
-									getColumnName( columnModel.getStarLinkColumns( )
-											.get( k ) ) );
-							if ( columnModel.getStartPosition( ) != null
-									&& columnModel.getEndPosition( ) != null )
-							{
-								columnElement.setAttribute( "coordinate",
-										columnModel.getStartPosition( )
-												+ ","
-												+ columnModel.getEndPosition( ) );
-							}
-							tableElement.appendChild( columnElement );
-						}
-					}
-					else
-					{
-						Element columnElement = doc.createElement( "column" );
-						columnElement.setAttribute( "id",
-								String.valueOf( columnModel.getId( ) ) );
-						columnElement.setAttribute( "name",
-								columnModel.getName( ) );
-						if ( columnModel.getStartPosition( ) != null
-								&& columnModel.getEndPosition( ) != null )
-						{
-							columnElement.setAttribute( "coordinate",
-									columnModel.getStartPosition( )
-											+ ","
-											+ columnModel.getEndPosition( ) );
-						}
-						tableElement.appendChild( columnElement );
-					}
-				}
+				appendTableModel(doc, dlineageResult, tableModel);
 			}
 			else if ( model instanceof QueryTable )
 			{
 				appendResultSet( doc, dlineageResult, (QueryTable) model );
+			}
+		}
+		
+		List<Table> selectIntoTables = modelManager.getSelectIntoTables();
+		for(int i=0;i<selectIntoTables.size();i++) {
+			appendTableModel(doc, dlineageResult, selectIntoTables.get(i));
+		}
+	}
+
+	private void appendTableModel(Document doc, Element dlineageResult, Table tableModel) {
+		Element tableElement = doc.createElement( "table" );
+		tableElement.setAttribute( "id",
+				String.valueOf( tableModel.getId( ) ) );
+		tableElement.setAttribute( "name", tableModel.getFullName( ) );
+		tableElement.setAttribute( "type", "table" );
+		if ( tableModel.getParent( ) != null )
+		{
+			tableElement.setAttribute( "parent", tableModel.getParent( ) );
+		}
+		if ( tableModel.getAlias( ) != null
+				&& tableModel.getAlias( ).trim( ).length( ) > 0 )
+		{
+			tableElement.setAttribute( "alias", tableModel.getAlias( ) );
+		}
+		if ( tableModel.getStartPosition( ) != null
+				&& tableModel.getEndPosition( ) != null )
+		{
+			tableElement.setAttribute( "coordinate",
+					tableModel.getStartPosition( )
+							+ ","
+							+ tableModel.getEndPosition( ) );
+		}
+		dlineageResult.appendChild( tableElement );
+
+		List<TableColumn> columns = tableModel.getColumns( );
+		for ( int j = 0; j < columns.size( ); j++ )
+		{
+			TableColumn columnModel = columns.get( j );
+			if ( !columnModel.getStarLinkColumns( ).isEmpty( ) )
+			{
+				for ( int k = 0; k < columnModel.getStarLinkColumns( )
+						.size( ); k++ )
+				{
+					Element columnElement = doc.createElement( "column" );
+					columnElement.setAttribute( "id",
+							String.valueOf( columnModel.getId( ) )
+									+ "_"
+									+ k );
+					columnElement.setAttribute( "name",
+							getColumnName( columnModel.getStarLinkColumns( )
+									.get( k ) ) );
+					if ( columnModel.getStartPosition( ) != null
+							&& columnModel.getEndPosition( ) != null )
+					{
+						columnElement.setAttribute( "coordinate",
+								columnModel.getStartPosition( )
+										+ ","
+										+ columnModel.getEndPosition( ) );
+					}
+					tableElement.appendChild( columnElement );
+				}
+			}
+			else
+			{
+				Element columnElement = doc.createElement( "column" );
+				columnElement.setAttribute( "id",
+						String.valueOf( columnModel.getId( ) ) );
+				columnElement.setAttribute( "name",
+						columnModel.getName( ) );
+				if ( columnModel.getStartPosition( ) != null
+						&& columnModel.getEndPosition( ) != null )
+				{
+					columnElement.setAttribute( "coordinate",
+							columnModel.getStartPosition( )
+									+ ","
+									+ columnModel.getEndPosition( ) );
+				}
+				tableElement.appendChild( columnElement );
 			}
 		}
 	}
@@ -4321,6 +4330,72 @@ public class DataFlowAnalyzer
 						analyzeResultColumn( column, EffectType.select );
 					}
 				}
+			}
+			
+			if(stmt.getIntoClause()!=null) {
+				TExpressionList tables = stmt.getIntoClause( )
+						.getExprList( );
+				Object queryModel = modelManager.getModel( stmt.getResultColumnList( ) );
+				for ( int j = 0; j < tables.size( ); j++ )
+				{
+					TObjectName tableName = tables.getExpression( j ).getObjectOperand();
+					Table tableModel = modelFactory.createSelectIntoTable( tableName );
+						
+					for ( int i = 0; i < stmt.getResultColumnList( ).size( ); i++ )
+					{
+						TResultColumn column = stmt.getResultColumnList( )
+								.getResultColumn( i );
+
+						ResultColumn resultColumn = null;
+
+						if ( queryModel instanceof QueryTable )
+						{
+							resultColumn = (ResultColumn)modelManager.getModel(column );
+						}
+						else if ( queryModel instanceof ResultSet )
+						{
+							resultColumn = (ResultColumn)modelManager.getModel(column );
+						}
+						else
+						{
+							continue;
+						}
+						
+						if (resultColumn != null) {
+							TObjectName columnObject = column.getFieldAttr();
+							if (columnObject != null) {
+								TableColumn tableColumn = modelFactory.createInsertTableColumn(tableModel,
+										columnObject);
+								DataFlowRelation relation = modelFactory.createDataFlowRelation();
+								relation.setEffectType(EffectType.insert);
+								relation.setTarget(new TableColumnRelationElement(tableColumn));
+								relation.addSource(new ResultColumnRelationElement(resultColumn));
+							}
+						}
+					}
+				}
+				
+				
+//				TInsertIntoValue value = stmt.getIntoTableClause( ).getTableName()
+//						.getElement( j );
+//				TTable table = value.getTable( );
+//				Table tableModel = modelFactory.createTable( table );
+//
+//				inserTables.add( tableModel );
+//				List<TObjectName> keyMap = new ArrayList<TObjectName>( );
+//				List<TResultColumn> valueMap = new ArrayList<TResultColumn>( );
+//				insertTableKeyMap.put( tableModel, keyMap );
+//				insertTableValueMap.put( tableModel, valueMap );
+//
+//				List<TableColumn> tableColumns = bindInsertTableColumn( tableModel,
+//						value,
+//						keyMap,
+//						valueMap );
+//				if ( tableColumnMap.get( table.getName( ) ) == null
+//						&& !tableColumns.isEmpty( ) )
+//				{
+//					tableColumnMap.put( tableModel.getName( ), tableColumns );
+//				}
 			}
 
 			if ( stmt.getJoins( ) != null && stmt.getJoins( ).size( ) > 0 )

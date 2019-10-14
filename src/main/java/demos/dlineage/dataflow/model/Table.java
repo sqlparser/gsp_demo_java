@@ -3,6 +3,7 @@ package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
 import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class Table {
     private boolean subquery = false;
 
     private TTable tableObject;
+    private TObjectName tableName;
 
     public Table(TTable table) {
         if (table == null) {
@@ -52,6 +54,28 @@ public class Table {
         if (table.getSubquery() != null) {
             subquery = true;
         }
+    }
+    
+    public Table(TObjectName tableName) {
+        if (tableName == null) {
+            throw new IllegalArgumentException("Table arguments can't be null.");
+        }
+
+        id = ++ModelBindingManager.get().TABLE_COLUMN_ID;
+
+        this.tableName = tableName;
+
+        TSourceToken startToken = tableName.getStartToken();
+        TSourceToken endToken = tableName.getEndToken();
+        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
+                startToken.columnNo);
+        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length());
+
+        
+        this.fullName = tableName.toString();
+        this.name = tableName.getTableString();
+        
     }
 
     public int getId() {
@@ -112,5 +136,11 @@ public class Table {
     public void setParent(String parent) {
         this.parent = parent;
     }
+
+	public TObjectName getTableName() {
+		return tableName;
+	}
+    
+    
 
 }

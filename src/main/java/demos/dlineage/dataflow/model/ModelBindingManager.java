@@ -23,6 +23,7 @@ public class ModelBindingManager {
     private final Map mergeModelBindingMap = new LinkedHashMap();
     private final Map updateModelBindingMap = new LinkedHashMap();
     private final Map cursorModelBindingMap = new LinkedHashMap();
+    private final Map selectIntoBindingMap = new LinkedHashMap();
     private final List<Relation> relationHolder = new CopyOnWriteArrayList<Relation>();
 
     private final Map<String, TTable> tableAliasMap = new HashMap();
@@ -363,6 +364,15 @@ public class ModelBindingManager {
         return null;
     }
 
+	public List<Table> getSelectIntoTables() {
+		List<Table> tables = new ArrayList<Table>();
+		Iterator iter = selectIntoBindingMap.values().iterator();
+		while (iter.hasNext()) {
+			tables.add((Table) iter.next());
+		}
+		return tables;
+	}
+    
     public List<TTable> getBaseTables() {
         List<TTable> tables = new ArrayList<TTable>();
 
@@ -589,6 +599,15 @@ public class ModelBindingManager {
 		}
 
 		return procedures;
+	}
+
+	public void bindSelectIntoModel(TObjectName tableName, Table tableModel) {
+		selectIntoBindingMap.put(tableName, tableModel);
+		
+	}
+
+	public Table getSelectIntoModel(TObjectName tableName) {
+		return (Table)selectIntoBindingMap.get(tableName);
 	}
 
 }
