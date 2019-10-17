@@ -3,12 +3,15 @@ package test.mssql;
  * Date: 12-3-20
  */
 
+import demos.dlineage.dataflow.model.EffectType;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TAlterTableStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlBlock;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlIfElse;
 import junit.framework.TestCase;
+
+
 
 public class testAlterTable extends TestCase {
 
@@ -75,6 +78,8 @@ public class testAlterTable extends TestCase {
         TAlterTableStatement alterTableStatement = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
 
         assertTrue(alterTableStatement.getAlterTableOptionList().size() == 1);
+        TTable targetTable = alterTableStatement.getTargetTable();
+        assertTrue(targetTable.getEffectType() == ETableEffectType.tetAlter);
         TAlterTableOption ao = alterTableStatement.getAlterTableOptionList().getAlterTableOption(0);
         assertTrue(ao.getOptionType() == EAlterTableOptionType.AddConstraint);
         assertTrue(ao.getConstraintList().size() == 2);
