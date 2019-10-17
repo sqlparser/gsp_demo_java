@@ -121,6 +121,15 @@ public class ModelFactory {
         modelManager.bindModel(table, tableModel);
         return tableModel;
     }
+    
+    public Table createSelectIntoTable(TObjectName tableName) {
+        if (modelManager.getSelectIntoModel(tableName) instanceof Table) {
+            return (Table) modelManager.getModel(tableName);
+        }
+        Table tableModel = new Table(tableName);
+        modelManager.bindSelectIntoModel(tableName, tableModel);
+        return tableModel;
+    }
 
     public QueryTable createQueryTable(TTable table) {
         QueryTable tableModel = null;
