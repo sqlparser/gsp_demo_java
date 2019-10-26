@@ -122,6 +122,15 @@ public class ModelFactory {
         return tableModel;
     }
     
+    public Table createTriggerOnTable(TTable table) {
+        if (modelManager.getModel(table) instanceof Table) {
+            return (Table) modelManager.getModel(table);
+        }
+        Table tableModel = new Table(table);
+        modelManager.bindModel(table, tableModel);
+        return tableModel;
+    }
+    
     public Table createSelectIntoTable(TObjectName tableName) {
         if (modelManager.getSelectIntoModel(tableName) instanceof Table) {
             return (Table) modelManager.getModel(tableName);

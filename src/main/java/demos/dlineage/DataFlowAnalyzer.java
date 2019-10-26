@@ -116,6 +116,7 @@ import gudusoft.gsqlparser.nodes.couchbase.TObjectConstruct;
 import gudusoft.gsqlparser.nodes.couchbase.TPair;
 import gudusoft.gsqlparser.stmt.TCreateMaterializedSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
+import gudusoft.gsqlparser.stmt.TCreateTriggerStmt;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
@@ -164,6 +165,7 @@ public class DataFlowAnalyzer
 	private boolean showJoin = false;
 	private ModelBindingManager modelManager = new ModelBindingManager( );
 	private ModelFactory modelFactory = new ModelFactory( modelManager );
+	private List<Integer> tableIds = new ArrayList<Integer>();
 
 	{
 		ModelBindingManager.set( modelManager );
@@ -851,6 +853,7 @@ public class DataFlowAnalyzer
 		modelManager.RELATION_ID = 0;
 		modelManager.DISPLAY_ID.clear( );
 		modelManager.DISPLAY_NAME.clear( );
+		tableIds.clear();
 	}
 
 	private void analyzeAndOutputResult( TGSqlParser sqlparser, Document doc,
@@ -1025,6 +1028,14 @@ public class DataFlowAnalyzer
 
 	private void analyzeStoredProcedureStmt(TStoredProcedureSqlStatement stmt) {
 		Procedure procedure = this.modelFactory.createProcedure(stmt);
+		if(stmt instanceof TCreateTriggerStmt ) {
+			TCreateTriggerStmt trigger = (TCreateTriggerStmt)stmt;
+			if(trigger.getTables()!=null) {
+				for(int i=0;i<trigger.getTables().size();i++) {
+					this.modelFactory.createTriggerOnTable(trigger.getTables().getTable(i));
+				}
+			}
+		}
 		if (stmt.getParameterDeclarations() != null) {
 			TParameterDeclarationList parameters = stmt.getParameterDeclarations();
 
@@ -3817,17 +3828,28 @@ public class DataFlowAnalyzer
 			if ( model instanceof Table )
 			{
 				Table tableModel = (Table) model;
-				appendTableModel(doc, dlineageResult, tableModel);
+				if(!tableIds.contains(tableModel.getId())) {
+					appendTableModel(doc, dlineageResult, tableModel);
+					tableIds.add(tableModel.getId());
+				}
 			}
 			else if ( model instanceof QueryTable )
 			{
-				appendResultSet( doc, dlineageResult, (QueryTable) model );
+				QueryTable queryTable = (QueryTable)model;
+				if(!tableIds.contains(queryTable.getId())) {
+					appendResultSet( doc, dlineageResult, queryTable );
+					tableIds.add(queryTable.getId());
+				}
 			}
 		}
 		
 		List<Table> selectIntoTables = modelManager.getSelectIntoTables();
 		for(int i=0;i<selectIntoTables.size();i++) {
-			appendTableModel(doc, dlineageResult, selectIntoTables.get(i));
+			Table tableModel = selectIntoTables.get(i);
+			if(!tableIds.contains(tableModel.getId())) {
+				appendTableModel(doc, dlineageResult, tableModel);
+				tableIds.add(tableModel.getId());
+			}
 		}
 	}
 
