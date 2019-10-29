@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="GetTableColumn" default="clean" basedir=".">
 	
-	<property name="gsp.version" value="2.0.2.3" />
+	<property name="gsp.version" value="2.0.2.4" />
 	<property name="demo.dir" value="../../../../.." />
 	
 	<property name="demo.src" value="${demo.dir}/src/main/java" />

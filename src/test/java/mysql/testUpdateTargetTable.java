@@ -27,7 +27,16 @@ public class testUpdateTargetTable extends TestCase {
         assertTrue(joinItem.getJoinType().toString().equalsIgnoreCase("inner"));
         assertTrue(joinItem.getTable().toString().equalsIgnoreCase("table2"));
         assertTrue(joinItem.getOnCondition().toString().equalsIgnoreCase("(a.field0=b.field0)"));
-
-
     }
+
+    public void testModifier(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
+        sqlparser.sqltext = "update low_priority ignore t5 set name='B' where id=1";
+        assertTrue(sqlparser.parse() == 0);
+
+        TUpdateSqlStatement updateSqlStatement =  (TUpdateSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(updateSqlStatement.getTargetTable().getFullName().equalsIgnoreCase("t5"));
+    }
+
+
 }

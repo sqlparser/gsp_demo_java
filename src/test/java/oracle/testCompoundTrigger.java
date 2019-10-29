@@ -115,6 +115,7 @@ public class testCompoundTrigger  extends TestCase {
                 " \n" +
                 "END aud_emp;\n" +
                 "/";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TPlsqlCreateTrigger createTrigger = (TPlsqlCreateTrigger)sqlparser.sqlstatements.get(0);

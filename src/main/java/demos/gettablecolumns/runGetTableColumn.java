@@ -2,6 +2,7 @@
 package demos.gettablecolumns;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -105,32 +106,87 @@ class sampleMetaDB implements IMetaDatabase
 
 public class runGetTableColumn
 {
+	private static  File[] listFiles( File sqlFiles )
+	{
+		List<File> children = new ArrayList<File>( );
+		if ( sqlFiles != null )
+			listFiles( sqlFiles, children );
+		return children.toArray( new File[0] );
+	}
+
+	private static void listFiles( File rootFile, List<File> children )
+	{
+		if ( rootFile.isFile( ) )
+			children.add( rootFile );
+		else
+		{
+			File[] files = rootFile.listFiles( );
+			for ( int i = 0; i < files.length; i++ )
+			{
+				listFiles( files[i], children );
+			}
+		}
+	}
+
 
 	public static void main( String args[] )
 	{
+		long t = System.currentTimeMillis();
+
 		if ( args.length < 2 )
 		{
 			displayInitInformation( );
 			return;
 		}
 
-		List<String> argList = Arrays.asList( args );
+//		List<String> argList = Arrays.asList( args );
+//
+//		File sqlFile = null;
 
-		File sqlFile = null;
+//		if ( argList.indexOf( "/f" ) != -1
+//				&& argList.size( ) > argList.indexOf( "/f" ) + 1 )
+//		{
+//			sqlFile = new File( args[argList.indexOf( "/f" ) + 1] );
+//			if ( !sqlFile.exists( ) || !sqlFile.isFile( ) )
+//			{
+//				System.out.println( sqlFile + " is not a valid file." );
+//				return;
+//			}
+//		}
+//
+//		if ( sqlFile == null )
+//		{
+//			displayInitInformation( );
+//			return;
+//		}
+
+		File sqlFiles = null;
+
+		List<String> argList = Arrays.asList(args);
 
 		if ( argList.indexOf( "/f" ) != -1
 				&& argList.size( ) > argList.indexOf( "/f" ) + 1 )
 		{
-			sqlFile = new File( args[argList.indexOf( "/f" ) + 1] );
-			if ( !sqlFile.exists( ) || !sqlFile.isFile( ) )
+			sqlFiles = new File( args[argList.indexOf( "/f" ) + 1] );
+			if ( !sqlFiles.exists( ) || !sqlFiles.isFile( ) )
 			{
-				System.out.println( sqlFile + " is not a valid file." );
+				System.out.println( sqlFiles + " is not a valid file." );
 				return;
 			}
 		}
-
-		if ( sqlFile == null )
+		else if ( argList.indexOf( "/d" ) != -1
+				&& argList.size( ) > argList.indexOf( "/d" ) + 1 )
 		{
+			sqlFiles = new File( args[argList.indexOf( "/d" ) + 1] );
+			if ( !sqlFiles.exists( ) || !sqlFiles.isDirectory( ) )
+			{
+				System.out.println( sqlFiles + " is not a valid directory." );
+				return;
+			}
+		}
+		else
+		{
+			//System.out.println( "Please specify a sql file path or directory path." );
 			displayInitInformation( );
 			return;
 		}
@@ -240,12 +296,36 @@ public class runGetTableColumn
 			getTableColumn.showJoin = true;
 		}
 
-		getTableColumn.runFile( sqlFile.getAbsolutePath( ) );
+
+		File[] children = listFiles( sqlFiles );
+
+		int total_sql_files = 0, error_sql_flies=0;
+
+
+		for ( int i = 0; i < children.length; i++ )
+		{
+			File child = children[i];
+			if ( child.isDirectory( ) )
+				continue;
+			//String content = SQLUtil.getFileContent(child);
+			if (child.getAbsolutePath().endsWith(".sql")){
+				total_sql_files++;
+
+				System.out.println("\nProcessing: "+child.getAbsolutePath());
+				getTableColumn.runFile( child.getAbsolutePath() );
+			}
+		}
+
+
+		System.out.println("Time Escaped: "+ (System.currentTimeMillis() - t) +",file processed: "+total_sql_files+",syntax errors:"+error_sql_flies );
+
+
+//		getTableColumn.runFile( sqlFile.getAbsolutePath( ) );
 	}
 
 	private static void displayInitInformation( )
 	{
-		System.out.println( "Usage: java runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]" );
+		System.out.println( "Usage: java runGetTableColumn [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/t <database type>] [/<show option>]" );
 		System.out.println( "/f: specify the sql file path to analyze." );
 		System.out.println( "/t: option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle" );
 		System.out.println( "/showSummary: default show option, display the summary information." );

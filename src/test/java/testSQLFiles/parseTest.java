@@ -1,4 +1,4 @@
-package test;
+package testSQLFiles;
 
 import junit.framework.TestCase;
 
@@ -13,7 +13,7 @@ public class parseTest extends TestCase {
     String xsdfile = "file:/C:/prg/gsp_java/library/doc/xml/sqlquery.xsd";
    // public static String test.gspCommon.BASE_SQL_DIR = "c:/prg/gsp_sqlfiles/TestCases/";
 
-void parsefiles(EDbVendor db,String dir)  {
+static void parsefiles(EDbVendor db,String dir)  {
 
     File parent = new File( dir );
     if (!( parent.exists( ) && parent.isDirectory( ))){
@@ -66,23 +66,6 @@ void parsefiles(EDbVendor db,String dir)  {
         parsefiles(EDbVendor.dbvteradata,test.gspCommon.BASE_SQL_DIR+"java/teradata");
     }
 
-
-    public  void testDB2(){
-        parsefiles(EDbVendor.dbvdb2,test.gspCommon.BASE_SQL_DIR+"db2");
-        parsefiles(EDbVendor.dbvdb2,test.gspCommon.BASE_SQL_DIR+"java/db2/");
-    }
-
-    public  void testMySQL(){
-        parsefiles(EDbVendor.dbvmysql,test.gspCommon.BASE_SQL_DIR+"mysql");
-        parsefiles(EDbVendor.dbvmysql,test.gspCommon.BASE_SQL_DIR+"java/mysql");
-
-//        parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\big-ds\\testing");
-//        parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\big-ds\\training");
-//        parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\hotelrs-x");
-//        parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\taskfreak-b");
-//        parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\wordpress-s");
-//          parsefiles(EDbVendor.dbvmysql,"C:\\prg\\sofia2.0\\sofia\\theorganizer-s");
-    }
 
     public  void testMdx(){
         parsefiles(EDbVendor.dbvmdx,test.gspCommon.BASE_SQL_DIR+"mdx");
@@ -144,9 +127,9 @@ void parsefiles(EDbVendor db,String dir)  {
         parsefiles(EDbVendor.dbvcouchbase,test.gspCommon.BASE_SQL_DIR+"couchbase");
     }
 
-    public  void testSnowflake(){
-        parsefiles(EDbVendor.dbvsnowflake,test.gspCommon.BASE_SQL_DIR+"snowflake");
-    }
+//    public  void testSnowflake(){
+//        parsefiles(EDbVendor.dbvsnowflake,test.gspCommon.BASE_SQL_DIR+"snowflake");
+//    }
 
     public  void testBigquery(){
         parsefiles(EDbVendor.dbvbigquery,test.gspCommon.BASE_SQL_DIR+"bigquery");
