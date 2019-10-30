@@ -18,5 +18,14 @@
         <jarDirectory url="file://$MODULE_DIR$/../../../gsp_java_maven/external_lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../external_lib/fastjson-1.2.41.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

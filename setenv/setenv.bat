@@ -20,4 +20,4 @@ REM #Set the home directory of the SwisSQL - Console  distribution
 set gspDemoHome=.
 
 REM # set classpath to the SwisSQL Jar files and the database JDBC drivers.
-set CLASSPATH=%gspDemoHome%\build;%gspDemoHome%\lib;%gspDemoHome%\lib\gudusoft.gsqlparser-2.0.2.3.jar;%gspDemoHome%\external_lib;%gspDemoHome%\external_lib\simple-xml-2.6.2.jar;%gspDemoHome%\external_lib\expr4j.jar;%gspDemoHome%\external_lib\commons-logging-1.1.3.jar;%gspDemoHome%\external_lib\json.jar;%gspDemoHome%\external_lib\jarLoader.jar;%gspDemoHome%\external_lib\junrar-0.7.jar;.;
+set CLASSPATH=%gspDemoHome%\build;%gspDemoHome%\lib;%gspDemoHome%\lib\gudusoft.gsqlparser-2.0.2.5.jar;%gspDemoHome%\external_lib;%gspDemoHome%\external_lib\simple-xml-2.6.2.jar;%gspDemoHome%\external_lib\expr4j.jar;%gspDemoHome%\external_lib\commons-logging-1.1.3.jar;%gspDemoHome%\external_lib\json.jar;%gspDemoHome%\external_lib\jarLoader.jar;%gspDemoHome%\external_lib\junrar-0.7.jar;.;
