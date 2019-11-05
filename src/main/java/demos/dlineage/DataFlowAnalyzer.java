@@ -119,6 +119,7 @@ import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTriggerStmt;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
+import gudusoft.gsqlparser.stmt.TDeleteSqlStatement;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TLoopStmt;
 import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
@@ -1004,6 +1005,12 @@ public class DataFlowAnalyzer
 			analyzeMergeStmt( (TMergeSqlStatement) stmt );
 			stmtStack.pop( );
 		}
+		else if ( stmt instanceof TDeleteSqlStatement )
+		{
+			stmtStack.push( stmt );
+			analyzeDeleteStmt( (TDeleteSqlStatement) stmt );
+			stmtStack.pop( );
+		}
 		else if ( stmt instanceof TCursorDeclStmt )
 		{
 			stmtStack.push( stmt );
@@ -1026,8 +1033,32 @@ public class DataFlowAnalyzer
 		}
 	}
 
+	private void analyzeDeleteStmt(TDeleteSqlStatement stmt) {
+		TTable table = stmt.getTargetTable( );
+		Table tableModel = modelFactory.createTable( table );
+		if ( table.getObjectNameReferences( ) != null
+				&& table.getObjectNameReferences( ).size( ) > 0 )
+		{
+			for ( int j = 0; j < table.getObjectNameReferences( )
+					.size( ); j++ )
+			{
+				TObjectName object = table.getObjectNameReferences( )
+						.getObjectName( j );
+				if ( !isFunctionName( object ) )
+				{
+					if ( object.getSourceTable( ) == null
+							|| object.getSourceTable( ) == table )
+					{
+						modelFactory.createTableColumn( tableModel,
+								object );
+					}
+				}
+			}
+		}
+	}
+
 	private void analyzeStoredProcedureStmt(TStoredProcedureSqlStatement stmt) {
-		Procedure procedure = this.modelFactory.createProcedure(stmt);
+		
 		if(stmt instanceof TCreateTriggerStmt ) {
 			TCreateTriggerStmt trigger = (TCreateTriggerStmt)stmt;
 			if(trigger.getTables()!=null) {
@@ -1036,12 +1067,17 @@ public class DataFlowAnalyzer
 				}
 			}
 		}
-		if (stmt.getParameterDeclarations() != null) {
-			TParameterDeclarationList parameters = stmt.getParameterDeclarations();
+		
+		if (((TStoredProcedureSqlStatement) stmt).getStoredProcedureName() != null) {
+			Procedure procedure = this.modelFactory.createProcedure(stmt);
 
-			for (int i = 0; i < parameters.size(); ++i) {
-				TParameterDeclaration parameter = parameters.getParameterDeclarationItem(i);
-				this.modelFactory.createProcedureArgument(procedure, parameter);
+			if (stmt.getParameterDeclarations() != null) {
+				TParameterDeclarationList parameters = stmt.getParameterDeclarations();
+
+				for (int i = 0; i < parameters.size(); ++i) {
+					TParameterDeclaration parameter = parameters.getParameterDeclarationItem(i);
+					this.modelFactory.createProcedureArgument(procedure, parameter);
+				}
 			}
 		}
 
@@ -3613,7 +3649,7 @@ public class DataFlowAnalyzer
 		}
 		else
 		{
-			tableName = getResultSetDisplayId( "RESULT_OF_SELECT-QUERY" );
+			tableName = getResultSetDisplayId( "RS" );
 		}
 		return tableName;
 	}
@@ -3697,7 +3733,7 @@ public class DataFlowAnalyzer
 			return name;
 		}
 
-		String name = getResultSetDisplayId( "RESULT_OF_SELECT-QUERY" );
+		String name = getResultSetDisplayId( "RS" );
 		modelManager.DISPLAY_NAME.put( resultSetModel.getId( ), name );
 		return name;
 	}
@@ -3707,13 +3743,13 @@ public class DataFlowAnalyzer
 		if ( !modelManager.DISPLAY_ID.containsKey( type ) )
 		{
 			modelManager.DISPLAY_ID.put( type, 1 );
-			return type;
+			return type + "-" + 1;
 		}
 		else
 		{
 			int id = modelManager.DISPLAY_ID.get( type );
 			modelManager.DISPLAY_ID.put( type, id + 1 );
-			return type + "-" + id;
+			return type + "-" + (id+1);
 		}
 	}
 
