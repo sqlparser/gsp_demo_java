@@ -37,6 +37,7 @@ public class testPlpgsql_forLoop extends TestCase {
           assertTrue(loopStmt.getKind() == TLoopStmt.cursor_for_loop);
         assertTrue(loopStmt.getIndexName().toString().equalsIgnoreCase("recordvar"));
         assertTrue(loopStmt.getCursorName().toString().equalsIgnoreCase("bound_cursorvar"));
+
         assertTrue(loopStmt.getBodyStatements().size() == 1);
         assertTrue(loopStmt.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstplsql_nullstmt);
 
@@ -46,8 +47,10 @@ public class testPlpgsql_forLoop extends TestCase {
           assertTrue(loopStmt.getKind() == TLoopStmt.cursor_for_loop);
         assertTrue(loopStmt.getIndexName().toString().equalsIgnoreCase("recordvar"));
         assertTrue(loopStmt.getCursorName().toString().equalsIgnoreCase("bound_cursorvar"));
+
         assertTrue(loopStmt.getBodyStatements().size() == 1);
         assertTrue(loopStmt.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstplsql_nullstmt);
+
         assertTrue(loopStmt.getCursorParameterNames().getExpression(0).toString().equalsIgnoreCase("1"));
         assertTrue(loopStmt.getCursorParameterNames().getExpression(1).toString().equalsIgnoreCase("s"));
       }
@@ -84,6 +87,8 @@ public class testPlpgsql_forLoop extends TestCase {
         assertTrue(loopStmt.getExecuteUsingVars().size() == 3);
         assertTrue(loopStmt.getExecuteUsingVars().getExpression(0).toString().equalsIgnoreCase("1"));
 
+//        System.out.println(loopStmt.getBodyStatements().size());
+//        System.out.println(loopStmt.getBodyStatements().get(0).sqlstatementtype);
         assertTrue(loopStmt.getBodyStatements().size() == 1);
         assertTrue(loopStmt.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstplsql_nullstmt);
 

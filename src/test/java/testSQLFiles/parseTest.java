@@ -45,12 +45,6 @@ static void parsefiles(EDbVendor db,String dir)  {
 
 }
 
-
-    public  void testOracle(){
-        parsefiles(EDbVendor.dbvoracle,test.gspCommon.BASE_SQL_DIR+"oracle");
-        parsefiles(EDbVendor.dbvoracle,test.gspCommon.BASE_SQL_DIR+"java/oracle/");
-    }
-
     public  void testSQLServer(){
         parsefiles(EDbVendor.dbvmssql,test.gspCommon.BASE_SQL_DIR+"mssql");
         parsefiles(EDbVendor.dbvmssql,test.gspCommon.BASE_SQL_DIR+"java/mssql");
@@ -81,10 +75,6 @@ static void parsefiles(EDbVendor db,String dir)  {
         parsefiles(EDbVendor.dbvinformix,test.gspCommon.BASE_SQL_DIR+"informix");
     }
 
-    public  void testPostgresql(){
-        parsefiles(EDbVendor.dbvpostgresql,test.gspCommon.BASE_SQL_DIR+"postgresql/verified");
-        parsefiles(EDbVendor.dbvpostgresql,test.gspCommon.BASE_SQL_DIR+"java/postgresql");
-    }
 
     public  void testGreenplum(){
         parsefiles(EDbVendor.dbvgreenplum,test.gspCommon.BASE_SQL_DIR+"greenplum");
