@@ -1628,7 +1628,11 @@ public class DataFlowAnalyzer
 			inserTables.add( tableModel );
 			if ( tableColumnMap.get( table.getName( ) ) == null )
 			{
-				tableColumnMap.put( tableModel.getName( ), null );
+				if (tableModel.getColumns() != null && !tableModel.getColumns().isEmpty()) {
+					tableColumnMap.put(tableModel.getName(), tableModel.getColumns());
+				} else {
+					tableColumnMap.put(tableModel.getName(), null);
+				}
 			}
 		}
 
@@ -1983,6 +1987,12 @@ public class DataFlowAnalyzer
 									DataFlowRelation relation = modelFactory.createDataFlowRelation( );
 									relation.setEffectType( EffectType.insert );
 									relation.setTarget( new TableColumnRelationElement( tableColumn ) );
+									relation.addSource( new ResultColumnRelationElement( resultColumn ) );
+								}
+								else {
+									DataFlowRelation relation = modelFactory.createDataFlowRelation( );
+									relation.setEffectType( EffectType.insert );
+									relation.setTarget( new TableColumnRelationElement( tableModel.getColumns().get(i) ) );
 									relation.addSource( new ResultColumnRelationElement( resultColumn ) );
 								}
 							}
