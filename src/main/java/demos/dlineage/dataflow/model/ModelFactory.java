@@ -114,6 +114,9 @@ public class ModelFactory {
     }
 
     public Table createTable(TTable table) {
+    	if(modelManager.getCreateTable(table)!=null) {
+    		return modelManager.getCreateTable(table);
+    	}
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }

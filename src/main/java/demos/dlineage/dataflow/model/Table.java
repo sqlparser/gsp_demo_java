@@ -2,7 +2,9 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 
@@ -45,7 +47,14 @@ public class Table {
             this.fullName = table.getLinkTable().getFullName();
             this.name = table.getLinkTable().getName();
             this.alias = table.getName();
-        } else {
+        }
+        else if(table.getTableType() == ETableSource.function && table.getFuncCall()!=null) {
+        	TFunctionCall function = table.getFuncCall();
+        	this.fullName = function.toScript();
+            this.name = function.getFunctionName().toString();
+            this.alias = table.getAliasName();
+        }
+        else {
             this.fullName = table.getFullName();
             this.name = table.getName();
             this.alias = table.getAliasName();
