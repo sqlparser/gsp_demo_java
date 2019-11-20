@@ -748,6 +748,9 @@ public class DataFlowAnalyzer
 				sourceColumn source = sources.get( i );
 				String sourceColumnId = source.getId( );
 				String sourceParentId = source.getParent_id( );
+				if(sourceParentId == null || sourceColumnId == null) {
+					continue;
+				}
 				if ( isTarget( instance, sourceParentId ) )
 				{
 					relationSources.add( source );
