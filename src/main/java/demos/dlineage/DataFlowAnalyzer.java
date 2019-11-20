@@ -4442,9 +4442,21 @@ public class DataFlowAnalyzer
 								relation.setTarget(new TableColumnRelationElement(tableColumn));
 								if (columns.get(k).getSourceTable() != null) {
 									TTable souceTable = columns.get(k).getSourceTable();
-									Table sourceTableModel = (Table) modelManager.getModel(souceTable);
-									relation.addSource(
-											new TableColumnRelationElement(sourceTableModel.getColumns().get(k)));
+									Object model =  modelManager.getModel(souceTable);
+									if (model instanceof Table) {
+										Table sourceTableModel = (Table)model;
+										if(sourceTableModel.getColumns().size()>k) {
+											relation.addSource(
+												new TableColumnRelationElement(sourceTableModel.getColumns().get(k)));
+										}
+									}
+									else if (model instanceof QueryTable) {
+										QueryTable sourceTableModel = (QueryTable)model;
+										if(sourceTableModel.getColumns().size()>k) {
+											relation.addSource(
+												new ResultColumnRelationElement(sourceTableModel.getColumns().get(k)));
+										}
+									}
 								} else {
 									relation.addSource(new ResultColumnRelationElement(resultColumn));
 								}

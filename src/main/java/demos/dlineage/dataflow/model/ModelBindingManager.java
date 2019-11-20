@@ -570,6 +570,8 @@ public class ModelBindingManager {
         createModelQuickBindingMap.clear();
         tableSet.clear();
         tableAliasMap.clear();
+        cursorModelBindingMap.clear();
+        selectIntoBindingMap.clear();
     }
 
     public void bindCursorModel(TCursorDeclStmt stmt,
