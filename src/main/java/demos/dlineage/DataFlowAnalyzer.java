@@ -3104,7 +3104,7 @@ public class DataFlowAnalyzer
 					if ( relation instanceof ImpactRelation )
 					{
 						ESqlClause clause = getSqlClause( sourceElements[j] );
-						if ( clause != null )
+						if ( clause != null && "source".equals(( (Element) relationElement.getLastChild( ) ).getNodeName()))
 						{
 							( (Element) relationElement.getLastChild( ) ).setAttribute( "clauseType",
 									clause.name( ) );
