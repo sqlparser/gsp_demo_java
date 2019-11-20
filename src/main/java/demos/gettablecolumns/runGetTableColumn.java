@@ -273,7 +273,7 @@ public class runGetTableColumn
 		getTableColumn.showIndex = false;
 		getTableColumn.showDatatype = true;
 		getTableColumn.listStarColumn = true;
-		getTableColumn.showTableEffect = true;
+		getTableColumn.showTableEffect = false;
 		getTableColumn.setMetaDatabase( new sampleMetaDB());
 
 		if ( argList.indexOf( "/showDetail" ) != -1 )

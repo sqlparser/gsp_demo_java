@@ -45,76 +45,9 @@ static void parsefiles(EDbVendor db,String dir)  {
 
 }
 
-    public  void testSQLServer(){
-        parsefiles(EDbVendor.dbvmssql,test.gspCommon.BASE_SQL_DIR+"mssql");
-        parsefiles(EDbVendor.dbvmssql,test.gspCommon.BASE_SQL_DIR+"java/mssql");
-    }
 
-    public  void testSybase(){
-        parsefiles(EDbVendor.dbvsybase,test.gspCommon.BASE_SQL_DIR+"sybase");
-        parsefiles(EDbVendor.dbvsybase,test.gspCommon.BASE_SQL_DIR+"java/sybase");
-    }
-
-    public  void testTeradata(){
-        parsefiles(EDbVendor.dbvteradata,test.gspCommon.BASE_SQL_DIR+"teradata/verified");
-        parsefiles(EDbVendor.dbvteradata,test.gspCommon.BASE_SQL_DIR+"java/teradata");
-    }
-
-
-    public  void testMdx(){
-        parsefiles(EDbVendor.dbvmdx,test.gspCommon.BASE_SQL_DIR+"mdx");
-        parsefiles(EDbVendor.dbvmdx,test.gspCommon.BASE_SQL_DIR+"java/mdx/passed");
-    }
-
-    public  void testNetezza(){
-        parsefiles(EDbVendor.dbvnetezza,test.gspCommon.BASE_SQL_DIR+"netezza");
-        parsefiles(EDbVendor.dbvnetezza,test.gspCommon.BASE_SQL_DIR+"java/netezza");
-    }
-
-    public  void testInformix(){
-        parsefiles(EDbVendor.dbvinformix,test.gspCommon.BASE_SQL_DIR+"informix");
-    }
-
-
-    public  void testGreenplum(){
-        parsefiles(EDbVendor.dbvgreenplum,test.gspCommon.BASE_SQL_DIR+"greenplum");
-    }
-
-    public  void testRedshift(){
-        parsefiles(EDbVendor.dbvredshift,test.gspCommon.BASE_SQL_DIR+"java/redshift");
-    }
-
-    public  void testHive(){
-        parsefiles(EDbVendor.dbvhive,test.gspCommon.BASE_SQL_DIR+"hive");
-    }
-
-    public  void testImpala(){
-        parsefiles(EDbVendor.dbvimpala,test.gspCommon.BASE_SQL_DIR+"impala");
-        parsefiles(EDbVendor.dbvimpala,test.gspCommon.BASE_SQL_DIR+"java/impala");
-    }
-
-    public  void testHana(){
-        parsefiles(EDbVendor.dbvhana,test.gspCommon.BASE_SQL_DIR+"hana");
-    }
     public  void testDax(){
         parsefiles(EDbVendor.dbvdax,test.gspCommon.BASE_SQL_DIR+"dax");
-    }
-
-    public  void testODBC(){
-        parsefiles(EDbVendor.dbvodbc,test.gspCommon.BASE_SQL_DIR+"odbc");
-    }
-
-    public  void testVertica(){
-        parsefiles(EDbVendor.dbvvertica,test.gspCommon.BASE_SQL_DIR+"vertica");
-    }
-
-    public  void testOpenedge(){
-        parsefiles(EDbVendor.dbvopenedge,test.gspCommon.BASE_SQL_DIR+"openedge");
-        parsefiles(EDbVendor.dbvopenedge,test.gspCommon.BASE_SQL_DIR+"java/openedge");
-    }
-
-    public  void testCouchbase(){
-        parsefiles(EDbVendor.dbvcouchbase,test.gspCommon.BASE_SQL_DIR+"couchbase");
     }
 
 //    public  void testSnowflake(){
