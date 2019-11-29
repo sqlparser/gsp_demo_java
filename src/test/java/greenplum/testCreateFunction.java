@@ -18,6 +18,7 @@ public class testCreateFunction extends TestCase {
                 "RETURNS complex\n" +
                 "AS 'filename', 'complex_add'\n" +
                 "LANGUAGE C IMMUTABLE STRICT;";
+        System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);

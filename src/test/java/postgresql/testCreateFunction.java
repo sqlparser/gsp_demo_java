@@ -3,11 +3,9 @@ package test.postgresql;
  * Date: 13-11-29
  */
 
-import gudusoft.gsqlparser.EDataType;
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TBaseType;
-import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
 import junit.framework.TestCase;
 
@@ -120,6 +118,76 @@ public class testCreateFunction extends TestCase {
         assertTrue(cd.getColumnName().toString().equalsIgnoreCase("total"));
         assertTrue(cd.getDatatype().getDataType() == EDataType.numeric_t);
 
+    }
+
+
+    public void testDropTable(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION ibis_speedtestci_tmp.create_speedtest_marketshare_by_month_poa()\n" +
+                " RETURNS void\n" +
+                " LANGUAGE plpgsql\n" +
+                "AS $function$\n" +
+                "\n" +
+                "DECLARE\n" +
+                "begin\n" +
+                "\n" +
+                "drop table if exists ibis_speedtestci_tmp.speedtest_marketshare_by_month_poa;\n" +
+                "create table ibis_speedtestci_tmp.speedtest_marketshare_by_month_poa\n" +
+                "as\n" +
+                "(\n" +
+                "select date, postcode as postcode, network_operator_name, count(device_id) as unique_share\n" +
+                "from (\n" +
+                "  select postcode, network_operator_name, device_id, date_trunc('month', test_date) as date\n" +
+                "  from ibis_speedtestci_raw.st_combined, ibis_admin_bdys_201811_raw.postcode_bdys_display\n" +
+                "  where device_id != 0\n" +
+                "  and sim_network_operator_code_a IS NOT NULL\n" +
+                "  and sim_network_operator_code_a like '505__'\n" +
+                "  and ST_Intersects(postcode_bdys_display.geom, st_combined.geom)\n" +
+                "  group by postcode, network_operator_name, device_id, date_trunc('month', test_date)\n" +
+                ") as st_combined\n" +
+                "group by date, postcode, network_operator_name\n" +
+                ");\n" +
+                "\n" +
+                "END;\n" +
+                "\n" +
+                "$function$";
+        assertTrue(sqlparser.parse() == 0);
+
+        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("ibis_speedtestci_tmp.create_speedtest_marketshare_by_month_poa"));
+        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
+        assertTrue(createFunction.getBodyStatements().size()==2);
+        assertTrue(createFunction.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstdroptable);
+    }
+
+    public void testIntoVariable(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE function \n" +
+                "  totalrecords (emp_id INT) returns INTEGER \n" +
+                "AS \n" +
+                "  $total$ \n" +
+                "  DECLARE total INTEGER;\n" +
+                "  BEGIN \n" +
+                "  SELECT total_sal \n" +
+                "  INTO   total \n" +
+                "  FROM   employee emp \n" +
+                "  WHERE  emp.employee_id = emp_id;\n" +
+                "  RETURN total;\n" +
+                "  END;\n" +
+                "  \n" +
+                "  $total$ language plpgsql;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
+        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
+
+        assertTrue(createFunction.getBodyStatements().size() == 2);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
+        TIntoClause intoClause = selectSqlStatement.getIntoClause();
+        assertTrue(intoClause.getExprList().getExpression(0).getExpressionType() == EExpressionType.simple_object_name_t);
+        TObjectName variableName = intoClause.getExprList().getExpression(0).getObjectOperand();
+        assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
 }
