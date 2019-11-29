@@ -748,6 +748,9 @@ public class DataFlowAnalyzer
 				sourceColumn source = sources.get( i );
 				String sourceColumnId = source.getId( );
 				String sourceParentId = source.getParent_id( );
+				if(sourceParentId == null || sourceColumnId == null) {
+					continue;
+				}
 				if ( isTarget( instance, sourceParentId ) )
 				{
 					relationSources.add( source );
@@ -3104,7 +3107,7 @@ public class DataFlowAnalyzer
 					if ( relation instanceof ImpactRelation )
 					{
 						ESqlClause clause = getSqlClause( sourceElements[j] );
-						if ( clause != null )
+						if ( clause != null && "source".equals(( (Element) relationElement.getLastChild( ) ).getNodeName()))
 						{
 							( (Element) relationElement.getLastChild( ) ).setAttribute( "clauseType",
 									clause.name( ) );
@@ -4439,9 +4442,21 @@ public class DataFlowAnalyzer
 								relation.setTarget(new TableColumnRelationElement(tableColumn));
 								if (columns.get(k).getSourceTable() != null) {
 									TTable souceTable = columns.get(k).getSourceTable();
-									Table sourceTableModel = (Table) modelManager.getModel(souceTable);
-									relation.addSource(
-											new TableColumnRelationElement(sourceTableModel.getColumns().get(k)));
+									Object model =  modelManager.getModel(souceTable);
+									if (model instanceof Table) {
+										Table sourceTableModel = (Table)model;
+										if(sourceTableModel.getColumns().size()>k) {
+											relation.addSource(
+												new TableColumnRelationElement(sourceTableModel.getColumns().get(k)));
+										}
+									}
+									else if (model instanceof QueryTable) {
+										QueryTable sourceTableModel = (QueryTable)model;
+										if(sourceTableModel.getColumns().size()>k) {
+											relation.addSource(
+												new ResultColumnRelationElement(sourceTableModel.getColumns().get(k)));
+										}
+									}
 								} else {
 									relation.addSource(new ResultColumnRelationElement(resultColumn));
 								}
