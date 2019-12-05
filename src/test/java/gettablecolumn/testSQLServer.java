@@ -14,8 +14,10 @@ public class testSQLServer extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.runText(inputQuery);
-        //  System.out.println(getTableColumn.outList.toString().trim());
+        //System.out.println(inputQuery);
+        //System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+        //System.out.println(desireResult);
     }
 
     public static void testColumnInSubquery() {
@@ -177,6 +179,7 @@ public class testSQLServer extends TestCase {
                         "dbo.Tealeaf.Calendar_Quarter\n" +
                         "dbo.Tealeaf.Calendar_Quarter_Name\n" +
                         "dbo.Tealeaf.Calendar_Year\n" +
+                        "dbo.Tealeaf.Date\n" +
                         "dbo.Tealeaf.ErrorCount\n" +
                         "dbo.Tealeaf.ErrorType\n" +
                         "dbo.TealeafPerformance.Calendar_Month\n" +
@@ -184,6 +187,7 @@ public class testSQLServer extends TestCase {
                         "dbo.TealeafPerformance.Calendar_Quarter\n" +
                         "dbo.TealeafPerformance.Calendar_Quarter_Name\n" +
                         "dbo.TealeafPerformance.Calendar_Year\n" +
+                        "dbo.TealeafPerformance.Date\n" +
                         "dbo.TealeafPerformance.PerformanceType");
     }
 

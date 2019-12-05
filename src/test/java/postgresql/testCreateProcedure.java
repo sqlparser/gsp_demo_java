@@ -39,6 +39,6 @@ public class testCreateProcedure extends TestCase {
         assertTrue(update.getTargetTable().toString().equalsIgnoreCase("accounts"));
 
         //assertTrue(createProcedure.getBodyStatements().get(1).sqlstatementtype == ESqlStatementType.sstcommit);
-        System.out.print(createProcedure.getBodyStatements().get(1).sqlstatementtype );
+        //System.out.print(createProcedure.getBodyStatements().get(1).sqlstatementtype );
     }
 }

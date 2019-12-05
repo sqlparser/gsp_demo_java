@@ -143,6 +143,7 @@ public static String getDesiredTablesColumns(String sqlfile){
        SqlFileList sqlfiles = new SqlFileList(pDir,true);
        String strDesired,strActual;
        for(int k=0;k < sqlfiles.sqlfiles.size();k++){
+           //System.out.println(sqlfiles.sqlfiles.get(k).toString());
            getTableColumn.runFile(sqlfiles.sqlfiles.get(k).toString());
            File f = new File(sqlfiles.sqlfiles.get(k).toString().replace(".sql",".outj"));
            if(f.exists() && !f.isDirectory()) {
