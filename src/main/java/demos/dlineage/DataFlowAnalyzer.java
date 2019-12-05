@@ -70,6 +70,7 @@ import demos.dlineage.util.SQLUtil;
 import demos.dlineage.util.XML2Model;
 import demos.dlineage.util.XMLUtil;
 import gudusoft.gsqlparser.EComparisonType;
+import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.EJoinType;
@@ -4440,6 +4441,9 @@ public class DataFlowAnalyzer
 				for ( int j = 0; j < tables.size( ); j++ )
 				{
 					TObjectName tableName = tables.getExpression( j ).getObjectOperand();
+					if(tableName.getDbObjectType() == EDbObjectType.variable) {
+						continue;
+					}
 					Table tableModel = modelFactory.createSelectIntoTable( tableName );
 				
 					for ( int i = 0; i < stmt.getResultColumnList( ).size( ); i++ )
