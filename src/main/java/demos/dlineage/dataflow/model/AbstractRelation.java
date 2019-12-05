@@ -8,9 +8,12 @@ public abstract class AbstractRelation implements Relation {
 
     private int id;
 
+    private String function; 
+    
     private EffectType effectType;
 
     protected RelationElement<?> target;
+    
     protected List<RelationElement<?>> sources = new ArrayList<RelationElement<?>>();
 
     public AbstractRelation() {
@@ -46,5 +49,13 @@ public abstract class AbstractRelation implements Relation {
     public void setEffectType(EffectType effectType) {
         this.effectType = effectType;
     }
+
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
 
 }

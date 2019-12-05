@@ -8,10 +8,12 @@ public class Relation {
 	@JSONField(ordinal = 2)
 	private String type;
 	@JSONField(ordinal = 3)
-	private String effectType;
+	private String function;
 	@JSONField(ordinal = 4)
-	private RelationElement target;
+	private String effectType;
 	@JSONField(ordinal = 5)
+	private RelationElement target;
+	@JSONField(ordinal = 6)
 	private RelationElement[] sources;
 
 	public String getId() {
@@ -54,4 +56,12 @@ public class Relation {
 		this.sources = sources;
 	}
 
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
+	
 }

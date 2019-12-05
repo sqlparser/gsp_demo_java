@@ -1351,14 +1351,15 @@ public class DataFlowAnalyzer
 								columnsInExpr visitor = new columnsInExpr( );
 								valueExpression.inOrderTraverse( visitor );
 								List<TObjectName> objectNames = visitor.getObjectNames( );
+								List<TFunctionCall> functions = visitor.getFunctions();
 								analyzeDataFlowRelation( updateColumn,
 										objectNames,
-										EffectType.merge_update );
+										EffectType.merge_update, functions );
 
 								List<TConstant> constants = visitor.getConstants( );
 								analyzeConstantDataFlowRelation( updateColumn,
 										constants,
-										EffectType.merge_update );
+										EffectType.merge_update, functions );
 
 								TableColumn tableColumn = modelFactory.createTableColumn( tableModel,
 										columnObject );
@@ -1408,14 +1409,15 @@ public class DataFlowAnalyzer
 									columnsInExpr visitor = new columnsInExpr( );
 									valueExpression.inOrderTraverse( visitor );
 									List<TObjectName> objectNames = visitor.getObjectNames( );
+									List<TFunctionCall> functions = visitor.getFunctions();
 									analyzeDataFlowRelation( insertColumn,
 											objectNames,
-											EffectType.merge_insert );
+											EffectType.merge_insert, functions );
 
 									List<TConstant> constants = visitor.getConstants( );
 									analyzeConstantDataFlowRelation( insertColumn,
 											constants,
-											EffectType.merge_insert );
+											EffectType.merge_insert, functions );
 
 									TableColumn tableColumn = modelFactory.createTableColumn( tableModel,
 											columnObject );
@@ -1458,14 +1460,15 @@ public class DataFlowAnalyzer
 								columnsInExpr visitor = new columnsInExpr( );
 								valueExpression.inOrderTraverse( visitor );
 								List<TObjectName> objectNames = visitor.getObjectNames( );
+								List<TFunctionCall> functions = visitor.getFunctions();
 								analyzeDataFlowRelation( insertColumn,
 										objectNames,
-										EffectType.merge_insert );
+										EffectType.merge_insert, functions );
 
 								List<TConstant> constants = visitor.getConstants( );
 								analyzeConstantDataFlowRelation( insertColumn,
 										constants,
-										EffectType.merge_insert );
+										EffectType.merge_insert, functions );
 
 								TableColumn tableColumn = modelFactory.createTableColumn( tableModel,
 										columnObject );
@@ -2385,14 +2388,15 @@ public class DataFlowAnalyzer
 							.inOrderTraverse( visitor );
 
 					List<TObjectName> objectNames = visitor.getObjectNames( );
+					List<TFunctionCall> functions = visitor.getFunctions();
 					analyzeDataFlowRelation( updateColumn,
 							objectNames,
-							EffectType.update );
+							EffectType.update, functions );
 
 					List<TConstant> constants = visitor.getConstants( );
 					analyzeConstantDataFlowRelation( updateColumn,
 							constants,
-							EffectType.update );
+							EffectType.update, functions );
 
 					TableColumn tableColumn = modelFactory.createTableColumn( tableModel,
 							columnObject );
@@ -2437,13 +2441,17 @@ public class DataFlowAnalyzer
 	}
 
 	private void analyzeConstantDataFlowRelation( Object modelObject,
-			List<TConstant> constants, EffectType effectType )
+			List<TConstant> constants, EffectType effectType, List<TFunctionCall> functions )
 	{
 		if ( constants == null || constants.size( ) == 0 )
 			return;
 
 		DataFlowRelation relation = modelFactory.createDataFlowRelation( );
 		relation.setEffectType( effectType );
+		
+		if(functions!=null && !functions.isEmpty()) {
+			relation.setFunction(functions.get(0).getFunctionName().toString());
+		}
 
 		if ( modelObject instanceof ResultColumn )
 		{
@@ -2807,6 +2815,11 @@ public class DataFlowAnalyzer
 				{
 					relationElement.setAttribute( "effectType",
 							relation.getEffectType( ).name( ) );
+				}
+				if ( relation.getFunction() != null )
+				{
+					relationElement.setAttribute( "function",
+							relation.getFunction( ) );
 				}
 				relationElement.setAttribute( "id",
 						String.valueOf( relation.getId( ) ) );
@@ -3381,6 +3394,9 @@ public class DataFlowAnalyzer
 			Element relationElement = doc.createElement( "relation" );
 			relationElement.setAttribute( "type", relation.getRelationType( )
 					.name( ) );
+			if (relation.getFunction() != null) {
+				relationElement.setAttribute("function", relation.getFunction());
+			}
 			if ( relation.getEffectType( ) != null )
 			{
 				relationElement.setAttribute( "effectType",
@@ -4240,14 +4256,15 @@ public class DataFlowAnalyzer
 										.inOrderTraverse( visitor );
 
 								List<TObjectName> objectNames = visitor.getObjectNames( );
+								List<TFunctionCall> functions = visitor.getFunctions();
 								analyzeDataFlowRelation( resultColumn,
 										objectNames,
-										EffectType.select );
+										EffectType.select, functions);
 
 								List<TConstant> constants = visitor.getConstants( );
 								analyzeConstantDataFlowRelation( resultColumn,
 										constants,
-										EffectType.select );
+										EffectType.select, functions);
 							}
 							else
 							{
@@ -4689,18 +4706,18 @@ public class DataFlowAnalyzer
 
 		List<TFunctionCall> functions = visitor.getFunctions( );
 
-		analyzeDataFlowRelation( column, objectNames, effectType );
+		analyzeDataFlowRelation( column, objectNames, effectType, functions);
 
 		List<TConstant> constants = visitor.getConstants( );
 		Object columnObject = modelManager.getModel( column );
-		analyzeConstantDataFlowRelation( columnObject, constants, effectType );
+		analyzeConstantDataFlowRelation( columnObject, constants, effectType, functions);
 
 		analyzeRecordSetRelation( column, functions, effectType );
-		analyzeResultColumnImpact( column, effectType );
+		analyzeResultColumnImpact( column, effectType, functions);
 	}
 
 	private void analyzeResultColumnImpact( TResultColumn column,
-			EffectType effectType )
+			EffectType effectType, List<TFunctionCall> functions )
 	{
 		TExpression expression = column.getExpr( );
 		EExpressionType type = expression.getExpressionType( );
@@ -4737,17 +4754,21 @@ public class DataFlowAnalyzer
 				objectNames.addAll( visitor.getObjectNames( ) );
 			}
 		}
-		analyzeImpactRelation( column, objectNames, effectType );
+		analyzeImpactRelation( column, objectNames, effectType, functions );
 	}
 
 	private void analyzeImpactRelation( TResultColumn column,
-			List<TObjectName> objectNames, EffectType effectType )
+			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
 	{
 		if ( objectNames == null || objectNames.size( ) == 0 )
 			return;
 
 		IndirectImpactRelation relation = modelFactory.createIndirectImpactRelation( );
 		relation.setEffectType( effectType );
+		
+		if(functions!=null && !functions.isEmpty()) {
+			relation.setFunction(functions.get(0).getFunctionName().toString());
+		}
 
 		relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
 
@@ -4788,13 +4809,23 @@ public class DataFlowAnalyzer
 		if ( functions == null || functions.size( ) == 0 )
 			return;
 
+	    List<TFunctionCall> aggregateFunctions = new ArrayList<TFunctionCall>();
+		for (TFunctionCall function : functions) {
+			if(isAggregateFunction(function)) {
+				aggregateFunctions.add(function);
+			}
+		}
+		
+		if ( aggregateFunctions.size( ) == 0 )
+			return;
+		
 		RecordSetRelation relation = modelFactory.createRecordSetRelation( );
 		relation.setEffectType( effectType );
 		relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
-
-		for ( int i = 0; i < functions.size( ); i++ )
+		relation.setFunction(aggregateFunctions.get(0).getFunctionName().toString());
+		for ( int i = 0; i < aggregateFunctions.size( ); i++ )
 		{
-			TFunctionCall function = functions.get( i );
+			TFunctionCall function = aggregateFunctions.get( i );
 			if ( stmtStack.peek( ).getTables( ).size( ) == 1 )
 			{
 				Object tableObject = modelManager.getModel( stmtStack.peek( )
@@ -4819,14 +4850,14 @@ public class DataFlowAnalyzer
 	}
 
 	private void analyzeDataFlowRelation( TParseTreeNode gspObject,
-			List<TObjectName> objectNames, EffectType effectType )
+			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
 	{
 		Object columnObject = modelManager.getModel( gspObject );
-		analyzeDataFlowRelation( columnObject, objectNames, effectType );
+		analyzeDataFlowRelation( columnObject, objectNames, effectType, functions );
 	}
 
 	private void analyzeDataFlowRelation( Object modelObject,
-			List<TObjectName> objectNames, EffectType effectType )
+			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
 	{
 		if ( objectNames == null || objectNames.size( ) == 0 )
 			return;
@@ -4835,6 +4866,10 @@ public class DataFlowAnalyzer
 
 		DataFlowRelation relation = modelFactory.createDataFlowRelation( );
 		relation.setEffectType( effectType );
+		
+		if(functions!=null && !functions.isEmpty()) {
+			relation.setFunction(functions.get(0).getFunctionName().toString());
+		}
 
 		int columnIndex = -1;
 
@@ -5278,6 +5313,7 @@ public class DataFlowAnalyzer
 			if ( isAggregateFunction( column.getExpr( ).getFunctionCall( ) ) )
 			{
 				relation = modelFactory.createRecordSetRelation( );
+				relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 				relation.setEffectType( effectType );
 				relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
 				( (RecordSetRelation) relation ).setAggregateFunction( column.getExpr( )
@@ -5351,7 +5387,7 @@ public class DataFlowAnalyzer
 				{
 					relation = modelFactory.createRecordSetRelation( );
 					relation.setEffectType( effectType );
-
+					relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 					relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
 					( (RecordSetRelation) relation ).setAggregateFunction( column.getExpr( )
 							.getFunctionCall( )
@@ -5362,6 +5398,9 @@ public class DataFlowAnalyzer
 				{
 					relation = modelFactory.createImpactRelation( );
 					relation.setEffectType( effectType );
+					if(column.getExpr( ).getFunctionCall( )!=null) {
+						relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+					}
 					if ( column.getExpr( ).getExpressionType( ) == EExpressionType.assignment_t )
 					{
 						relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column.getExpr( )
@@ -5464,7 +5503,7 @@ public class DataFlowAnalyzer
 			else if ( lcexpr.getExpressionType( ) == EExpressionType.function_t )
 			{
 				TFunctionCall func = lcexpr.getFunctionCall( );
-				if ( isAggregateFunction( func ) )
+				//if ( isAggregateFunction( func ) )
 				{
 					functions.add( func );
 				}

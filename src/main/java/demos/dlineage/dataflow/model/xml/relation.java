@@ -17,6 +17,9 @@ public class relation implements Cloneable
 	private String type;
 
 	@Attribute(required = false)
+	private String function;
+
+	@Attribute(required = false)
 	private String effectType;
 
 	@Attribute(required = false)
@@ -107,6 +110,14 @@ public class relation implements Cloneable
 	public boolean isDataFlow( )
 	{
 		return "fdd".equals( type );
+	}
+	
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
 	}
 
 	public String getEffectType() {

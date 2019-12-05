@@ -3,11 +3,13 @@ package demos.dlineage.dataflow.model;
 
 public interface Relation {
 
-    RelationElement<?> getTarget();
+	RelationElement<?> getTarget();
 
-    RelationElement<?>[] getSources();
+	RelationElement<?>[] getSources();
 
-    RelationType getRelationType();
+	RelationType getRelationType();
 
-    EffectType getEffectType();
+	EffectType getEffectType();
+
+	String getFunction();
 }

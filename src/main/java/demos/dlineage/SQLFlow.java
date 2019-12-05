@@ -274,6 +274,7 @@ public class SQLFlow {
 				relationModel.setId(relation.getId());
 				relationModel.setType(relation.getType());
 				relationModel.setEffectType(relation.getEffectType());
+				relationModel.setFunction(relation.getFunction());
 
 				if (relation.getTarget() != null && relation.getSources() != null && !relation.getSources().isEmpty()) {
 					{
