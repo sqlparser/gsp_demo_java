@@ -1070,6 +1070,15 @@ public class DataFlowAnalyzer
 				}
 			}
 		}
+		
+		if ( stmt.getWhereClause( ) != null
+				&& stmt.getWhereClause( ).getCondition( ) != null )
+		{
+			analyzeFilterCondtion( stmt.getWhereClause( ).getCondition( ),
+					null,
+					JoinClauseType.where,
+					EffectType.delete );
+		}
 	}
 
 	private void analyzeStoredProcedureStmt(TStoredProcedureSqlStatement stmt) {
