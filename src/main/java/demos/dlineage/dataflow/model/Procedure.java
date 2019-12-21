@@ -33,7 +33,7 @@ public class Procedure {
 			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
 					endToken.columnNo + (long) endToken.astext.length());
 			this.fullName = this.procedureObject.getStoredProcedureName().toString();
-			this.name = this.procedureObject.getStoredProcedureName().getColumnNameOnly();
+			this.name = this.procedureObject.getStoredProcedureName().getTableString();
 			
 			if (!SQLUtil.isEmpty(this.procedureObject.getStoredProcedureName().getSchemaString())) {
 				this.schema = SQLUtil.trimObjectName(this.procedureObject.getStoredProcedureName().getSchemaString());
