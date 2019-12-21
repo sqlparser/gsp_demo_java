@@ -332,6 +332,8 @@ public class DataFlowAnalyzer
 				String type = tableTypeMap.get( tableName );
 				table table = new table( );
 				table.setId( String.valueOf( ++modelManager.TABLE_COLUMN_ID ) );
+				table.setDatabase(firstTable.getDatabase());
+				table.setSchema(firstTable.getSchema());
 				table.setName( firstTable.getName( ) );
 				table.setParent( firstTable.getParent( ) );
 				table.setColumns( new ArrayList<column>( ) );
@@ -3948,7 +3950,7 @@ public class DataFlowAnalyzer
 			if(!SQLUtil.isEmpty(model.getSchema())) {
 				procedureElement.setAttribute( "schema", model.getSchema());
 			}
-			procedureElement.setAttribute("name", model.getFullName());
+			procedureElement.setAttribute("name", model.getName());
 			procedureElement.setAttribute("type", model.getType().name().replace("sst", ""));
 			if (model.getStartPosition() != null && model.getEndPosition() != null) {
 				procedureElement.setAttribute("coordinate", model.getStartPosition() + "," + model.getEndPosition());
