@@ -26,6 +26,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import demos.dlineage.dataflow.listener.DataFlowHandleListener;
 import demos.dlineage.dataflow.model.AbstractRelation;
 import demos.dlineage.dataflow.model.Argument;
@@ -169,6 +172,7 @@ public class DataFlowAnalyzer
 	private ModelBindingManager modelManager = new ModelBindingManager( );
 	private ModelFactory modelFactory = new ModelFactory( modelManager );
 	private List<Integer> tableIds = new ArrayList<Integer>();
+	
 
 	{
 		ModelBindingManager.set( modelManager );
@@ -501,6 +505,18 @@ public class DataFlowAnalyzer
 					}
 
 					String content = SQLUtil.getFileContent( children[i].getAbsolutePath( ) );
+					ModelBindingManager.removeGlobalDatabase();
+					ModelBindingManager.removeGlobalSchema();
+					
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+					}
+					
+					
+					
 					if ( handleListener != null )
 					{
 						handleListener.startParse( children[i],
@@ -527,6 +543,16 @@ public class DataFlowAnalyzer
 					handleListener.startParse( null, sqlContent.length( ), 0 );
 				}
 
+				ModelBindingManager.removeGlobalDatabase();
+				ModelBindingManager.removeGlobalSchema();
+				
+				if (sqlContent != null && sqlContent.trim().startsWith("{")) {
+					JSONObject queryObject = JSON.parseObject(sqlContent);
+					sqlContent = queryObject.getString("sourceCode");
+					ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+					ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+				}
+				
 				TGSqlParser sqlparser = new TGSqlParser( vendor );
 				sqlparser.sqltext = sqlContent;
 				analyzeAndOutputResult( sqlparser, doc, dlineageResult );
@@ -557,6 +583,16 @@ public class DataFlowAnalyzer
 					}
 
 					String content = sqlContents[i];
+					
+					ModelBindingManager.removeGlobalDatabase();
+					ModelBindingManager.removeGlobalSchema();
+					
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+					}
 
 					if ( handleListener != null )
 					{
@@ -596,6 +632,16 @@ public class DataFlowAnalyzer
 
 					String content = SQLUtil.getFileContent( children[i].getAbsolutePath( ) );
 
+					ModelBindingManager.removeGlobalDatabase();
+					ModelBindingManager.removeGlobalSchema();
+					
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+					}
+					
 					if ( handleListener != null )
 					{
 						handleListener.startParse( children[i],
@@ -864,6 +910,8 @@ public class DataFlowAnalyzer
 	{
 		dataflowString = null;
 		dataflowResult = null;
+		ModelBindingManager.removeGlobalDatabase();
+		ModelBindingManager.removeGlobalSchema();
 		appendResultSets.clear( );
 		modelManager.TABLE_COLUMN_ID = 0;
 		modelManager.RELATION_ID = 0;
@@ -3573,6 +3621,14 @@ public class DataFlowAnalyzer
 		Element resultSetElement = doc.createElement( "resultset" );
 		resultSetElement.setAttribute( "id",
 				String.valueOf( resultSetModel.getId( ) ) );
+		if (!SQLUtil.isEmpty(resultSetModel.getDatabase())) {
+			resultSetElement.setAttribute("database", resultSetModel.getDatabase());
+		}
+		if(!SQLUtil.isEmpty(resultSetModel.getSchema())) {
+			resultSetElement.setAttribute( "schema", resultSetModel.getSchema());
+		}
+		resultSetElement.setAttribute( "name",
+				getResultSetName( resultSetModel ) );
 		resultSetElement.setAttribute( "name",
 				getResultSetName( resultSetModel ) );
 		resultSetElement.setAttribute( "type",
@@ -3813,6 +3869,12 @@ public class DataFlowAnalyzer
 			View viewModel = (View) modelManager.getViewModel( views.get( i ) );
 			Element viewElement = doc.createElement( "view" );
 			viewElement.setAttribute( "id", String.valueOf( viewModel.getId( ) ) );
+			if (!SQLUtil.isEmpty(viewModel.getDatabase())) {
+				viewElement.setAttribute("database", viewModel.getDatabase());
+			}
+			if(!SQLUtil.isEmpty(viewModel.getSchema())) {
+				viewElement.setAttribute( "schema", viewModel.getSchema());
+			}
 			viewElement.setAttribute( "name", viewModel.getName( ) );
 			viewElement.setAttribute( "type", "view" );
 			if ( viewModel.getStartPosition( ) != null
@@ -3880,6 +3942,12 @@ public class DataFlowAnalyzer
 			Procedure model = (Procedure) this.modelManager.getModel(procedures.get(i));
 			Element procedureElement = doc.createElement("procedure");
 			procedureElement.setAttribute("id", String.valueOf(model.getId()));
+			if (!SQLUtil.isEmpty(model.getDatabase())) {
+				procedureElement.setAttribute("database", model.getDatabase());
+			}
+			if(!SQLUtil.isEmpty(model.getSchema())) {
+				procedureElement.setAttribute( "schema", model.getSchema());
+			}
 			procedureElement.setAttribute("name", model.getFullName());
 			procedureElement.setAttribute("type", model.getType().name().replace("sst", ""));
 			if (model.getStartPosition() != null && model.getEndPosition() != null) {
@@ -3945,7 +4013,13 @@ public class DataFlowAnalyzer
 		Element tableElement = doc.createElement( "table" );
 		tableElement.setAttribute( "id",
 				String.valueOf( tableModel.getId( ) ) );
-		tableElement.setAttribute( "name", tableModel.getFullName( ) );
+		if (!SQLUtil.isEmpty(tableModel.getDatabase())) {
+			tableElement.setAttribute("database", tableModel.getDatabase());
+		}
+		if(!SQLUtil.isEmpty(tableModel.getSchema())) {
+			tableElement.setAttribute( "schema", tableModel.getSchema());
+		}
+		tableElement.setAttribute( "name", tableModel.getName() );
 		tableElement.setAttribute( "type", "table" );
 		if ( tableModel.getParent( ) != null )
 		{

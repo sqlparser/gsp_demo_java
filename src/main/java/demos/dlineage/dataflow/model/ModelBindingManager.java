@@ -37,19 +37,51 @@ public class ModelBindingManager {
     public Map<String, String> virtualTableNames = new HashMap<String, String>();
 
     private final static ThreadLocal localManager = new ThreadLocal();
+    private final static ThreadLocal globalDatabase = new ThreadLocal();
+    private final static ThreadLocal globalSchema = new ThreadLocal();
 
     public static void set(ModelBindingManager modelManager) {
         if (localManager.get() == null) {
             localManager.set(modelManager);
         }
     }
-
+    
     public static ModelBindingManager get() {
-        return (ModelBindingManager) localManager.get();
+       return (ModelBindingManager)localManager.get();
+    }
+    
+    public static void setGlobalDatabase(String database) {
+        if (globalDatabase.get() == null && database!=null) {
+        	globalDatabase.set(database);
+        }
+    }
+
+    public static String getGlobalDatabase() {
+        return (String) globalDatabase.get();
+    }
+    
+    public static void removeGlobalDatabase() {
+    	globalDatabase.remove();
+    }
+    
+    public static void setGlobalSchema(String schema) {
+        if (globalSchema.get() == null && schema!=null) {
+        	globalSchema.set(schema);
+        }
+    }
+    
+    public static void removeGlobalSchema() {
+    	globalSchema.remove();
+    }
+
+    public static String getGlobalSchema() {
+        return (String) globalSchema.get();
     }
 
     public static void remove() {
         localManager.remove();
+        globalDatabase.remove();
+        globalSchema.remove();
     }
 
     public void bindModel(Object gspModel, Object relationModel) {

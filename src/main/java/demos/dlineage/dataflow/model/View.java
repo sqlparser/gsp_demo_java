@@ -1,19 +1,22 @@
 
 package demos.dlineage.dataflow.model;
 
-import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.nodes.TObjectName;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
+import gudusoft.gsqlparser.TCustomSqlStatement;
+import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.nodes.TObjectName;
 
 public class View {
 
     private int id;
+    private String database;
+    private String schema;
     private String name;
+    private String fullName;
     private Pair<Long, Long> startPosition;
     private Pair<Long, Long> endPosition;
     private List<ViewColumn> columns = new ArrayList<ViewColumn>();
@@ -32,9 +35,11 @@ public class View {
         if (viewName != null) {
             startToken = viewName.getStartToken();
             endToken = viewName.getEndToken();
-            this.name = viewName.toString();
+            this.name = viewName.getTableString();
+            this.fullName = viewName.toString();
         } else {
             this.name = "";
+            this.fullName = "";
             System.err.println();
             System.err.println("Can't get view name. View is ");
             System.err.println(view.toString());
@@ -44,7 +49,20 @@ public class View {
                 startToken.columnNo);
         this.endPosition = new Pair<Long, Long>(endToken.lineNo,
                 endToken.columnNo + endToken.astext.length());
-
+        
+        if (!SQLUtil.isEmpty(viewName.getSchemaString())) {
+			this.schema = SQLUtil.trimObjectName(viewName.getSchemaString());
+		} else {
+			this.schema = ModelBindingManager.getGlobalSchema();
+		}
+		
+		if (!SQLUtil.isEmpty(viewName.getDatabaseString())) {
+			this.database = SQLUtil.trimObjectName(viewName.getDatabaseString());
+		} else {
+			this.database = ModelBindingManager.getGlobalDatabase();
+		}
+		
+		this.name = SQLUtil.trimObjectName(this.name);
     }
 
     public int getId() {
@@ -55,11 +73,11 @@ public class View {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getFullName() {
+		return fullName;
+	}
 
-    public Pair<Long, Long> getStartPosition() {
+	public Pair<Long, Long> getStartPosition() {
         return startPosition;
     }
 
@@ -82,6 +100,16 @@ public class View {
     }
 
     public String getDisplayName() {
-        return getName();
+        return getFullName();
     }
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+    
+    
 }

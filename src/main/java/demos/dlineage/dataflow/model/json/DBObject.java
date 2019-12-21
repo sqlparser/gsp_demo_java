@@ -6,16 +6,20 @@ public class DBObject {
 	@JSONField(ordinal = 1)
 	private String id;
 	@JSONField(ordinal = 2)
-	private String name;
+	private String database;
 	@JSONField(ordinal = 3)
-	private String alias;
+	private String schema;
 	@JSONField(ordinal = 4)
-	private String type;
+	private String name;
 	@JSONField(ordinal = 5)
-	private Argument[] arguments;
+	private String alias;
 	@JSONField(ordinal = 6)
-	private Column[] columns;
+	private String type;
 	@JSONField(ordinal = 7)
+	private Argument[] arguments;
+	@JSONField(ordinal = 8)
+	private Column[] columns;
+	@JSONField(ordinal = 9)
 	private Coordinate[] coordinates;
 
 	public String getId() {
@@ -74,4 +78,19 @@ public class DBObject {
 		this.coordinates = coordinates;
 	}
 
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
 }
