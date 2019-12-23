@@ -118,6 +118,7 @@ import gudusoft.gsqlparser.nodes.TWhenClauseItem;
 import gudusoft.gsqlparser.nodes.TWhenClauseItemList;
 import gudusoft.gsqlparser.nodes.couchbase.TObjectConstruct;
 import gudusoft.gsqlparser.nodes.couchbase.TPair;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.stmt.TCreateMaterializedSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTriggerStmt;
@@ -169,6 +170,7 @@ public class DataFlowAnalyzer
 	private boolean textFormat = false;
 	private boolean showJoin = false;
 	private boolean ignoreRecordSet = false;
+	private TSQLEnv sqlenv = null;
 	private ModelBindingManager modelManager = new ModelBindingManager( );
 	private ModelFactory modelFactory = new ModelFactory( modelManager );
 	private List<Integer> tableIds = new ArrayList<Integer>();
@@ -233,6 +235,11 @@ public class DataFlowAnalyzer
 	public void setHandleListener( DataFlowHandleListener listener )
 	{
 		this.handleListener = listener;
+	}
+	
+	
+	public void setSqlEnv(TSQLEnv sqlenv) {
+		this.sqlenv = sqlenv;
 	}
 
 	public synchronized String generateDataFlow( StringBuffer errorMessage )
@@ -527,6 +534,9 @@ public class DataFlowAnalyzer
 					}
 
 					TGSqlParser sqlparser = new TGSqlParser( vendor );
+					if(sqlenv!=null) {
+						sqlparser.setSqlEnv(sqlenv);
+					}
 					sqlparser.sqltext = content;
 					analyzeAndOutputResult( sqlparser, doc, dlineageResult );
 				}
@@ -556,6 +566,9 @@ public class DataFlowAnalyzer
 				}
 				
 				TGSqlParser sqlparser = new TGSqlParser( vendor );
+				if(sqlenv!=null) {
+					sqlparser.setSqlEnv(sqlenv);
+				}
 				sqlparser.sqltext = sqlContent;
 				analyzeAndOutputResult( sqlparser, doc, dlineageResult );
 			}
@@ -602,6 +615,9 @@ public class DataFlowAnalyzer
 					}
 
 					TGSqlParser sqlparser = new TGSqlParser( vendor );
+					if(sqlenv!=null) {
+						sqlparser.setSqlEnv(sqlenv);
+					}
 					sqlparser.sqltext = content;
 					analyzeAndOutputResult( sqlparser, doc, dlineageResult );
 				}
@@ -652,6 +668,9 @@ public class DataFlowAnalyzer
 					}
 
 					TGSqlParser sqlparser = new TGSqlParser( vendor );
+					if(sqlenv!=null) {
+						sqlparser.setSqlEnv(sqlenv);
+					}
 					sqlparser.sqltext = content;
 					analyzeAndOutputResult( sqlparser, doc, dlineageResult );
 				}
