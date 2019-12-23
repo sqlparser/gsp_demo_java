@@ -39,10 +39,4 @@ public class SQLEnvParser {
 		}
 		return null;
 	}
-	
-	public static void main(String[] args) {
-		TSQLEnv sqlEnv = SQLEnvParser.getSQLEnv(EDbVendor.dbvmssql, SQLUtil.getFileContent("C:\\Users\\z\\Desktop\\DBexport20191119.txt"));
-		sqlEnv.initSQLEnv();
-		System.out.println(JSON.toJSONString(sqlEnv));
-	}
 }
