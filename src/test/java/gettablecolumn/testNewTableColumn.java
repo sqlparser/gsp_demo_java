@@ -6,6 +6,10 @@ package test.gettablecolumn;
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
 import test.SqlFileList;
 import test.gspCommon;
@@ -13,6 +17,40 @@ import test.gspCommon;
 import java.io.*;
 
 
+class TOracleServerEnv extends TSQLEnv {
+
+    public TOracleServerEnv(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+
+        // add a new database: db
+        TSQLCatalog sqlCatalog = createSQLCatalog("db");
+        // add a new schema: default
+        TSQLSchema defaultSchema = sqlCatalog.createSchema("default");
+        //add a new table: emp
+        TSQLTable empTable = defaultSchema.createTable("emp");
+        empTable.addColumn("ename");
+
+        // add a new schema: DW
+        TSQLSchema dwSchema = sqlCatalog.createSchema("DW");
+        //add a new table: ImSysInfo_BC
+        TSQLTable bcTable = dwSchema.createTable("ImSysInfo_BC");
+        bcTable.addColumn("ACCT_ID");
+        bcTable.addColumn("SystemOfRec");
+        bcTable.addColumn("OpeningDate");
+
+        //add a new table: AcctInfo_PT
+        TSQLTable ptTab = dwSchema.createTable("AcctInfo_PT");
+        ptTab.addColumn("SystemOfRec");
+        ptTab.addColumn("OfficerCode");
+
+
+    }
+}
 
 class myMetaDB implements IMetaDatabase {
 
@@ -165,7 +203,9 @@ public static String getDesiredTablesColumns(String sqlfile){
       TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvoracle);
       getTableColumn.isConsole = false;
       getTableColumn.showDetail = false;
-      getTableColumn.setMetaDatabase(new myMetaDB());
+      //getTableColumn.setMetaDatabase(new myMetaDB());
+      getTableColumn.setSqlEnv(new TOracleServerEnv());
+
       getTableColumn.runText("<<main>>\n" +
               "DECLARE\n" +
               "ename VARCHAR2(10) := 'KING';\n" +

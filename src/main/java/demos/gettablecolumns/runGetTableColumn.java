@@ -8,6 +8,10 @@ import java.util.List;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 
 class sampleMetaDB implements IMetaDatabase
 {
@@ -274,7 +278,9 @@ public class runGetTableColumn
 		getTableColumn.showDatatype = true;
 		getTableColumn.listStarColumn = true;
 		getTableColumn.showTableEffect = false;
-		getTableColumn.setMetaDatabase( new sampleMetaDB());
+		//getTableColumn.setMetaDatabase( new sampleMetaDB());
+		getTableColumn.setSqlEnv(new TSQLServerEnv());
+
 
 		if ( argList.indexOf( "/showDetail" ) != -1 )
 		{
@@ -334,5 +340,34 @@ public class runGetTableColumn
 		System.out.println( "/showTreeStructure: show option, display the information as a tree structure." );
 		System.out.println( "/showBySQLClause: show option, display the information group by sql clause type." );
 		System.out.println( "/showJoin: show option, display the join table and column." );
+	}
+}
+
+class TSQLServerEnv extends TSQLEnv{
+
+	public TSQLServerEnv(){
+		super(EDbVendor.dbvmssql);
+		initSQLEnv();
+	}
+
+	@Override
+	public void initSQLEnv() {
+
+		// add a new database: master
+		TSQLCatalog sqlCatalog = createSQLCatalog("master");
+		// add a new schema: dbo
+		TSQLSchema sqlSchema = sqlCatalog.createSchema("dbo");
+		//add a new table: aTab
+		TSQLTable aTab = sqlSchema.createTable("aTab");
+		aTab.addColumn("Quantity1");
+
+		//add a new table: bTab
+		TSQLTable bTab = sqlSchema.createTable("bTab");
+		bTab.addColumn("Quantity2");
+
+		//add a new table: cTab
+		TSQLTable cTab = sqlSchema.createTable("cTab");
+		cTab.addColumn("Quantity");
+
 	}
 }

@@ -6,6 +6,7 @@ import gudusoft.gsqlparser.nodes.TColumnWithSortOrder;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.nodes.TTypeName;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 
 import java.util.ArrayList;
@@ -285,6 +286,13 @@ public class TGetTableColumn{
     public void setMetaDatabase(IMetaDatabase metaDatabase) {
         this.metaDatabase = metaDatabase;
         sqlParser.setMetaDatabase(metaDatabase);
+    }
+
+    private TSQLEnv sqlEnv = null;
+
+    public void setSqlEnv(TSQLEnv sqlEnv) {
+        this.sqlEnv = sqlEnv;
+        sqlParser.setSqlEnv(sqlEnv);
     }
 
     private StringBuffer functionlist,schemalist,
