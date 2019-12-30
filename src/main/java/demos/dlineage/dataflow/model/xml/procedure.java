@@ -9,6 +9,10 @@ public class procedure {
 	@Attribute(required = false)
 	private String id;
 	@Attribute(required = false)
+	private String database;
+	@Attribute(required = false)
+	private String schema;
+	@Attribute(required = false)
 	private String name;
 	@Attribute(required = false)
 	private String type;
@@ -71,4 +75,21 @@ public class procedure {
 	public void setArguments(List<argument> arguments) {
 		this.arguments = arguments;
 	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
+	
 }

@@ -209,6 +209,8 @@ public class SQLFlow {
 			for (procedure procedure : procedures) {
 				DBObject item = new DBObject();
 				item.setId(procedure.getId());
+				item.setDatabase(procedure.getDatabase());
+				item.setSchema(procedure.getSchema());
 				item.setName(procedure.getName());
 				item.setType("procedure");
 				item.setCoordinates(Coordinate.parse(procedure.getCoordinate()));
@@ -235,6 +237,8 @@ public class SQLFlow {
 			for (table table : tables) {
 				DBObject item = new DBObject();
 				item.setId(table.getId());
+				item.setDatabase(table.getDatabase());
+				item.setSchema(table.getSchema());
 				item.setAlias(table.getAlias());
 				item.setName(table.getName());
 				item.setType(table.getType());

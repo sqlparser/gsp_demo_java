@@ -14,6 +14,12 @@ public class table
 	private String id;
 	
 	@Attribute(required = false)
+	private String database;
+	
+	@Attribute(required = false)
+	private String schema;
+	
+	@Attribute(required = false)
 	private String name;
 	
 	@Attribute(required = false)
@@ -137,6 +143,22 @@ public class table
 	public void setParent( String parent )
 	{
 		this.parent = parent;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
 	}
 
 }

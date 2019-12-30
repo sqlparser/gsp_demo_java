@@ -1,20 +1,23 @@
 
 package demos.dlineage.dataflow.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Table {
 
 
     private int id;
+    private String database;
+    private String schema;
     private String name;
     private String fullName;
     private String alias;
@@ -63,6 +66,20 @@ public class Table {
         if (table.getSubquery() != null) {
             subquery = true;
         }
+        
+		if (!SQLUtil.isEmpty(table.getTableName().getSchemaString())) {
+			this.schema = SQLUtil.trimObjectName(table.getTableName().getSchemaString());
+		} else {
+			this.schema = ModelBindingManager.getGlobalSchema();
+		}
+		
+		if (!SQLUtil.isEmpty(table.getTableName().getDatabaseString())) {
+			this.database = SQLUtil.trimObjectName(table.getTableName().getDatabaseString());
+		} else {
+			this.database = ModelBindingManager.getGlobalDatabase();
+		}
+		
+		this.name = SQLUtil.trimObjectName(this.name);
     }
     
     public Table(TObjectName tableName) {
@@ -84,6 +101,20 @@ public class Table {
         
         this.fullName = tableName.toString();
         this.name = tableName.getTableString();
+        
+        if (!SQLUtil.isEmpty(tableName.getSchemaString())) {
+			this.schema = SQLUtil.trimObjectName(tableName.getSchemaString());
+		} else {
+			this.schema = ModelBindingManager.getGlobalSchema();
+		}
+		
+		if (!SQLUtil.isEmpty(tableName.getDatabaseString())) {
+			this.database = SQLUtil.trimObjectName(tableName.getDatabaseString());
+		} else {
+			this.database = ModelBindingManager.getGlobalDatabase();
+		}
+		
+		this.name = SQLUtil.trimObjectName(this.name);
         
     }
 
@@ -149,7 +180,13 @@ public class Table {
 	public TObjectName getTableName() {
 		return tableName;
 	}
-    
-    
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
 
 }

@@ -1,14 +1,18 @@
 package demos.dlineage.dataflow.model;
 
-import demos.dlineage.util.Pair;
-import gudusoft.gsqlparser.ESqlStatementType;
-import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import java.util.ArrayList;
 import java.util.List;
 
+import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
+import gudusoft.gsqlparser.ESqlStatementType;
+import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
+
 public class Procedure {
 	private int id;
+	private String database;
+	private String schema;
 	private String name;
 	private String fullName;
 	private Pair<Long, Long> startPosition;
@@ -29,7 +33,22 @@ public class Procedure {
 			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
 					endToken.columnNo + (long) endToken.astext.length());
 			this.fullName = this.procedureObject.getStoredProcedureName().toString();
-			this.name = this.procedureObject.getStoredProcedureName().getColumnNameOnly();
+			this.name = this.procedureObject.getStoredProcedureName().getTableString();
+			
+			if (!SQLUtil.isEmpty(this.procedureObject.getStoredProcedureName().getSchemaString())) {
+				this.schema = SQLUtil.trimObjectName(this.procedureObject.getStoredProcedureName().getSchemaString());
+			} else {
+				this.schema = ModelBindingManager.getGlobalSchema();
+			}
+			
+			if (!SQLUtil.isEmpty(this.procedureObject.getStoredProcedureName().getDatabaseString())) {
+				this.database = SQLUtil.trimObjectName(this.procedureObject.getStoredProcedureName().getDatabaseString());
+			} else {
+				this.database = ModelBindingManager.getGlobalDatabase();
+			}
+			
+			this.name = SQLUtil.trimObjectName(this.name);
+			
 			this.type = procedure.sqlstatementtype;
 		}
 	}
@@ -104,4 +123,13 @@ public class Procedure {
 	public void setEndPosition(Pair<Long, Long> endPosition) {
 		this.endPosition = endPosition;
 	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+
 }

@@ -11,6 +11,8 @@ import java.util.List;
 public class ResultSet {
 
     private int id;
+    protected String schema;
+    protected String database;
     private Pair<Long, Long> startPosition;
     private Pair<Long, Long> endPosition;
     private List<ResultColumn> columns = new ArrayList<ResultColumn>();
@@ -44,6 +46,9 @@ public class ResultSet {
             System.err.println();
             System.err.println("Can't get end token, the end token is null");
         }
+        
+        this.schema = ModelBindingManager.getGlobalSchema();
+        this.database = ModelBindingManager.getGlobalDatabase();
     }
 
     public Pair<Long, Long> getStartPosition() {
@@ -76,4 +81,11 @@ public class ResultSet {
         return isTarget;
     }
 
+	public String getSchema() {
+		return schema;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
 }
