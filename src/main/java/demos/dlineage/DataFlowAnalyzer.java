@@ -5906,6 +5906,7 @@ public class DataFlowAnalyzer
 			System.out.println( "/d: Option, specify the sql directory path to analyze fdd relation." );
 			System.out.println( "/j: Option, analyze the join relation." );
 			System.out.println( "/s: Option, simple output, ignore the intermediate results." );
+			System.out.println( "/i: Option, ignore all result sets." );
 			System.out.println( "/text: Option, print the plain text format output." );
 			System.out.println( "/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle" );
 			System.out.println( "/o: Option, write the output stream to the specified file." );
@@ -6027,6 +6028,7 @@ public class DataFlowAnalyzer
 		}
 
 		boolean simple = argList.indexOf( "/s" ) != -1;
+		boolean ignoreResultSets = argList.indexOf( "/i" ) != -1;
 		boolean showJoin = argList.indexOf( "/j" ) != -1;
 		boolean textFormat = false;
 		if ( simple )
@@ -6039,6 +6041,7 @@ public class DataFlowAnalyzer
 				simple );
 
 		dlineage.setShowJoin( showJoin );
+		dlineage.setIgnoreRecordSet(ignoreResultSets);
 
 		if ( simple )
 		{
