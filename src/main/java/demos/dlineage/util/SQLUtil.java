@@ -137,6 +137,9 @@ public class SQLUtil {
 
             if (string.startsWith("[") && string.endsWith("]"))
                 return string.substring(1, string.length() - 1);
+            
+            if (string.startsWith("'") && string.endsWith("'"))
+                return string.substring(1, string.length() - 1);
         }
         return string;
     }
@@ -146,7 +149,8 @@ public class SQLUtil {
         List<String> names = new ArrayList<String>();
         String[] splits = nameString.split("\\.");
         if ((name.startsWith("\"") && name.endsWith("\""))
-                || (name.startsWith("[") && name.endsWith("]"))) {
+                || (name.startsWith("[") && name.endsWith("]"))
+                || (name.startsWith("'") && name.endsWith("'"))) {
             for (int i = 0; i < splits.length; i++) {
                 String split = splits[i].trim();
                 if (split.startsWith("[") && !split.endsWith("]")) {
@@ -167,6 +171,20 @@ public class SQLUtil {
                     StringBuilder buffer = new StringBuilder();
                     buffer.append(splits[i]);
                     while (!(split = splits[++i].trim()).endsWith("\"")) {
+                        buffer.append(".");
+                        buffer.append(splits[i]);
+                    }
+
+                    buffer.append(".");
+                    buffer.append(splits[i]);
+
+                    names.add(buffer.toString());
+                    continue;
+                }
+                if (split.startsWith("'") && !split.endsWith("'")) {
+                    StringBuilder buffer = new StringBuilder();
+                    buffer.append(splits[i]);
+                    while (!(split = splits[++i].trim()).endsWith("'")) {
                         buffer.append(".");
                         buffer.append(splits[i]);
                     }
