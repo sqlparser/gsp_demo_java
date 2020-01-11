@@ -1,4 +1,4 @@
-package test.mssql;
+package mssql;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.mssql.TExecuteAsClause;
@@ -34,6 +34,25 @@ public class testCreateProcedureOption extends TestCase {
         TMssqlExecuteAs executeAs = (TMssqlExecuteAs)createProcedure.getBodyStatements().get(1);
         assertTrue(executeAs.getExecuteAsOption() == EExecuteAsOption.eaoUser);
         assertTrue(executeAs.getUserName().equalsIgnoreCase("'guest'"));
+    }
+
+    public void test2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "create proc dbo.outer\n" +
+                "        @var1 nvarchar(255) = ''\n" +
+                "        as\n" +
+                "        set nocount on\n" +
+                "        exec dbo.inner\n" +
+                "        @var1";
+        assertTrue(sqlparser.parse() == 0);
+
+        TMssqlCreateProcedure createProcedure = (TMssqlCreateProcedure)sqlparser.sqlstatements.get(0);
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("dbo.outer"));
+
+        assertTrue(createProcedure.getBodyStatements().size() == 2);
+        //System.out.println(createProcedure.getBodyStatements().get(0).sqlstatementtype);
+        assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstmssqlset);
+        assertTrue(createProcedure.getBodyStatements().get(1).sqlstatementtype == ESqlStatementType.sstmssqlexec);
     }
 
 

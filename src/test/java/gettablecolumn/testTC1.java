@@ -8,6 +8,9 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
 import junit.framework.TestCase;
 
+/**
+ * @deprecated As of v2.0.3.1, please use {@link #testSQLEnv} instead
+ */
 class myMetaDB2 implements IMetaDatabase {
 
     String columns[][] = {
@@ -63,47 +66,47 @@ class myMetaDB2 implements IMetaDatabase {
 public class testTC1 extends TestCase {
 
   public static void test1(){
-      TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvteradata);
-      getTableColumn.isConsole = false;
-      getTableColumn.listStarColumn = true;
-      getTableColumn.setMetaDatabase(new myMetaDB2());
-      getTableColumn.runText("SELECT officercode, \n" +
-              "       openingdate, \n" +
-              "       Count(*) AS NUM_OPEN \n" +
-              "FROM   (SELECT * \n" +
-              "        FROM   (SELECT * \n" +
-              "                FROM   dw.acctinfo_pt b \n" +
-              "                WHERE  snap_dt = DATE'2014-12-31') a) Acct \n" +
-              "       inner join (SELECT * \n" +
-              "                   FROM   (SELECT * \n" +
-              "                           FROM   dw.imsysinfo_bc c \n" +
-              "                           WHERE  snap_dt = DATE'2014-12-31' \n" +
-              "                                  AND acct_id IN (SELECT acct_id \n" +
-              "                                                  FROM   dw.acctinfo_pt \n" +
-              "                                                  WHERE \n" +
-              "                                      snap_dt = DATE'2014-12-31' \n" +
-              "                                      AND acctstatus = '04')) b) \n" +
-              "                                                   ImSys \n" +
-              "               ON ImSys.systemofrec = Acct.systemofrec \n" +
-              "GROUP  BY 1, \n" +
-              "          2;");
-       String strActual = getTableColumn.outList.toString();
-      // System.out.println(strActual);
-      assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
-              "dw.acctinfo_pt\n" +
-              "dw.imsysinfo_bc\n" +
-              "\nFields:\n" +
-              "dw.acctinfo_pt.*\n" +
-              "dw.acctinfo_pt.acct_id\n" +
-              "dw.acctinfo_pt.acctstatus\n" +
-              "dw.acctinfo_pt.officercode\n" +
-              "dw.acctinfo_pt.snap_dt\n" +
-              "dw.acctinfo_pt.systemofrec\n" +
-              "dw.imsysinfo_bc.*\n" +
-              "dw.imsysinfo_bc.acct_id\n" +
-              "dw.imsysinfo_bc.openingdate\n" +
-              "dw.imsysinfo_bc.snap_dt\n" +
-              "dw.imsysinfo_bc.systemofrec"));
+//      TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvteradata);
+//      getTableColumn.isConsole = false;
+//      getTableColumn.listStarColumn = true;
+//      getTableColumn.setMetaDatabase(new myMetaDB2());
+//      getTableColumn.runText("SELECT officercode, \n" +
+//              "       openingdate, \n" +
+//              "       Count(*) AS NUM_OPEN \n" +
+//              "FROM   (SELECT * \n" +
+//              "        FROM   (SELECT * \n" +
+//              "                FROM   dw.acctinfo_pt b \n" +
+//              "                WHERE  snap_dt = DATE'2014-12-31') a) Acct \n" +
+//              "       inner join (SELECT * \n" +
+//              "                   FROM   (SELECT * \n" +
+//              "                           FROM   dw.imsysinfo_bc c \n" +
+//              "                           WHERE  snap_dt = DATE'2014-12-31' \n" +
+//              "                                  AND acct_id IN (SELECT acct_id \n" +
+//              "                                                  FROM   dw.acctinfo_pt \n" +
+//              "                                                  WHERE \n" +
+//              "                                      snap_dt = DATE'2014-12-31' \n" +
+//              "                                      AND acctstatus = '04')) b) \n" +
+//              "                                                   ImSys \n" +
+//              "               ON ImSys.systemofrec = Acct.systemofrec \n" +
+//              "GROUP  BY 1, \n" +
+//              "          2;");
+//       String strActual = getTableColumn.outList.toString();
+//      // System.out.println(strActual);
+//      assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
+//              "dw.acctinfo_pt\n" +
+//              "dw.imsysinfo_bc\n" +
+//              "\nFields:\n" +
+//              "dw.acctinfo_pt.*\n" +
+//              "dw.acctinfo_pt.acct_id\n" +
+//              "dw.acctinfo_pt.acctstatus\n" +
+//              "dw.acctinfo_pt.officercode\n" +
+//              "dw.acctinfo_pt.snap_dt\n" +
+//              "dw.acctinfo_pt.systemofrec\n" +
+//              "dw.imsysinfo_bc.*\n" +
+//              "dw.imsysinfo_bc.acct_id\n" +
+//              "dw.imsysinfo_bc.openingdate\n" +
+//              "dw.imsysinfo_bc.snap_dt\n" +
+//              "dw.imsysinfo_bc.systemofrec"));
   }
 
 }

@@ -1,4 +1,4 @@
-package test.teradata;
+package teradata;
 
 import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;

@@ -2,7 +2,6 @@ package teradata;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import junit.framework.TestCase;
 

@@ -1,4 +1,4 @@
-package test.teradata;
+package teradata;
 /*
  * Date: 14-7-8
  */

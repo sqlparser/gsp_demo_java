@@ -1,4 +1,4 @@
-package test.teradata;
+package teradata;
 /*
  * Date: 2010-9-17
  * Time: 10:36:52
