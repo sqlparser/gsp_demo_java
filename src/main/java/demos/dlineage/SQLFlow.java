@@ -41,6 +41,7 @@ public class SQLFlow {
 			System.out.println(
 					"/r: Option, set the relation types, split by comma. Support fdd, fdr, frd, fddi, join. The default relation type is fdd.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
+			System.out.println( "/i: Option, ignore all result sets." );
 			System.out.println(
 					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle.");
 			System.out.println("/o: Option, write the output stream to the specified file.");
@@ -110,6 +111,7 @@ public class SQLFlow {
 		}
 
 		boolean simple = argList.indexOf("/s") != -1;
+		boolean ignoreResultSets = argList.indexOf("/i") != -1;
 
 		String showRelationType = "fdd";
 		index = argList.indexOf("/r");
@@ -117,7 +119,7 @@ public class SQLFlow {
 			showRelationType = args[index + 1];
 		}
 
-		JSONObject result = analyzeSQLFlow(sqlFiles, vendor, simple, showRelationType);
+		JSONObject result = analyzeSQLFlow(sqlFiles, vendor, simple, ignoreResultSets, showRelationType);
 
 		index = argList.indexOf("/o");
 
@@ -148,7 +150,7 @@ public class SQLFlow {
 
 	}
 
-	private static JSONObject analyzeSQLFlow(File sqlFiles, EDbVendor vendor, boolean simple, String showRelationType) {
+	private static JSONObject analyzeSQLFlow(File sqlFiles, EDbVendor vendor, boolean simple, boolean ignoreResultSets, String showRelationType) {
 		JSONObject result = new JSONObject();
 
 		List<RelationType> relationTypes = new ArrayList<RelationType>();
@@ -164,6 +166,7 @@ public class SQLFlow {
 		DataFlowAnalyzer dataFlow = new DataFlowAnalyzer(sqlFiles, vendor,
 				simple && relationTypes.contains(RelationType.fdd) && relationTypes.size() == 1);
 		dataFlow.setShowJoin(relationTypes.contains(RelationType.join));
+		dataFlow.setIgnoreRecordSet(ignoreResultSets);
 		StringBuffer errorMessage = new StringBuffer();
 
 		dataFlow.generateDataFlow(errorMessage);
