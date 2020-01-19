@@ -312,7 +312,7 @@ public class DataFlowAnalyzer
 
 		for ( table table : tables )
 		{
-			String tableName = table.getName( ).toLowerCase( );
+			String tableName = table.getFullName().toLowerCase( );
 			if ( !tableMap.containsKey( tableName ) )
 			{
 				tableMap.put( tableName, new ArrayList<table>( ) );
