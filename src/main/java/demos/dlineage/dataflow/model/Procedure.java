@@ -7,7 +7,9 @@ import demos.dlineage.util.Pair;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 
 public class Procedure {
 	private int id;
@@ -27,22 +29,22 @@ public class Procedure {
 		} else {
 			this.id = ++ModelBindingManager.get().TABLE_COLUMN_ID;
 			this.procedureObject = procedure;
-			TSourceToken startToken = this.procedureObject.getStoredProcedureName().getStartToken();
-			TSourceToken endToken = this.procedureObject.getStoredProcedureName().getEndToken();
+			TSourceToken startToken = getProcedureName().getStartToken();
+			TSourceToken endToken = getProcedureName().getEndToken();
 			this.startPosition = new Pair<Long, Long>(startToken.lineNo, startToken.columnNo);
 			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
 					endToken.columnNo + (long) endToken.astext.length());
-			this.fullName = this.procedureObject.getStoredProcedureName().toString();
-			this.name = this.procedureObject.getStoredProcedureName().getTableString();
+			this.fullName = getProcedureName().toString();
+			this.name = getProcedureName().getTableString();
 			
-			if (!SQLUtil.isEmpty(this.procedureObject.getStoredProcedureName().getSchemaString())) {
-				this.schema = SQLUtil.trimObjectName(this.procedureObject.getStoredProcedureName().getSchemaString());
+			if (!SQLUtil.isEmpty(getProcedureName().getSchemaString())) {
+				this.schema = SQLUtil.trimObjectName(getProcedureName().getSchemaString());
 			} else {
 				this.schema = ModelBindingManager.getGlobalSchema();
 			}
 			
-			if (!SQLUtil.isEmpty(this.procedureObject.getStoredProcedureName().getDatabaseString())) {
-				this.database = SQLUtil.trimObjectName(this.procedureObject.getStoredProcedureName().getDatabaseString());
+			if (!SQLUtil.isEmpty(getProcedureName().getDatabaseString())) {
+				this.database = SQLUtil.trimObjectName(getProcedureName().getDatabaseString());
 			} else {
 				this.database = ModelBindingManager.getGlobalDatabase();
 			}
@@ -51,6 +53,14 @@ public class Procedure {
 			
 			this.type = procedure.sqlstatementtype;
 		}
+	}
+
+	private TObjectName getProcedureName() {
+		if(procedureObject instanceof TTeradataCreateProcedure)
+		{
+			return ((TTeradataCreateProcedure)procedureObject).getProcedureName();
+		}
+		return this.procedureObject.getStoredProcedureName();
 	}
 
 	public int getId() {

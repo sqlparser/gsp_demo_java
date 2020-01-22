@@ -131,6 +131,7 @@ import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import gudusoft.gsqlparser.util.functionChecker;
 import gudusoft.gsqlparser.util.keywordChecker;
 
@@ -311,7 +312,7 @@ public class DataFlowAnalyzer
 
 		for ( table table : tables )
 		{
-			String tableName = table.getName( ).toLowerCase( );
+			String tableName = table.getFullName().toLowerCase( );
 			if ( !tableMap.containsKey( tableName ) )
 			{
 				tableMap.put( tableName, new ArrayList<table>( ) );
@@ -787,6 +788,7 @@ public class DataFlowAnalyzer
 				}
 			}
 		}
+		simple.setProcedures(instance.getProcedures());
 		simple.setTables( instance.getTables( ) );
 		simple.setViews( instance.getViews( ) );
 		if ( instance.getResultsets( ) != null )
@@ -1150,6 +1152,14 @@ public class DataFlowAnalyzer
 		}
 	}
 
+	private TObjectName getProcedureName(TStoredProcedureSqlStatement stmt) {
+		if(stmt instanceof TTeradataCreateProcedure)
+		{
+			return ((TTeradataCreateProcedure)stmt).getProcedureName();
+		}
+		return stmt.getStoredProcedureName();
+	}
+	
 	private void analyzeStoredProcedureStmt(TStoredProcedureSqlStatement stmt) {
 		
 		if(stmt instanceof TCreateTriggerStmt ) {
@@ -1161,7 +1171,8 @@ public class DataFlowAnalyzer
 			}
 		}
 		
-		if (((TStoredProcedureSqlStatement) stmt).getStoredProcedureName() != null) {
+		TObjectName procedureName = getProcedureName(stmt);
+		if (procedureName != null) {
 			Procedure procedure = this.modelFactory.createProcedure(stmt);
 
 			if (stmt.getParameterDeclarations() != null) {
@@ -1368,10 +1379,19 @@ public class DataFlowAnalyzer
 
 		if ( stmt instanceof TStoredProcedureSqlStatement )
 		{
-			return ( (TStoredProcedureSqlStatement) stmt ).getStoredProcedureName( )
-					.toString( );
+			if (((TStoredProcedureSqlStatement) stmt).getStoredProcedureName() != null) 
+			{
+				return ((TStoredProcedureSqlStatement) stmt).getStoredProcedureName().toString();
+			} 
 		}
-
+		if ( stmt instanceof TTeradataCreateProcedure )
+		{
+			if (((TTeradataCreateProcedure) stmt).getProcedureName() != null) 
+			{
+				return ((TTeradataCreateProcedure) stmt).getProcedureName().toString();
+			} 
+		}
+		
 		return getProcedureParentName( stmt );
 	}
 

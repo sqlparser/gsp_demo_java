@@ -6,7 +6,9 @@ import java.util.List;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 
+import demos.antiSQLInjection.expr.util.StringUtil;
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 
 public class table
 {
@@ -159,6 +161,18 @@ public class table
 
 	public void setSchema(String schema) {
 		this.schema = schema;
+	}
+	
+	public String getFullName(){
+		StringBuilder fullName = new StringBuilder();
+		if(!SQLUtil.isEmpty(database)){
+			fullName.append(database).append(".");
+		}
+		if(!SQLUtil.isEmpty(schema)){
+			fullName.append(database).append(".");
+		}
+		fullName.append(name);
+		return fullName.toString();
 	}
 
 }
