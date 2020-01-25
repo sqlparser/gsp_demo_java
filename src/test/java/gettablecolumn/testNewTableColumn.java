@@ -1,4 +1,4 @@
-package test.gettablecolumn;
+package gettablecolumn;
 /*
  * Date: 15-4-23
  */
@@ -11,6 +11,7 @@ import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
+import org.junit.Test;
 import test.SqlFileList;
 import test.gspCommon;
 
@@ -107,7 +108,15 @@ class myMetaDB implements IMetaDatabase {
 
 public class testNewTableColumn extends TestCase {
 
-public static String getDesiredTablesColumns(String sqlfile){
+
+    public static void testDummy(){
+
+       // System.out.println(getDesiredTablesColumns("c:\\prg\\gsp_sqlfiles\\TestCases\\java\\mssql\\dbobject\\update3.outj"));
+        assertTrue(true);
+    }
+
+
+    public static String getDesiredTablesColumns(String sqlfile){
         String line;
        StringBuffer sb = new StringBuffer();
         String newline  = "\n";
@@ -213,7 +222,13 @@ public static String getDesiredTablesColumns(String sqlfile){
               "DELETE FROM emp WHERE ename = main.ename;\n" +
               "end;");
        String strActual = getTableColumn.outList.toString();
-      //System.out.println(strActual);
+//       System.out.println("<<main>>\n" +
+//               "DECLARE\n" +
+//               "ename VARCHAR2(10) := 'KING';\n" +
+//               "BEGIN\n" +
+//               "DELETE FROM emp WHERE ename = main.ename;\n" +
+//               "end;");
+     // System.out.println(strActual);
       assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
               "emp\n" +
               "\nFields:\n" +
@@ -634,4 +649,5 @@ public static String getDesiredTablesColumns(String sqlfile){
                 "   salary(having)\n" +
                 "   salary(orderby)"));
     }
+
 }

@@ -22,4 +22,28 @@ public class TestAlterTable extends TestCase {
         assertTrue(columnDefinition.getColumnName().toString().equalsIgnoreCase("c2"));
         assertTrue(columnDefinition.getDatatype().getDataType() == EDataType.number_t);
     }
+
+    public void testRenameTable(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "alter table t2 rename to t3;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TAlterTableStatement alterTable = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        TAlterTableOption alterTableOption = alterTable.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(alterTableOption.getOptionType() == EAlterTableOptionType.RenameTable);
+        assertTrue(alterTable.getTableName().toString().equalsIgnoreCase("t2"));
+        assertTrue(alterTableOption.getNewTableName().toString().equalsIgnoreCase("t3"));
+    }
+
+    public void testSwapTable(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "alter table t2 swap with t3;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TAlterTableStatement alterTable = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        TAlterTableOption alterTableOption = alterTable.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(alterTableOption.getOptionType() == EAlterTableOptionType.swapWith);
+        assertTrue(alterTable.getTableName().toString().equalsIgnoreCase("t2"));
+        assertTrue(alterTableOption.getNewTableName().toString().equalsIgnoreCase("t3"));
+    }
 }

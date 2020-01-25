@@ -1,4 +1,4 @@
-package test.gettablecolumn;
+package gettablecolumn;
 /*
  * Date: 15-4-23
  */
@@ -6,6 +6,7 @@ package test.gettablecolumn;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import test.gspCommon;
 import test.metaDB;
 
@@ -131,12 +132,21 @@ class getObject{
 
     }
 
+    public void setSqlEnv(TSQLEnv sqlEnv) {
+        this.sqlEnv = sqlEnv;
+    }
+
+    private TSQLEnv sqlEnv = null;
+
     boolean run(int pmode){
         // 1: compare, compare found table/column with desired results in a file
         // 2: show result, don't compare
         boolean retb = true;
 
         TGSqlParser sqlparser = new TGSqlParser(this.dbvendor);
+        if (sqlEnv != null){
+            sqlparser.setSqlEnv(sqlEnv);
+        }
         if (pmode == showMode){
             files_count = 1;
             sqlparser.setMetaDatabase(new metaDB());
@@ -215,6 +225,8 @@ class getObject{
 
                     if (!isfound){
                         retb = isfound;
+                        //System.out.println("desiredColumns:"+Arrays.toString(desiredColumns));
+                        //System.out.println("foundColumns:"+Arrays.toString(foundColumns3));
                         System.out.println(sqlparser.sqlfilename+ " not in desired column:"+foundColumns3[i]);
                     }
                 }
@@ -242,11 +254,11 @@ class getObject{
 
               foundTables[foundTableCount] = stmt.tables.getTable(i).getFullName();
               foundTableCount++;
-              for (int j=0;j<stmt.tables.getTable(i).getObjectNameReferences().size();j++){
-                if (stmt.tables.getTable(i).getObjectNameReferences().getObjectName(j).getColumnNameOnly().startsWith("*")){
+              for (int j=0;j<stmt.tables.getTable(i).getLinkedColumns().size();j++){
+                if (stmt.tables.getTable(i).getLinkedColumns().getObjectName(j).getColumnNameOnly().startsWith("*")){
                     continue; //ignore *
                 }
-                foundColumns[foundColumnsCount] = stmt.tables.getTable(i).getFullName()+"."+stmt.tables.getTable(i).getObjectNameReferences().getObjectName(j).getColumnNameOnly();
+                foundColumns[foundColumnsCount] = stmt.tables.getTable(i).getFullName()+"."+stmt.tables.getTable(i).getLinkedColumns().getObjectName(j).getColumnNameOnly();
                 foundColumnsCount++;
               }
             }

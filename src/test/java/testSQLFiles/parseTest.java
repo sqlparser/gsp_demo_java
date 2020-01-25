@@ -40,6 +40,7 @@ static void parsefiles(EDbVendor db,String dir)  {
             }
         }catch (Exception e){
             System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
+            throw e;
         }
     }
 

@@ -1,5 +1,9 @@
-package test.gettablecolumn;
+package gettablecolumn;
 
+import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.EDbVendor;
 
@@ -13,11 +17,13 @@ public class testDbObject extends TestCase {
 
     public static void testOracle(){
         getObject go = new getObject(EDbVendor.dbvoracle);
+        go.setSqlEnv(new TOracleEnv());
         assertTrue(go.run(getObject.compareMode));
     }
 
     public static void testSQLServer(){
         getObject go = new getObject(EDbVendor.dbvmssql);
+        go.setSqlEnv(new TSQLServerEnv());
         assertTrue(go.run(getObject.compareMode));
     }
 

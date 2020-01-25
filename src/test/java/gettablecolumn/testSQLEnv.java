@@ -8,6 +8,53 @@ import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
 
+class TOracleEnv extends TSQLEnv {
+
+    public TOracleEnv(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+
+        // add a new database: master
+        TSQLCatalog sqlCatalog = createSQLCatalog("orcl");
+        // add a new schema: dbo
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("scott");
+        //add a new table:
+        TSQLTable aTab = sqlSchema.createTable("tab2");
+        aTab.addColumn("col1");
+
+        aTab = sqlSchema.createTable("departments");
+        aTab.addColumn("department_name");
+
+        aTab = sqlSchema.createTable("CDS_H_KUNDEN_OBJEKT");
+        aTab.addColumn("C_BANK");
+        aTab.addColumn("STATUSCODE");
+
+        aTab = sqlSchema.createTable("CDS_H_ZINSEN");
+        aTab.addColumn("BANKSTELLE");
+        aTab.addColumn("HIST_DATUM");
+        aTab.addColumn("KONTONUMMER");
+        aTab.addColumn("RUBRIK");
+
+        aTab = sqlSchema.createTable("DWH_OTF_GESCHAEFTE");
+        aTab.addColumn("agentur");
+        aTab.addColumn("anzahl");
+        aTab.addColumn("bankstelle");
+        aTab.addColumn("betrag");
+        aTab.addColumn("betrag_frw");
+        aTab.addColumn("datum_verfall");
+        aTab.addColumn("kategorie");
+        aTab.addColumn("rubrik");
+        aTab.addColumn("snb_code");
+        aTab.addColumn("waehrungscode_iso");
+        aTab.addColumn("zinssatz");
+
+    }
+}
+
 class TSQLServerEnv extends TSQLEnv {
 
     public TSQLServerEnv(){
@@ -33,6 +80,13 @@ class TSQLServerEnv extends TSQLEnv {
         //add a new table: cTab
         TSQLTable cTab = sqlSchema.createTable("cTab");
         cTab.addColumn("Quantity");
+
+        TSQLTable tab = sqlSchema.createTable("sysforeignkeys");
+        tab.addColumn("keyno");
+
+        tab = sqlSchema.createTable("employee");
+        tab.addColumn("max_lvl");
+        tab.addColumn("min_lvl");
 
     }
 }

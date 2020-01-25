@@ -1,4 +1,4 @@
-package test;
+package common;
 
 import gudusoft.gsqlparser.nodes.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
