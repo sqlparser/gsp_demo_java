@@ -1130,7 +1130,7 @@ public class DataFlowAnalyzer
 			{
 				TObjectName object = table.getObjectNameReferences( )
 						.getObjectName( j );
-				if ( !isFunctionName( object ) )
+				if ( !isFunctionName( object ) && object.getDbObjectType()!=EDbObjectType.variable)
 				{
 					if ( object.getSourceTable( ) == null
 							|| object.getSourceTable( ) == table )
@@ -4334,7 +4334,7 @@ public class DataFlowAnalyzer
 					{
 						TObjectName object = table.getObjectNameReferences( )
 								.getObjectName( j );
-						if ( !isFunctionName( object ) )
+						if ( !isFunctionName( object ) && object.getDbObjectType()!=EDbObjectType.variable)
 						{
 							if ( object.getSourceTable( ) == null
 									|| object.getSourceTable( ) == table )
@@ -5545,6 +5545,10 @@ public class DataFlowAnalyzer
 				for ( int j = 0; j < objectNames.size( ); j++ )
 				{
 					TObjectName columnName = objectNames.get( j );
+					if(columnName.getDbObjectType() == EDbObjectType.variable)
+					{
+						continue;
+					}
 
 					TTable table = modelManager.getTable( stmt, columnName );
 					if ( table != null )
@@ -5779,6 +5783,12 @@ public class DataFlowAnalyzer
 					for ( int i = 0; i < leftObjectNames.size( ); i++ )
 					{
 						TObjectName leftObjectName = leftObjectNames.get( i );
+						
+						if(leftObjectName.getDbObjectType() == EDbObjectType.variable)
+						{
+							continue;
+						}
+						
 						TTable leftTable = modelManager.getTable( stmt,
 								leftObjectName );
 
@@ -5865,6 +5875,12 @@ public class DataFlowAnalyzer
 								}
 
 								TObjectName rightObjectName = rightObjectNames.get( j );
+								
+								if(rightObjectName.getDbObjectType() == EDbObjectType.variable)
+								{
+									continue;
+								}
+								
 								TTable rightTable = modelManager.getTable( stmt,
 										rightObjectName );
 								if ( rightTable == null )
