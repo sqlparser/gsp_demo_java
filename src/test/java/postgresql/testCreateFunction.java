@@ -190,4 +190,26 @@ public class testCreateFunction extends TestCase {
         assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
+    public void testCoordinates(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION totalRecords (emp_id int)\n" +
+                "RETURNS integer AS $total$\n" +
+                "declare\n" +
+                "total integer;\n" +
+                "BEGIN\n" +
+                "  SELECT TOTAL_SAL into total FROM employee emp where emp.employee_id = emp_id;\n" +
+                "  RETURN total;\n" +
+                "END; $total$ LANGUAGE plpgsql;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
+        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
+
+        assertTrue(createFunction.getBodyStatements().size() == 2);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
+        TTable table = selectSqlStatement.tables.getTable(0);
+        assertTrue(table.getTableName().getLineNo() == 6);
+        assertTrue(table.getTableName().getColumnNo() == 36);
+    }
 }

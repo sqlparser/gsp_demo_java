@@ -30,7 +30,7 @@ public class formatsql {
              return;
          }
 
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
          sqlparser.sqlfilename = args[0];
 
 //        sqlparser.sqltext = "insert into emp(empno,empnm,deptnm,sal) select empno, empnm, dptnm, sal from emp where empno=:empno;\n" +
