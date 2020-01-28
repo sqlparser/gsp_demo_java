@@ -691,7 +691,7 @@ public class DataFlowAnalyzer
 			{
 				dataflow dataflowInstance = XML2Model.loadXML( dataflow.class,
 						xml );
-				dataflow simpleDataflow = getSimpleDataflow( dataflowInstance );
+				dataflow simpleDataflow = getSimpleDataflow( dataflowInstance, ignoreRecordSet);
 				if ( textFormat )
 				{
 					xml = getTextOutput( simpleDataflow );
@@ -760,7 +760,7 @@ public class DataFlowAnalyzer
 		return buffer.toString( );
 	}
 
-	private dataflow getSimpleDataflow( dataflow instance ) throws Exception
+	public static dataflow getSimpleDataflow(dataflow instance, boolean ignoreRecordSet) throws Exception
 	{
 
 		dataflow simple = new dataflow( );
@@ -773,12 +773,12 @@ public class DataFlowAnalyzer
 				relation relationElem = relations.get( i );
 				targetColumn target = relationElem.getTarget( );
 				String targetParent = target.getParent_id( );
-				if ( isTarget( instance, targetParent ) )
+				if ( isTarget( instance, targetParent, ignoreRecordSet) )
 				{
 					List<sourceColumn> relationSources = new ArrayList<sourceColumn>( );
 					findSourceRaltions( instance,
 							relationElem.getSources( ),
-							relationSources );
+							relationSources, ignoreRecordSet );
 					if ( relationSources.size( ) > 0 )
 					{
 						relation simpleRelation = (relation) relationElem.clone( );
@@ -809,7 +809,7 @@ public class DataFlowAnalyzer
 	}
 
 	private void findSourceRaltions( dataflow instance,
-			List<sourceColumn> sources, List<sourceColumn> relationSources )
+			List<sourceColumn> sources, List<sourceColumn> relationSources, boolean ignoreRecordSet )
 	{
 		if ( sources != null )
 		{
@@ -821,7 +821,7 @@ public class DataFlowAnalyzer
 				if(sourceParentId == null || sourceColumnId == null) {
 					continue;
 				}
-				if ( isTarget( instance, sourceParentId ) )
+				if ( isTarget( instance, sourceParentId, ignoreRecordSet ) )
 				{
 					relationSources.add( source );
 				}
@@ -839,7 +839,7 @@ public class DataFlowAnalyzer
 						{
 							findSourceRaltions( instance,
 									relation.getSources( ),
-									relationSources );
+									relationSources, ignoreRecordSet );
 							break;
 						}
 					}
@@ -850,7 +850,7 @@ public class DataFlowAnalyzer
 
 	private Map<String, Boolean> targetTables = new HashMap<String, Boolean>( );
 
-	private boolean isTarget( dataflow instance, String targetParent )
+	private boolean isTarget( dataflow instance, String targetParent, boolean ignoreRecordSet )
 	{
 		if ( targetTables.containsKey( targetParent ) )
 			return targetTables.get( targetParent );
