@@ -760,7 +760,7 @@ public class DataFlowAnalyzer
 		return buffer.toString( );
 	}
 
-	public static dataflow getSimpleDataflow(dataflow instance, boolean ignoreRecordSet) throws Exception
+	public dataflow getSimpleDataflow(dataflow instance, boolean ignoreRecordSet) throws Exception
 	{
 
 		dataflow simple = new dataflow( );
@@ -776,6 +776,7 @@ public class DataFlowAnalyzer
 				if ( isTarget( instance, targetParent, ignoreRecordSet) )
 				{
 					List<sourceColumn> relationSources = new ArrayList<sourceColumn>( );
+					findSourceRaltionCondition.clear();
 					findSourceRaltions( instance,
 							relationElem.getSources( ),
 							relationSources, ignoreRecordSet );
@@ -808,6 +809,7 @@ public class DataFlowAnalyzer
 		return simple;
 	}
 
+	private Set<String> findSourceRaltionCondition = new HashSet<>();
 	private void findSourceRaltions( dataflow instance,
 			List<sourceColumn> sources, List<sourceColumn> relationSources, boolean ignoreRecordSet )
 	{
@@ -837,6 +839,14 @@ public class DataFlowAnalyzer
 						if ( sourceParentId.equalsIgnoreCase( targetParentId )
 								&& sourceColumnId.equalsIgnoreCase( targetColumnId ) )
 						{
+							String key = sourceParentId + ":" + sourceColumnId;
+							if(findSourceRaltionCondition.contains(key)){
+								findSourceRaltionCondition.clear();
+								break;
+							}
+							else{
+								findSourceRaltionCondition.add(key);
+							}
 							findSourceRaltions( instance,
 									relation.getSources( ),
 									relationSources, ignoreRecordSet );
