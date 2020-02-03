@@ -704,6 +704,10 @@ public class TGetTableColumn{
         }
 
         if (stmt instanceof  TStoredProcedureSqlStatement){
+            TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)stmt;
+            for(int i=0;i<p.getBodyStatements().size();i++){
+                analyzeStmt(p.getBodyStatements().get(i),pNest+1);
+            }
             spList.pop();
         }
 
