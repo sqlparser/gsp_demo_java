@@ -79,7 +79,6 @@ public class Table {
 			this.database = ModelBindingManager.getGlobalDatabase();
 		}
 		
-		this.name = SQLUtil.trimObjectName(this.name);
     }
     
     public Table(TObjectName tableName) {
@@ -113,9 +112,7 @@ public class Table {
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
 		}
-		
-		this.name = SQLUtil.trimObjectName(this.name);
-        
+	
     }
 
     public int getId() {
