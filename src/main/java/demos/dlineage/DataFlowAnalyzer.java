@@ -1197,8 +1197,19 @@ public class DataFlowAnalyzer
 			}
 		}
 
-		for (int i = 0; i < stmt.getStatements().size(); ++i) {
-			this.analyzeCustomSqlStmt(stmt.getStatements().get(i));
+		if (stmt.getStatements().size() > 0) 
+		{
+			for (int i = 0; i < stmt.getStatements().size(); ++i) 
+			{
+				this.analyzeCustomSqlStmt(stmt.getStatements().get(i));
+			}
+		} 
+		else if (stmt.getBodyStatements().size() > 0) 
+		{
+			for (int i = 0; i < stmt.getBodyStatements().size(); ++i) 
+			{
+				this.analyzeCustomSqlStmt(stmt.getBodyStatements().get(i));
+			}
 		}
 
 	}
