@@ -1140,6 +1140,12 @@ public class DataFlowAnalyzer
 			{
 				TObjectName object = table.getObjectNameReferences( )
 						.getObjectName( j );
+				
+				if(object.getDbObjectType() == EDbObjectType.variable)
+				{
+					continue;
+				}
+				
 				if ( !isFunctionName( object ) && object.getDbObjectType()!=EDbObjectType.variable)
 				{
 					if ( object.getSourceTable( ) == null
@@ -1208,7 +1214,7 @@ public class DataFlowAnalyzer
 		{
 			for (int i = 0; i < stmt.getBodyStatements().size(); ++i) 
 			{
-				this.analyzeCustomSqlStmt(stmt.getBodyStatements().get(i));
+				this.analyzeCustomSqlStmt(stmt.getStatements().get(i));
 			}
 		}
 
@@ -1459,6 +1465,11 @@ public class DataFlowAnalyzer
 								TObjectName columnObject = resultColumn.getExpr( )
 										.getLeftOperand( )
 										.getObjectOperand( );
+								
+								if(columnObject.getDbObjectType() == EDbObjectType.variable)
+								{
+									continue;
+								}
 
 								ResultColumn updateColumn = modelFactory.createMergeResultColumn( resultSet,
 										columnObject );
@@ -1817,6 +1828,12 @@ public class DataFlowAnalyzer
 					for ( int i = 0; i < items.size( ); i++ )
 					{
 						TObjectName column = items.getObjectName( i );
+						
+						if(column.getDbObjectType() == EDbObjectType.variable)
+						{
+							continue;
+						}
+						
 						ResultColumn resultColumn = resultSetModel.getColumns( )
 								.get( j );
 						if ( !resultSetModel.getColumns( )
@@ -2459,6 +2476,12 @@ public class DataFlowAnalyzer
 					{
 						TObjectName column = columnList.getExpression( j )
 								.getObjectOperand( );
+						
+						if(column.getDbObjectType() == EDbObjectType.variable)
+						{
+							continue;
+						}
+						
 						ResultColumn resultColumn = resultSetModel.getColumns( )
 								.get( j );
 						TableColumn tableColumn = modelFactory.createTableColumn( tableModel,
@@ -4355,7 +4378,13 @@ public class DataFlowAnalyzer
 					{
 						TObjectName object = table.getObjectNameReferences( )
 								.getObjectName( j );
-						if ( !isFunctionName( object ) && object.getDbObjectType()!=EDbObjectType.variable)
+						
+						if(object.getDbObjectType() == EDbObjectType.variable)
+						{
+							continue;
+						}
+						
+						if ( !isFunctionName( object ) )
 						{
 							if ( object.getSourceTable( ) == null
 									|| object.getSourceTable( ) == table )
@@ -4926,6 +4955,11 @@ public class DataFlowAnalyzer
 		for ( int j = 0; j < objectNames.size( ); j++ )
 		{
 			TObjectName columnName = objectNames.get( j );
+			
+			if(columnName.getDbObjectType() == EDbObjectType.variable)
+			{
+				continue;
+			}
 
 			TTable table = modelManager.getTable( stmt, columnName );
 			if ( table != null )
@@ -5078,6 +5112,11 @@ public class DataFlowAnalyzer
 		for ( int i = 0; i < objectNames.size( ); i++ )
 		{
 			TObjectName columnName = objectNames.get( i );
+			
+			if(columnName.getDbObjectType() == EDbObjectType.variable)
+			{
+				continue;
+			}
 
 			List<TTable> tables = new ArrayList<TTable>( );
 			{
@@ -5481,6 +5520,11 @@ public class DataFlowAnalyzer
 			for ( int j = 0; j < objectNames.size( ); j++ )
 			{
 				TObjectName columnName = objectNames.get( j );
+				
+				if(columnName.getDbObjectType() == EDbObjectType.variable)
+				{
+					continue;
+				}
 
 				TTable table = modelManager.getTable( stmt, columnName );
 				if ( table != null )
