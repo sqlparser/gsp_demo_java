@@ -16,6 +16,38 @@ import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
 
+
+    public void testIndexDefinitionCaseN(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "create table tst.table(\n" +
+                "               col1 integer,\n" +
+                "               CURR_IND char(1))\n" +
+                "PRIMARY INDEX BILLG_ACCT_NUPI ( col1 )\n" +
+                "PARTITION BY CASE_N(\n" +
+                "CURR_IND =  'Y',\n" +
+                "CURR_IND =  'N')\n";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createTable.getTableName().toString().equalsIgnoreCase("tst.table"));
+        assertTrue(createTable.getColumnList().size() == 2 );
+
+        TIndexDefinition indexDefinition = createTable.getIndexDefinitions().getElement(0);
+        assertTrue(indexDefinition.isPrimary());
+        assertTrue(!indexDefinition.isUnique());
+        assertTrue(indexDefinition.getIndexColumns().size() == 1);
+        assertTrue(indexDefinition.getIndexColumns().getObjectName(0).toString().equalsIgnoreCase("col1"));
+        assertTrue(indexDefinition.getPartitionExprList().size() == 1);
+        TExpression partitionExpr = indexDefinition.getPartitionExprList().getExpression(0);
+        assertTrue(partitionExpr.getExpressionType() == EExpressionType.function_t);
+        TFunctionCall functionCall = partitionExpr.getFunctionCall();
+        assertTrue(functionCall.getFunctionType() == EFunctionType.case_n_t);
+        TExpression arg0  = functionCall.getArgs().getExpression(0);
+        assertTrue(arg0.getLeftOperand().toString().equalsIgnoreCase("CURR_IND"));
+        assertTrue(arg0.getRightOperand().toString().equalsIgnoreCase("'Y'"));
+    }
+
     public void testIndexDefinition(){
 
     TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
