@@ -1214,7 +1214,7 @@ public class DataFlowAnalyzer
 		{
 			for (int i = 0; i < stmt.getBodyStatements().size(); ++i) 
 			{
-				this.analyzeCustomSqlStmt(stmt.getStatements().get(i));
+				this.analyzeCustomSqlStmt(stmt.getBodyStatements().get(i));
 			}
 		}
 
