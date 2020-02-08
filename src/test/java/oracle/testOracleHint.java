@@ -1,4 +1,4 @@
-package test.oracle;
+package oracle;
 
 /*
  * Date: 11-8-4
@@ -23,7 +23,19 @@ public class testOracleHint extends TestCase {
 
         TSelectSqlStatement select  = viewSqlStatement.getSubquery();
        assertTrue(select.getOracleHint().equalsIgnoreCase("/*+  RULE  */"));
-
     }
+
+    public void test2(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "SELECT /*+ A(B) */ e.last_name FROM scott.employees";
+        assertTrue(sqlparser.parse() == 0);
+
+        TSelectSqlStatement select  = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+       // System.out.println(select.getOracleHint());
+        assertTrue(select.getOracleHint().equalsIgnoreCase("/*+ A(B) */"));
+    }
+
+
 
 }

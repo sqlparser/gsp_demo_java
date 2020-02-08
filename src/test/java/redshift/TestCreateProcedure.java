@@ -2,6 +2,7 @@ package redshift;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
+import gudusoft.gsqlparser.nodes.TIntoClause;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
@@ -44,6 +45,44 @@ public class TestCreateProcedure extends TestCase {
         assertTrue(createProcedure.getBodyStatements().get(3).sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createProcedure.getBodyStatements().get(3);
         assertTrue(selectSqlStatement.getTables().getTable(0).toString().equalsIgnoreCase("tmp_tbl"));
+
+    }
+
+    public void test11(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
+        sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE test_sp1(f1 int, f2 varchar(20))\n" +
+                "AS $$\n" +
+                "DECLARE\n" +
+                "  min_val int;\n" +
+                "BEGIN\n" +
+                "  DROP TABLE IF EXISTS tmp_tbl;\n" +
+                "  CREATE TEMP TABLE tmp_tbl(id int);\n" +
+                "  INSERT INTO tmp_tbl values (f1),(10001),(10002);\n" +
+                "  SELECT INTO min_val MIN(id) FROM tmp_tbl;\n" +
+                "  RAISE INFO 'min_val = %, f2 = %', min_val, f2;\n" +
+                "END;\n" +
+                "$$ LANGUAGE plpgsql;";
+        assertTrue(sqlparser.parse() == 0);
+        TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
+
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlStatement;
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("test_sp1"));
+        assertTrue(createProcedure.getParameterDeclarations().size() == 2);
+        TParameterDeclaration parameterDeclaration = createProcedure.getParameterDeclarations().getParameterDeclarationItem(0);
+        assertTrue(parameterDeclaration.getDataType().getDataType() == EDataType.int_t);
+        assertTrue(parameterDeclaration.getParameterName().toString().equalsIgnoreCase("f1"));
+
+        assertTrue(createProcedure.getRoutineLanguage().equalsIgnoreCase("plpgsql"));
+
+        assertTrue(createProcedure.getDeclareStatements().size() == 1);
+        assertTrue (createProcedure.getDeclareStatements().get(0).sqlstatementtype==  sstplsql_vardecl);
+        assertTrue(createProcedure.getBodyStatements().size() == 5);
+        assertTrue(createProcedure.getBodyStatements().get(3).sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createProcedure.getBodyStatements().get(3);
+        assertTrue(selectSqlStatement.getTables().getTable(0).toString().equalsIgnoreCase("tmp_tbl"));
+        TIntoClause intoClause  = selectSqlStatement.getIntoClause();
+        assertTrue(intoClause.getVariableList().getObjectName(0).toString().equalsIgnoreCase("min_val"));
 
     }
 
