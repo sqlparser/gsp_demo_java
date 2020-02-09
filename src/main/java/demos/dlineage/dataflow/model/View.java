@@ -51,18 +51,17 @@ public class View {
                 endToken.columnNo + endToken.astext.length());
         
         if (!SQLUtil.isEmpty(viewName.getSchemaString())) {
-			this.schema = SQLUtil.trimObjectName(viewName.getSchemaString());
+			this.schema = viewName.getSchemaString();
 		} else {
 			this.schema = ModelBindingManager.getGlobalSchema();
 		}
 		
 		if (!SQLUtil.isEmpty(viewName.getDatabaseString())) {
-			this.database = SQLUtil.trimObjectName(viewName.getDatabaseString());
+			this.database = viewName.getDatabaseString();
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
 		}
-		
-		this.name = SQLUtil.trimObjectName(this.name);
+
     }
 
     public int getId() {

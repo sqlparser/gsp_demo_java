@@ -38,18 +38,16 @@ public class Procedure {
 			this.name = getProcedureName().getTableString();
 			
 			if (!SQLUtil.isEmpty(getProcedureName().getSchemaString())) {
-				this.schema = SQLUtil.trimObjectName(getProcedureName().getSchemaString());
+				this.schema = getProcedureName().getSchemaString();
 			} else {
 				this.schema = ModelBindingManager.getGlobalSchema();
 			}
 			
 			if (!SQLUtil.isEmpty(getProcedureName().getDatabaseString())) {
-				this.database = SQLUtil.trimObjectName(getProcedureName().getDatabaseString());
+				this.database = getProcedureName().getDatabaseString();
 			} else {
 				this.database = ModelBindingManager.getGlobalDatabase();
 			}
-			
-			this.name = SQLUtil.trimObjectName(this.name);
 			
 			this.type = procedure.sqlstatementtype;
 		}

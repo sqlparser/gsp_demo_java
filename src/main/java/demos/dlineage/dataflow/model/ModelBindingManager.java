@@ -166,6 +166,11 @@ public class ModelBindingManager {
         if (result == null) {
             result = cursorModelBindingMap.get(gspModel);
         }
+        
+        if(result == null && gspModel instanceof TTable){
+        	result = getCreateTable((TTable)gspModel);
+        }
+        	
         return result;
     }
 

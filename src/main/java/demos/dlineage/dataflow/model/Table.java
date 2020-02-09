@@ -68,13 +68,13 @@ public class Table {
         }
         
 		if (!SQLUtil.isEmpty(table.getTableName().getSchemaString())) {
-			this.schema = SQLUtil.trimObjectName(table.getTableName().getSchemaString());
+			this.schema = table.getTableName().getSchemaString();
 		} else {
 			this.schema = ModelBindingManager.getGlobalSchema();
 		}
 		
 		if (!SQLUtil.isEmpty(table.getTableName().getDatabaseString())) {
-			this.database = SQLUtil.trimObjectName(table.getTableName().getDatabaseString());
+			this.database = table.getTableName().getDatabaseString();
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
 		}
@@ -102,13 +102,13 @@ public class Table {
         this.name = tableName.getTableString();
         
         if (!SQLUtil.isEmpty(tableName.getSchemaString())) {
-			this.schema = SQLUtil.trimObjectName(tableName.getSchemaString());
+			this.schema = tableName.getSchemaString();
 		} else {
 			this.schema = ModelBindingManager.getGlobalSchema();
 		}
 		
 		if (!SQLUtil.isEmpty(tableName.getDatabaseString())) {
-			this.database = SQLUtil.trimObjectName(tableName.getDatabaseString());
+			this.database = tableName.getDatabaseString();
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
 		}
