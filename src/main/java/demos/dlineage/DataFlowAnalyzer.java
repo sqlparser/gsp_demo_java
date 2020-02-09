@@ -312,7 +312,7 @@ public class DataFlowAnalyzer
 
 		for ( table table : tables )
 		{
-			String tableName = table.getFullName().toLowerCase( );
+			String tableName = SQLUtil.getIdentifierNormalName(table.getFullName());
 			if ( !tableMap.containsKey( tableName ) )
 			{
 				tableMap.put( tableName, new ArrayList<table>( ) );
@@ -860,26 +860,26 @@ public class DataFlowAnalyzer
 
 	private Map<String, Boolean> targetTables = new HashMap<String, Boolean>( );
 
-	private boolean isTarget( dataflow instance, String targetParent, boolean ignoreRecordSet )
+	private boolean isTarget( dataflow instance, String targetParentId, boolean ignoreRecordSet )
 	{
-		if ( targetTables.containsKey( targetParent ) )
-			return targetTables.get( targetParent );
-		if ( isTable( instance, targetParent ) )
+		if ( targetTables.containsKey( targetParentId ) )
+			return targetTables.get( targetParentId );
+		if ( isTable( instance, targetParentId ) )
 		{
-			targetTables.put( targetParent, true );
+			targetTables.put( targetParentId, true );
 			return true;
 		}
-		else if ( isView( instance, targetParent ) )
+		else if ( isView( instance, targetParentId ) )
 		{
-			targetTables.put( targetParent, true );
+			targetTables.put( targetParentId, true );
 			return true;
 		}
-		else if ( isTargetResultSet( instance, targetParent ) && !ignoreRecordSet)
+		else if ( isTargetResultSet( instance, targetParentId ) && !ignoreRecordSet)
 		{
-			targetTables.put( targetParent, true );
+			targetTables.put( targetParentId, true );
 			return true;
 		}
-		targetTables.put( targetParent, false );
+		targetTables.put( targetParentId, false );
 		return false;
 	}
 
@@ -917,11 +917,11 @@ public class DataFlowAnalyzer
 
 	private Map<String, Boolean> isTables = new HashMap<String, Boolean>( );
 
-	private boolean isTable( dataflow instance, String targetParent )
+	private boolean isTable( dataflow instance, String targetParentId )
 	{
-		if ( isTables.containsKey( targetParent ) )
+		if ( isTables.containsKey( targetParentId ) )
 		{
-			return isTables.get( targetParent );
+			return isTables.get( targetParentId );
 		}
 		if ( instance.getTables( ) != null )
 		{
@@ -929,13 +929,13 @@ public class DataFlowAnalyzer
 			{
 				table resultSet = instance.getTables( ).get( i );
 				isTables.put( resultSet.getId( ), true );
-				if ( resultSet.getId( ).equalsIgnoreCase( targetParent ) )
+				if ( resultSet.getId( ).equalsIgnoreCase( targetParentId ) )
 				{
 					return true;
 				}
 			}
 		}
-		isTables.put( targetParent, false );
+		isTables.put( targetParentId, false );
 		return false;
 	}
 
@@ -945,12 +945,14 @@ public class DataFlowAnalyzer
 		dataflowResult = null;
 		ModelBindingManager.removeGlobalDatabase();
 		ModelBindingManager.removeGlobalSchema();
+		ModelBindingManager.removeGlobalVendor();
 		appendResultSets.clear( );
 		modelManager.TABLE_COLUMN_ID = 0;
 		modelManager.RELATION_ID = 0;
 		modelManager.DISPLAY_ID.clear( );
 		modelManager.DISPLAY_NAME.clear( );
 		tableIds.clear();
+		ModelBindingManager.setGlobalVendor(vendor);
 	}
 
 	private void analyzeAndOutputResult( TGSqlParser sqlparser, Document doc,
@@ -1730,10 +1732,10 @@ public class DataFlowAnalyzer
 							value,
 							keyMap,
 							valueMap );
-					if ( tableColumnMap.get( table.getName( ) ) == null
+					if ( tableColumnMap.get( SQLUtil.getIdentifierNormalName(table.getFullName()) ) == null
 							&& !tableColumns.isEmpty( ) )
 					{
-						tableColumnMap.put( tableModel.getName( ), tableColumns );
+						tableColumnMap.put( SQLUtil.getIdentifierNormalName(tableModel.getFullName()), tableColumns );
 					}
 				}
 			}
@@ -1776,12 +1778,12 @@ public class DataFlowAnalyzer
 			}
 			Table tableModel = modelFactory.createTable( table );
 			inserTables.add( tableModel );
-			if ( tableColumnMap.get( table.getName( ) ) == null )
+			if ( tableColumnMap.get( SQLUtil.getIdentifierNormalName(table.getFullName()) ) == null )
 			{
 				if (tableModel.getColumns() != null && !tableModel.getColumns().isEmpty()) {
-					tableColumnMap.put(tableModel.getName(), tableModel.getColumns());
+					tableColumnMap.put(SQLUtil.getIdentifierNormalName(tableModel.getFullName()), tableModel.getColumns());
 				} else {
-					tableColumnMap.put(tableModel.getName(), null);
+					tableColumnMap.put(SQLUtil.getIdentifierNormalName(tableModel.getFullName()), null);
 				}
 			}
 		}
@@ -3051,8 +3053,7 @@ public class DataFlowAnalyzer
 					target.setAttribute( "column", targetColumn.getName( ) );
 					target.setAttribute( "parent_id",
 							String.valueOf( targetColumn.getView( ).getId( ) ) );
-					target.setAttribute( "parent_name", targetColumn.getView( )
-							.getName( ) );
+					target.setAttribute( "parent_name", targetColumn.getView( ).getFullName() );
 					if ( targetColumn.getStartPosition( ) != null
 							&& targetColumn.getEndPosition( ) != null )
 					{
@@ -5424,8 +5425,7 @@ public class DataFlowAnalyzer
 									for ( k = 0; k < columns.size( ); k++ )
 									{
 										ResultColumn column = columns.get( k );
-										if ( SQLUtil.trimObjectName( getColumnName( columnName ) )
-												.equalsIgnoreCase( SQLUtil.trimObjectName( column.getName( ) ) ) )
+										if ( SQLUtil.compareIdentifier( getColumnName( columnName ) , column.getName( ) ) )
 										{
 											if ( !column.equals( modelObject ) )
 											{
@@ -5465,8 +5465,8 @@ public class DataFlowAnalyzer
 											for ( int l = 0; l < queryColumns.size( ); l++ )
 											{
 												ResultColumn column = queryColumns.get( l );
-												if (SQLUtil.trimObjectName(getColumnName(columnName))
-														.equalsIgnoreCase(SQLUtil.trimObjectName(column.getName())))
+												if (SQLUtil.compareIdentifier(getColumnName(columnName),
+														column.getName()))
 												{
 													if ( !column.equals( modelObject ) )
 													{

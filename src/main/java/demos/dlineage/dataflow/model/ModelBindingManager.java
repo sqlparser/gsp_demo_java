@@ -2,6 +2,8 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
+import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.nodes.*;
@@ -39,6 +41,7 @@ public class ModelBindingManager {
     private final static ThreadLocal localManager = new ThreadLocal();
     private final static ThreadLocal globalDatabase = new ThreadLocal();
     private final static ThreadLocal globalSchema = new ThreadLocal();
+    private final static ThreadLocal globalVendor = new ThreadLocal();
 
     public static void set(ModelBindingManager modelManager) {
         if (localManager.get() == null) {
@@ -78,10 +81,26 @@ public class ModelBindingManager {
         return (String) globalSchema.get();
     }
 
+    public static void setGlobalVendor(EDbVendor vendor) {
+        if (globalVendor.get() == null && vendor!=null) {
+        	globalVendor.set(vendor);
+        }
+    }
+    
+    public static void removeGlobalVendor() {
+    	globalVendor.remove();
+    }
+
+    public static EDbVendor getGlobalVendor() {
+        return (EDbVendor) globalVendor.get();
+    }
+
+    
     public static void remove() {
         localManager.remove();
         globalDatabase.remove();
         globalSchema.remove();
+        globalVendor.remove();
     }
 
     public void bindModel(Object gspModel, Object relationModel) {
@@ -99,7 +118,7 @@ public class ModelBindingManager {
             for (int j = 0; j < tables.size(); j++) {
                 TTable item = tables.getTable(j);
                 if (item != null && item.getAliasName() != null) {
-                    tableAliasMap.put(item.getAliasName().toLowerCase(),
+                    tableAliasMap.put(SQLUtil.getIdentifierNormalName(item.getAliasName()),
                             item);
                 }
 
@@ -117,7 +136,7 @@ public class ModelBindingManager {
         }
 
         if (table != null && table.getAliasName() != null) {
-            tableAliasMap.put(table.getAliasName().toLowerCase(), table);
+            tableAliasMap.put(SQLUtil.getIdentifierNormalName(table.getAliasName()), table);
         }
 
         if (table != null) {
@@ -207,7 +226,7 @@ public class ModelBindingManager {
     }
 
     public Table getCreateTable(TTable table) {
-        if (table != null && table.getTableName() != null) {
+        if (table != null && table.getFullName() != null) {
             // Iterator iter = createModelBindingMap.keySet( ).iterator( );
             // while ( iter.hasNext( ) )
             // {
@@ -218,7 +237,7 @@ public class ModelBindingManager {
             // }
             // }
             return (Table) createModelQuickBindingMap
-                    .get(table.getFullName());
+                    .get(SQLUtil.getIdentifierNormalName(table.getFullName()));
         }
         return null;
     }
@@ -229,8 +248,8 @@ public class ModelBindingManager {
 
     public void bindCreateModel(TTable table, Table tableModel) {
         createModelBindingMap.put(table, tableModel);
-        if (!createModelQuickBindingMap.containsKey(table.getFullName())) {
-            createModelQuickBindingMap.put(table.getFullName(), tableModel);
+        if (!createModelQuickBindingMap.containsKey(SQLUtil.getIdentifierNormalName(table.getFullName()))) {
+            createModelQuickBindingMap.put(SQLUtil.getIdentifierNormalName(table.getFullName()), tableModel);
         }
     }
 
@@ -331,7 +350,7 @@ public class ModelBindingManager {
         if (column.getTableString() != null
                 && column.getTableString().trim().length() > 0) {
             TTable table = tableAliasMap
-                    .get(column.getTableString().toLowerCase());
+                    .get(SQLUtil.getIdentifierNormalName(column.getTableString()));
 
             if (table != null && table.getSubquery() != stmt)
                 return table;
@@ -366,8 +385,7 @@ public class ModelBindingManager {
         if ( column.getTableString( ) != null
                 && column.getTableString( ).trim( ).length( ) > 0 )
         {
-            TTable table = tableAliasMap.get( column.getTableString( )
-                    .toLowerCase( ) );
+            TTable table = tableAliasMap.get(SQLUtil.getIdentifierNormalName(column.getTableString( )));
 
             if ( table != null && table.getSubquery( ) != stmt )
                 return table;
@@ -613,15 +631,15 @@ public class ModelBindingManager {
 
     public void bindCursorModel(TCursorDeclStmt stmt,
                                 CursorResultSet resultSet) {
-        createModelBindingMap.put(stmt.getCursorName().toScript(),
+        createModelBindingMap.put(SQLUtil.getIdentifierNormalName(stmt.getCursorName().toString()),
                 resultSet);
     }
 
     public void bindCursorIndex(TObjectName indexName,
                                 TObjectName cursorName) {
-        bindModel(indexName.toScript(),
+        bindModel(SQLUtil.getIdentifierNormalName(indexName.toString()),
                 modelBindingMap.get(((CursorResultSet) createModelBindingMap
-                        .get(cursorName.toScript()))
+                        .get(SQLUtil.getIdentifierNormalName(cursorName.toString())))
                         .getResultColumnObject()));
     }
     

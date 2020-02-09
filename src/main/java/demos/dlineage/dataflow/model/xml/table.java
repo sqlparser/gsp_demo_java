@@ -169,7 +169,7 @@ public class table
 			fullName.append(database).append(".");
 		}
 		if(!SQLUtil.isEmpty(schema)){
-			fullName.append(database).append(".");
+			fullName.append(schema).append(".");
 		}
 		fullName.append(name);
 		return fullName.toString();

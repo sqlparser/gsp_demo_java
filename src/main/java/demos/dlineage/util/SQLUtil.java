@@ -2,6 +2,7 @@
 package demos.dlineage.util;
 
 import demos.dlineage.dataflow.model.ModelBindingManager;
+import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 
 import java.io.*;
@@ -425,4 +426,211 @@ public class SQLUtil {
             return internalIn.read();
         }
     }
+    
+	public static boolean compareIdentifier(String source, String target) {
+		boolean ret = false;
+		String normalTarget, normalSource;
+
+		switch (ModelBindingManager.getGlobalVendor()) {
+		case dbvbigquery:
+		case dbvcouchbase:
+		case dbvhive:
+		case dbvimpala:
+			if (target.indexOf('`') >= 0) {
+				normalTarget = target.replaceAll("[`]", "");
+			} else {
+				normalTarget = target;
+			}
+
+			if (source.indexOf('`') >= 0) {
+				normalSource = source.replaceAll("[`]", "");
+			} else {
+				normalSource = source;
+			}
+
+			ret = normalTarget.equalsIgnoreCase(normalSource);
+			break;
+		case dbvmysql:
+			if (target.indexOf('`') >= 0) {
+				normalTarget = target.replaceAll("[`]", "");
+			} else {
+				normalTarget = target;
+			}
+
+			if (source.indexOf('`') >= 0) {
+				normalSource = source.replaceAll("[`]", "");
+			} else {
+				normalSource = source;
+			}
+
+			ret = normalTarget.equalsIgnoreCase(normalSource);
+			break;
+		case dbvdax:
+			if (target.indexOf('\'') >= 0) {
+				normalTarget = target.replaceAll("[']", "");
+			} else {
+				normalTarget = target;
+			}
+
+			if (source.indexOf('\'') >= 0) {
+				normalSource = source.replaceAll("[']", "");
+			} else {
+				normalSource = source;
+			}
+
+			ret = normalTarget.equalsIgnoreCase(normalSource);
+			break;
+		case dbvdb2:
+		case dbvhana:
+		case dbvinformix:
+		case dbvnetezza:
+		case dbvoracle:
+		case dbvredshift:
+		case dbvsnowflake:
+		case dbvsybase:
+		case dbvteradata:
+		case dbvvertica:
+			if (target.indexOf('"') >= 0) {
+				normalTarget = target.replaceAll("\"", "");
+			} else {
+				normalTarget = target.toUpperCase();
+			}
+
+			if (source.indexOf('"') >= 0) {
+				normalSource = source.replaceAll("\"", "");
+			} else {
+				normalSource = source.toUpperCase();
+			}
+			ret = normalTarget.compareTo(normalSource) == 0;
+
+			break;
+		case dbvpostgresql:
+			if (target.indexOf('"') >= 0) {
+				normalTarget = target.replaceAll("\"", "");
+			} else {
+				normalTarget = target.toLowerCase();
+			}
+
+			if (source.indexOf('"') >= 0) {
+				normalSource = source.replaceAll("\"", "");
+			} else {
+				normalSource = source.toLowerCase();
+			}
+			ret = normalTarget.compareTo(normalSource) == 0;
+
+			break;
+		case dbvmssql:
+			if (target.indexOf('"') >= 0) {
+				normalTarget = target.replaceAll("\"", "");
+			} else if (target.indexOf("[") >= 0) {
+				normalTarget = target.replaceAll("\\[", "").replaceAll("]", "");
+			} else {
+				normalTarget = target;
+			}
+
+			if (source.indexOf('"') >= 0) {
+				normalSource = source.replaceAll("\"", "");
+			} else if (source.indexOf("[") >= 0) {
+				normalSource = source.replaceAll("\\[", "").replaceAll("]", "");
+			} else {
+				normalSource = source;
+			}
+
+			// depends on the sql server case sensitive setting, need to add an
+			// option to control the comparision
+			ret = normalTarget.equalsIgnoreCase(normalSource);
+
+			break;
+		default:
+			if (target.indexOf('"') >= 0) {
+				normalTarget = target.replaceAll("\"", "");
+			} else {
+				normalTarget = target.toUpperCase();
+			}
+
+			if (source.indexOf('"') >= 0) {
+				normalSource = source.replaceAll("\"", "");
+			} else {
+				normalSource = source.toUpperCase();
+			}
+			ret = normalTarget.compareTo(normalSource) == 0;
+
+			break;
+		}
+
+		return ret;
+	}
+    
+	public static String getIdentifierNormalName(String name) {
+		String normalName = null;
+		switch (ModelBindingManager.getGlobalVendor()) {
+		case dbvbigquery:
+		case dbvcouchbase:
+		case dbvhive:
+		case dbvimpala:
+			if (name.indexOf('`') >= 0) {
+				normalName = name.replaceAll("[`]", "");
+			} else {
+				normalName = name;
+			}
+			return normalName.toUpperCase();
+
+		case dbvmysql:
+			if (name.indexOf('`') >= 0) {
+				normalName = name.replaceAll("[`]", "");
+			} else {
+				normalName = name;
+			}
+
+			return normalName.toUpperCase();
+		case dbvdax:
+			if (name.indexOf('\'') >= 0) {
+				normalName = name.replaceAll("[']", "");
+			} else {
+				normalName = name;
+			}
+
+			return normalName.toUpperCase();
+		case dbvdb2:
+		case dbvhana:
+		case dbvinformix:
+		case dbvnetezza:
+		case dbvoracle:
+		case dbvredshift:
+		case dbvsnowflake:
+		case dbvsybase:
+		case dbvteradata:
+		case dbvvertica:
+			if (name.indexOf('"') >= 0) {
+				normalName = name.replaceAll("\"", "");
+			} else {
+				normalName = name.toUpperCase();
+			}
+			return normalName;
+		case dbvpostgresql:
+			if (name.indexOf('"') >= 0) {
+				normalName = name.replaceAll("\"", "");
+			} else {
+				normalName = name.toLowerCase();
+			}
+			return normalName;
+		case dbvmssql:
+			if (name.indexOf('"') >= 0) {
+				normalName = name.replaceAll("\"", "");
+			} else if (name.indexOf("[") >= 0) {
+				normalName = name.replaceAll("\\[", "").replaceAll("]", "");
+			} else {
+				normalName = name;
+			}
+			return normalName.toUpperCase();
+		default:
+			if (name.indexOf('"') >= 0) {
+				normalName = name.replaceAll("\"", "");
+			} else {
+				normalName = name.toUpperCase();
+			}
+
+			return normalName;
+		}
+	}
 }
