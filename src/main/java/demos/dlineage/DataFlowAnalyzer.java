@@ -4609,12 +4609,27 @@ public class DataFlowAnalyzer
 			}
 			
 			if(stmt.getIntoClause()!=null) {
-				TExpressionList tables = stmt.getIntoClause( )
-						.getExprList( );
-				Object queryModel = modelManager.getModel( stmt.getResultColumnList( ) );
-				for ( int j = 0; j < tables.size( ); j++ )
+				List<TObjectName> tableNames = new ArrayList<TObjectName>();
+				if (stmt.getIntoClause().getIntoName() != null) 
 				{
-					TObjectName tableName = tables.getExpression( j ).getObjectOperand();
+					tableNames.add(stmt.getIntoClause().getIntoName());
+				} 
+				else if (stmt.getIntoClause().getExprList() != null) 
+				{
+					for (int j = 0; j < stmt.getIntoClause().getExprList().size(); j++) 
+					{
+						TObjectName tableName = stmt.getIntoClause().getExprList().getExpression(j).getObjectOperand();
+						if (tableName != null) 
+						{
+							tableNames.add(tableName);
+						}
+					}
+				}
+				
+				Object queryModel = modelManager.getModel( stmt.getResultColumnList( ) );
+				for ( int j = 0; j < tableNames.size( ); j++ )
+				{
+					TObjectName tableName = tableNames.get(j);
 					if(tableName.getDbObjectType() == EDbObjectType.variable) {
 						continue;
 					}
