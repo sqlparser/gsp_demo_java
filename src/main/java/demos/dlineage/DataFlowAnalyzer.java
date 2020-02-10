@@ -119,6 +119,8 @@ import gudusoft.gsqlparser.nodes.TWhenClauseItemList;
 import gudusoft.gsqlparser.nodes.couchbase.TObjectConstruct;
 import gudusoft.gsqlparser.nodes.couchbase.TPair;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import gudusoft.gsqlparser.stmt.TCreateMaterializedSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTriggerStmt;
@@ -2142,6 +2144,15 @@ public class DataFlowAnalyzer
 											( (TResultColumn) resultColumn.getColumnObject( ) ).getExpr( )
 													.getConstantOperand( ),
 											i );
+									if (SQLUtil.isTempTable(tableModel, vendor) && sqlenv != null
+											&& tableModel.getDatabase() != null && tableModel.getSchema() != null) {
+										TSQLSchema schema = sqlenv.getSQLSchema(
+												tableModel.getDatabase() + "." + tableModel.getSchema(), true);
+										if (schema != null) {
+											TSQLTable tempTable = schema.createTable(tableModel.getName());
+											tempTable.addColumn(tableColumn.getName());
+										}
+									}
 									DataFlowRelation relation = modelFactory.createDataFlowRelation( );
 									relation.setEffectType( EffectType.insert );
 									relation.setTarget( new TableColumnRelationElement( tableColumn ) );
@@ -4648,6 +4659,17 @@ public class DataFlowAnalyzer
 								
 								TableColumn tableColumn = modelFactory.createInsertTableColumn(tableModel,
 										columns.get(k));
+								
+								if (SQLUtil.isTempTable(tableModel, vendor) && sqlenv != null
+										&& tableModel.getDatabase() != null && tableModel.getSchema() != null) {
+									TSQLSchema schema = sqlenv.getSQLSchema(
+											tableModel.getDatabase() + "." + tableModel.getSchema(), true);
+									if (schema != null) {
+										TSQLTable tempTable = schema.createTable(tableModel.getName());
+										tempTable.addColumn(tableColumn.getName());
+									}
+								}
+								
 								DataFlowRelation relation = modelFactory.createDataFlowRelation();
 								relation.setEffectType(EffectType.insert);
 								relation.setTarget(new TableColumnRelationElement(tableColumn));
