@@ -265,6 +265,12 @@ public class ModelBindingManager {
 
                 @Override
                 public int compare(TObjectName o1, TObjectName o2) {
+                	if(o1 == null){
+                		return -1;
+                	}
+                	if(o2 == null){
+                		return 1;
+                	}
                     return o1.getStartToken().posinlist
                             - o2.getStartToken().posinlist;
                 }
@@ -366,7 +372,7 @@ public class ModelBindingManager {
             TObjectName[] columns = getTableColumns(table);
             for (int i = 0; i < columns.length; i++) {
                 TObjectName columnName = columns[i];
-                if ("*".equals(columnName.getColumnNameOnly()))
+                if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
                     continue;
                 if (columnName == column) {
                     if (columnName.getSourceTable() == null
