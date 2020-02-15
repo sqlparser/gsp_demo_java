@@ -39,10 +39,14 @@ public class WhereCondition implements IExpressionVisitor
 				System.out.println( "Operator: "
 						+ lcexpr.getComparisonOperator( ).astext );
 			}
-			System.out.println( "value: "
-					+ lcexpr.getRightOperand( ).toString( ) );
+			TExpression rightExpr = (TExpression)lcexpr.getRightOperand();
+			if ( rightExpr.getExpressionType() == EExpressionType.subquery_t){
+				System.out.println( "value: (subquery)");
+			}else{
+				System.out.println( "value: "
+						+ rightExpr.toString( ) );
+			}
 			System.out.println( "" );
-
 		}
 		return true;
 	}

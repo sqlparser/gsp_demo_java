@@ -34,42 +34,9 @@ public class toXml
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				dbVendor = EDbVendor.dbvmssql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
-			{
-				dbVendor = EDbVendor.dbvdb2;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
-			{
-				dbVendor = EDbVendor.dbvmysql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				dbVendor = EDbVendor.dbvmssql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "oracle" ) )
-			{
-				dbVendor = EDbVendor.dbvoracle;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "netezza" ) )
-			{
-				dbVendor = EDbVendor.dbvnetezza;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "teradata" ) )
-			{
-				dbVendor = EDbVendor.dbvteradata;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mdx" ) )
-			{
-				dbVendor = EDbVendor.dbvmdx;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "postgresql" ) )
-			{
-				dbVendor = EDbVendor.dbvpostgresql;
-			}
+
+			dbVendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+
 		}
 		System.out.println( "Selected SQL dialect: " + dbVendor.toString( ) );
 

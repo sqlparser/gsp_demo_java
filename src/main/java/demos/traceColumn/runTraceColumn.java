@@ -27,8 +27,8 @@ public class runTraceColumn {
 //                    "from table1 a join table2 b on a.id=b.id\n" +
 //                    "join table3 c on b.tid=c.id";
 
-       runText(EDbVendor.dbvoracle,sqltext);
-       //runFile(EDbVendor.dbvmssql,"c:/prg/tmp/demo.sql");
+      // runText(EDbVendor.dbvoracle,sqltext);
+       runFile(EDbVendor.dbvoracle,"c:/prg/tmp/demo.sql");
     }
 
     public static void runText(EDbVendor dbVendor, String query){

@@ -6,10 +6,7 @@ package demos.expressionTraverser;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.IExpressionVisitor;
-import gudusoft.gsqlparser.nodes.TExpression;
-import gudusoft.gsqlparser.nodes.TFunctionCall;
-import gudusoft.gsqlparser.nodes.TParseTreeNode;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 public class expressionTraverser  {
@@ -18,7 +15,7 @@ public class expressionTraverser  {
      {
          //
           oracleWhereCondition();
-         // sqlServerSelectList();
+        //  sqlServerSelectList();
         // functionArg();
      }
 
@@ -49,6 +46,7 @@ public class expressionTraverser  {
         //sqlparser.sqltext = "select col1, col2,sum(col3) from table1, table2 where col4 > col5 and col6= 1000 or c1 = 1 and not sal";
         sqlparser.sqltext = "SELECT * FROM Customers\n" +
                 "WHERE Country='Germany' AND City='Berlin';";
+
 
         int ret = sqlparser.parse();
         if (ret == 0){
@@ -129,15 +127,15 @@ public class expressionTraverser  {
             TExpression expr = select.getResultColumnList().getResultColumn(1).getExpr();
 
             doTraverse(expr,"pre");
-            doTraverse(expr,"in");
-            doTraverse(expr,"post");
+           // doTraverse(expr,"in");
+           // doTraverse(expr,"post");
 
         }else{
             System.out.println(sqlparser.getErrormessage());
         }
     }
 
-    static void doTraverse(TExpression expr, String traverseStyle){
+    public static void doTraverse(TExpression expr, String traverseStyle){
         if (traverseStyle.equalsIgnoreCase("pre")){
             System.out.println("pre order");
             expr.preOrderTraverse(new exprVisitor());
@@ -154,6 +152,14 @@ public class expressionTraverser  {
 
 }
 
+class functionVistor extends TParseTreeVisitor{
+
+    public void preVisit(TFunctionCall node) {
+        for(int i=0;i<node.getArgs().size();i++){
+            expressionTraverser.doTraverse(node.getArgs().getExpression(i),"pre");
+        }
+    }
+}
 class exprVisitor implements IExpressionVisitor {
 
     public boolean exprVisit(TParseTreeNode pNode,boolean isLeafNode){
@@ -161,7 +167,13 @@ class exprVisitor implements IExpressionVisitor {
         if (isLeafNode){
             sign ="*";
         }
-         System.out.println(sign+pNode.getClass().toString()+" "+ pNode.toString());
+        System.out.println(sign+pNode.getClass().toString()+" "+ pNode.toString());
+        TExpression expr = (TExpression)pNode;
+        switch (expr.getExpressionType()){
+            case function_t:
+                expr.getFunctionCall().accept(new functionVistor());
+                break;
+        }
         return true;
     };
 }
