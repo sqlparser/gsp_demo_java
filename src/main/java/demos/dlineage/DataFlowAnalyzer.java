@@ -3869,7 +3869,7 @@ public class DataFlowAnalyzer
 				getResultSetName( resultSetModel ) );
 		resultSetElement.setAttribute( "type",
 				getResultSetType( resultSetModel ) );
-		if ( simpleOutput && resultSetModel.isTarget( ) )
+		if ( (ignoreRecordSet || simpleOutput) && resultSetModel.isTarget( ) )
 		{
 			resultSetElement.setAttribute( "isTarget",
 					String.valueOf( resultSetModel.isTarget( ) ) );
