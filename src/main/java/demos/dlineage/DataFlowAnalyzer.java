@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,6 +38,8 @@ import demos.dlineage.dataflow.model.ConstantRelationElement;
 import demos.dlineage.dataflow.model.CursorResultSet;
 import demos.dlineage.dataflow.model.DataFlowRelation;
 import demos.dlineage.dataflow.model.EffectType;
+import demos.dlineage.dataflow.model.Function;
+import demos.dlineage.dataflow.model.FunctionResultColumn;
 import demos.dlineage.dataflow.model.ImpactRelation;
 import demos.dlineage.dataflow.model.IndirectImpactRelation;
 import demos.dlineage.dataflow.model.JoinRelation;
@@ -72,6 +75,7 @@ import demos.dlineage.util.Pair;
 import demos.dlineage.util.SQLUtil;
 import demos.dlineage.util.XML2Model;
 import demos.dlineage.util.XMLUtil;
+import gudusoft.gsqlparser.EAlterTableOptionType;
 import gudusoft.gsqlparser.EComparisonType;
 import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;
@@ -84,6 +88,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.IExpressionVisitor;
 import gudusoft.gsqlparser.nodes.TAliasClause;
+import gudusoft.gsqlparser.nodes.TAlterTableOption;
 import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TCaseExpression;
 import gudusoft.gsqlparser.nodes.TColumnDefinition;
@@ -107,6 +112,7 @@ import gudusoft.gsqlparser.nodes.TObjectNameList;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
+import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.nodes.TTable;
@@ -121,6 +127,7 @@ import gudusoft.gsqlparser.nodes.couchbase.TPair;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
+import gudusoft.gsqlparser.stmt.TAlterTableStatement;
 import gudusoft.gsqlparser.stmt.TCreateMaterializedSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTriggerStmt;
@@ -693,7 +700,7 @@ public class DataFlowAnalyzer
 			{
 				dataflow dataflowInstance = XML2Model.loadXML( dataflow.class,
 						xml );
-				dataflow simpleDataflow = getSimpleDataflow( dataflowInstance, ignoreRecordSet);
+				dataflow simpleDataflow = getSimpleDataflow( dataflowInstance);
 				if ( textFormat )
 				{
 					xml = getTextOutput( simpleDataflow );
@@ -762,7 +769,19 @@ public class DataFlowAnalyzer
 		return buffer.toString( );
 	}
 
-	public dataflow getSimpleDataflow(dataflow instance, boolean ignoreRecordSet) throws Exception
+	private String getRelationType(List<String> typePaths) {
+		if (typePaths.contains("fdr"))
+			return "fdr";
+		if (typePaths.contains("frd"))
+			return "frd";
+		if (typePaths.contains("fddi"))
+			return "fddi";
+		if (typePaths.contains("join"))
+			return "join";
+		return "fdd";
+	}
+	
+	public dataflow getSimpleDataflow(dataflow instance) throws Exception
 	{
 
 		dataflow simple = new dataflow( );
@@ -770,23 +789,42 @@ public class DataFlowAnalyzer
 		List<relation> relations = instance.getRelations( );
 		if ( relations != null )
 		{
-			for ( int i = 0; i < relations.size( ); i++ )
+			relations = relations.stream().filter(t -> "fdd".equals(t.getType()))
+					.collect(Collectors.toList());
+			Map<String, Set<relation>> targetIdRelationMap = new HashMap<>();
+	        for (relation relation : relations) {
+	            if (relation.getTarget() != null) {
+	                String key = relation.getTarget().getParent_id() + "." + relation.getTarget().getId();
+	                targetIdRelationMap.putIfAbsent(key, new HashSet<>());
+	                targetIdRelationMap.get(key).add(relation);
+	            }
+	        }
+	        
+	        for ( int i = 0; i < relations.size( ); i++ )
 			{
 				relation relationElem = relations.get( i );
 				targetColumn target = relationElem.getTarget( );
 				String targetParent = target.getParent_id( );
-				if ( isTarget( instance, targetParent, ignoreRecordSet) )
+				if ( isTarget( instance, targetParent) )
 				{
-					List<sourceColumn> relationSources = new ArrayList<sourceColumn>( );
+					Map<sourceColumn, List<String>> relationSources = new LinkedHashMap<sourceColumn, List<String>>( );
+					
 					findSourceRaltionCondition.clear();
-					findSourceRaltions( instance,
-							relationElem.getSources( ),
-							relationSources, ignoreRecordSet );
+				
+					findSourceRaltions( instance, targetIdRelationMap,
+							relationElem,
+							relationSources, new String[]{relationElem.getType()} );
 					if ( relationSources.size( ) > 0 )
 					{
-						relation simpleRelation = (relation) relationElem.clone( );
-						simpleRelation.setSources( relationSources );
-						simpleRelations.add( simpleRelation );
+						Iterator<sourceColumn> iter = relationSources.keySet().iterator();
+						while (iter.hasNext()) {
+							sourceColumn column = iter.next();
+							relation simpleRelation = (relation) relationElem.clone();
+							simpleRelation.setSources(Arrays.asList(column));
+							simpleRelation.setType(getRelationType(relationSources.get(column)));
+							simpleRelation.setId(String.valueOf(++ModelBindingManager.get().RELATION_ID));
+							simpleRelations.add(simpleRelation);
+						}
 					}
 				}
 			}
@@ -813,46 +851,40 @@ public class DataFlowAnalyzer
 
 	private Set<String> findSourceRaltionCondition = new HashSet<>();
 	private void findSourceRaltions( dataflow instance,
-			List<sourceColumn> sources, List<sourceColumn> relationSources, boolean ignoreRecordSet )
+			Map<String, Set<relation>> sourceIdRelationMap, relation targetRelation, Map<sourceColumn, List<String>> relationSources, String[] pathTypes )
 	{
-		if ( sources != null )
+		if ( targetRelation != null && targetRelation.getSources()!=null)
 		{
-			for ( int i = 0; i < sources.size( ); i++ )
+			for ( int i = 0; i < targetRelation.getSources().size( ); i++ )
 			{
-				sourceColumn source = sources.get( i );
+				sourceColumn source = targetRelation.getSources().get( i );
 				String sourceColumnId = source.getId( );
 				String sourceParentId = source.getParent_id( );
 				if(sourceParentId == null || sourceColumnId == null) {
 					continue;
 				}
-				if ( isTarget( instance, sourceParentId, ignoreRecordSet ) )
+				if ( isTarget( instance, sourceParentId ) )
 				{
-					relationSources.add( source );
+					relationSources.put( source, Arrays.asList(pathTypes) );
 				}
 				else
 				{
-					for ( int j = 0; j < instance.getRelations( ).size( ); j++ )
-					{
-						relation relation = instance.getRelations( ).get( j );
-						targetColumn target = relation.getTarget( );
-						String targetColumnId = target.getId( );
-						String targetParentId = target.getParent_id( );
-
-						if ( sourceParentId.equalsIgnoreCase( targetParentId )
-								&& sourceColumnId.equalsIgnoreCase( targetColumnId ) )
-						{
+					Set<relation> sourceRelations = sourceIdRelationMap
+							.get(source.getParent_id() + "." + source.getId());
+					if (sourceRelations != null) {
+						for (relation relation : sourceRelations) {
 							String key = sourceParentId + ":" + sourceColumnId;
-							if(findSourceRaltionCondition.contains(key)){
+							if (findSourceRaltionCondition.contains(key)) {
 								findSourceRaltionCondition.clear();
-								break;
-							}
-							else{
+								continue;
+							} else {
 								findSourceRaltionCondition.add(key);
 							}
-							findSourceRaltions( instance,
-									relation.getSources( ),
-									relationSources, ignoreRecordSet );
-							break;
+
+							String[] types = new String[pathTypes.length + 1];
+							types[0] = relation.getType();
+							System.arraycopy(pathTypes, 0, types, 1, pathTypes.length);
+							findSourceRaltions(instance, sourceIdRelationMap, relation, relationSources, types);
 						}
 					}
 				}
@@ -862,7 +894,7 @@ public class DataFlowAnalyzer
 
 	private Map<String, Boolean> targetTables = new HashMap<String, Boolean>( );
 
-	private boolean isTarget( dataflow instance, String targetParentId, boolean ignoreRecordSet )
+	private boolean isTarget( dataflow instance, String targetParentId )
 	{
 		if ( targetTables.containsKey( targetParentId ) )
 			return targetTables.get( targetParentId );
@@ -876,7 +908,7 @@ public class DataFlowAnalyzer
 			targetTables.put( targetParentId, true );
 			return true;
 		}
-		else if ( isTargetResultSet( instance, targetParentId ) && !ignoreRecordSet)
+		else if ( isTargetResultSet( instance, targetParentId ))
 		{
 			targetTables.put( targetParentId, true );
 			return true;
@@ -1123,12 +1155,50 @@ public class DataFlowAnalyzer
 			analyzeLoopStmt( (TLoopStmt) stmt );
 			stmtStack.pop( );
 		}
+		else if ( stmt instanceof TAlterTableStatement)
+		{
+			stmtStack.push( stmt );
+			analyzeAlterTableStmt( (TAlterTableStatement) stmt );
+			stmtStack.pop( );
+		}
 		else if ( stmt.getStatements( ) != null
 				&& stmt.getStatements( ).size( ) > 0 )
 		{
 			for ( int i = 0; i < stmt.getStatements( ).size( ); i++ )
 			{
 				analyzeCustomSqlStmt( stmt.getStatements( ).get( i ) );
+			}
+		}
+	}
+
+	private void analyzeAlterTableStmt(TAlterTableStatement stmt) {
+		TTable oldNameTable = stmt.getTargetTable();
+		Table oldNameTableModel = modelFactory.createTable(oldNameTable);
+		for (int i = 0; i < stmt.getAlterTableOptionList().size(); i++) {
+			TAlterTableOption option = stmt.getAlterTableOptionList().getAlterTableOption(i);
+			if (option.getOptionType() == EAlterTableOptionType.RenameTable
+					|| option.getOptionType() == EAlterTableOptionType.swapWith) {
+				TObjectName newTableName = option.getNewTableName();
+				TParseTreeNodeList list = newTableName.getStartToken().getNodesStartFromThisToken();
+				boolean containsTable = false;
+				for (int j = 0; j < list.size(); j++) {
+					if (list.getElement(j) instanceof TTable) {
+						TTable newTableTable = (TTable) list.getElement(j);
+						Table newNameTableModel = modelFactory.createTable(newTableTable);
+						DataFlowRelation realtion = modelFactory.createDataFlowRelation();
+						realtion.setEffectType(option.getOptionType() == EAlterTableOptionType.RenameTable? EffectType.rename_table:EffectType.swap_table);
+						realtion.setTarget(new TableRelationElement(newNameTableModel));
+						realtion.addSource(new TableRelationElement(oldNameTableModel));
+						containsTable = true;
+					}
+				}
+				if(!containsTable){
+					Table newNameTableModel = modelFactory.createTableByName(newTableName);
+					DataFlowRelation realtion = modelFactory.createDataFlowRelation();
+					realtion.setEffectType(option.getOptionType() == EAlterTableOptionType.RenameTable? EffectType.rename_table:EffectType.swap_table);
+					realtion.setTarget(new TableRelationElement(newNameTableModel));
+					realtion.addSource(new TableRelationElement(oldNameTableModel));
+				}
 			}
 		}
 	}
@@ -1486,7 +1556,12 @@ public class DataFlowAnalyzer
 								columnsInExpr visitor = new columnsInExpr( );
 								valueExpression.inOrderTraverse( visitor );
 								List<TObjectName> objectNames = visitor.getObjectNames( );
-								List<TFunctionCall> functions = visitor.getFunctions();
+								List<TParseTreeNode> functions = visitor.getFunctions();
+								
+								if (functions != null && !functions.isEmpty()) {
+									analyzeFunctionDataFlowRelation(updateColumn, functions, EffectType.merge_update);
+								}
+								
 								analyzeDataFlowRelation( updateColumn,
 										objectNames,
 										EffectType.merge_update, functions );
@@ -1544,7 +1619,12 @@ public class DataFlowAnalyzer
 									columnsInExpr visitor = new columnsInExpr( );
 									valueExpression.inOrderTraverse( visitor );
 									List<TObjectName> objectNames = visitor.getObjectNames( );
-									List<TFunctionCall> functions = visitor.getFunctions();
+									List<TParseTreeNode> functions = visitor.getFunctions();
+									
+									if (functions != null && !functions.isEmpty()) {
+										analyzeFunctionDataFlowRelation(insertColumn, functions, EffectType.merge_insert);
+									}
+									
 									analyzeDataFlowRelation( insertColumn,
 											objectNames,
 											EffectType.merge_insert, functions );
@@ -1595,7 +1675,12 @@ public class DataFlowAnalyzer
 								columnsInExpr visitor = new columnsInExpr( );
 								valueExpression.inOrderTraverse( visitor );
 								List<TObjectName> objectNames = visitor.getObjectNames( );
-								List<TFunctionCall> functions = visitor.getFunctions();
+								List<TParseTreeNode> functions = visitor.getFunctions();
+								
+								if (functions != null && !functions.isEmpty()) {
+									analyzeFunctionDataFlowRelation(insertColumn, functions, EffectType.merge_insert);
+								}
+								
 								analyzeDataFlowRelation( insertColumn,
 										objectNames,
 										EffectType.merge_insert, functions );
@@ -2544,7 +2629,12 @@ public class DataFlowAnalyzer
 							.inOrderTraverse( visitor );
 
 					List<TObjectName> objectNames = visitor.getObjectNames( );
-					List<TFunctionCall> functions = visitor.getFunctions();
+					List<TParseTreeNode> functions = visitor.getFunctions();
+					
+					if (functions != null && !functions.isEmpty()) {
+						analyzeFunctionDataFlowRelation(updateColumn, functions, EffectType.update);
+					}
+					
 					analyzeDataFlowRelation( updateColumn,
 							objectNames,
 							EffectType.update, functions );
@@ -2597,7 +2687,7 @@ public class DataFlowAnalyzer
 	}
 
 	private void analyzeConstantDataFlowRelation( Object modelObject,
-			List<TConstant> constants, EffectType effectType, List<TFunctionCall> functions )
+			List<TConstant> constants, EffectType effectType, List<TParseTreeNode> functions )
 	{
 		if ( constants == null || constants.size( ) == 0 )
 			return;
@@ -2606,7 +2696,7 @@ public class DataFlowAnalyzer
 		relation.setEffectType( effectType );
 		
 		if(functions!=null && !functions.isEmpty()) {
-			relation.setFunction(functions.get(0).getFunctionName().toString());
+			relation.setFunction(getFunctionName(functions.get(0)));
 		}
 
 		if ( modelObject instanceof ResultColumn )
@@ -2635,6 +2725,16 @@ public class DataFlowAnalyzer
 			relation.addSource( new ConstantRelationElement( new Constant( constant ) ) );
 		}
 
+	}
+
+	private String getFunctionName(TParseTreeNode parseTreeNode) {
+		if(parseTreeNode instanceof TFunctionCall){
+			return ((TFunctionCall)parseTreeNode).getFunctionName().toString();
+		}
+		if(parseTreeNode instanceof TCaseExpression){
+			return "case-when";
+		}
+		return null;
 	}
 
 	private void analyzeCreateViewStmt( TCustomSqlStatement stmt,
@@ -2871,7 +2971,7 @@ public class DataFlowAnalyzer
 	private void appendRelations( Document doc, Element dlineageResult )
 	{
 		Relation[] relations = modelManager.getRelations( );
-		if ( simpleOutput )
+		if ( simpleOutput || ignoreRecordSet)
 		{
 			appendRelation( doc,
 					dlineageResult,
@@ -3081,6 +3181,24 @@ public class DataFlowAnalyzer
 					targetName = targetColumn.getName( );
 					relationElement.appendChild( target );
 				}
+				else if ( targetElement instanceof Table )
+				{
+					Table table = (Table) targetElement;
+					Element target = doc.createElement( "target" );
+					target.setAttribute( "target_id",
+							String.valueOf( table.getId( ) ) );
+					target.setAttribute( "target_name",
+							getTableName( table ) );
+					if ( table.getStartPosition( ) != null
+							&& table.getEndPosition( ) != null )
+					{
+						target.setAttribute( "coordinate",
+								table.getStartPosition( )
+										+ ","
+										+ table.getEndPosition( ) );
+					}
+					relationElement.appendChild( target );
+				}
 				else
 				{
 					continue;
@@ -3267,6 +3385,25 @@ public class DataFlowAnalyzer
 									sourceColumn.getStartPosition( )
 											+ ","
 											+ sourceColumn.getEndPosition( ) );
+						}
+						append = true;
+						relationElement.appendChild( source );
+					}
+					else if ( sourceElement instanceof Table )
+					{
+						Table table = (Table) sourceElement;
+						Element source = doc.createElement( "source" );
+						source.setAttribute( "source_id",
+								String.valueOf( table.getId( ) ) );
+						source.setAttribute( "source_name",
+								getTableName( table ) );
+						if ( table.getStartPosition( ) != null
+								&& table.getEndPosition( ) != null )
+						{
+							source.setAttribute( "coordinate",
+									table.getStartPosition( )
+											+ ","
+											+ table.getEndPosition( ) );
 						}
 						append = true;
 						relationElement.appendChild( source );
@@ -3682,6 +3819,7 @@ public class DataFlowAnalyzer
 		List<TCTE> ctes = modelManager.getCTEs( );
 		List<TParseTreeNode> mergeResultSets = modelManager.getMergeResultSets( );
 		List<TParseTreeNode> updateResultSets = modelManager.getUpdateResultSets( );
+		List<TParseTreeNode> functionCalls = modelManager.getFunctoinCalls( );
 
 		List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>( );
 		resultSets.addAll( selectResultSets );
@@ -3690,6 +3828,7 @@ public class DataFlowAnalyzer
 		resultSets.addAll( ctes );
 		resultSets.addAll( mergeResultSets );
 		resultSets.addAll( updateResultSets );
+		resultSets.addAll(functionCalls);
 
 		for ( int i = 0; i < resultSets.size( ); i++ )
 		{
@@ -3834,6 +3973,16 @@ public class DataFlowAnalyzer
 		{
 			return "update-set";
 		}
+		
+		if ( resultSetModel.getGspObject( ) instanceof TFunctionCall )
+		{
+			return "function";
+		}
+		
+		if ( resultSetModel.getGspObject( ) instanceof TCaseExpression )
+		{
+			return "function";
+		}
 
 		return "select_list";
 	}
@@ -3934,6 +4083,20 @@ public class DataFlowAnalyzer
 		if ( resultSetModel.getGspObject( ) instanceof TUpdateSqlStatement )
 		{
 			String name = getResultSetDisplayId( "UPDATE-SET" );
+			modelManager.DISPLAY_NAME.put( resultSetModel.getId( ), name );
+			return name;
+		}
+		
+		if ( resultSetModel.getGspObject( ) instanceof TFunctionCall )
+		{
+			String name = getResultSetDisplayId("FUNCTION");
+			modelManager.DISPLAY_NAME.put( resultSetModel.getId( ), name );
+			return name;
+		}
+		
+		if ( resultSetModel.getGspObject( ) instanceof TCaseExpression )
+		{
+			String name = getResultSetDisplayId("FUNCTION");
 			modelManager.DISPLAY_NAME.put( resultSetModel.getId( ), name );
 			return name;
 		}
@@ -4096,9 +4259,9 @@ public class DataFlowAnalyzer
 			}
 		}
 		
-		List<Table> selectIntoTables = modelManager.getSelectIntoTables();
-		for(int i=0;i<selectIntoTables.size();i++) {
-			Table tableModel = selectIntoTables.get(i);
+		List<Table> tableNames = modelManager.getTablesByName();
+		for(int i=0;i<tableNames.size();i++) {
+			Table tableModel = tableNames.get(i);
 			if(!tableIds.contains(tableModel.getId())) {
 				appendTableModel(doc, dlineageResult, tableModel);
 				tableIds.add(tableModel.getId());
@@ -4443,7 +4606,13 @@ public class DataFlowAnalyzer
 										.inOrderTraverse( visitor );
 
 								List<TObjectName> objectNames = visitor.getObjectNames( );
-								List<TFunctionCall> functions = visitor.getFunctions();
+								List<TParseTreeNode> functions = visitor.getFunctions();
+								
+								if (functions != null && !functions.isEmpty()) {
+									analyzeFunctionDataFlowRelation(resultColumn, functions, EffectType.select);
+
+								}
+								
 								analyzeDataFlowRelation( resultColumn,
 										objectNames,
 										EffectType.select, functions);
@@ -4645,7 +4814,7 @@ public class DataFlowAnalyzer
 					if(tableName.getDbObjectType() == EDbObjectType.variable) {
 						continue;
 					}
-					Table tableModel = modelFactory.createSelectIntoTable( tableName );
+					Table tableModel = modelFactory.createTableByName( tableName );
 				
 					for ( int i = 0; i < stmt.getResultColumnList( ).size( ); i++ )
 					{
@@ -4794,6 +4963,145 @@ public class DataFlowAnalyzer
 		}
 	}
 
+	private void analyzeFunctionDataFlowRelation(Object gspObject, List<TParseTreeNode> functions,
+			EffectType effectType) {
+	
+		Object modelObject = modelManager.getModel( gspObject );
+		if (modelObject == null) {
+			if (gspObject instanceof ResultColumn || gspObject instanceof TableColumn
+					|| gspObject instanceof ViewColumn) {
+				modelObject = gspObject;
+			}
+		}
+		
+		DataFlowRelation relation = modelFactory.createDataFlowRelation( );
+		relation.setEffectType( effectType );
+
+		if ( modelObject instanceof ResultColumn )
+		{
+			relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelObject ) );
+
+		}
+		else if ( modelObject instanceof TableColumn )
+		{
+			relation.setTarget( new TableColumnRelationElement( (TableColumn) modelObject ) );
+
+		}
+		else if ( modelObject instanceof ViewColumn )
+		{
+			relation.setTarget( new ViewColumnRelationElement( (ViewColumn) modelObject ) );
+
+		}
+		else
+		{
+			throw new UnsupportedOperationException( );
+		}
+
+		for ( int i = 0; i < functions.size( ); i++ )
+		{
+			TParseTreeNode functionCall = functions.get( i );
+			createFunction(functionCall);
+			if (functionCall instanceof TFunctionCall) {
+				relation.addSource(new ResultColumnRelationElement( (FunctionResultColumn)modelManager.getModel(((TFunctionCall)functionCall).getFunctionName())));
+			}
+			else if (functionCall instanceof TCaseExpression) {
+				relation.addSource(new ResultColumnRelationElement( (FunctionResultColumn)modelManager.getModel(((TCaseExpression)functionCall).getWhenClauseItemList())));
+			}
+			
+		}
+		
+	}
+
+	private void createFunction(TParseTreeNode functionCall) {
+		if (functionCall instanceof TFunctionCall) {
+			Function function = modelFactory.createFunction((TFunctionCall)functionCall);
+			ResultColumn column = modelFactory.createFunctionResultColumn(function, ((TFunctionCall)functionCall).getFunctionName());
+			analyzeFunctionArgumentsDataFlowRelation(column, functionCall);
+		}
+		else if (functionCall instanceof TCaseExpression) {
+			Function function = modelFactory.createFunction((TCaseExpression)functionCall);
+			ResultColumn column = modelFactory.createFunctionResultColumn(function, ((TCaseExpression)functionCall).getWhenClauseItemList());
+			analyzeFunctionArgumentsDataFlowRelation(column, functionCall);
+		}
+	}
+
+	private void analyzeFunctionArgumentsDataFlowRelation(ResultColumn resultColumn, TParseTreeNode gspObject) {
+		List<TExpression> expressions = new ArrayList<TExpression>();
+		if (gspObject instanceof TFunctionCall) {
+			TFunctionCall functionCall = (TFunctionCall) gspObject;
+
+			if (functionCall.getArgs() != null) {
+				for (int k = 0; k < functionCall.getArgs().size(); k++) {
+					TExpression expr = functionCall.getArgs().getExpression(k);
+					if (expr != null) {
+						expressions.add(expr);
+					}
+				}
+			}
+			if (functionCall.getTrimArgument() != null) {
+				TTrimArgument args = functionCall.getTrimArgument();
+				TExpression expr = args.getStringExpression();
+				if (expr != null) {
+					expressions.add(expr);
+				}
+				expr = args.getTrimCharacter();
+				if (expr != null) {
+					expressions.add(expr);
+				}
+			}
+
+			if (functionCall.getAgainstExpr() != null) {
+				expressions.add(functionCall.getAgainstExpr());
+			}
+			if (functionCall.getBetweenExpr() != null) {
+				expressions.add(functionCall.getBetweenExpr());
+			}
+			if (functionCall.getExpr1() != null) {
+				expressions.add(functionCall.getExpr1());
+			}
+			if (functionCall.getExpr2() != null) {
+				expressions.add(functionCall.getExpr2());
+			}
+			if (functionCall.getExpr3() != null) {
+				expressions.add(functionCall.getExpr3());
+			}
+			if (functionCall.getParameter() != null) {
+				expressions.add(functionCall.getParameter());
+			}
+		}
+		else if(gspObject instanceof TCaseExpression){
+			TCaseExpression expr = (TCaseExpression)gspObject;
+			TExpression defaultExpr = expr.getElse_expr( );
+			if ( defaultExpr != null )
+			{
+				expressions.add(defaultExpr);
+			}
+			TWhenClauseItemList list = expr.getWhenClauseItemList( );
+			for ( int i = 0; i < list.size( ); i++ )
+			{
+				TWhenClauseItem element = (TWhenClauseItem) list.getElement( i );
+				expressions.add(element.getComparison_expr());
+				expressions.add(element.getReturn_expr());		
+			}
+		}
+		
+		for (int j = 0; j < expressions.size(); j++) {
+			columnsInExpr visitor = new columnsInExpr();
+			expressions.get(j).inOrderTraverse(visitor);
+			List<TObjectName> objectNames = visitor.getObjectNames();
+			List<TParseTreeNode> functions = visitor.getFunctions();
+
+			if (functions != null && !functions.isEmpty()) {
+				analyzeFunctionDataFlowRelation(resultColumn, functions, EffectType.function);
+			}
+
+			analyzeDataFlowRelation(resultColumn, objectNames, EffectType.function, functions);
+
+			List<TConstant> constants = visitor.getConstants();
+			analyzeConstantDataFlowRelation(resultColumn, constants, EffectType.function, functions);
+		}
+	}
+
 	private void analyzeJoin( TJoin join, EffectType effectType )
 	{
 		if ( join.getJoinItems( ) != null )
@@ -4920,8 +5228,12 @@ public class DataFlowAnalyzer
 		expression.inOrderTraverse( visitor );
 		List<TObjectName> objectNames = visitor.getObjectNames( );
 
-		List<TFunctionCall> functions = visitor.getFunctions( );
-
+		List<TParseTreeNode> functions = visitor.getFunctions( );
+		
+		if (functions != null && !functions.isEmpty()) {
+			analyzeFunctionDataFlowRelation(column, functions, effectType);
+		}
+		
 		analyzeDataFlowRelation( column, objectNames, effectType, functions);
 
 		List<TConstant> constants = visitor.getConstants( );
@@ -4929,11 +5241,12 @@ public class DataFlowAnalyzer
 		analyzeConstantDataFlowRelation( columnObject, constants, effectType, functions);
 
 		analyzeRecordSetRelation( column, functions, effectType );
-		analyzeResultColumnImpact( column, effectType, functions);
+		//analyzeResultColumnImpact( column, effectType, functions);
 	}
 
+	/**
 	private void analyzeResultColumnImpact( TResultColumn column,
-			EffectType effectType, List<TFunctionCall> functions )
+			EffectType effectType, List<TParseTreeNode> functions )
 	{
 		TExpression expression = column.getExpr( );
 		EExpressionType type = expression.getExpressionType( );
@@ -4974,7 +5287,7 @@ public class DataFlowAnalyzer
 	}
 
 	private void analyzeImpactRelation( TResultColumn column,
-			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
+			List<TObjectName> objectNames, EffectType effectType, List<TParseTreeNode> functions )
 	{
 		if ( objectNames == null || objectNames.size( ) == 0 )
 			return;
@@ -4983,7 +5296,7 @@ public class DataFlowAnalyzer
 		relation.setEffectType( effectType );
 		
 		if(functions!=null && !functions.isEmpty()) {
-			relation.setFunction(functions.get(0).getFunctionName().toString());
+			relation.setFunction(getFunctionName(functions.get(0)));
 		}
 
 		relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
@@ -5023,17 +5336,18 @@ public class DataFlowAnalyzer
 			}
 		}
 	}
-
+	**/
+	
 	private void analyzeRecordSetRelation( TResultColumn column,
-			List<TFunctionCall> functions, EffectType effectType )
+			List<TParseTreeNode> functions, EffectType effectType )
 	{
 		if ( functions == null || functions.size( ) == 0 )
 			return;
 
 	    List<TFunctionCall> aggregateFunctions = new ArrayList<TFunctionCall>();
-		for (TFunctionCall function : functions) {
-			if(isAggregateFunction(function)) {
-				aggregateFunctions.add(function);
+		for (TParseTreeNode function : functions) {
+			if(function instanceof TFunctionCall && isAggregateFunction((TFunctionCall)function)) {
+				aggregateFunctions.add((TFunctionCall)function);
 			}
 		}
 		
@@ -5047,6 +5361,11 @@ public class DataFlowAnalyzer
 		for ( int i = 0; i < aggregateFunctions.size( ); i++ )
 		{
 			TFunctionCall function = aggregateFunctions.get( i );
+			RecordSetRelation functionRelation = modelFactory.createRecordSetRelation( );
+			functionRelation.setEffectType(EffectType.function);
+			functionRelation.setFunction(function.getFunctionName().toString());
+			functionRelation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( function.getFunctionName() ) ) );
+			
 			if ( stmtStack.peek( ).getTables( ).size( ) == 1 )
 			{
 				Object tableObject = modelManager.getModel( stmtStack.peek( )
@@ -5058,6 +5377,8 @@ public class DataFlowAnalyzer
 					relation.addSource( new TableRelationElement( tableModel ) );
 					relation.setAggregateFunction( function.getFunctionName( )
 							.toString( ) );
+					functionRelation.addSource( new TableRelationElement( tableModel ) );
+					functionRelation.setAggregateFunction(function.getFunctionName().toString());
 				}
 				else if ( tableObject instanceof QueryTable )
 				{
@@ -5065,20 +5386,22 @@ public class DataFlowAnalyzer
 					relation.addSource( new QueryTableRelationElement( tableModel ) );
 					relation.setAggregateFunction( function.getFunctionName( )
 							.toString( ) );
+					functionRelation.addSource( new QueryTableRelationElement( tableModel ) );
+					functionRelation.setAggregateFunction(function.getFunctionName().toString());
 				}
 			}
 		}
 	}
 
 	private void analyzeDataFlowRelation( TParseTreeNode gspObject,
-			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
+			List<TObjectName> objectNames, EffectType effectType, List<TParseTreeNode> functions )
 	{
 		Object columnObject = modelManager.getModel( gspObject );
 		analyzeDataFlowRelation( columnObject, objectNames, effectType, functions );
 	}
 
 	private void analyzeDataFlowRelation( Object modelObject,
-			List<TObjectName> objectNames, EffectType effectType, List<TFunctionCall> functions )
+			List<TObjectName> objectNames, EffectType effectType, List<TParseTreeNode> functions )
 	{
 		if ( objectNames == null || objectNames.size( ) == 0 )
 			return;
@@ -5089,7 +5412,7 @@ public class DataFlowAnalyzer
 		relation.setEffectType( effectType );
 		
 		if(functions!=null && !functions.isEmpty()) {
-			relation.setFunction(functions.get(0).getFunctionName().toString());
+			relation.setFunction(getFunctionName(functions.get(0)));
 		}
 
 		int columnIndex = -1;
@@ -5536,22 +5859,40 @@ public class DataFlowAnalyzer
 		{
 			TResultColumn column = columns.getResultColumn( i );
 			AbstractRelation relation;
+			AbstractRelation functionRelation = null;
 			if ( isAggregateFunction( column.getExpr( ).getFunctionCall( ) ) )
 			{
 				relation = modelFactory.createRecordSetRelation( );
 				relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 				relation.setEffectType( effectType );
-				relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
-				( (RecordSetRelation) relation ).setAggregateFunction( column.getExpr( )
-						.getFunctionCall( )
-						.getFunctionName( )
-						.toString( ) );
+				
+				TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
+				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+				((RecordSetRelation) relation).setAggregateFunction(functionName.toString());
+
+				functionRelation = modelFactory.createRecordSetRelation();
+				functionRelation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+				functionRelation.setEffectType(EffectType.function);
+				functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
+				((RecordSetRelation) functionRelation).setAggregateFunction(functionName.toString());
 			}
 			else
 			{
 				relation = modelFactory.createImpactRelation( );
 				relation.setEffectType( effectType );
 				relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
+				
+				if(column.getExpr( ).getFunctionCall( )!=null){
+					functionRelation = modelFactory.createImpactRelation();
+					TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
+					functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
+					functionRelation.setEffectType(EffectType.function);
+				}
+				if(column.getExpr( ).getCaseExpression()!=null){
+					functionRelation = modelFactory.createImpactRelation();
+					functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column.getExpr( ).getCaseExpression().getWhenClauseItemList())));
+					functionRelation.setEffectType(EffectType.function);
+				}
 			}
 
 			for ( int j = 0; j < objectNames.size( ); j++ )
@@ -5575,6 +5916,10 @@ public class DataFlowAnalyzer
 									columnName );
 							relation.addSource( new TableColumnRelationElement( columnModel,
 									columnName.getLocation( ) ) );
+							if(functionRelation!=null){
+								functionRelation.addSource( new TableColumnRelationElement( columnModel,
+										columnName.getLocation( ) ) );
+							}
 						}
 					}
 					else if ( modelManager.getModel( table ) instanceof QueryTable )
@@ -5584,6 +5929,10 @@ public class DataFlowAnalyzer
 						{
 							relation.addSource( new ResultColumnRelationElement( resultColumn,
 									columnName.getLocation( ) ) );
+							if(functionRelation!=null){
+								functionRelation.addSource( new ResultColumnRelationElement( resultColumn,
+										columnName.getLocation( ) )  );
+							}
 						}
 					}
 				}
@@ -5603,8 +5952,10 @@ public class DataFlowAnalyzer
 
 		columnsInExpr visitor = new columnsInExpr( );
 		expr.inOrderTraverse( visitor );
+		
 
 		List<TObjectName> objectNames = visitor.getObjectNames( );
+		List<TParseTreeNode> functions = visitor.getFunctions();
 
 		TResultColumnList columns = stmt.getResultColumnList( );
 		if ( columns != null )
@@ -5612,8 +5963,9 @@ public class DataFlowAnalyzer
 			for ( int i = 0; i < columns.size( ); i++ )
 			{
 				TResultColumn column = columns.getResultColumn( i );
-
+							
 				AbstractRelation relation;
+				AbstractRelation functoinRelation = null;
 				if ( isAggregateFunction( column.getExpr( ).getFunctionCall( ) ) )
 				{
 					relation = modelFactory.createRecordSetRelation( );
@@ -5621,6 +5973,14 @@ public class DataFlowAnalyzer
 					relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 					relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
 					( (RecordSetRelation) relation ).setAggregateFunction( column.getExpr( )
+							.getFunctionCall( )
+							.getFunctionName( )
+							.toString( ) );
+					
+					functoinRelation = modelFactory.createRecordSetRelation();
+					functoinRelation.setEffectType( EffectType.function );
+					functoinRelation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column.getExpr().getFunctionCall().getFunctionName() ) ) );
+					( (RecordSetRelation) functoinRelation ).setAggregateFunction( column.getExpr( )
 							.getFunctionCall( )
 							.getFunctionName( )
 							.toString( ) );
@@ -5632,6 +5992,9 @@ public class DataFlowAnalyzer
 					if(column.getExpr( ).getFunctionCall( )!=null) {
 						relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 					}
+					else if(column.getExpr( ).getCaseExpression()!=null) {
+						relation.setFunction("case-when");
+					}
 					if ( column.getExpr( ).getExpressionType( ) == EExpressionType.assignment_t )
 					{
 						relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column.getExpr( )
@@ -5641,6 +6004,17 @@ public class DataFlowAnalyzer
 					else
 					{
 						relation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column ) ) );
+					}
+					
+					if(column.getExpr().getFunctionCall()!=null){
+						functoinRelation = modelFactory.createImpactRelation();
+						functoinRelation.setEffectType( EffectType.function );
+						functoinRelation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column.getExpr().getFunctionCall().getFunctionName() ) ) );
+					}
+					else if(column.getExpr().getCaseExpression()!=null){
+						functoinRelation = modelFactory.createImpactRelation();
+						functoinRelation.setEffectType( EffectType.function );
+						functoinRelation.setTarget( new ResultColumnRelationElement( (ResultColumn) modelManager.getModel( column.getExpr().getCaseExpression().getWhenClauseItemList() ) ) );
 					}
 				}
 
@@ -5660,10 +6034,14 @@ public class DataFlowAnalyzer
 							Table tableModel = (Table) modelManager.getModel( table );
 							if ( tableModel != null )
 							{
-								TableColumn columnModel = modelFactory.createTableColumn( tableModel,
-										columnName );
-								relation.addSource( new TableColumnRelationElement( columnModel,
-										columnName.getLocation( ) ) );
+								TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName);
+								TableColumnRelationElement element = new TableColumnRelationElement(columnModel,
+										columnName.getLocation());
+								relation.addSource(element);
+
+								if (functoinRelation != null) {
+									functoinRelation.addSource(element);
+								}
 							}
 						}
 						else if ( modelManager.getModel( table ) instanceof QueryTable )
@@ -5671,13 +6049,51 @@ public class DataFlowAnalyzer
 							ResultColumn resultColumn = (ResultColumn) modelManager.getModel( columnName.getSourceColumn( ) );
 							if ( resultColumn != null )
 							{
-								relation.addSource( new ResultColumnRelationElement( resultColumn,
-										columnName.getLocation( ) ) );
+								ResultColumnRelationElement element = new ResultColumnRelationElement( resultColumn,
+										columnName.getLocation( ) );
+								relation.addSource( element );
+								if(functoinRelation!=null){
+									functoinRelation.addSource( element );
+								}
+							}
+						}
+					}
+				}
+				
+				
+				for (int j = 0; j < functions.size(); j++) {
+					TParseTreeNode functionObj = functions.get(j);
+					if(modelManager.getModel(functionObj) == null ){
+						createFunction(functionObj);
+					}
+					if (modelManager.getModel(functionObj) instanceof Function){
+						if (functionObj instanceof TFunctionCall) {
+							ResultColumn resultColumn = (ResultColumn) modelManager
+									.getModel(((TFunctionCall) functionObj).getFunctionName());
+							if (resultColumn != null) {
+								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+										((TFunctionCall) functionObj).getFunctionName().getLocation());
+								relation.addSource(element);
+								if (functoinRelation != null) {
+									functoinRelation.addSource(element);
+								}
+							}
+						}
+						if (functionObj instanceof TCaseExpression) {
+							ResultColumn resultColumn = (ResultColumn) modelManager
+									.getModel(((TCaseExpression) functionObj).getWhenClauseItemList());
+							if (resultColumn != null) {
+								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
+								relation.addSource(element);
+								if (functoinRelation != null) {
+									functoinRelation.addSource(element);
+								}
 							}
 						}
 					}
 				}
 			}
+			
 		}
 
 		if ( isShowJoin( ) )
@@ -5699,9 +6115,9 @@ public class DataFlowAnalyzer
 
 		private List<TConstant> constants = new ArrayList<TConstant>( );
 		private List<TObjectName> objectNames = new ArrayList<TObjectName>( );
-		private List<TFunctionCall> functions = new ArrayList<TFunctionCall>( );
+		private List<TParseTreeNode> functions = new ArrayList<TParseTreeNode>( );
 
-		public List<TFunctionCall> getFunctions( )
+		public List<TParseTreeNode> getFunctions( )
 		{
 			return functions;
 		}
@@ -5743,70 +6159,72 @@ public class DataFlowAnalyzer
 					functions.add( func );
 				}
 
-				if ( func.getArgs( ) != null )
-				{
-					for ( int k = 0; k < func.getArgs( ).size( ); k++ )
-					{
-						TExpression expr = func.getArgs( ).getExpression( k );
-						if ( expr != null )
-							expr.inOrderTraverse( this );
-					}
-				}
-
-				if ( func.getTrimArgument( ) != null )
-				{
-					TTrimArgument args = func.getTrimArgument( );
-					TExpression expr = args.getStringExpression( );
-					if ( expr != null )
-					{
-						expr.inOrderTraverse( this );
-					}
-					expr = args.getTrimCharacter( );
-					if ( expr != null )
-					{
-						expr.inOrderTraverse( this );
-					}
-				}
-
-				if ( func.getAgainstExpr( ) != null )
-				{
-					func.getAgainstExpr( ).inOrderTraverse( this );
-				}
-				if ( func.getBetweenExpr( ) != null )
-				{
-					func.getBetweenExpr( ).inOrderTraverse( this );
-				}
-				if ( func.getExpr1( ) != null )
-				{
-					func.getExpr1( ).inOrderTraverse( this );
-				}
-				if ( func.getExpr2( ) != null )
-				{
-					func.getExpr2( ).inOrderTraverse( this );
-				}
-				if ( func.getExpr3( ) != null )
-				{
-					func.getExpr3( ).inOrderTraverse( this );
-				}
-				if ( func.getParameter( ) != null )
-				{
-					func.getParameter( ).inOrderTraverse( this );
-				}
+//				if ( func.getArgs( ) != null )
+//				{
+//					for ( int k = 0; k < func.getArgs( ).size( ); k++ )
+//					{
+//						TExpression expr = func.getArgs( ).getExpression( k );
+//						if ( expr != null )
+//							expr.inOrderTraverse( this );
+//					}
+//				}
+//
+//				if ( func.getTrimArgument( ) != null )
+//				{
+//					TTrimArgument args = func.getTrimArgument( );
+//					TExpression expr = args.getStringExpression( );
+//					if ( expr != null )
+//					{
+//						expr.inOrderTraverse( this );
+//					}
+//					expr = args.getTrimCharacter( );
+//					if ( expr != null )
+//					{
+//						expr.inOrderTraverse( this );
+//					}
+//				}
+//
+//				if ( func.getAgainstExpr( ) != null )
+//				{
+//					func.getAgainstExpr( ).inOrderTraverse( this );
+//				}
+//				if ( func.getBetweenExpr( ) != null )
+//				{
+//					func.getBetweenExpr( ).inOrderTraverse( this );
+//				}
+//				if ( func.getExpr1( ) != null )
+//				{
+//					func.getExpr1( ).inOrderTraverse( this );
+//				}
+//				if ( func.getExpr2( ) != null )
+//				{
+//					func.getExpr2( ).inOrderTraverse( this );
+//				}
+//				if ( func.getExpr3( ) != null )
+//				{
+//					func.getExpr3( ).inOrderTraverse( this );
+//				}
+//				if ( func.getParameter( ) != null )
+//				{
+//					func.getParameter( ).inOrderTraverse( this );
+//				}
 			}
 			else if ( lcexpr.getExpressionType( ) == EExpressionType.case_t )
 			{
 				TCaseExpression expr = lcexpr.getCaseExpression( );
-				TExpression defaultExpr = expr.getElse_expr( );
-				if ( defaultExpr != null )
-				{
-					defaultExpr.inOrderTraverse( this );
-				}
-				TWhenClauseItemList list = expr.getWhenClauseItemList( );
-				for ( int i = 0; i < list.size( ); i++ )
-				{
-					TWhenClauseItem element = (TWhenClauseItem) list.getElement( i );
-					( ( (TWhenClauseItem) element ).getReturn_expr( ) ).inOrderTraverse( this );
-				}
+				functions.add(expr);
+//				TExpression defaultExpr = expr.getElse_expr( );
+//				if ( defaultExpr != null )
+//				{
+//					defaultExpr.inOrderTraverse( this );
+//				}
+//				TWhenClauseItemList list = expr.getWhenClauseItemList( );
+//				for ( int i = 0; i < list.size( ); i++ )
+//				{
+//					TWhenClauseItem element = (TWhenClauseItem) list.getElement( i );
+//					( ( (TWhenClauseItem) element ).getReturn_expr( ) ).inOrderTraverse( this );
+//			
+//				}
 			}
 			else if ( lcexpr.getSubQuery( ) != null )
 			{
@@ -6047,7 +6465,7 @@ public class DataFlowAnalyzer
 			System.out.println( "/s: Option, simple output, ignore the intermediate results." );
 			System.out.println( "/i: Option, ignore all result sets." );
 			System.out.println( "/text: Option, print the plain text format output." );
-			System.out.println( "/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum, hana and redshift, the default type is oracle" );
+			System.out.println( "/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle" );
 			System.out.println( "/o: Option, write the output stream to the specified file." );
 			System.out.println( "/log: Option, generate a dataflow.log file to log information." );
 			return;
@@ -6089,7 +6507,58 @@ public class DataFlowAnalyzer
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+			if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
+			{
+				vendor = EDbVendor.dbvmssql;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
+			{
+				vendor = EDbVendor.dbvdb2;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
+			{
+				vendor = EDbVendor.dbvmysql;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "netezza" ) )
+			{
+				vendor = EDbVendor.dbvnetezza;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "teradata" ) )
+			{
+				vendor = EDbVendor.dbvteradata;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "oracle" ) )
+			{
+				vendor = EDbVendor.dbvoracle;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "informix" ) )
+			{
+				vendor = EDbVendor.dbvinformix;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "sybase" ) )
+			{
+				vendor = EDbVendor.dbvsybase;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "postgresql" ) )
+			{
+				vendor = EDbVendor.dbvpostgresql;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "hive" ) )
+			{
+				vendor = EDbVendor.dbvhive;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "greenplum" ) )
+			{
+				vendor = EDbVendor.dbvgreenplum;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "redshift" ) )
+			{
+				vendor = EDbVendor.dbvredshift;
+			}
+			else if ( args[index + 1].equalsIgnoreCase( "snowflake" ) )
+			{
+				vendor = EDbVendor.dbvsnowflake;
+			}
 		}
 
 		String outputFile = null;

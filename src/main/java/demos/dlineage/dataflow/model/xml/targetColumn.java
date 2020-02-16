@@ -18,6 +18,12 @@ public class targetColumn
 	private String function;
 
 	@Attribute(required = false)
+	private String target_id;
+
+	@Attribute(required = false)
+	private String target_name;
+	
+	@Attribute(required = false)
 	private String parent_id;
 
 	@Attribute(required = false)
@@ -84,6 +90,22 @@ public class targetColumn
 	public void setFunction( String function )
 	{
 		this.function = function;
+	}
+
+	public String getTarget_id() {
+		return target_id;
+	}
+
+	public void setTarget_id(String target_id) {
+		this.target_id = target_id;
+	}
+
+	public String getTarget_name() {
+		return target_name;
+	}
+
+	public void setTarget_name(String target_name) {
+		this.target_name = target_name;
 	}
 
 }

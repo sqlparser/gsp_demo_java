@@ -9,8 +9,8 @@ public class SelectSetResultSet extends ResultSet {
 
     private TSelectSqlStatement selectObject;
 
-    public SelectSetResultSet(TSelectSqlStatement select) {
-        super(select, false);
+    public SelectSetResultSet(TSelectSqlStatement select, boolean isTarget) {
+        super(select, isTarget);
         this.selectObject = select;
     }
 

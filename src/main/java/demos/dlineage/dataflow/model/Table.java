@@ -100,6 +100,9 @@ public class Table {
         
         this.fullName = tableName.toString();
         this.name = tableName.getTableString();
+		if (SQLUtil.isEmpty(name)) {
+			name = tableName.toString();
+		}
         
         if (!SQLUtil.isEmpty(tableName.getSchemaString())) {
 			this.schema = tableName.getSchemaString();

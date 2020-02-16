@@ -73,6 +73,24 @@ public class ModelFactory {
         modelManager.bindModel(resultColumn, column);
         return column;
     }
+    
+	public FunctionResultColumn createFunctionResultColumn(Function function, TObjectName functionName) {
+		if (modelManager.getModel(functionName) instanceof FunctionResultColumn) {
+			return (FunctionResultColumn) modelManager.getModel(functionName);
+		}
+		FunctionResultColumn column = new FunctionResultColumn(function, functionName);
+		modelManager.bindModel(functionName, column);
+		return column;
+	}
+	
+	public FunctionResultColumn createFunctionResultColumn(Function function, TWhenClauseItemList caseFunction) {
+		if (modelManager.getModel(caseFunction) instanceof FunctionResultColumn) {
+			return (FunctionResultColumn) modelManager.getModel(caseFunction);
+		}
+		FunctionResultColumn column = new FunctionResultColumn(function, caseFunction);
+		modelManager.bindModel(caseFunction, column);
+		return column;
+	}
 
     public ResultColumn createMergeResultColumn(ResultSet resultSet,
                                                 TObjectName resultColumn) {
@@ -134,14 +152,36 @@ public class ModelFactory {
         return tableModel;
     }
     
-    public Table createSelectIntoTable(TObjectName tableName) {
-        if (modelManager.getSelectIntoModel(tableName) instanceof Table) {
+    public Table createTableByName(TObjectName tableName) {
+        if (modelManager.getTableByName(tableName) instanceof Table) {
             return (Table) modelManager.getModel(tableName);
         }
         Table tableModel = new Table(tableName);
-        modelManager.bindSelectIntoModel(tableName, tableModel);
+        modelManager.bindTableByName(tableName, tableModel);
         return tableModel;
     }
+    
+	public Function createFunction(TFunctionCall functionCall) {
+		if (modelManager.getModel(functionCall) instanceof Function) {
+			return (Function) modelManager.getModel(functionCall);
+		}
+
+		Function function = new Function(functionCall);
+		modelManager.bindModel(functionCall, function);
+
+		return function;
+	}
+	
+	public Function createFunction(TCaseExpression caseExpression) {
+		if (modelManager.getModel(caseExpression) instanceof Function) {
+			return (Function) modelManager.getModel(caseExpression);
+		}
+
+		Function function = new Function(caseExpression);
+		modelManager.bindModel(caseExpression, function);
+
+		return function;
+	}
 
     public QueryTable createQueryTable(TTable table) {
         QueryTable tableModel = null;
@@ -302,7 +342,7 @@ public class ModelFactory {
         if (modelManager.getModel(stmt) instanceof SelectSetResultSet) {
             return (SelectSetResultSet) modelManager.getModel(stmt);
         }
-        SelectSetResultSet resultSet = new SelectSetResultSet(stmt);
+        SelectSetResultSet resultSet = new SelectSetResultSet(stmt, stmt.getParentStmt() == null);
         modelManager.bindModel(stmt, resultSet);
         return resultSet;
     }

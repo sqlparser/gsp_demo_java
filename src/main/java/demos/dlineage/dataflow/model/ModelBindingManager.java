@@ -25,7 +25,7 @@ public class ModelBindingManager {
     private final Map mergeModelBindingMap = new LinkedHashMap();
     private final Map updateModelBindingMap = new LinkedHashMap();
     private final Map cursorModelBindingMap = new LinkedHashMap();
-    private final Map selectIntoBindingMap = new LinkedHashMap();
+    private final Map tableNamesMap = new LinkedHashMap();
     private final List<Relation> relationHolder = new CopyOnWriteArrayList<Relation>();
 
     private final Map<String, TTable> tableAliasMap = new HashMap();
@@ -425,9 +425,9 @@ public class ModelBindingManager {
         return null;
     }
 
-	public List<Table> getSelectIntoTables() {
+	public List<Table> getTablesByName() {
 		List<Table> tables = new ArrayList<Table>();
-		Iterator iter = selectIntoBindingMap.values().iterator();
+		Iterator iter = tableNamesMap.values().iterator();
 		while (iter.hasNext()) {
 			tables.add((Table) iter.next());
 		}
@@ -608,6 +608,21 @@ public class ModelBindingManager {
         }
         return resultSets;
     }
+    
+    public List<TParseTreeNode> getFunctoinCalls() {
+        List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TFunctionCall) && !(key instanceof TCaseExpression)) {
+                continue;
+            }
+            TParseTreeNode resultset = (TParseTreeNode) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
 
     public void addRelation(Relation relation) {
         if (relation != null && !relationHolder.contains(relation)) {
@@ -632,7 +647,7 @@ public class ModelBindingManager {
         tableSet.clear();
         tableAliasMap.clear();
         cursorModelBindingMap.clear();
-        selectIntoBindingMap.clear();
+        tableNamesMap.clear();
     }
 
     public void bindCursorModel(TCursorDeclStmt stmt,
@@ -664,13 +679,13 @@ public class ModelBindingManager {
 		return procedures;
 	}
 
-	public void bindSelectIntoModel(TObjectName tableName, Table tableModel) {
-		selectIntoBindingMap.put(tableName, tableModel);
+	public void bindTableByName(TObjectName tableName, Table tableModel) {
+		tableNamesMap.put(tableName, tableModel);
 		
 	}
 
-	public Table getSelectIntoModel(TObjectName tableName) {
-		return (Table)selectIntoBindingMap.get(tableName);
+	public Table getTableByName(TObjectName tableName) {
+		return (Table)tableNamesMap.get(tableName);
 	}
 
 }
