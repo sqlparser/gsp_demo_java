@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import demos.utils.SQLUtil;
+
 
 public class checksyntax {
 
@@ -84,7 +86,7 @@ public class checksyntax {
 
         if ( index != -1 && args.length > index + 1 )
         {
-            vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+            vendor = SQLUtil.getVendor(args[index + 1]);
 
         }
 
