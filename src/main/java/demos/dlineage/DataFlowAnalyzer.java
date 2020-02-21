@@ -5068,9 +5068,25 @@ public class DataFlowAnalyzer
 			if (functionCall.getParameter() != null) {
 				expressions.add(functionCall.getParameter());
 			}
+			if (functionCall.getWindowDef() != null && functionCall.getWindowDef().getPartitionClause()!=null) {
+				TExpressionList args = functionCall.getWindowDef().getPartitionClause().getExpressionList();
+				if (args != null) {
+					for (int k = 0; k < args.size(); k++) {
+						TExpression expr = args.getExpression(k);
+						if (expr != null) {
+							expressions.add(expr);
+						}
+					}
+				}
+			}
 		}
 		else if(gspObject instanceof TCaseExpression){
 			TCaseExpression expr = (TCaseExpression)gspObject;
+			TExpression inputExpr = expr.getInput_expr();
+			if ( inputExpr != null )
+			{
+				expressions.add(inputExpr);
+			}
 			TExpression defaultExpr = expr.getElse_expr( );
 			if ( defaultExpr != null )
 			{
