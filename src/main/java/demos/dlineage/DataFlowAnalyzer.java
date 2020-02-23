@@ -613,25 +613,39 @@ public class DataFlowAnalyzer {
 		return buffer.toString();
 	}
 
+	private String mergeRelationType(List<Pair<sourceColumn, List<String>>> typePaths) {
+		RelationType relationType = RelationType.join;
+		for (int i = 0; i < typePaths.size(); i++) {
+			List<String> path = typePaths.get(i).second;
+			RelationType type = RelationType.valueOf(getRelationType(path));
+			if(type.ordinal()< relationType.ordinal()){
+				relationType = type;
+			}
+		}
+		return relationType.name();
+	}
+	
 	private String getRelationType(List<String> typePaths) {
-		if (typePaths.contains("fdr"))
-			return "fdr";
-		if (typePaths.contains("frd"))
-			return "frd";
-		if (typePaths.contains("fddi"))
-			return "fddi";
 		if (typePaths.contains("join"))
 			return "join";
+		if (typePaths.contains("frd"))
+			return "frd";
+		if (typePaths.contains("fdr"))
+			return "fdr";
+		if (typePaths.contains("fddi"))
+			return "fddi";
 		return "fdd";
 	}
 
 	public dataflow getSimpleDataflow(dataflow instance) throws Exception {
-
+		targetTables.clear();
 		dataflow simple = new dataflow();
 		List<relation> simpleRelations = new ArrayList<relation>();
 		List<relation> relations = instance.getRelations();
 		if (relations != null) {
-			relations = relations.stream().filter(t -> "fdd".equals(t.getType())).collect(Collectors.toList());
+			if (relations.size() > 5000) {
+				relations = relations.stream().filter(t -> "fdd".equals(t.getType())).collect(Collectors.toList());
+			}
 			Map<String, Set<relation>> targetIdRelationMap = new HashMap<>();
 			for (relation relation : relations) {
 				if (relation.getTarget() != null) {
@@ -646,19 +660,20 @@ public class DataFlowAnalyzer {
 				targetColumn target = relationElem.getTarget();
 				String targetParent = target.getParent_id();
 				if (isTarget(instance, targetParent)) {
-					Map<sourceColumn, List<String>> relationSources = new LinkedHashMap<sourceColumn, List<String>>();
+					List<Pair<sourceColumn, List<String>>> relationSources = new ArrayList<>();
 
 					findSourceRaltionCondition.clear();
 
 					findSourceRaltions(instance, targetIdRelationMap, relationElem, relationSources,
 							new String[] { relationElem.getType() });
 					if (relationSources.size() > 0) {
-						Iterator<sourceColumn> iter = relationSources.keySet().iterator();
+						Map<sourceColumn, List<Pair<sourceColumn, List<String>>>> columnMap = relationSources.stream().collect(Collectors.groupingBy(t->((Pair<sourceColumn, List<String>>)t).first));
+						Iterator<sourceColumn> iter = columnMap.keySet().iterator();
 						while (iter.hasNext()) {
 							sourceColumn column = iter.next();
 							relation simpleRelation = (relation) relationElem.clone();
 							simpleRelation.setSources(Arrays.asList(column));
-							simpleRelation.setType(getRelationType(relationSources.get(column)));
+							simpleRelation.setType(mergeRelationType(columnMap.get(column)));
 							simpleRelation.setId(String.valueOf(++ModelBindingManager.get().RELATION_ID));
 							simpleRelations.add(simpleRelation);
 						}
@@ -686,7 +701,7 @@ public class DataFlowAnalyzer {
 	private Set<String> findSourceRaltionCondition = new HashSet<>();
 
 	private void findSourceRaltions(dataflow instance, Map<String, Set<relation>> sourceIdRelationMap,
-			relation targetRelation, Map<sourceColumn, List<String>> relationSources, String[] pathTypes) {
+			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes) {
 		if (targetRelation != null && targetRelation.getSources() != null) {
 			for (int i = 0; i < targetRelation.getSources().size(); i++) {
 				sourceColumn source = targetRelation.getSources().get(i);
@@ -696,13 +711,13 @@ public class DataFlowAnalyzer {
 					continue;
 				}
 				if (isTarget(instance, sourceParentId)) {
-					relationSources.put(source, Arrays.asList(pathTypes));
+					relationSources.add(new Pair<sourceColumn, List<String>>(source, Arrays.asList(pathTypes)));
 				} else {
 					Set<relation> sourceRelations = sourceIdRelationMap
 							.get(source.getParent_id() + "." + source.getId());
 					if (sourceRelations != null) {
 						for (relation relation : sourceRelations) {
-							String key = sourceParentId + ":" + sourceColumnId;
+							String key = sourceParentId + ":" + sourceColumnId + ":" + relation.getType();
 							/*
 							 * 此处Function需要特殊处理，因为function
 							 * relation，总是一个target对应一个source,
@@ -2230,9 +2245,10 @@ public class DataFlowAnalyzer {
 
 	private void appendRelations(Document doc, Element dlineageResult) {
 		Relation[] relations = modelManager.getRelations();
-		if (simpleOutput || ignoreRecordSet) {
-			appendRelation(doc, dlineageResult, relations, DataFlowRelation.class);
-		} else {
+//		if (simpleOutput || ignoreRecordSet) {
+//			appendRelation(doc, dlineageResult, relations, DataFlowRelation.class);
+//		} else
+		{
 			appendRelation(doc, dlineageResult, relations, DataFlowRelation.class);
 			appendRelation(doc, dlineageResult, relations, IndirectImpactRelation.class);
 			appendRecordSetRelation(doc, dlineageResult, relations);
@@ -4352,20 +4368,12 @@ public class DataFlowAnalyzer {
 				TResultColumn column = columns.getResultColumn(i);
 
 				AbstractRelation relation;
-				AbstractRelation functoinRelation = null;
 				if (isAggregateFunction(column.getExpr().getFunctionCall())) {
 					relation = modelFactory.createRecordSetRelation();
 					relation.setEffectType(effectType);
 					relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 					relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
 					((RecordSetRelation) relation)
-							.setAggregateFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-
-					functoinRelation = modelFactory.createRecordSetRelation();
-					functoinRelation.setEffectType(EffectType.function);
-					functoinRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-							.getModel(column.getExpr().getFunctionCall().getFunctionName())));
-					((RecordSetRelation) functoinRelation)
 							.setAggregateFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
 				} else {
 					relation = modelFactory.createImpactRelation();
@@ -4381,18 +4389,6 @@ public class DataFlowAnalyzer {
 					} else {
 						relation.setTarget(
 								new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-					}
-
-					if (column.getExpr().getFunctionCall() != null) {
-						functoinRelation = modelFactory.createImpactRelation();
-						functoinRelation.setEffectType(EffectType.function);
-						functoinRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-								.getModel(column.getExpr().getFunctionCall().getFunctionName())));
-					} else if (column.getExpr().getCaseExpression() != null) {
-						functoinRelation = modelFactory.createImpactRelation();
-						functoinRelation.setEffectType(EffectType.function);
-						functoinRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-								.getModel(column.getExpr().getCaseExpression().getWhenClauseItemList())));
 					}
 				}
 
@@ -4411,10 +4407,6 @@ public class DataFlowAnalyzer {
 								TableColumnRelationElement element = new TableColumnRelationElement(columnModel,
 										columnName.getLocation());
 								relation.addSource(element);
-
-								if (functoinRelation != null) {
-									functoinRelation.addSource(element);
-								}
 							}
 						} else if (modelManager.getModel(table) instanceof QueryTable) {
 							ResultColumn resultColumn = (ResultColumn) modelManager
@@ -4423,9 +4415,6 @@ public class DataFlowAnalyzer {
 								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
 										columnName.getLocation());
 								relation.addSource(element);
-								if (functoinRelation != null) {
-									functoinRelation.addSource(element);
-								}
 							}
 						}
 					}
@@ -4444,9 +4433,6 @@ public class DataFlowAnalyzer {
 								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
 										((TFunctionCall) functionObj).getFunctionName().getLocation());
 								relation.addSource(element);
-								if (functoinRelation != null) {
-									functoinRelation.addSource(element);
-								}
 							}
 						}
 						if (functionObj instanceof TCaseExpression) {
@@ -4455,9 +4441,6 @@ public class DataFlowAnalyzer {
 							if (resultColumn != null) {
 								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
 								relation.addSource(element);
-								if (functoinRelation != null) {
-									functoinRelation.addSource(element);
-								}
 							}
 						}
 					}
