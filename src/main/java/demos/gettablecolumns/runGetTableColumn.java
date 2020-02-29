@@ -8,6 +8,7 @@ import java.util.List;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
@@ -201,66 +202,8 @@ public class runGetTableColumn
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				vendor = EDbVendor.dbvmssql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
-			{
-				vendor = EDbVendor.dbvdb2;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
-			{
-				vendor = EDbVendor.dbvmysql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "netezza" ) )
-			{
-				vendor = EDbVendor.dbvnetezza;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "teradata" ) )
-			{
-				vendor = EDbVendor.dbvteradata;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "oracle" ) )
-			{
-				vendor = EDbVendor.dbvoracle;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "informix" ) )
-			{
-				vendor = EDbVendor.dbvinformix;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "sybase" ) )
-			{
-				vendor = EDbVendor.dbvsybase;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "postgresql" ) )
-			{
-				vendor = EDbVendor.dbvpostgresql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "hive" ) )
-			{
-				vendor = EDbVendor.dbvhive;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "greenplum" ) )
-			{
-				vendor = EDbVendor.dbvgreenplum;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "redshift" ) )
-			{
-				vendor = EDbVendor.dbvredshift;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "bigquery" ) )
-			{
-				vendor = EDbVendor.dbvbigquery;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "couchbase" ) )
-			{
-				vendor = EDbVendor.dbvcouchbase;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "snowflake" ) )
-			{
-				vendor = EDbVendor.dbvsnowflake;
-			}
+			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+
 		}
 
 		System.out.println("Processing "+vendor.toString()+"...");

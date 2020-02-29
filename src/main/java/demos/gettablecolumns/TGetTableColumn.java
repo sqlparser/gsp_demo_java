@@ -569,6 +569,14 @@ public class TGetTableColumn{
 						+ lcTable.getAliasName( )
 						+ ")";
 			}
+            else if ( lcTable.getTableType( ) == ETableSource.openquery )
+            {
+                tn = "(table openquery, alias:"
+                        + lcTable.getAliasName( )
+                        + ")";
+
+                analyzeStmt(lcTable.getSubquery(),pNest++);
+            }
 			else if ( lcTable.getTableName( ) != null )
 			{
 				tn = lcTable.getTableName( ).toString( );
@@ -595,7 +603,7 @@ public class TGetTableColumn{
 
                 tableColumnList.append(","+tn);
 
-                if (!((lcTable.getTableType() == ETableSource.subquery) || (lcTable.isCTEName())) && lcTable.getTableName()!=null) {
+                if (!((lcTable.getTableType() == ETableSource.subquery) || (lcTable.isCTEName())||(lcTable.getTableType() == ETableSource.openquery)) && lcTable.getTableName()!=null) {
                    if (lcTable.isLinkTable()){
                       // tablelist.append(lcTable.getLinkTable().toString()+newline);
                        tablelist.add(lcTable.getLinkTable().toString());
