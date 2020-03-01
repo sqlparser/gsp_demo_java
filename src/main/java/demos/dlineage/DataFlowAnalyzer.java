@@ -47,8 +47,9 @@ import demos.dlineage.dataflow.model.JoinRelation.JoinClauseType;
 import demos.dlineage.dataflow.model.ModelBindingManager;
 import demos.dlineage.dataflow.model.ModelFactory;
 import demos.dlineage.dataflow.model.Procedure;
+import demos.dlineage.dataflow.model.PseduoRows;
+import demos.dlineage.dataflow.model.PseduoRowsRelationElement;
 import demos.dlineage.dataflow.model.QueryTable;
-import demos.dlineage.dataflow.model.QueryTableRelationElement;
 import demos.dlineage.dataflow.model.RecordSetRelation;
 import demos.dlineage.dataflow.model.Relation;
 import demos.dlineage.dataflow.model.RelationElement;
@@ -56,15 +57,17 @@ import demos.dlineage.dataflow.model.RelationType;
 import demos.dlineage.dataflow.model.ResultColumn;
 import demos.dlineage.dataflow.model.ResultColumnRelationElement;
 import demos.dlineage.dataflow.model.ResultSet;
+import demos.dlineage.dataflow.model.ResultSetPseduoRows;
 import demos.dlineage.dataflow.model.SelectResultSet;
 import demos.dlineage.dataflow.model.SelectSetResultSet;
 import demos.dlineage.dataflow.model.Table;
 import demos.dlineage.dataflow.model.TableColumn;
 import demos.dlineage.dataflow.model.TableColumnRelationElement;
-import demos.dlineage.dataflow.model.TableRelationElement;
+import demos.dlineage.dataflow.model.TablePseduoRows;
 import demos.dlineage.dataflow.model.View;
 import demos.dlineage.dataflow.model.ViewColumn;
 import demos.dlineage.dataflow.model.ViewColumnRelationElement;
+import demos.dlineage.dataflow.model.ViewPseduoRows;
 import demos.dlineage.dataflow.model.xml.column;
 import demos.dlineage.dataflow.model.xml.dataflow;
 import demos.dlineage.dataflow.model.xml.relation;
@@ -628,10 +631,10 @@ public class DataFlowAnalyzer {
 	private String getRelationType(List<String> typePaths) {
 		if (typePaths.contains("join"))
 			return "join";
-		if (typePaths.contains("frd"))
-			return "frd";
 		if (typePaths.contains("fdr"))
 			return "fdr";
+		if (typePaths.contains("frd"))
+			return "frd";
 		if (typePaths.contains("fddi"))
 			return "fddi";
 		return "fdd";
@@ -643,9 +646,9 @@ public class DataFlowAnalyzer {
 		List<relation> simpleRelations = new ArrayList<relation>();
 		List<relation> relations = instance.getRelations();
 		if (relations != null) {
-			if (relations.size() > 5000) {
-				relations = relations.stream().filter(t -> "fdd".equals(t.getType())).collect(Collectors.toList());
-			}
+//			if (relations.size() > 1000) {
+//				relations = relations.stream().filter(t -> "fdd".equals(t.getType())).collect(Collectors.toList());
+//			}
 			Map<String, Set<relation>> targetIdRelationMap = new HashMap<>();
 			for (relation relation : relations) {
 				if (relation.getTarget() != null) {
@@ -963,8 +966,8 @@ public class DataFlowAnalyzer {
 						DataFlowRelation realtion = modelFactory.createDataFlowRelation();
 						realtion.setEffectType(option.getOptionType() == EAlterTableOptionType.RenameTable
 								? EffectType.rename_table : EffectType.swap_table);
-						realtion.setTarget(new TableRelationElement(newNameTableModel));
-						realtion.addSource(new TableRelationElement(oldNameTableModel));
+						realtion.setTarget(new PseduoRowsRelationElement<TablePseduoRows>(newNameTableModel.getPseduoRows()));
+						realtion.addSource(new PseduoRowsRelationElement<TablePseduoRows>(oldNameTableModel.getPseduoRows()));
 						containsTable = true;
 					}
 				}
@@ -973,8 +976,9 @@ public class DataFlowAnalyzer {
 					DataFlowRelation realtion = modelFactory.createDataFlowRelation();
 					realtion.setEffectType(option.getOptionType() == EAlterTableOptionType.RenameTable
 							? EffectType.rename_table : EffectType.swap_table);
-					realtion.setTarget(new TableRelationElement(newNameTableModel));
-					realtion.addSource(new TableRelationElement(oldNameTableModel));
+					realtion.setTarget(new PseduoRowsRelationElement<TablePseduoRows>(newNameTableModel.getPseduoRows()));
+					realtion.addSource(new PseduoRowsRelationElement<TablePseduoRows>(oldNameTableModel.getPseduoRows()));
+					
 				}
 			}
 		}
@@ -2311,7 +2315,24 @@ public class DataFlowAnalyzer {
 				String targetName = null;
 				List<TObjectName> targetObjectNames = null;
 
-				if (targetElement instanceof ResultColumn) {
+				if (targetElement instanceof ResultSetPseduoRows) {
+					ResultSetPseduoRows targetColumn = (ResultSetPseduoRows) targetElement;
+					Element target = doc.createElement("target");
+					target.setAttribute("id", String.valueOf(targetColumn.getId()));
+					target.setAttribute("column", targetColumn.getName());
+					target.setAttribute("parent_id", String.valueOf(targetColumn.getHolder().getId()));
+					target.setAttribute("parent_name", getResultSetName(targetColumn.getHolder()));
+					if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
+						target.setAttribute("coordinate",
+								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+					}
+					if (relation instanceof RecordSetRelation) {
+						target.setAttribute("function", ((RecordSetRelation) relation).getAggregateFunction());
+					}
+					targetName = targetColumn.getName();
+					relationElement.appendChild(target);
+				}
+				else if (targetElement instanceof ResultColumn) {
 					ResultColumn targetColumn = (ResultColumn) targetElement;
 					Element target = doc.createElement("target");
 					target.setAttribute("id", String.valueOf(targetColumn.getId()));
@@ -2714,7 +2735,21 @@ public class DataFlowAnalyzer {
 								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
 					}
 					relationElement.appendChild(target);
-				} else {
+				} else if (targetElement instanceof ViewColumn) {
+					ViewColumn targetColumn = (ViewColumn) targetElement;
+					Element target = doc.createElement("target");
+					target.setAttribute("id", String.valueOf(targetColumn.getId()));
+					target.setAttribute("column", targetColumn.getName());
+					target.setAttribute("function", recordCountRelation.getAggregateFunction());
+					target.setAttribute("parent_id", String.valueOf(targetColumn.getView().getId()));
+					target.setAttribute("parent_name", getViewName(targetColumn.getView()));
+					if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
+						target.setAttribute("coordinate",
+								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+					}
+					relationElement.appendChild(target);
+				}  
+				else {
 					continue;
 				}
 
@@ -2743,6 +2778,42 @@ public class DataFlowAnalyzer {
 						source.setAttribute("source_name", getResultSetName(table));
 						if (table.getStartPosition() != null && table.getEndPosition() != null) {
 							source.setAttribute("coordinate", table.getStartPosition() + "," + table.getEndPosition());
+						}
+						append = true;
+						relationElement.appendChild(source);
+					} else if (sourceElement instanceof TablePseduoRows) {
+						TablePseduoRows pseduoRows = (TablePseduoRows) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(pseduoRows.getId()));
+						source.setAttribute("column", pseduoRows.getName());
+						source.setAttribute("parent_id", String.valueOf(pseduoRows.getHolder().getId()));
+						source.setAttribute("parent_name", getTableName(pseduoRows.getHolder()));
+						if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+							source.setAttribute("coordinate", pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
+						}
+						append = true;
+						relationElement.appendChild(source);
+					} else if (sourceElement instanceof ViewPseduoRows) {
+						ViewPseduoRows pseduoRows = (ViewPseduoRows) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(pseduoRows.getId()));
+						source.setAttribute("column", pseduoRows.getName());
+						source.setAttribute("parent_id", String.valueOf(pseduoRows.getHolder().getId()));
+						source.setAttribute("parent_name", getViewName(pseduoRows.getHolder()));
+						if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+							source.setAttribute("coordinate", pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
+						}
+						append = true;
+						relationElement.appendChild(source);
+					} else if (sourceElement instanceof ResultSetPseduoRows) {
+						ResultSetPseduoRows pseduoRows = (ResultSetPseduoRows) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(pseduoRows.getId()));
+						source.setAttribute("column", pseduoRows.getName());
+						source.setAttribute("parent_id", String.valueOf(pseduoRows.getHolder().getId()));
+						source.setAttribute("parent_name", getResultSetName(pseduoRows.getHolder()));
+						if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+							source.setAttribute("coordinate", pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
 						}
 						append = true;
 						relationElement.appendChild(source);
@@ -2835,6 +2906,16 @@ public class DataFlowAnalyzer {
 				resultSetElement.appendChild(columnElement);
 			}
 		}
+		
+		ResultSetPseduoRows pseduoRows = resultSetModel.getPseduoRows();
+		Element pseduoRowsElement = doc.createElement("column");
+		pseduoRowsElement.setAttribute("id", String.valueOf(pseduoRows.getId()));
+		pseduoRowsElement.setAttribute("name", pseduoRows.getName());
+		if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+			pseduoRowsElement.setAttribute("coordinate",
+					pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
+		}
+		resultSetElement.appendChild(pseduoRowsElement);
 	}
 
 	private String getResultSetType(ResultSet resultSetModel) {
@@ -2894,6 +2975,17 @@ public class DataFlowAnalyzer {
 			tableName = getResultSetDisplayId("RS");
 		}
 		return tableName;
+	}
+
+	private String getViewName(View viewModel) {
+		String viewName;
+		if (viewModel.getFullName() != null && viewModel.getFullName().trim().length() > 0) {
+			return viewModel.getFullName();
+		}
+		
+		viewName = getResultSetDisplayId("RS");
+		
+		return viewName;
 	}
 
 	private String getResultSetName(ResultSet resultSetModel) {
@@ -3026,6 +3118,16 @@ public class DataFlowAnalyzer {
 					viewElement.appendChild(columnElement);
 				}
 			}
+			
+			ViewPseduoRows pseduoRows = viewModel.getPseduoRows();
+			Element pseduoRowsElement = doc.createElement("column");
+			pseduoRowsElement.setAttribute("id", String.valueOf(pseduoRows.getId()));
+			pseduoRowsElement.setAttribute("name", pseduoRows.getName());
+			if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+				pseduoRowsElement.setAttribute("coordinate",
+						pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
+			}
+			viewElement.appendChild(pseduoRowsElement);
 		}
 	}
 
@@ -3145,6 +3247,16 @@ public class DataFlowAnalyzer {
 				tableElement.appendChild(columnElement);
 			}
 		}
+		
+		TablePseduoRows pseduoRows = tableModel.getPseduoRows();
+		Element pseduoRowsElement = doc.createElement("column");
+		pseduoRowsElement.setAttribute("id", String.valueOf(pseduoRows.getId()));
+		pseduoRowsElement.setAttribute("name", pseduoRows.getName());
+		if (pseduoRows.getStartPosition() != null && pseduoRows.getEndPosition() != null) {
+			pseduoRowsElement.setAttribute("coordinate",
+					pseduoRows.getStartPosition() + "," + pseduoRows.getEndPosition());
+		}
+		tableElement.appendChild(pseduoRowsElement);
 	}
 
 	private void analyzeSelectStmt(TSelectSqlStatement stmt) {
@@ -3920,10 +4032,10 @@ public class DataFlowAnalyzer {
 		if (aggregateFunctions.size() == 0)
 			return;
 
-		RecordSetRelation relation = modelFactory.createRecordSetRelation();
-		relation.setEffectType(effectType);
-		relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-		relation.setFunction(aggregateFunctions.get(0).getFunctionName().toString());
+//		RecordSetRelation relation = modelFactory.createRecordSetRelation();
+//		relation.setEffectType(effectType);
+//		relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+//		relation.setFunction(aggregateFunctions.get(0).getFunctionName().toString());
 		for (int i = 0; i < aggregateFunctions.size(); i++) {
 			TFunctionCall function = aggregateFunctions.get(i);
 			RecordSetRelation functionRelation = modelFactory.createRecordSetRelation();
@@ -3936,15 +4048,23 @@ public class DataFlowAnalyzer {
 				Object tableObject = modelManager.getModel(stmtStack.peek().getTables().getTable(0));
 				if (tableObject instanceof Table) {
 					Table tableModel = (Table) tableObject;
-					relation.addSource(new TableRelationElement(tableModel));
-					relation.setAggregateFunction(function.getFunctionName().toString());
-					functionRelation.addSource(new TableRelationElement(tableModel));
+//					relation.addSource(new PseduoRowsRelationElement<TablePseduoRows>(tableModel.getPseduoRows()));
+//					relation.setAggregateFunction(function.getFunctionName().toString());
+					functionRelation.addSource(new PseduoRowsRelationElement<TablePseduoRows>(tableModel.getPseduoRows()));
 					functionRelation.setAggregateFunction(function.getFunctionName().toString());
-				} else if (tableObject instanceof QueryTable) {
+				}
+				else if (tableObject instanceof View) {
+					View tableModel = (View) tableObject;
+//					relation.addSource(new PseduoRowsRelationElement<ViewPseduoRows>(tableModel.getPseduoRows()));
+//					relation.setAggregateFunction(function.getFunctionName().toString());
+					functionRelation.addSource(new PseduoRowsRelationElement<ViewPseduoRows>(tableModel.getPseduoRows()));
+					functionRelation.setAggregateFunction(function.getFunctionName().toString());
+				}
+				else if (tableObject instanceof QueryTable) {
 					QueryTable tableModel = (QueryTable) tableObject;
-					relation.addSource(new QueryTableRelationElement(tableModel));
-					relation.setAggregateFunction(function.getFunctionName().toString());
-					functionRelation.addSource(new QueryTableRelationElement(tableModel));
+//					relation.addSource(new PseduoRowsRelationElement<ResultSetPseduoRows>(tableModel.getPseduoRows()));
+//					relation.setAggregateFunction(function.getFunctionName().toString());
+					functionRelation.addSource(new PseduoRowsRelationElement<ResultSetPseduoRows>(tableModel.getPseduoRows()));
 					functionRelation.setAggregateFunction(function.getFunctionName().toString());
 				}
 			}
@@ -4277,16 +4397,16 @@ public class DataFlowAnalyzer {
 		TResultColumnList columns = stmt.getResultColumnList();
 		for (int i = 0; i < columns.size(); i++) {
 			TResultColumn column = columns.getResultColumn(i);
-			AbstractRelation relation;
+//			AbstractRelation relation;
 			AbstractRelation functionRelation = null;
 			if (isAggregateFunction(column.getExpr().getFunctionCall())) {
-				relation = modelFactory.createRecordSetRelation();
-				relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-				relation.setEffectType(effectType);
-
+//				relation = modelFactory.createRecordSetRelation();
+//				relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+//				relation.setEffectType(effectType);
+//
 				TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
-				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-				((RecordSetRelation) relation).setAggregateFunction(functionName.toString());
+//				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+//				((RecordSetRelation) relation).setAggregateFunction(functionName.toString());
 
 				functionRelation = modelFactory.createRecordSetRelation();
 				functionRelation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
@@ -4294,25 +4414,26 @@ public class DataFlowAnalyzer {
 				functionRelation
 						.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
 				((RecordSetRelation) functionRelation).setAggregateFunction(functionName.toString());
-			} else {
-				relation = modelFactory.createImpactRelation();
-				relation.setEffectType(effectType);
-				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-
-				if (column.getExpr().getFunctionCall() != null) {
-					functionRelation = modelFactory.createImpactRelation();
-					TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
-					functionRelation.setTarget(
-							new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
-					functionRelation.setEffectType(EffectType.function);
-				}
-				if (column.getExpr().getCaseExpression() != null) {
-					functionRelation = modelFactory.createImpactRelation();
-					functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-							.getModel(column.getExpr().getCaseExpression().getWhenClauseItemList())));
-					functionRelation.setEffectType(EffectType.function);
-				}
-			}
+			} 
+//			else {
+//				relation = modelFactory.createImpactRelation();
+//				relation.setEffectType(effectType);
+//				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+//
+//				if (column.getExpr().getFunctionCall() != null) {
+//					functionRelation = modelFactory.createImpactRelation();
+//					TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
+//					functionRelation.setTarget(
+//							new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
+//					functionRelation.setEffectType(EffectType.function);
+//				}
+//				if (column.getExpr().getCaseExpression() != null) {
+//					functionRelation = modelFactory.createImpactRelation();
+//					functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
+//							.getModel(column.getExpr().getCaseExpression().getWhenClauseItemList())));
+//					functionRelation.setEffectType(EffectType.function);
+//				}
+//			}
 
 			for (int j = 0; j < objectNames.size(); j++) {
 				TObjectName columnName = objectNames.get(j);
@@ -4327,7 +4448,7 @@ public class DataFlowAnalyzer {
 						Table tableModel = (Table) modelManager.getModel(table);
 						if (tableModel != null) {
 							TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName);
-							relation.addSource(new TableColumnRelationElement(columnModel, columnName.getLocation()));
+//							relation.addSource(new TableColumnRelationElement(columnModel, columnName.getLocation()));
 							if (functionRelation != null) {
 								functionRelation.addSource(
 										new TableColumnRelationElement(columnModel, columnName.getLocation()));
@@ -4336,7 +4457,7 @@ public class DataFlowAnalyzer {
 					} else if (modelManager.getModel(table) instanceof QueryTable) {
 						ResultColumn resultColumn = (ResultColumn) modelManager.getModel(columnName.getSourceColumn());
 						if (resultColumn != null) {
-							relation.addSource(new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
+//							relation.addSource(new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
 							if (functionRelation != null) {
 								functionRelation.addSource(
 										new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
@@ -4361,93 +4482,157 @@ public class DataFlowAnalyzer {
 
 		List<TObjectName> objectNames = visitor.getObjectNames();
 		List<TParseTreeNode> functions = visitor.getFunctions();
-
-		TResultColumnList columns = stmt.getResultColumnList();
-		if (columns != null) {
-			for (int i = 0; i < columns.size(); i++) {
-				TResultColumn column = columns.getResultColumn(i);
-
-				AbstractRelation relation;
-				if (isAggregateFunction(column.getExpr().getFunctionCall())) {
-					relation = modelFactory.createRecordSetRelation();
-					relation.setEffectType(effectType);
-					relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-					relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-					((RecordSetRelation) relation)
-							.setAggregateFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-				} else {
-					relation = modelFactory.createImpactRelation();
-					relation.setEffectType(effectType);
-					if (column.getExpr().getFunctionCall() != null) {
-						relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-					} else if (column.getExpr().getCaseExpression() != null) {
-						relation.setFunction("case-when");
+		
+		ResultSet resultSet = (ResultSet) modelManager.getModel(stmt.getResultColumnList());
+		if(resultSet == null){
+			return;
+		}
+		
+		ImpactRelation relation = modelFactory.createImpactRelation();
+		relation.setEffectType(effectType);
+		relation.setTarget(
+				new PseduoRowsRelationElement<ResultSetPseduoRows>(resultSet.getPseduoRows()));
+		
+		for (int j = 0; j < objectNames.size(); j++) {
+			TObjectName columnName = objectNames.get(j);
+			if (columnName.getDbObjectType() == EDbObjectType.variable) {
+				continue;
+			}
+	
+			TTable table = modelManager.getTable(stmt, columnName);
+			if (table != null) {
+				if (modelManager.getModel(table) instanceof Table) {
+					Table tableModel = (Table) modelManager.getModel(table);
+					if (tableModel != null) {
+						TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName);
+						TableColumnRelationElement element = new TableColumnRelationElement(columnModel,
+								columnName.getLocation());
+						relation.addSource(element);
 					}
-					if (column.getExpr().getExpressionType() == EExpressionType.assignment_t) {
-						relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-								.getModel(column.getExpr().getLeftOperand().getObjectOperand())));
-					} else {
-						relation.setTarget(
-								new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-					}
-				}
-
-				for (int j = 0; j < objectNames.size(); j++) {
-					TObjectName columnName = objectNames.get(j);
-					if (columnName.getDbObjectType() == EDbObjectType.variable) {
-						continue;
-					}
-
-					TTable table = modelManager.getTable(stmt, columnName);
-					if (table != null) {
-						if (modelManager.getModel(table) instanceof Table) {
-							Table tableModel = (Table) modelManager.getModel(table);
-							if (tableModel != null) {
-								TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName);
-								TableColumnRelationElement element = new TableColumnRelationElement(columnModel,
-										columnName.getLocation());
-								relation.addSource(element);
-							}
-						} else if (modelManager.getModel(table) instanceof QueryTable) {
-							ResultColumn resultColumn = (ResultColumn) modelManager
-									.getModel(columnName.getSourceColumn());
-							if (resultColumn != null) {
-								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
-										columnName.getLocation());
-								relation.addSource(element);
-							}
-						}
-					}
-				}
-
-				for (int j = 0; j < functions.size(); j++) {
-					TParseTreeNode functionObj = functions.get(j);
-					if (modelManager.getModel(functionObj) == null) {
-						createFunction(functionObj);
-					}
-					if (modelManager.getModel(functionObj) instanceof Function) {
-						if (functionObj instanceof TFunctionCall) {
-							ResultColumn resultColumn = (ResultColumn) modelManager
-									.getModel(((TFunctionCall) functionObj).getFunctionName());
-							if (resultColumn != null) {
-								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
-										((TFunctionCall) functionObj).getFunctionName().getLocation());
-								relation.addSource(element);
-							}
-						}
-						if (functionObj instanceof TCaseExpression) {
-							ResultColumn resultColumn = (ResultColumn) modelManager
-									.getModel(((TCaseExpression) functionObj).getWhenClauseItemList());
-							if (resultColumn != null) {
-								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
-								relation.addSource(element);
-							}
-						}
+				} else if (modelManager.getModel(table) instanceof QueryTable) {
+					ResultColumn resultColumn = (ResultColumn) modelManager
+							.getModel(columnName.getSourceColumn());
+					if (resultColumn != null) {
+						ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+								columnName.getLocation());
+						relation.addSource(element);
 					}
 				}
 			}
-
 		}
+
+		for (int j = 0; j < functions.size(); j++) {
+			TParseTreeNode functionObj = functions.get(j);
+			if (modelManager.getModel(functionObj) == null) {
+				createFunction(functionObj);
+			}
+			if (modelManager.getModel(functionObj) instanceof Function) {
+				if (functionObj instanceof TFunctionCall) {
+					ResultColumn resultColumn = (ResultColumn) modelManager
+							.getModel(((TFunctionCall) functionObj).getFunctionName());
+					if (resultColumn != null) {
+						ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+								((TFunctionCall) functionObj).getFunctionName().getLocation());
+						relation.addSource(element);
+					}
+				}
+				if (functionObj instanceof TCaseExpression) {
+					ResultColumn resultColumn = (ResultColumn) modelManager
+							.getModel(((TCaseExpression) functionObj).getWhenClauseItemList());
+					if (resultColumn != null) {
+						ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
+						relation.addSource(element);
+					}
+				}
+			}
+		}
+
+//		TResultColumnList columns = stmt.getResultColumnList();
+//		if (columns != null) {
+//			for (int i = 0; i < columns.size(); i++) {
+//				TResultColumn column = columns.getResultColumn(i);
+//
+//				AbstractRelation relation;
+//				if (isAggregateFunction(column.getExpr().getFunctionCall())) {
+//					relation = modelFactory.createRecordSetRelation();
+//					relation.setEffectType(effectType);
+//					relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+//					relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+//					((RecordSetRelation) relation)
+//							.setAggregateFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+//				} else {
+//					relation = modelFactory.createImpactRelation();
+//					relation.setEffectType(effectType);
+//					if (column.getExpr().getFunctionCall() != null) {
+//						relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
+//					} else if (column.getExpr().getCaseExpression() != null) {
+//						relation.setFunction("case-when");
+//					}
+//					if (column.getExpr().getExpressionType() == EExpressionType.assignment_t) {
+//						relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
+//								.getModel(column.getExpr().getLeftOperand().getObjectOperand())));
+//					} else {
+//						relation.setTarget(
+//								new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
+//					}
+//				}
+//
+//				for (int j = 0; j < objectNames.size(); j++) {
+//					TObjectName columnName = objectNames.get(j);
+//					if (columnName.getDbObjectType() == EDbObjectType.variable) {
+//						continue;
+//					}
+//
+//					TTable table = modelManager.getTable(stmt, columnName);
+//					if (table != null) {
+//						if (modelManager.getModel(table) instanceof Table) {
+//							Table tableModel = (Table) modelManager.getModel(table);
+//							if (tableModel != null) {
+//								TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName);
+//								TableColumnRelationElement element = new TableColumnRelationElement(columnModel,
+//										columnName.getLocation());
+//								relation.addSource(element);
+//							}
+//						} else if (modelManager.getModel(table) instanceof QueryTable) {
+//							ResultColumn resultColumn = (ResultColumn) modelManager
+//									.getModel(columnName.getSourceColumn());
+//							if (resultColumn != null) {
+//								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+//										columnName.getLocation());
+//								relation.addSource(element);
+//							}
+//						}
+//					}
+//				}
+//
+//				for (int j = 0; j < functions.size(); j++) {
+//					TParseTreeNode functionObj = functions.get(j);
+//					if (modelManager.getModel(functionObj) == null) {
+//						createFunction(functionObj);
+//					}
+//					if (modelManager.getModel(functionObj) instanceof Function) {
+//						if (functionObj instanceof TFunctionCall) {
+//							ResultColumn resultColumn = (ResultColumn) modelManager
+//									.getModel(((TFunctionCall) functionObj).getFunctionName());
+//							if (resultColumn != null) {
+//								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+//										((TFunctionCall) functionObj).getFunctionName().getLocation());
+//								relation.addSource(element);
+//							}
+//						}
+//						if (functionObj instanceof TCaseExpression) {
+//							ResultColumn resultColumn = (ResultColumn) modelManager
+//									.getModel(((TCaseExpression) functionObj).getWhenClauseItemList());
+//							if (resultColumn != null) {
+//								ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
+//								relation.addSource(element);
+//							}
+//						}
+//					}
+//				}
+//			}
+//
+//		}
 
 		if (isShowJoin()) {
 			joinInExpr joinVisitor = new joinInExpr(joinType, joinClauseType, effectType);

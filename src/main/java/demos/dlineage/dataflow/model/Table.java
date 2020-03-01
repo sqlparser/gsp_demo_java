@@ -29,6 +29,10 @@ public class Table {
 
     private TTable tableObject;
     private TObjectName tableName;
+    
+    
+    private TablePseduoRows pseduoRows = new TablePseduoRows(this);
+    
 
     public Table(TTable table) {
         if (table == null) {
@@ -187,6 +191,10 @@ public class Table {
 
 	public String getSchema() {
 		return schema;
+	}
+	
+	public TablePseduoRows getPseduoRows(){
+		return pseduoRows;
 	}
 
 }

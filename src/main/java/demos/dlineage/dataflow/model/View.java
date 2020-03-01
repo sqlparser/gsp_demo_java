@@ -21,6 +21,8 @@ public class View {
     private Pair<Long, Long> endPosition;
     private List<ViewColumn> columns = new ArrayList<ViewColumn>();
     private TCustomSqlStatement viewObject;
+    
+    private ViewPseduoRows pseduoRows = new ViewPseduoRows(this);
 
     public View(TCustomSqlStatement view, TObjectName viewName ) {
         if (view == null)
@@ -110,5 +112,7 @@ public class View {
 		return schema;
 	}
     
-    
+	public ViewPseduoRows getPseduoRows(){
+		return pseduoRows;
+	}
 }

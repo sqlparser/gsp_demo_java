@@ -403,7 +403,7 @@ public class Dlineage
 		return null;
 	}
 
-	public void forwardAnalyze( String tableColumn,
+	public void forwfdrAnalyze( String tableColumn,
 			List<ColumnMetaData[]> relations )
 	{
 		ColumnMetaData columnMetaData = new MetaScanner( this ).getColumnMetaData( tableColumn );
@@ -415,21 +415,21 @@ public class Dlineage
 		}
 		if ( columnMetaData != null )
 		{
-			outputForwardAnalyze( columnMetaData, columns, 0, relations );
+			outputForwfdrAnalyze( columnMetaData, columns, 0, relations );
 		}
 	}
 
-	public void backwardAnalyze( String viewColumn,
+	public void backwfdrAnalyze( String viewColumn,
 			List<ColumnMetaData[]> relations )
 	{
 		ColumnMetaData columnMetaData = new MetaScanner( this ).getColumnMetaData( viewColumn );
 		if ( columnMetaData != null )
 		{
-			outputBackwardAnalyze( columnMetaData, 0, relations );
+			outputBackwfdrAnalyze( columnMetaData, 0, relations );
 		}
 	}
 
-	private void outputBackwardAnalyze( ColumnMetaData columnMetaData,
+	private void outputBackwfdrAnalyze( ColumnMetaData columnMetaData,
 			int level, List<ColumnMetaData[]> relations )
 	{
 		if ( level > 0 )
@@ -449,7 +449,7 @@ public class Dlineage
 				ColumnMetaData sourceColumn = columnMetaData.getReferColumns( )[i];
 				if ( containsRelation( columnMetaData, sourceColumn, relations ) )
 				{
-					outputBackwardAnalyze( columnMetaData.getReferColumns( )[i],
+					outputBackwfdrAnalyze( columnMetaData.getReferColumns( )[i],
 							level + 1,
 							relations );
 				}
@@ -472,7 +472,7 @@ public class Dlineage
 		return false;
 	}
 
-	private void outputForwardAnalyze( ColumnMetaData columnMetaData,
+	private void outputForwfdrAnalyze( ColumnMetaData columnMetaData,
 			List<ColumnMetaData> columns, int level,
 			List<ColumnMetaData[]> relations )
 	{
@@ -493,7 +493,7 @@ public class Dlineage
 			{
 				if ( containsRelation( targetColumn, columnMetaData, relations ) )
 				{
-					outputForwardAnalyze( targetColumn,
+					outputForwfdrAnalyze( targetColumn,
 							columns,
 							level + 1,
 							relations );
@@ -589,8 +589,8 @@ public class Dlineage
 			System.out.println( "/f: Option, specify the sql file path to analyze dlineage." );
 			System.out.println( "/d: Option, specify the sql directory path to analyze dlineage." );
 			System.out.println( "/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle" );
-			System.out.println( "/fo: Option, forward analyze the specified table column." );
-			System.out.println( "/b: Option, backward analyze the specified view column." );
+			System.out.println( "/fo: Option, forwfdr analyze the specified table column." );
+			System.out.println( "/b: Option, backwfdr analyze the specified view column." );
 			System.out.println( "/ddl: Option, output the database DDL schema." );
 			System.out.println( "/s: Option, set the strict match mode. It will match the catalog name and schema name." );
 			System.out.println( "/log: Option, generate a dlineage.log file to log information." );
@@ -702,11 +702,11 @@ public class Dlineage
 
 		Dlineage dlineage = new Dlineage( sqlFiles, vendor, strict, false );
 
-		boolean forwardAnalyze = argList.indexOf( "/fo" ) != -1;
-		boolean backwardAnalyze = argList.indexOf( "/b" ) != -1;
+		boolean forwfdrAnalyze = argList.indexOf( "/fo" ) != -1;
+		boolean backwfdrAnalyze = argList.indexOf( "/b" ) != -1;
 		boolean outputDDL = argList.indexOf( "/ddl" ) != -1;
 
-		if ( !forwardAnalyze && !backwardAnalyze && !outputDDL )
+		if ( !forwfdrAnalyze && !backwfdrAnalyze && !outputDDL )
 		{
 			dlineage.columnImpact( );
 		}
@@ -723,18 +723,18 @@ public class Dlineage
 			List<ColumnMetaData[]> relations = relation.collectDlineageRelations( dlineage,
 					impactResult );
 
-			if ( forwardAnalyze
+			if ( forwfdrAnalyze
 					&& argList.size( ) > argList.indexOf( "/fo" ) + 1 )
 			{
 				String tableColumn = argList.get( argList.indexOf( "/fo" ) + 1 );
-				dlineage.forwardAnalyze( tableColumn, relations );
+				dlineage.forwfdrAnalyze( tableColumn, relations );
 			}
 
-			if ( backwardAnalyze
+			if ( backwfdrAnalyze
 					&& argList.size( ) > argList.indexOf( "/b" ) + 1 )
 			{
 				String viewColumn = argList.get( argList.indexOf( "/b" ) + 1 );
-				dlineage.backwardAnalyze( viewColumn, relations );
+				dlineage.backwfdrAnalyze( viewColumn, relations );
 			}
 		}
 
