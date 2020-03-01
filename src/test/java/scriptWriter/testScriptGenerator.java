@@ -16,6 +16,18 @@ public class testScriptGenerator extends TestCase
 {
 
 
+	public void testPostgresqlAnd( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvpostgresql );
+		sqlparser.sqltext = "SELECT * from transmission where position_search && '{3456788}';";
+
+		sqlparser.parse( );
+
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+		//assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+
+	}
+
 	public void testMySQLFunctionAddDate( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql );

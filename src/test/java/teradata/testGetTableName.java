@@ -17,7 +17,8 @@ public class testGetTableName extends TestCase {
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TTable table = select.tables.getTable(0);
-        assertTrue(table.getName().equalsIgnoreCase(""));
+        assertTrue(table.getName().equalsIgnoreCase("subquery"));
+       // System.out.println(table.getName());
     }
 
 }
