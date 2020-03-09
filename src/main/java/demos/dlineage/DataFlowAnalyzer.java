@@ -329,6 +329,13 @@ public class DataFlowAnalyzer {
 					if (item.getColumns() != null) {
 						table.getColumns().addAll(item.getColumns());
 					}
+					
+					table.getColumns().sort((t1,t2)->{
+						if(t2.getName().equalsIgnoreCase("PseduoRows")){
+							return -1;
+						}
+						return 1;
+					});
 
 					tableIdMap.put(item.getId(), table.getId());
 
@@ -641,6 +648,7 @@ public class DataFlowAnalyzer {
 	}
 
 	public dataflow getSimpleDataflow(dataflow instance) throws Exception {
+		ModelBindingManager.setGlobalVendor(vendor);
 		targetTables.clear();
 		dataflow simple = new dataflow();
 		List<relation> simpleRelations = new ArrayList<relation>();
@@ -705,9 +713,23 @@ public class DataFlowAnalyzer {
 
 	private void findSourceRaltions(dataflow instance, Map<String, Set<relation>> sourceIdRelationMap,
 			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes) {
+		findStarSourceRaltions(instance, null, sourceIdRelationMap, targetRelation, relationSources, pathTypes);
+	}
+	private void findStarSourceRaltions(dataflow instance, targetColumn starRelationTarget, Map<String, Set<relation>> sourceIdRelationMap,
+			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes) {
 		if (targetRelation != null && targetRelation.getSources() != null) {
 			for (int i = 0; i < targetRelation.getSources().size(); i++) {
 				sourceColumn source = targetRelation.getSources().get(i);
+				
+				/*
+				 * target不为null，意味着中间传递 *，需要进行匹配
+				 */
+				if(starRelationTarget!=null  
+						&& !"*".equals(source.getColumn()) 
+						&& !SQLUtil.getIdentifierNormalName(starRelationTarget.getColumn()).equals(SQLUtil.getIdentifierNormalName(source.getColumn()))){
+						continue;
+				}
+				
 				String sourceColumnId = source.getId();
 				String sourceParentId = source.getParent_id();
 				if (sourceParentId == null || sourceColumnId == null) {
@@ -738,13 +760,19 @@ public class DataFlowAnalyzer {
 							String[] types = new String[pathTypes.length + 1];
 							types[0] = relation.getType();
 							System.arraycopy(pathTypes, 0, types, 1, pathTypes.length);
-							findSourceRaltions(instance, sourceIdRelationMap, relation, relationSources, types);
+							if(!"*".equals(source.getColumn())){
+								findStarSourceRaltions(instance, null, sourceIdRelationMap, relation, relationSources, types);
+							}
+							else{
+								findStarSourceRaltions(instance, starRelationTarget == null ? targetRelation.getTarget() : starRelationTarget, sourceIdRelationMap, relation, relationSources, types);
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+	
 
 	private Map<String, Boolean> targetTables = new HashMap<String, Boolean>();
 
@@ -2332,6 +2360,23 @@ public class DataFlowAnalyzer {
 					targetName = targetColumn.getName();
 					relationElement.appendChild(target);
 				}
+				else if (targetElement instanceof TablePseduoRows) {
+					TablePseduoRows targetColumn = (TablePseduoRows) targetElement;
+					Element target = doc.createElement("target");
+					target.setAttribute("id", String.valueOf(targetColumn.getId()));
+					target.setAttribute("column", targetColumn.getName());
+					target.setAttribute("parent_id", String.valueOf(targetColumn.getHolder().getId()));
+					target.setAttribute("parent_name", getTableName(targetColumn.getHolder()));
+					if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
+						target.setAttribute("coordinate",
+								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+					}
+					if (relation instanceof RecordSetRelation) {
+						target.setAttribute("function", ((RecordSetRelation) relation).getAggregateFunction());
+					}
+					targetName = targetColumn.getName();
+					relationElement.appendChild(target);
+				}
 				else if (targetElement instanceof ResultColumn) {
 					ResultColumn targetColumn = (ResultColumn) targetElement;
 					Element target = doc.createElement("target");
@@ -2491,6 +2536,19 @@ public class DataFlowAnalyzer {
 						source.setAttribute("column", sourceColumn.getName());
 						source.setAttribute("parent_id", String.valueOf(sourceColumn.getTable().getId()));
 						source.setAttribute("parent_name", getTableName(sourceColumn.getTable()));
+						if (sourceColumn.getStartPosition() != null && sourceColumn.getEndPosition() != null) {
+							source.setAttribute("coordinate",
+									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+						}
+						append = true;
+						relationElement.appendChild(source);
+					} else if (sourceElement instanceof TablePseduoRows) {
+						TablePseduoRows sourceColumn = (TablePseduoRows) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(sourceColumn.getId()));
+						source.setAttribute("column", sourceColumn.getName());
+						source.setAttribute("parent_id", String.valueOf(sourceColumn.getHolder().getId()));
+						source.setAttribute("parent_name", getTableName(sourceColumn.getHolder()));
 						if (sourceColumn.getStartPosition() != null && sourceColumn.getEndPosition() != null) {
 							source.setAttribute("coordinate",
 									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());

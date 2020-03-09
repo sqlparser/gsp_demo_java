@@ -63,7 +63,11 @@ public class Table {
         }
         else {
             this.fullName = table.getFullName();
-            this.name = table.getName();
+			if (table.getTableName() != null) {
+				this.name = table.getTableName().toString();
+			} else {
+				this.name = table.getName();
+			}
             this.alias = table.getAliasName();
         }
 
