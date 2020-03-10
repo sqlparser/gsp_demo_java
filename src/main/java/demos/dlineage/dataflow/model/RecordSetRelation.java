@@ -15,7 +15,7 @@ public class RecordSetRelation extends AbstractRelation {
 
     @Override
     public RelationType getRelationType() {
-        return RelationType.fdr;
+        return RelationType.frd;
     }
 
 }

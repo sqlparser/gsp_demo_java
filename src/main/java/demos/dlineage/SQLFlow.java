@@ -40,7 +40,7 @@ public class SQLFlow {
 			System.out.println("/f: Option, specify the sql file path to analyze sqlflow relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze sqlflow relation.");
 			System.out.println(
-					"/r: Option, set the relation types, split by comma. Support fdd, fdr, frd, fddi, join. The default relation type is fdd.");
+					"/r: Option, set the relation types, split by comma. Support fdd, frd, frd, fddi, join. The default relation type is fdd.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
 			System.out.println( "/i: Option, ignore all result sets." );
 			System.out.println(

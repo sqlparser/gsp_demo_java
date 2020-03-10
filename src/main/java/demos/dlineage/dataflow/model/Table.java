@@ -29,6 +29,10 @@ public class Table {
 
     private TTable tableObject;
     private TObjectName tableName;
+    
+    
+    private TablePseduoRows pseduoRows = new TablePseduoRows(this);
+    
 
     public Table(TTable table) {
         if (table == null) {
@@ -59,7 +63,11 @@ public class Table {
         }
         else {
             this.fullName = table.getFullName();
-            this.name = table.getName();
+			if (table.getTableName() != null) {
+				this.name = table.getTableName().toString();
+			} else {
+				this.name = table.getName();
+			}
             this.alias = table.getAliasName();
         }
 
@@ -187,6 +195,10 @@ public class Table {
 
 	public String getSchema() {
 		return schema;
+	}
+	
+	public TablePseduoRows getPseduoRows(){
+		return pseduoRows;
 	}
 
 }

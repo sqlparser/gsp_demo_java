@@ -20,6 +20,8 @@ public class ResultSet {
     private TParseTreeNode gspObject;
     private boolean isTarget;
 
+    private ResultSetPseduoRows pseduoRows = new ResultSetPseduoRows(this);
+    
     public ResultSet(TParseTreeNode gspObject, boolean isTarget) {
         if (gspObject == null) {
             throw new IllegalArgumentException("ResultSet arguments can't be null.");
@@ -87,5 +89,9 @@ public class ResultSet {
 
 	public String getDatabase() {
 		return database;
+	}
+	
+	public ResultSetPseduoRows getPseduoRows(){
+		return pseduoRows;
 	}
 }
