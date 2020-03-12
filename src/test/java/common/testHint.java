@@ -1,4 +1,4 @@
-package oracle;
+package common;
 
 /*
  * Date: 11-8-4
@@ -10,7 +10,7 @@ import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
-public class testOracleHint extends TestCase {
+public class testHint extends TestCase {
 
     public void test1(){
 
@@ -34,6 +34,17 @@ public class testOracleHint extends TestCase {
         TSelectSqlStatement select  = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
        // System.out.println(select.getOracleHint());
         assertTrue(select.getOracleHint().equalsIgnoreCase("/*+ A(B) */"));
+    }
+
+    public void testMySQLHint(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
+        sqlparser.sqltext = "SELECT /*+ A(B) */ e.last_name FROM scott.employees";
+        assertTrue(sqlparser.parse() == 0);
+
+        TSelectSqlStatement select  = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        // System.out.println(select.getOracleHint());
+        assertTrue(select.getHint().equalsIgnoreCase("/*+ A(B) */"));
     }
 
 

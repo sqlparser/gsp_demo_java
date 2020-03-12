@@ -16,7 +16,7 @@ public class PseudoRows<T> {
 	}
 
 	public String getName() {
-		return "pseudoRows";
+		return "PseudoRows";
 	}
 
 	public int getId() {
