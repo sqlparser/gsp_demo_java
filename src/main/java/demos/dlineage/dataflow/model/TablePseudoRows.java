@@ -2,9 +2,9 @@ package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
 
-public class TablePseduoRows extends PseduoRows<Table> {
+public class TablePseudoRows extends PseudoRows<Table> {
 
-	public TablePseduoRows(Table holder) {
+	public TablePseudoRows(Table holder) {
 		super(holder);
 	}
 

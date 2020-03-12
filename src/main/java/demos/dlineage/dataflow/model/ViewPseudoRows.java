@@ -2,9 +2,9 @@ package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
 
-public class ResultSetPseduoRows extends PseduoRows<ResultSet> {
+public class ViewPseudoRows extends PseudoRows<View> {
 
-	public ResultSetPseduoRows(ResultSet holder) {
+	public ViewPseudoRows(View holder) {
 		super(holder);
 	}
 

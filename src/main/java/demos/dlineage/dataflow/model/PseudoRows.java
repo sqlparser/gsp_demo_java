@@ -1,12 +1,12 @@
 package demos.dlineage.dataflow.model;
 
-public class PseduoRows<T> {
+public class PseudoRows<T> {
 
 	protected int id;
 
 	private T holder;
 
-	public PseduoRows(T holder) {
+	public PseudoRows(T holder) {
 		this.holder = holder;
 		id = ++ModelBindingManager.get().TABLE_COLUMN_ID;
 	}
@@ -16,7 +16,7 @@ public class PseduoRows<T> {
 	}
 
 	public String getName() {
-		return "pseduoRows";
+		return "pseudoRows";
 	}
 
 	public int getId() {

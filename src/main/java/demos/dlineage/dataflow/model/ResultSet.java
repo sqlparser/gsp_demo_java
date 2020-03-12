@@ -20,7 +20,7 @@ public class ResultSet {
     private TParseTreeNode gspObject;
     private boolean isTarget;
 
-    private ResultSetPseduoRows pseduoRows = new ResultSetPseduoRows(this);
+    private ResultSetPseudoRows pseudoRows = new ResultSetPseudoRows(this);
     
     public ResultSet(TParseTreeNode gspObject, boolean isTarget) {
         if (gspObject == null) {
@@ -91,7 +91,7 @@ public class ResultSet {
 		return database;
 	}
 	
-	public ResultSetPseduoRows getPseduoRows(){
-		return pseduoRows;
+	public ResultSetPseudoRows getPseudoRows(){
+		return pseudoRows;
 	}
 }

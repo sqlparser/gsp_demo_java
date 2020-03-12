@@ -31,7 +31,7 @@ public class Table {
     private TObjectName tableName;
     
     
-    private TablePseduoRows pseduoRows = new TablePseduoRows(this);
+    private TablePseudoRows pseudoRows = new TablePseudoRows(this);
     
 
     public Table(TTable table) {
@@ -197,8 +197,8 @@ public class Table {
 		return schema;
 	}
 	
-	public TablePseduoRows getPseduoRows(){
-		return pseduoRows;
+	public TablePseudoRows getPseudoRows(){
+		return pseudoRows;
 	}
 
 }
