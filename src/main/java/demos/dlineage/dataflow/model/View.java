@@ -22,7 +22,7 @@ public class View {
     private List<ViewColumn> columns = new ArrayList<ViewColumn>();
     private TCustomSqlStatement viewObject;
     
-    private ViewPseduoRows pseduoRows = new ViewPseduoRows(this);
+    private ViewPseudoRows pseudoRows = new ViewPseudoRows(this);
 
     public View(TCustomSqlStatement view, TObjectName viewName ) {
         if (view == null)
@@ -112,7 +112,7 @@ public class View {
 		return schema;
 	}
     
-	public ViewPseduoRows getPseduoRows(){
-		return pseduoRows;
+	public ViewPseudoRows getPseudoRows(){
+		return pseudoRows;
 	}
 }

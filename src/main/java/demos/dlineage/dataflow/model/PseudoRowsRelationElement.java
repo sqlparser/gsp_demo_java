@@ -3,17 +3,17 @@ package demos.dlineage.dataflow.model;
 
 import gudusoft.gsqlparser.ESqlClause;
 
-public class PseduoRowsRelationElement<T extends PseduoRows<?>> implements RelationElement<T> {
+public class PseudoRowsRelationElement<T extends PseudoRows<?>> implements RelationElement<T> {
 
 	private T rseduoRows;
 
 	private ESqlClause relationLocation;
 
-	public PseduoRowsRelationElement(T rseduoRows) {
+	public PseudoRowsRelationElement(T rseduoRows) {
 		this.rseduoRows = rseduoRows;
 	}
 
-	public PseduoRowsRelationElement( T rseduoRows,
+	public PseudoRowsRelationElement( T rseduoRows,
 			ESqlClause relationLocation )
 	{
 		this.rseduoRows = rseduoRows;
@@ -46,7 +46,7 @@ public class PseduoRowsRelationElement<T extends PseduoRows<?>> implements Relat
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PseduoRowsRelationElement<?> other = (PseduoRowsRelationElement<?>) obj;
+		PseudoRowsRelationElement<?> other = (PseudoRowsRelationElement<?>) obj;
 		if (rseduoRows == null) {
 			if (other.rseduoRows != null)
 				return false;
