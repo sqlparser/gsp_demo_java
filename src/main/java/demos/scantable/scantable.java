@@ -128,22 +128,8 @@ public class scantable
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				vendor = EDbVendor.dbvmssql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
-			{
-				vendor = EDbVendor.dbvdb2;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
-			{
-				vendor = EDbVendor.dbvmysql;
-			}
-			else if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				vendor = EDbVendor.dbvmssql;
-			}
+			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+
 		}
 
 		scantable scan = new scantable( new File( args[0] ), vendor );

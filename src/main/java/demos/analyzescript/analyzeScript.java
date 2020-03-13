@@ -24,7 +24,7 @@ public class analyzeScript {
      {
 
         if (args.length != 1){
-            System.out.println("Usage: java analyzeScript sqlfile.sql");
+            System.out.println("Usage: java analyzeScript sqlfile.sql /t dbvendor");
             return;
         }
         File file=new File(args[0]);

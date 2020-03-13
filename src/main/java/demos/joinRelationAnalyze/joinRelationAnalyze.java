@@ -763,26 +763,7 @@ public class joinRelationAnalyze
 
 			if ( index != -1 && args.length > index + 1 )
 			{
-				if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-				{
-					vendor = EDbVendor.dbvmssql;
-				}
-				else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
-				{
-					vendor = EDbVendor.dbvdb2;
-				}
-				else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
-				{
-					vendor = EDbVendor.dbvmysql;
-				}
-				else if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-				{
-					vendor = EDbVendor.dbvmssql;
-				}
-				else if ( args[index + 1].equalsIgnoreCase( "netezza" ) )
-				{
-					vendor = EDbVendor.dbvnetezza;
-				}
+				vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 			}
 
 			joinRelationAnalyze analysis = new joinRelationAnalyze( new File( args[0] ),
