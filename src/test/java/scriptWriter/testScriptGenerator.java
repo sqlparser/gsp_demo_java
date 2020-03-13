@@ -16,6 +16,21 @@ public class testScriptGenerator extends TestCase
 {
 
 
+	public void testHiveLimit( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvhive );
+		sqlparser.sqltext = "select groupcol, avg(mycolumn) as myalias\n" +
+				"from mytable\n" +
+				"group by groupcol\n" +
+				"limit 4";
+
+		sqlparser.parse( );
+
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+		assertTrue(verifyScript(EDbVendor.dbvhive,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+
+	}
+
 	public void testPostgresqlAnd( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvpostgresql );

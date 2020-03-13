@@ -132,4 +132,19 @@ public class testAlterTable extends TestCase {
 
     }
 
+
+    public void testDropColumn() {
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "ALTER TABLE F_HISTO_LETTRAGE DROP COLUMN HL_LETTRAGE;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TAlterTableStatement alterTableStatement = (TAlterTableStatement) sqlparser.sqlstatements.get(0);
+        assertTrue(alterTableStatement.getAlterTableOptionList().size() == 1);
+        TAlterTableOption ao = alterTableStatement.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(ao.getOptionType() == EAlterTableOptionType.DropColumn);
+        assertTrue(ao.getColumnName().toString().equalsIgnoreCase("HL_LETTRAGE"));
+        assertTrue(ao.getColumnNameList().getObjectName(0).toString().equalsIgnoreCase("HL_LETTRAGE"));
+    }
+
 }
