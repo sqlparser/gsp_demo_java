@@ -2,6 +2,7 @@ package demos.antiSQLInjection;
 
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TGSqlParser;
 
 import java.io.*;
 import java.util.Arrays;
@@ -74,54 +75,7 @@ public class antiSQLInjection  {
 
          if ( index != -1 && args.length > index + 1 )
          {
-             if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-             {
-                 dbvendor = EDbVendor.dbvmssql;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "db2" ) )
-             {
-                 dbvendor = EDbVendor.dbvdb2;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "mysql" ) )
-             {
-                 dbvendor = EDbVendor.dbvmysql;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "netezza" ) )
-             {
-                 dbvendor = EDbVendor.dbvnetezza;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "teradata" ) )
-             {
-                 dbvendor = EDbVendor.dbvteradata;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "oracle" ) )
-             {
-                 dbvendor = EDbVendor.dbvoracle;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "informix" ) )
-             {
-                 dbvendor = EDbVendor.dbvinformix;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "sybase" ) )
-             {
-                 dbvendor = EDbVendor.dbvsybase;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "postgresql" ) )
-             {
-                 dbvendor = EDbVendor.dbvpostgresql;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "hive" ) )
-             {
-                 dbvendor = EDbVendor.dbvhive;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "greenplum" ) )
-             {
-                 dbvendor = EDbVendor.dbvgreenplum;
-             }
-             else if ( args[index + 1].equalsIgnoreCase( "redshift" ) )
-             {
-                 dbvendor = EDbVendor.dbvredshift;
-             }
+             dbvendor = TGSqlParser.getDBVendorByName(args[index + 1]);
          }
 
          System.out.println("Selected SQL dialect: "+dbvendor.toString());

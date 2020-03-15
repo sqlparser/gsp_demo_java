@@ -1034,10 +1034,7 @@ public class JoinConverter
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			if ( args[index + 1].equalsIgnoreCase( "mssql" ) )
-			{
-				vendor = EDbVendor.dbvmssql;
-			}
+			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 		}
 
 		String vendorString = EDbVendor.dbvmssql == vendor ? "SQL Server"
