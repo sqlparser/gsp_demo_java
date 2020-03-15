@@ -2,6 +2,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
 
@@ -31,6 +32,8 @@ public class Constant
 		TSourceToken endToken = constant.getEndToken( );
 
 		this.name = constant.toString( );
+		
+	    this.name = SQLUtil.trimColumnStringQuote(name);
 
 		this.fullName = constant.toString( );
 

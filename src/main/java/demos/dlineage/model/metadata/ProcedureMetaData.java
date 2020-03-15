@@ -44,7 +44,7 @@ public class ProcedureMetaData extends LinkedHashMap<String, Object>
 		if ( SQLUtil.isEmpty( name ) )
 			return;
 		displayName = name;
-		name = SQLUtil.trimObjectName( name );
+		name = SQLUtil.trimColumnStringQuote( name );
 		this.name = name;
 		if ( name != null )
 			this.put( PROP_NAME, name );
@@ -55,7 +55,7 @@ public class ProcedureMetaData extends LinkedHashMap<String, Object>
 		if ( SQLUtil.isEmpty( catalogName ) )
 			return;
 		catalogDisplayName = catalogName;
-		catalogName = SQLUtil.trimObjectName( catalogName );
+		catalogName = SQLUtil.trimColumnStringQuote( catalogName );
 		this.catalogName = catalogName;
 		if ( catalogName != null )
 			this.put( PROP_CATALOGNAME, catalogName );
@@ -72,7 +72,7 @@ public class ProcedureMetaData extends LinkedHashMap<String, Object>
 		else
 		{
 			schemaDisplayName = schemaName;
-			schemaName = SQLUtil.trimObjectName( schemaName );
+			schemaName = SQLUtil.trimColumnStringQuote( schemaName );
 			this.schemaName = schemaName;
 			if ( schemaName != null )
 				this.put( PROP_SCHEMANAME, schemaName );

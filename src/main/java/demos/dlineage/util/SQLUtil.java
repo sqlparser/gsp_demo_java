@@ -114,11 +114,7 @@ public class SQLUtil {
 		return getFileContent(file);
 	}
 
-	public static boolean isQuoted(String name) {
-		return !name.equals(trimObjectName(name));
-	}
-
-	public static String trimObjectName(String string) {
+	public static String trimColumnStringQuote(String string) {
 		if (string == null)
 			return string;
 
@@ -133,12 +129,6 @@ public class SQLUtil {
 			}
 			string = buffer.toString();
 		} else {
-			if (string.startsWith("\"") && string.endsWith("\""))
-				return string.substring(1, string.length() - 1);
-
-			if (string.startsWith("[") && string.endsWith("]"))
-				return string.substring(1, string.length() - 1);
-
 			if (string.startsWith("'") && string.endsWith("'"))
 				return string.substring(1, string.length() - 1);
 		}
@@ -149,38 +139,9 @@ public class SQLUtil {
 		String name = nameString.trim();
 		List<String> names = new ArrayList<String>();
 		String[] splits = nameString.split("\\.");
-		if ((name.startsWith("\"") && name.endsWith("\"")) || (name.startsWith("[") && name.endsWith("]"))
-				|| (name.startsWith("'") && name.endsWith("'"))) {
+		if ((name.startsWith("'") && name.endsWith("'"))) {
 			for (int i = 0; i < splits.length; i++) {
 				String split = splits[i].trim();
-				if (split.startsWith("[") && !split.endsWith("]")) {
-					StringBuilder buffer = new StringBuilder();
-					buffer.append(splits[i]);
-					while (!(split = splits[++i].trim()).endsWith("]")) {
-						buffer.append(".");
-						buffer.append(splits[i]);
-					}
-
-					buffer.append(".");
-					buffer.append(splits[i]);
-
-					names.add(buffer.toString());
-					continue;
-				}
-				if (split.startsWith("\"") && !split.endsWith("\"")) {
-					StringBuilder buffer = new StringBuilder();
-					buffer.append(splits[i]);
-					while (!(split = splits[++i].trim()).endsWith("\"")) {
-						buffer.append(".");
-						buffer.append(splits[i]);
-					}
-
-					buffer.append(".");
-					buffer.append(splits[i]);
-
-					names.add(buffer.toString());
-					continue;
-				}
 				if (split.startsWith("'") && !split.endsWith("'")) {
 					StringBuilder buffer = new StringBuilder();
 					buffer.append(splits[i]);

@@ -586,7 +586,7 @@ public class ViewParser
 			}
 			return result.toString( );
 		}
-		return SQLUtil.trimObjectName( string );
+		return SQLUtil.trimColumnStringQuote( string );
 	}
 
 	private ColumnMetaData getColumn( ColumnModel column )

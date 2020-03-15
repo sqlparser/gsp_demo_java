@@ -2,6 +2,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.TSourceToken;
@@ -73,6 +74,8 @@ public class SelectSetResultColumn extends ResultColumn {
         }
 
         this.fullName = this.name;
+        
+        this.name = SQLUtil.trimColumnStringQuote(name);
     }
 
     private boolean isNotSameAlias(ResultSet resultSet, int index) {

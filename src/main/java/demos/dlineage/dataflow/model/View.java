@@ -37,7 +37,7 @@ public class View {
         if (viewName != null) {
             startToken = viewName.getStartToken();
             endToken = viewName.getEndToken();
-            this.name = viewName.getTableString();
+            this.name = viewName.toString();
             this.fullName = viewName.toString();
         } else {
             this.name = "";
