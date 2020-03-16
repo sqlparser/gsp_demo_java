@@ -597,7 +597,7 @@ public class ColumnImpact
 		public void setColumn( String column )
 		{
 			this.columnDisplayName = column;
-			this.column = SQLUtil.trimObjectName( column );
+			this.column = SQLUtil.trimColumnStringQuote( column );
 		}
 
 		public String getAlias( )
@@ -608,7 +608,7 @@ public class ColumnImpact
 		public void setAlias( String alias )
 		{
 			this.aliasDisplayName = alias;
-			this.alias = SQLUtil.trimObjectName( alias );
+			this.alias = SQLUtil.trimColumnStringQuote( alias );
 		}
 
 		public String getAliasDisplayName( )
@@ -944,7 +944,7 @@ public class ColumnImpact
 
 				if ( !fromStmtTable( stmt, attr.getObjectOperand( ) ) )
 				{
-					String columnName = SQLUtil.trimObjectName( attr.getObjectOperand( )
+					String columnName = SQLUtil.trimColumnStringQuote( attr.getObjectOperand( )
 							.getEndToken( )
 							.toString( ) );
 
@@ -971,7 +971,7 @@ public class ColumnImpact
 
 		TColumn column = new TColumn( );
 		column.clauseType = clauseType;
-		column.columnName = SQLUtil.trimObjectName( attr.getObjectOperand( )
+		column.columnName = SQLUtil.trimColumnStringQuote( attr.getObjectOperand( )
 				.getEndToken( )
 				.toString( ) );
 		column.location = new Point( (int) attr.getObjectOperand( )
@@ -1002,15 +1002,15 @@ public class ColumnImpact
 		List<String> segements = SQLUtil.parseNames( attr.toString( ) );
 		if ( segements.size( ) > 1 )
 		{
-			column.columnPrex = SQLUtil.trimObjectName( attr.toString( )
+			column.columnPrex = SQLUtil.trimColumnStringQuote( attr.toString( )
 					.substring( 0,
 							attr.toString( ).lastIndexOf( "."
 									+ segements.get( segements.size( ) - 1 ) ) ) );
 
-			String tableName = SQLUtil.trimObjectName( column.columnPrex );
+			String tableName = SQLUtil.trimColumnStringQuote( column.columnPrex );
 			if ( tableName.indexOf( "." ) > 0 )
 			{
-				tableName = SQLUtil.trimObjectName( tableName.substring( tableName.lastIndexOf( "." ) + 1 ) );
+				tableName = SQLUtil.trimColumnStringQuote( tableName.substring( tableName.lastIndexOf( "." ) + 1 ) );
 			}
 			if ( !column.tableNames.contains( tableName ) )
 			{
@@ -1260,7 +1260,7 @@ public class ColumnImpact
 		TObjectNameList columnNames = lztable.getLinkedColumns( );
 		for ( int j = 0; j < columnNames.size( ); j++ )
 		{
-			if ( SQLUtil.trimObjectName( columnNames.getObjectName( j )
+			if ( SQLUtil.trimColumnStringQuote( columnNames.getObjectName( j )
 					.getColumnNameOnly( )
 					.toString( ) ).equalsIgnoreCase( column.columnName ) )
 			{
@@ -1345,7 +1345,7 @@ public class ColumnImpact
 	{
 		TColumn column = new TColumn( );
 		column.clauseType = clauseType;
-		column.columnName = SQLUtil.trimObjectName( objectName.getEndToken( )
+		column.columnName = SQLUtil.trimColumnStringQuote( objectName.getEndToken( )
 				.toString( ) );
 		column.location = new Point( (int) objectName.getEndToken( ).lineNo,
 				(int) objectName.getEndToken( ).columnNo );
@@ -1374,15 +1374,15 @@ public class ColumnImpact
 		List<String> segements = SQLUtil.parseNames( objectName.toString( ) );
 		if ( objectName.toString( ).indexOf( "." ) > 0 )
 		{
-			column.columnPrex = SQLUtil.trimObjectName( objectName.toString( )
+			column.columnPrex = SQLUtil.trimColumnStringQuote( objectName.toString( )
 					.substring( 0,
 							objectName.toString( ).lastIndexOf( "."
 									+ segements.get( segements.size( ) - 1 ) ) ) );
-			String tableName = SQLUtil.trimObjectName( column.columnPrex );
+			String tableName = SQLUtil.trimColumnStringQuote( column.columnPrex );
 
 			if ( tableName.indexOf( "." ) > 0 )
 			{
-				tableName = SQLUtil.trimObjectName( tableName.substring( tableName.lastIndexOf( "." ) + 1 ) );
+				tableName = SQLUtil.trimColumnStringQuote( tableName.substring( tableName.lastIndexOf( "." ) + 1 ) );
 			}
 			if ( !column.tableNames.contains( tableName ) )
 			{
@@ -1954,7 +1954,7 @@ public class ColumnImpact
 			if ( ( lzTable.getTableType( ) == ETableSource.objectname )
 					&& ( tableName == null
 							|| ( tableName != null
-									&& lzTable.getAliasClause( ) == null && getTableName( lzTable ).equalsIgnoreCase( SQLUtil.trimObjectName( tableName ) ) ) || ( tableName != null
+									&& lzTable.getAliasClause( ) == null && getTableName( lzTable ).equalsIgnoreCase( SQLUtil.trimColumnStringQuote( tableName ) ) ) || ( tableName != null
 							&& lzTable.getAliasClause( ) != null && lzTable.getAliasClause( )
 							.toString( )
 							.equalsIgnoreCase( tableName ) ) ) )
@@ -2349,14 +2349,14 @@ public class ColumnImpact
 	{
 		if ( lztable == null )
 			return null;
-		return SQLUtil.trimObjectName( lztable.getAliasClause( )
+		return SQLUtil.trimColumnStringQuote( lztable.getAliasClause( )
 				.getAliasName( )
 				.toString( ) );
 	}
 
 	private String getTableName( TTable lzTable )
 	{
-		return SQLUtil.trimObjectName( lzTable.getName( ) );
+		return SQLUtil.trimColumnStringQuote( lzTable.getName( ) );
 	}
 
 	private boolean findColumnInTables( TColumn column,
@@ -2886,27 +2886,27 @@ public class ColumnImpact
 								String key = null;
 								if ( result.isConstant )
 								{
-									key = SQLUtil.trimObjectName( ( Dlineage.TABLE_CONSTANT.toLowerCase( )
+									key = SQLUtil.trimColumnStringQuote( ( Dlineage.TABLE_CONSTANT.toLowerCase( )
 											+ "." + result.targetColumn ).toLowerCase( ) );
 								}
 								else if ( "*".equals( result.targetColumn ) )
 								{
 									if ( result.columnObject.linkColumnName != null )
 									{
-										key = SQLUtil.trimObjectName( result.targetTable.getFullName( )
+										key = SQLUtil.trimColumnStringQuote( result.targetTable.getFullName( )
 												.toLowerCase( )
 												+ "."
 												+ result.columnObject.linkColumnName );
 									}
 									else
 									{
-										key = SQLUtil.trimObjectName( result.targetTable.getFullName( )
+										key = SQLUtil.trimColumnStringQuote( result.targetTable.getFullName( )
 												.toLowerCase( ) );
 									}
 								}
 								else
 								{
-									key = SQLUtil.trimObjectName( ( result.targetTable.getFullName( )
+									key = SQLUtil.trimColumnStringQuote( ( result.targetTable.getFullName( )
 											.toLowerCase( )
 											+ "." + result.targetColumn ).toLowerCase( ) );
 								}
@@ -3740,7 +3740,7 @@ public class ColumnImpact
 			TColumn linkColumn = new TColumn( );
 			linkColumn.linkColumnName = objectName.getColumnNameOnly( )
 					.toString( );
-			linkColumn.columnName = SQLUtil.trimObjectName( currentSource );
+			linkColumn.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 			linkColumn.location = new Point( (int) objectName.getStartToken( ).lineNo,
 					(int) objectName.getStartToken( ).columnNo );
@@ -4244,7 +4244,7 @@ public class ColumnImpact
 								{
 									buffer.append( buildString( " ", level + 1 )
 											+ "--> table "
-											+ SQLUtil.trimObjectName( select.tables.getTable( i )
+											+ SQLUtil.trimColumnStringQuote( select.tables.getTable( i )
 													.getFullNameWithAliasString( ) )
 											+ "\r\n" );
 								}
@@ -4387,7 +4387,7 @@ public class ColumnImpact
 				if ( parentAlias != null )
 				{
 					column.linkColumnName = parentAlias.getAliasDisplayName( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				else
 				{
@@ -4395,7 +4395,7 @@ public class ColumnImpact
 							.toString( )
 							: ( isNotEmpty( field.getColumnNameOnly( ) ) ? field.getColumnNameOnly( )
 									: field.toString( ) );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				if ( parentAlias != null )
 				{
@@ -4451,7 +4451,7 @@ public class ColumnImpact
 				if ( parentAlias != null )
 				{
 					column.linkColumnName = parentAlias.getAliasDisplayName( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				else
 				{
@@ -4459,7 +4459,7 @@ public class ColumnImpact
 							.toString( )
 							: ( isNotEmpty( field.getColumnNameOnly( ) ) ? field.getColumnNameOnly( )
 									: field.toString( ) );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				if ( parentAlias != null )
 				{
@@ -4519,7 +4519,7 @@ public class ColumnImpact
 				if ( parentAlias != null )
 				{
 					column.linkColumnName = parentAlias.getAliasDisplayName( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				else
 				{
@@ -4527,7 +4527,7 @@ public class ColumnImpact
 							.toString( )
 							: ( isNotEmpty( field.getColumnNameOnly( ) ) ? field.getColumnNameOnly( )
 									: field.toString( ) );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				if ( parentAlias != null )
 				{
@@ -4602,14 +4602,14 @@ public class ColumnImpact
 				if ( parentAlias != null )
 				{
 					column.linkColumnName = parentAlias.getAliasDisplayName( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				else
 				{
 					column.linkColumnName = columnExpression.getObjectOperand( ) != null ? columnExpression.getObjectOperand( )
 							.getColumnNameOnly( )
 							: columnExpression.toString( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				if ( parentAlias != null )
 				{
@@ -4643,7 +4643,7 @@ public class ColumnImpact
 				if ( parentAlias != null )
 				{
 					column.linkColumnName = parentAlias.getAliasDisplayName( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				else
 				{
@@ -4656,7 +4656,7 @@ public class ColumnImpact
 							.toString( ) : field.getExpr( )
 							.getLeftOperand( )
 							.toString( );
-					column.columnName = SQLUtil.trimObjectName( currentSource );
+					column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 				}
 				if ( parentAlias != null )
 				{
@@ -4710,7 +4710,7 @@ public class ColumnImpact
 										.getTableName( ) );
 								TColumn column = new TColumn( );
 
-								column.columnName = SQLUtil.trimObjectName( currentSource );
+								column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 								TObjectName columnName = insertStmt.getColumnList( )
 										.getObjectName( i );
@@ -4748,7 +4748,7 @@ public class ColumnImpact
 										.getTableName( ) );
 								TColumn column = new TColumn( );
 
-								column.columnName = SQLUtil.trimObjectName( currentSource );
+								column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 								TObjectName columnName = insertStmt.getColumnList( )
 										.getObjectName( i );
@@ -4797,7 +4797,7 @@ public class ColumnImpact
 										.getTableName( ) );
 								TColumn column = new TColumn( );
 
-								column.columnName = SQLUtil.trimObjectName( currentSource );
+								column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 								column.linkColumnName = columns.get( i )
 										.getName( );
@@ -4823,7 +4823,7 @@ public class ColumnImpact
 										.getTableName( ) );
 								TColumn column = new TColumn( );
 
-								column.columnName = SQLUtil.trimObjectName( currentSource );
+								column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 								if ( field.getColumnAlias( ) != null
 										&& !"".equals( field.getColumnAlias( ) ) )
@@ -4890,7 +4890,7 @@ public class ColumnImpact
 						{
 							column.linkColumnName = setExpression.getExpression( k )
 									.toString( );
-							column.columnName = SQLUtil.trimObjectName( currentSource );
+							column.columnName = SQLUtil.trimColumnStringQuote( currentSource );
 
 							column.location = new Point( (int) setExpression.getExpression( k )
 									.getStartToken( ).lineNo,
@@ -5044,10 +5044,10 @@ public class ColumnImpact
 					&& lztable.getTableName( ) != null
 					&& lztable.getFullName( ) != null )
 			{
-				table.tableName = SQLUtil.trimObjectName( getTableName( lztable ) );
+				table.tableName = SQLUtil.trimColumnStringQuote( getTableName( lztable ) );
 				if ( lztable.getTableName( ).toString( ).indexOf( "." ) > 0 )
 				{
-					table.prefixName = SQLUtil.trimObjectName( lztable.getTableName( )
+					table.prefixName = SQLUtil.trimColumnStringQuote( lztable.getTableName( )
 							.toString( )
 							.substring( 0, lztable.getFullName( ).indexOf( '.' ) ) );
 				}
@@ -5055,7 +5055,7 @@ public class ColumnImpact
 
 			if ( lztable.getAliasClause( ) != null )
 			{
-				table.tableAlias = SQLUtil.trimObjectName( lztable.getAliasClause( )
+				table.tableAlias = SQLUtil.trimColumnStringQuote( lztable.getAliasClause( )
 						.toString( ) );
 			}
 		}

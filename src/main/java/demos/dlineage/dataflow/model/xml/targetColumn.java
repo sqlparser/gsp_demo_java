@@ -32,6 +32,9 @@ public class targetColumn
 	@Attribute(required = false)
 	private String coordinate;
 
+	@Attribute(required = false)
+	private String source;
+	
 	public String getCoordinate( )
 	{
 		return coordinate;
@@ -106,6 +109,14 @@ public class targetColumn
 
 	public void setTarget_name(String target_name) {
 		this.target_name = target_name;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 }

@@ -37,6 +37,9 @@ public class sourceColumn
 
 	@Attribute(required = false)
 	private String clauseType;
+	
+	@Attribute(required = false)
+	private String source;
 
 	public String getCoordinate( )
 	{
@@ -136,6 +139,14 @@ public class sourceColumn
 	public void setColumn_type( String column_type )
 	{
 		this.column_type = column_type;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 }

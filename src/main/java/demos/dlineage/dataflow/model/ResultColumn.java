@@ -2,6 +2,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TObjectName;
@@ -58,6 +59,8 @@ public class ResultColumn {
             }
         } else
             this.name = columnObject.toString();
+        
+        this.name = SQLUtil.trimColumnStringQuote(name);
 
         this.fullName = columnObject.toString();
 
@@ -131,6 +134,8 @@ public class ResultColumn {
             this.fullName = resultColumnObject.toString();
         }
 
+        this.name = SQLUtil.trimColumnStringQuote(name);
+        
         TSourceToken startToken = resultColumnObject.getStartToken();
         TSourceToken endToken = resultColumnObject.getEndToken();
         this.startPosition = new Pair<Long, Long>(startToken.lineNo,
@@ -156,6 +161,8 @@ public class ResultColumn {
 
         this.name = ((TObjectName) columnObject).getColumnNameOnly();
         this.fullName = columnObject.toString();
+        
+        this.name = SQLUtil.trimColumnStringQuote(name);
 
         this.startPosition = new Pair<Long, Long>(startToken.lineNo,
                 startToken.columnNo);

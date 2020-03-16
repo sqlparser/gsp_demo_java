@@ -148,7 +148,7 @@ public class ColumnMetaData extends LinkedHashMap<String, Object>
 		if ( SQLUtil.isEmpty( name ) )
 			return;
 		displayName = name;
-		name = SQLUtil.trimObjectName( name );
+		name = SQLUtil.trimColumnStringQuote( name );
 		this.name = name;
 	}
 

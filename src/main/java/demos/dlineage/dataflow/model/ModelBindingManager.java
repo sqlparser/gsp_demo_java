@@ -189,6 +189,18 @@ public class ModelBindingManager {
         if(result == null && gspModel instanceof TTable){
         	result = getCreateTable((TTable)gspModel);
         }
+        
+        if(result == null && gspModel instanceof TTable){
+        	result = (Table) getCreateModel((TTable)gspModel);
+        }
+            
+        if(result == null && gspModel instanceof TTable){
+        	result = (Table) getTableByName(((TTable)gspModel).getTableName());
+        }
+        
+        if(result == null && gspModel instanceof TTable){
+        	result = (Table) getTableByName(((TTable)gspModel).toString());
+        }
         	
         return result;
     }
@@ -683,8 +695,17 @@ public class ModelBindingManager {
 		tableNamesMap.put(tableName, tableModel);
 		
 	}
+	
+	public void bindTableByName(String tableName, Table tableModel) {
+		tableNamesMap.put(tableName, tableModel);
+		
+	}
 
 	public Table getTableByName(TObjectName tableName) {
+		return (Table)tableNamesMap.get(tableName);
+	}
+	
+	public Table getTableByName(String tableName) {
 		return (Table)tableNamesMap.get(tableName);
 	}
 

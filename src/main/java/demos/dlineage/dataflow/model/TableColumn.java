@@ -2,12 +2,15 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TConstant;
 import gudusoft.gsqlparser.nodes.TObjectName;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.sun.javafx.sg.prism.NGShape.Mode;
 
 public class TableColumn {
 
@@ -44,6 +47,8 @@ public class TableColumn {
         } else {
             this.name = columnObject.toString();
         }
+        
+        this.name = SQLUtil.trimColumnStringQuote(name);
 
         this.table = table;
         table.addColumn(this);
@@ -64,6 +69,8 @@ public class TableColumn {
 
         this.name = "DUMMY" + columnIndex;
 
+        this.name = SQLUtil.trimColumnStringQuote(name);
+        
         this.table = table;
         table.addColumn(this);
     }

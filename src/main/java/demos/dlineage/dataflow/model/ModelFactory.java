@@ -126,8 +126,18 @@ public class ModelFactory {
         if (modelManager.getCreateModel(table) instanceof Table) {
             return (Table) modelManager.getCreateModel(table);
         }
+        if (modelManager.getModel(table) instanceof Table) {
+            return (Table) modelManager.getModel(table);
+        }
+        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName());
+        }
+        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        }
         Table tableModel = new Table(table);
         modelManager.bindCreateModel(table, tableModel);
+        modelManager.bindTableByName(table.toString(), tableModel);
         return tableModel;
     }
 
@@ -138,26 +148,47 @@ public class ModelFactory {
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }
+        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName());
+        }
+        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        }
         Table tableModel = new Table(table);
         modelManager.bindModel(table, tableModel);
+        modelManager.bindTableByName(table.toString(), tableModel);
         return tableModel;
     }
     
     public Table createTriggerOnTable(TTable table) {
+    	if(modelManager.getCreateTable(table)!=null) {
+    		return modelManager.getCreateTable(table);
+    	}
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }
+        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName());
+        }
+        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        }
         Table tableModel = new Table(table);
         modelManager.bindModel(table, tableModel);
+        modelManager.bindTableByName(table.toString(), tableModel);
         return tableModel;
     }
     
     public Table createTableByName(TObjectName tableName) {
         if (modelManager.getTableByName(tableName) instanceof Table) {
-            return (Table) modelManager.getModel(tableName);
+        	return (Table) modelManager.getTableByName(tableName);
+        }
+        if (modelManager.getTableByName(tableName.toString()) instanceof Table) {
+        	return (Table) modelManager.getTableByName(tableName.toString());
         }
         Table tableModel = new Table(tableName);
         modelManager.bindTableByName(tableName, tableModel);
+        modelManager.bindTableByName(tableName.toString(), tableModel);
         return tableModel;
     }
     
@@ -237,6 +268,11 @@ public class ModelFactory {
             return (TableColumn) modelManager.getModel(new Pair<Table, TObjectName>(table,
                     column));
         }
+        
+        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){
+        	return null;
+        }
+        
         TableColumn columnModel = new TableColumn(table, column);
         modelManager.bindModel(new Pair<Table, TObjectName>(table,
                 column), columnModel);

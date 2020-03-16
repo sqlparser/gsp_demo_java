@@ -48,7 +48,7 @@ public class MetaDB implements IMetaDatabase {
 				if ((server == null) || (server.length() == 0)) {
 					bServer = true;
 				} else {
-					bServer = columns[i][0].equalsIgnoreCase(SQLUtil.trimObjectName(server));
+					bServer = columns[i][0].equalsIgnoreCase(SQLUtil.trimColumnStringQuote(server));
 				}
 				if (!bServer)
 					continue;
@@ -56,7 +56,7 @@ public class MetaDB implements IMetaDatabase {
 				if ((database == null) || (database.length() == 0)) {
 					bDatabase = true;
 				} else {
-					bDatabase = columns[i][1].equalsIgnoreCase(SQLUtil.trimObjectName(database));
+					bDatabase = columns[i][1].equalsIgnoreCase(SQLUtil.trimColumnStringQuote(database));
 				}
 				if (!bDatabase)
 					continue;
@@ -64,18 +64,18 @@ public class MetaDB implements IMetaDatabase {
 				if ((schema == null) || (schema.length() == 0)) {
 					bSchema = true;
 				} else {
-					bSchema = columns[i][2].equalsIgnoreCase(SQLUtil.trimObjectName(schema));
+					bSchema = columns[i][2].equalsIgnoreCase(SQLUtil.trimColumnStringQuote(schema));
 				}
 
 				if (!bSchema)
 					continue;
 			}
 
-			bTable = columns[i][3].equalsIgnoreCase(SQLUtil.trimObjectName(table));
+			bTable = columns[i][3].equalsIgnoreCase(SQLUtil.trimColumnStringQuote(table));
 			if (!bTable)
 				continue;
 
-			bColumn = columns[i][4].equalsIgnoreCase(SQLUtil.trimObjectName(column));
+			bColumn = columns[i][4].equalsIgnoreCase(SQLUtil.trimColumnStringQuote(column));
 			if (!bColumn)
 				continue;
 

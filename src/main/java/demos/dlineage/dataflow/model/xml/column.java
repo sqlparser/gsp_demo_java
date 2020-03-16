@@ -15,6 +15,9 @@ public class column
 
 	@Attribute(required = false)
 	private String coordinate;
+	
+	@Attribute(required = false)
+	private String source;
 
 	public String getCoordinate( )
 	{
@@ -60,5 +63,15 @@ public class column
 	{
 		this.id = id;
 	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+	
+	
 
 }

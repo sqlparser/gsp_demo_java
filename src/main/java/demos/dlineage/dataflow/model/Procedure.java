@@ -35,7 +35,7 @@ public class Procedure {
 			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
 					endToken.columnNo + (long) endToken.astext.length());
 			this.fullName = getProcedureName().toString();
-			this.name = getProcedureName().getTableString();
+			this.name = getProcedureName().toString();
 			
 			if (!SQLUtil.isEmpty(getProcedureName().getSchemaString())) {
 				this.schema = getProcedureName().getSchemaString();

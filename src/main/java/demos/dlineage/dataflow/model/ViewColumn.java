@@ -7,6 +7,7 @@ import java.util.List;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 
 public class ViewColumn {
 
@@ -43,6 +44,8 @@ public class ViewColumn {
         else
             this.name = columnObject.toString();
 
+        this.name = SQLUtil.trimColumnStringQuote(name);
+        
         this.view = view;
         this.columnIndex = index;
         view.addColumn(this);
