@@ -24,6 +24,7 @@ public class testCastDate extends TestCase {
         assertTrue(resultColumn.getAliasClause().toString().equalsIgnoreCase("cust_Dt"));
         assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.simple_object_name_t);
         assertTrue(resultColumn.getExpr().getObjectOperand().toString().equalsIgnoreCase("Col1_DT"));
+      //  System.out.println(sqlparser.sqltext);
 
     }
 }
