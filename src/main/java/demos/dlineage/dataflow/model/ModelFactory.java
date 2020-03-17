@@ -2,6 +2,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
@@ -129,15 +130,12 @@ public class ModelFactory {
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }
-        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName());
-        }
-        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        if (modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString())) instanceof Table) {
+        	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
         Table tableModel = new Table(table);
         modelManager.bindCreateModel(table, tableModel);
-        modelManager.bindTableByName(table.toString(), tableModel);
+        modelManager.bindTableByName(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         return tableModel;
     }
 
@@ -148,15 +146,12 @@ public class ModelFactory {
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }
-        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName());
-        }
-        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        if (modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString())) instanceof Table) {
+        	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
         Table tableModel = new Table(table);
         modelManager.bindModel(table, tableModel);
-        modelManager.bindTableByName(table.toString(), tableModel);
+        modelManager.bindTableByName(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         return tableModel;
     }
     
@@ -167,28 +162,21 @@ public class ModelFactory {
         if (modelManager.getModel(table) instanceof Table) {
             return (Table) modelManager.getModel(table);
         }
-        if (modelManager.getTableByName(table.getTableName()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName());
-        }
-        if (modelManager.getTableByName(table.getTableName().toString()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(table.getTableName().toString());
+        if (modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString())) instanceof Table) {
+        	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
         Table tableModel = new Table(table);
         modelManager.bindModel(table, tableModel);
-        modelManager.bindTableByName(table.toString(), tableModel);
+        modelManager.bindTableByName(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         return tableModel;
     }
     
     public Table createTableByName(TObjectName tableName) {
-        if (modelManager.getTableByName(tableName) instanceof Table) {
-        	return (Table) modelManager.getTableByName(tableName);
-        }
-        if (modelManager.getTableByName(tableName.toString()) instanceof Table) {
-        	return (Table) modelManager.getTableByName(tableName.toString());
+        if (modelManager.getTableByName(SQLUtil.getTableFullName(tableName.toString())) instanceof Table) {
+        	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(tableName.toString()));
         }
         Table tableModel = new Table(tableName);
-        modelManager.bindTableByName(tableName, tableModel);
-        modelManager.bindTableByName(tableName.toString(), tableModel);
+        modelManager.bindTableByName(SQLUtil.getTableFullName(tableName.toString()), tableModel);
         return tableModel;
     }
     

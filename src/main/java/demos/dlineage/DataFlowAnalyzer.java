@@ -431,6 +431,8 @@ public class DataFlowAnalyzer {
 						handleListener.startAnalyze(sqlFile, sqlFile.length(), false);
 					}
 				}
+				
+				modelManager.reset();
 
 				for (int i = 0; i < children.length; i++) {
 					if (handleListener != null && handleListener.isCanceled()) {
@@ -440,6 +442,7 @@ public class DataFlowAnalyzer {
 					String content = SQLUtil.getFileContent(children[i].getAbsolutePath());
 					ModelBindingManager.removeGlobalDatabase();
 					ModelBindingManager.removeGlobalSchema();
+					ModelBindingManager.removeGlobalSQLEnv();
 
 					if (content != null && content.trim().startsWith("{")) {
 						JSONObject queryObject = JSON.parseObject(content);
@@ -455,10 +458,18 @@ public class DataFlowAnalyzer {
 					TGSqlParser sqlparser = new TGSqlParser(vendor);
 					if (sqlenv != null) {
 						sqlparser.setSqlEnv(sqlenv);
+						ModelBindingManager.setGlobalSQLEnv(sqlenv);
 					}
 					sqlparser.sqltext = content;
-					analyzeAndOutputResult(sqlparser, doc, dlineageResult);
+					analyzeAndOutputResult(sqlparser);
 				}
+				
+				appendProcedures(doc, dlineageResult);
+				appendTables(doc, dlineageResult);
+				appendViews(doc, dlineageResult);
+				appendResultSets(doc, dlineageResult);
+				appendRelations(doc, dlineageResult);
+				
 			} else if (sqlContent != null) {
 				if (handleListener != null) {
 					handleListener.startAnalyze(null, sqlContent.length(), false);
@@ -481,9 +492,17 @@ public class DataFlowAnalyzer {
 				TGSqlParser sqlparser = new TGSqlParser(vendor);
 				if (sqlenv != null) {
 					sqlparser.setSqlEnv(sqlenv);
+					ModelBindingManager.setGlobalSQLEnv(sqlenv);
 				}
 				sqlparser.sqltext = sqlContent;
-				analyzeAndOutputResult(sqlparser, doc, dlineageResult);
+				analyzeAndOutputResult(sqlparser);
+				
+				appendProcedures(doc, dlineageResult);
+				appendTables(doc, dlineageResult);
+				appendViews(doc, dlineageResult);
+				appendResultSets(doc, dlineageResult);
+				appendRelations(doc, dlineageResult);
+				
 			} else if (sqlContents != null) {
 				if (handleListener != null) {
 					if (sqlContents.length == 1) {
@@ -517,10 +536,18 @@ public class DataFlowAnalyzer {
 					TGSqlParser sqlparser = new TGSqlParser(vendor);
 					if (sqlenv != null) {
 						sqlparser.setSqlEnv(sqlenv);
+						ModelBindingManager.setGlobalSQLEnv(sqlenv);
 					}
 					sqlparser.sqltext = content;
-					analyzeAndOutputResult(sqlparser, doc, dlineageResult);
+					analyzeAndOutputResult(sqlparser);
 				}
+				
+				appendProcedures(doc, dlineageResult);
+				appendTables(doc, dlineageResult);
+				appendViews(doc, dlineageResult);
+				appendResultSets(doc, dlineageResult);
+				appendRelations(doc, dlineageResult);
+				
 			} else if (sqlFiles != null) {
 				if (handleListener != null) {
 					if (sqlFiles.length == 1) {
@@ -555,10 +582,17 @@ public class DataFlowAnalyzer {
 					TGSqlParser sqlparser = new TGSqlParser(vendor);
 					if (sqlenv != null) {
 						sqlparser.setSqlEnv(sqlenv);
+						ModelBindingManager.setGlobalSQLEnv(sqlenv);
 					}
 					sqlparser.sqltext = content;
-					analyzeAndOutputResult(sqlparser, doc, dlineageResult);
+					analyzeAndOutputResult(sqlparser);
 				}
+				
+				appendProcedures(doc, dlineageResult);
+				appendTables(doc, dlineageResult);
+				appendViews(doc, dlineageResult);
+				appendResultSets(doc, dlineageResult);
+				appendRelations(doc, dlineageResult);
 			}
 
 			doc.appendChild(dlineageResult);
@@ -829,6 +863,7 @@ public class DataFlowAnalyzer {
 		ModelBindingManager.removeGlobalDatabase();
 		ModelBindingManager.removeGlobalSchema();
 		ModelBindingManager.removeGlobalVendor();
+		ModelBindingManager.removeGlobalSQLEnv();
 		appendResultSets.clear();
 		modelManager.TABLE_COLUMN_ID = 0;
 		modelManager.RELATION_ID = 0;
@@ -838,11 +873,10 @@ public class DataFlowAnalyzer {
 		ModelBindingManager.setGlobalVendor(vendor);
 	}
 
-	private void analyzeAndOutputResult(TGSqlParser sqlparser, Document doc, Element dlineageResult) {
+	private void analyzeAndOutputResult(TGSqlParser sqlparser) {
 		try {
 			accessedStatements.clear();
 			stmtStack.clear();
-			modelManager.reset();
 
 			try {
 				int result = sqlparser.parse();
@@ -887,11 +921,6 @@ public class DataFlowAnalyzer {
 				}
 			}
 
-			appendProcedures(doc, dlineageResult);
-			appendTables(doc, dlineageResult);
-			appendViews(doc, dlineageResult);
-			appendResultSets(doc, dlineageResult);
-			appendRelations(doc, dlineageResult);
 
 			if (handleListener != null) {
 				handleListener.endAnalyzeDataFlow(sqlparser.sqlstatements.size());
@@ -2271,7 +2300,7 @@ public class DataFlowAnalyzer {
 			appendRelation(doc, dlineageResult, relations, DataFlowRelation.class);
 			appendRelation(doc, dlineageResult, relations, IndirectImpactRelation.class);
 			appendRecordSetRelation(doc, dlineageResult, relations);
-			appendRelation(doc, dlineageResult, relations, RecordSetRelation.class);
+			//appendRelation(doc, dlineageResult, relations, RecordSetRelation.class);
 			appendRelation(doc, dlineageResult, relations, ImpactRelation.class);
 			appendRelation(doc, dlineageResult, relations, JoinRelation.class);
 		}
@@ -3457,7 +3486,9 @@ public class DataFlowAnalyzer {
 
 						if (!isFunctionName(object)) {
 							if (object.getSourceTable() == null || object.getSourceTable() == table) {
-								modelFactory.createTableColumn(tableModel, object);
+								if(!"*".equals(object.toString()) || table.getObjectNameReferences().size() == 1){ 
+									modelFactory.createTableColumn(tableModel, object);
+								}
 							}
 						}
 					}

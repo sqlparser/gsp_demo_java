@@ -7,6 +7,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.stmt.*;
 
 import java.util.*;
@@ -42,7 +43,9 @@ public class ModelBindingManager {
     private final static ThreadLocal globalDatabase = new ThreadLocal();
     private final static ThreadLocal globalSchema = new ThreadLocal();
     private final static ThreadLocal globalVendor = new ThreadLocal();
+    private final static ThreadLocal globalSQLEnv = new ThreadLocal();
 
+    
     public static void set(ModelBindingManager modelManager) {
         if (localManager.get() == null) {
             localManager.set(modelManager);
@@ -93,6 +96,20 @@ public class ModelBindingManager {
 
     public static EDbVendor getGlobalVendor() {
         return (EDbVendor) globalVendor.get();
+    }
+    
+    public static void setGlobalSQLEnv(TSQLEnv sqlenv) {
+        if (globalSQLEnv.get() == null && sqlenv!=null) {
+        	globalSQLEnv.set(sqlenv);
+        }
+    }
+    
+    public static void removeGlobalSQLEnv() {
+    	globalSQLEnv.remove();
+    }
+
+    public static TSQLEnv getGlobalSQLEnv() {
+        return (TSQLEnv) globalSQLEnv.get();
     }
 
     
@@ -195,11 +212,11 @@ public class ModelBindingManager {
         }
             
         if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(((TTable)gspModel).getTableName());
+        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
         }
         
         if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(((TTable)gspModel).toString());
+        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
         }
         	
         return result;
@@ -691,19 +708,19 @@ public class ModelBindingManager {
 		return procedures;
 	}
 
-	public void bindTableByName(TObjectName tableName, Table tableModel) {
-		tableNamesMap.put(tableName, tableModel);
-		
-	}
-	
+//	public void bindTableByName(TObjectName tableName, Table tableModel) {
+//		tableNamesMap.put(tableName, tableModel);
+//		
+//	}
+//	
 	public void bindTableByName(String tableName, Table tableModel) {
 		tableNamesMap.put(tableName, tableModel);
 		
 	}
 
-	public Table getTableByName(TObjectName tableName) {
-		return (Table)tableNamesMap.get(tableName);
-	}
+//	public Table getTableByName(TObjectName tableName) {
+//		return (Table)tableNamesMap.get(tableName);
+//	}
 	
 	public Table getTableByName(String tableName) {
 		return (Table)tableNamesMap.get(tableName);

@@ -594,4 +594,27 @@ public class SQLUtil {
 			return false;
 		}
 	}
+
+	public static String getTableFullName(String tableName) {
+		if (tableName.split("\\.").length == 1) {
+			StringBuffer buffer = new StringBuffer();
+			if (ModelBindingManager.getGlobalDatabase() != null) {
+				buffer.append(ModelBindingManager.getGlobalDatabase() ).append(".");
+			}
+			if (ModelBindingManager.getGlobalSchema() != null) {
+				buffer.append(ModelBindingManager.getGlobalSchema() ).append(".");
+			}
+			buffer.append(tableName);
+			return SQLUtil.getIdentifierNormalName(buffer.toString());		
+		} else if (tableName.split("\\.").length == 2) {
+			if (ModelBindingManager.getGlobalDatabase() != null) {
+				return SQLUtil.getIdentifierNormalName(ModelBindingManager.getGlobalDatabase() + "." + tableName);
+			}
+			else{
+				return SQLUtil.getIdentifierNormalName(tableName);
+			}
+		} else {
+			return SQLUtil.getIdentifierNormalName(tableName);
+		}
+	}
 }

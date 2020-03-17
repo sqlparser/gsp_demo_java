@@ -18,7 +18,6 @@ public abstract class AbstractRelation implements Relation {
 
     public AbstractRelation() {
         id = ++ModelBindingManager.get().RELATION_ID;
-        System.out.println();
     }
 
     public int getId() {
