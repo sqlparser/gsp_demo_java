@@ -576,6 +576,10 @@ public class TGetTableColumn{
                         + ")";
 
                 analyzeStmt(lcTable.getSubquery(),pNest++);
+            }else if (lcTable.getTableType() == ETableSource.function){
+                tn = "(table-valued function:"
+                        + lcTable.getTableName( )
+                        + ")";
             }
 			else if ( lcTable.getTableName( ) != null )
 			{
@@ -603,7 +607,10 @@ public class TGetTableColumn{
 
                 tableColumnList.append(","+tn);
 
-                if (!((lcTable.getTableType() == ETableSource.subquery) || (lcTable.isCTEName())||(lcTable.getTableType() == ETableSource.openquery)) && lcTable.getTableName()!=null) {
+                if (!((lcTable.getTableType() == ETableSource.subquery)
+                        || (lcTable.isCTEName())
+                        ||(lcTable.getTableType() == ETableSource.openquery)
+                        ||(lcTable.getTableType() == ETableSource.function)) && lcTable.getTableName()!=null) {
                    if (lcTable.isLinkTable()){
                       // tablelist.append(lcTable.getLinkTable().toString()+newline);
                        tablelist.add(lcTable.getLinkTable().toString());
