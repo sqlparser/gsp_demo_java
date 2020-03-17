@@ -331,4 +331,21 @@ public class testTeradata  extends TestCase {
                         "T.'monthly_sales'");
     }
 
+    public static void testCastDate() {
+        doTest("select ydLLdNG_mTzTEMENT_dD\n" +
+                        "              ,Col1_DT (date) cust_Dt\n" +
+                        "              ,PRORzTE_dND\n" +
+                        "         FROM zxxountLevelxhzrgem\n" +
+                        "              WHERE ydLL_mTzTEMENT_xHzRGE_zMT > 0"+
+                        "    ",
+                "Tables:\n" +
+                        "zxxountLevelxhzrgem\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "zxxountLevelxhzrgem.Col1_DT\n" +
+                        "zxxountLevelxhzrgem.PRORzTE_dND\n" +
+                        "zxxountLevelxhzrgem.ydLL_mTzTEMENT_xHzRGE_zMT\n" +
+                        "zxxountLevelxhzrgem.ydLLdNG_mTzTEMENT_dD");
+    }
+
 }
