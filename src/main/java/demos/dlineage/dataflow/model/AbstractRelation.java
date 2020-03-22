@@ -30,6 +30,9 @@ public abstract class AbstractRelation implements Relation {
 
     public void setTarget(RelationElement<?> target) {
         this.target = target;
+        if(target.getElement() instanceof PseudoRows<?>){
+        	((PseudoRows<?>)target.getElement()).holdRelation(this);
+        }
     }
 
     public RelationElement<?>[] getSources() {

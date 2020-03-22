@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 public class SQLUtil {
 
 	public static final String TABLE_CONSTANT = "CONSTANT";
@@ -617,4 +621,24 @@ public class SQLUtil {
 			return SQLUtil.getIdentifierNormalName(tableName);
 		}
 	}
+	
+	public static String[] convertSQL(String json) {
+        List<String> sqls = new ArrayList<String>();
+        if (json != null && json.trim().startsWith("{")) {
+            StringBuilder buffer = new StringBuilder();
+            JSONObject queryObject = JSONObject.parseObject(json);
+            JSONArray querys = queryObject.getJSONArray("queries");
+            if (querys != null) {
+                for (int i = 0; i < querys.size(); i++) {
+                    JSONObject object = querys.getJSONObject(i);
+                    sqls.add(object.toJSONString());
+                }
+            } else {
+                sqls.add(queryObject.toJSONString());
+            }
+        } else {
+            sqls.add(json == null ? "" : json);
+        }
+        return sqls.toArray(new String[0]);
+    }
 }
