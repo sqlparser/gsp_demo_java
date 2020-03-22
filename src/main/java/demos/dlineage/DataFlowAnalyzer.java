@@ -1704,6 +1704,14 @@ public class DataFlowAnalyzer {
 				} else if (stmt.getSubQuery().getResultColumnList() != null) {
 					SelectResultSet resultSetModel = (SelectResultSet) modelManager
 							.getModel(stmt.getSubQuery().getResultColumnList());
+					
+					if(resultSetModel!=null && !resultSetModel.getPseudoRows().getHoldRelations().isEmpty()){
+						ImpactRelation impactRelation = modelFactory.createImpactRelation();
+						impactRelation.setEffectType(EffectType.insert);
+						impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSetModel.getPseudoRows()));
+						impactRelation.setTarget(new PseudoRowsRelationElement<TablePseudoRows>(tableModel.getPseudoRows()));
+					}
+					
 					for (int i = 0; i < resultSetModel.getColumns().size(); i++) {
 						ResultColumn resultColumn = resultSetModel.getColumns().get(i);
 						if (resultColumn.getColumnObject() instanceof TObjectName) {
@@ -1888,6 +1896,14 @@ public class DataFlowAnalyzer {
 				} else if (stmt.getSubQuery() != null) {
 					SelectSetResultSet resultSetModel = (SelectSetResultSet) modelManager.getModel(stmt.getSubQuery());
 					if (resultSetModel != null) {
+						
+						if(!resultSetModel.getPseudoRows().getHoldRelations().isEmpty()){
+							ImpactRelation impactRelation = modelFactory.createImpactRelation();
+							impactRelation.setEffectType(EffectType.insert);
+							impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSetModel.getPseudoRows()));
+							impactRelation.setTarget(new PseudoRowsRelationElement<TablePseudoRows>(tableModel.getPseudoRows()));
+						}
+						
 						for (int i = 0; i < resultSetModel.getColumns().size(); i++) {
 							ResultColumn resultColumn = resultSetModel.getColumns().get(i);
 							TAliasClause alias = ((TResultColumn) resultColumn.getColumnObject()).getAliasClause();
