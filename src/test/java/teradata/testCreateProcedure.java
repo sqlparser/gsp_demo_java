@@ -11,6 +11,8 @@ import gudusoft.gsqlparser.stmt.mssql.TMssqlOpen;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import junit.framework.TestCase;
 
+import static gudusoft.gsqlparser.ESqlStatementType.sstmssqldeclare;
+
 public class testCreateProcedure extends TestCase {
 
     public void test1(){
@@ -67,7 +69,7 @@ public class testCreateProcedure extends TestCase {
 
         assertTrue(cp.getBodyStatements().size() == 2);
 
-        assertTrue(cp.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstmssqldeclare);
+        assertTrue(cp.getBodyStatements().get(0).sqlstatementtype == sstmssqldeclare);
         TMssqlDeclare declare = (TMssqlDeclare)cp.getBodyStatements().get(0);
         assertTrue(declare.getCursorName().toString().equalsIgnoreCase("cur1"));
         TSelectSqlStatement subquery = declare.getSubquery();
@@ -106,7 +108,7 @@ public class testCreateProcedure extends TestCase {
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("EDW_TABLES_DEV.samplesp7"));
 
         assertTrue(cp.getBodyStatements().size() == 4);
-        assertTrue(cp.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstmssqldeclare);
+        assertTrue(cp.getBodyStatements().get(0).sqlstatementtype == sstmssqldeclare);
 
         TMssqlDeclare declare = (TMssqlDeclare)cp.getBodyStatements().get(0);
         assertTrue(declare.getDeclareType() == EDeclareType.variable);
@@ -114,7 +116,7 @@ public class testCreateProcedure extends TestCase {
         assertTrue(variable.getDatatype().getDataType() == EDataType.integer_t);
         assertTrue(variable.getVariableName().toString().equalsIgnoreCase("V1"));
 
-        assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == ESqlStatementType.sstmssqldeclare);
+        assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == sstmssqldeclare);
         declare = (TMssqlDeclare)cp.getBodyStatements().get(1);
         assertTrue(declare.getDeclareType() == EDeclareType.handlers);
         TSelectSqlStatement subquery = declare.getSubquery();
@@ -327,6 +329,10 @@ public class testCreateProcedure extends TestCase {
         TRepeatStmt repeatStmt = (TRepeatStmt)cp.getBodyStatements().get(16);
         assertTrue(repeatStmt.getCondition().toString().equalsIgnoreCase("V_COUNTER >= V_ACT_CNT"));
         assertTrue(repeatStmt.getBodyStatements().size() == 7);
+
+        assertTrue(cp.getBodyStatements().get(7).sqlstatementtype == sstmssqldeclare);
+        TMssqlDeclare declare = (TMssqlDeclare)cp.getBodyStatements().get(7);
+        assertTrue(declare.getSubquery().getTables().getTable(0).getTableName().toString().equalsIgnoreCase("CTE_REQ_DATE"));
 
     }
 

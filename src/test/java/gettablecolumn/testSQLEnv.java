@@ -91,6 +91,43 @@ class TSQLServerEnv extends TSQLEnv {
     }
 }
 
+class TOracleEnv2 extends TSQLEnv {
+
+    public TOracleEnv2(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+
+        TSQLCatalog sqlCatalog = createSQLCatalog("orcl");
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("scott");
+        //add a new table:
+        TSQLTable aTab = sqlSchema.createTable("deb_rfa_dpd_history");
+        aTab.addColumn("dpd_100");
+        aTab.addColumn("dpd_100_delinquency_bucket");
+    }
+}
+
+class TOracleEnvStarColumn1 extends TSQLEnv {
+
+    public TOracleEnvStarColumn1(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+        TSQLCatalog sqlCatalog = createSQLCatalog("default");
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("default");
+        TSQLTable aTab = sqlSchema.createTable("some_table");
+        aTab.addColumn("c123");
+        TSQLTable bTab = sqlSchema.createTable("other_table");
+        bTab.addColumn("c1");
+    }
+}
+
 public class testSQLEnv extends TestCase {
 
     public static void test1(){
@@ -119,5 +156,75 @@ public class testSQLEnv extends TestCase {
                 "cTab.ID\n" +
                 "cTab.Quantity"));
     }
+
+    public static void testOracle1(){
+        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvoracle);
+        getTableColumn.isConsole = false;
+        getTableColumn.listStarColumn = true;
+        getTableColumn.setSqlEnv(new TOracleEnv2());
+
+        getTableColumn.runText("select b.pb_id\n" +
+                "                 , b.pb_source_code\n" +
+                "                 , b.time_key as hist_time_key\n" +
+                "                 , ot.time_key as curr_time_key\n" +
+                "                 , dpd_100\n" +
+                "                 , dpd_100_delinquency_bucket as bucket_100\n" +
+                "                 , ot.time_id\n" +
+                "                 , to_char(add_months(ot.time_id, -6),'J') as time_key_6m\n" +
+                "             from deb_rfa_product_bridge pb\n" +
+                "             left join deb_rfa_dpd_history b\n" +
+                "                     on pb.pb_id = b.pb_id\n" +
+                "                    and pb.pb_source_code = b.pb_source_code\n" +
+                "             cross join ods_time ot\n" +
+                "            where b.time_key >= to_char (add_months (ot.time_id, -12),'J')\n" +
+                "              and ot.time_id = (select process_current_date\n" +
+                "                                  from etl_current_date\n" +
+                "                                 where process_code = 'DEB_RFA_ODS')");
+        String strActual = getTableColumn.outList.toString();
+       // System.out.println(strActual);
+        assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
+                "deb_rfa_dpd_history\n" +
+                "deb_rfa_product_bridge\n" +
+                "etl_current_date\n" +
+                "ods_time\n" +
+                "\n" +
+                "Fields:\n" +
+                "deb_rfa_dpd_history.dpd_100\n" +
+                "deb_rfa_dpd_history.dpd_100_delinquency_bucket\n" +
+                "deb_rfa_dpd_history.pb_id\n" +
+                "deb_rfa_dpd_history.pb_source_code\n" +
+                "deb_rfa_dpd_history.time_key\n" +
+                "deb_rfa_product_bridge.pb_id\n" +
+                "deb_rfa_product_bridge.pb_source_code\n" +
+                "etl_current_date.process_code\n" +
+                "etl_current_date.process_current_date\n" +
+                "ods_time.time_id\n" +
+                "ods_time.time_key"));
+    }
+
+    public static void testSelectStarColumn1(){
+        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvoracle);
+        getTableColumn.isConsole = false;
+        getTableColumn.listStarColumn = true;
+        getTableColumn.setSqlEnv(new TOracleEnvStarColumn1());
+
+        getTableColumn.runText("select c1, c123 from\n" +
+                "(  -- subquery\n" +
+                "    select *\n" +
+                "    from some_table o1, other_table o2\n" +
+                ")");
+        String strActual = getTableColumn.outList.toString();
+//        System.out.println(strActual);
+        assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
+                "other_table\n" +
+                "some_table\n" +
+                "\n" +
+                "Fields:\n" +
+                "other_table.*\n" +
+                "other_table.c1\n" +
+                "some_table.*\n" +
+                "some_table.c123"));
+    }
+
 
 }
