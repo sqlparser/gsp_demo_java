@@ -403,7 +403,7 @@ public class ModelBindingManager {
                 TObjectName columnName = columns[i];
                 if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
                     continue;
-                if (columnName == column) {
+                if (SQLUtil.getIdentifierNormalName(columnName.toString()).equals(SQLUtil.getIdentifierNormalName(column.toString()))) {
                     if (columnName.getSourceTable() == null
                             || columnName.getSourceTable() == table) {
                         return table;
