@@ -25,8 +25,8 @@ public class testScriptGenerator extends TestCase
 				"limit 4";
 
 		sqlparser.parse( );
-
 		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
 		assertTrue(verifyScript(EDbVendor.dbvhive,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
 
 	}
