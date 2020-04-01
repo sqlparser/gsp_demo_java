@@ -171,7 +171,18 @@ public class table
 		if(!SQLUtil.isEmpty(schema)){
 			fullName.append(schema).append(".");
 		}
-		fullName.append(name);
+		if(fullName.length()>0){
+			int index = name.lastIndexOf(".");
+			if(index!=-1){
+				fullName.append(name.substring(index+1));
+			}
+			else{
+				fullName.append(name);
+			}
+		}
+		else{
+			fullName.append(name);
+		}
 		return fullName.toString();
 	}
 

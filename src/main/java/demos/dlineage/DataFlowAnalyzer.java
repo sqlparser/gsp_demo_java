@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -269,6 +268,7 @@ public class DataFlowAnalyzer {
 		dataflow dataflow = XML2Model.loadXML(dataflow.class, dataflowString);
 		List<table> tableCopy = new ArrayList<table>();
 		List<table> viewCopy = new ArrayList<table>();
+		List<table> resultSetCopy = new ArrayList<table>();
 		if (dataflow.getTables() != null) {
 			tableCopy.addAll(dataflow.getTables());
 		}
@@ -277,13 +277,17 @@ public class DataFlowAnalyzer {
 			viewCopy.addAll(dataflow.getViews());
 		}
 		dataflow.setViews(viewCopy);
+		if (dataflow.getResultsets() != null) {
+			resultSetCopy.addAll(dataflow.getResultsets());
+		}
+		dataflow.setResultsets(resultSetCopy);
 
 		
 		Map<String, List<table>> tableMap = new HashMap<String, List<table>>();
 		Map<String, String> tableTypeMap = new HashMap<String, String>();
 		Map<String, String> tableIdMap = new HashMap<String, String>();
 		
-		Map<String, List<column>> columnMap = new HashMap<>();
+		Map<String, Set<column>> columnMap = new HashMap<>();
 		Map<String, Set<String>> tableColumnMap = new HashMap<>();
 		Map<String, String> columnIdMap = new HashMap<String, String>();
 		Map<String, column> columnMergeIdMap = new HashMap<String, column>();
@@ -291,6 +295,7 @@ public class DataFlowAnalyzer {
 		List<table> tables = new ArrayList<table>();
 		tables.addAll(dataflow.getTables());
 		tables.addAll(dataflow.getViews());
+		tables.addAll(dataflow.getResultsets());
 
 		for (table table : tables) {
 			String tableName = SQLUtil.getIdentifierNormalName(table.getFullName());
@@ -299,18 +304,14 @@ public class DataFlowAnalyzer {
 			}
 
 			tableMap.get(tableName).add(table);
-			if (table.getType().equals("view")) {
-				tableTypeMap.put(tableName, "view");
-			} else if (!tableTypeMap.containsKey(tableName)) {
-				tableTypeMap.put(tableName, "table");
-			}
+			tableTypeMap.put(tableName, table.getType());
 			
 			if(table.getColumns()!=null){
 				tableColumnMap.putIfAbsent(tableName, new LinkedHashSet<>());
 				for(column column:table.getColumns()){
 					String columnName = SQLUtil.getIdentifierNormalName(table.getFullName()+"."+column.getName() );
 					if(!columnMap.containsKey(columnName)){
-						columnMap.put(columnName, new ArrayList<column>());
+						columnMap.put(columnName, new LinkedHashSet<column>());
 						tableColumnMap.get(tableName).add(columnName);
 					}
 					columnMap.get(columnName).add(column);
@@ -353,11 +354,15 @@ public class DataFlowAnalyzer {
 						dataflow.getViews().remove(item);
 					} else if (item.isTable()) {
 						dataflow.getTables().remove(item);
+					} else if (item.isResultSet()) {
+						dataflow.getResultsets().remove(item);
 					}
 				}
 
 				if (table.isView()) {
 					dataflow.getViews().add(table);
+				} else if (table.isResultSet()) {
+					dataflow.getResultsets().add(table);
 				} else {
 					dataflow.getTables().add(table);
 				}
@@ -371,8 +376,8 @@ public class DataFlowAnalyzer {
 			List<column> mergeColumns = new ArrayList<column>();
 			while(columnIter.hasNext()){
 				String columnName = columnIter.next();
-				List<column> columnList = columnMap.get(columnName);
-				column firstColumn = columnList.get(0);
+				Set<column> columnList = columnMap.get(columnName);
+				column firstColumn = columnList.iterator().next();
 				if(columnList.size()>1){
 					column mergeColumn = new column();
 					mergeColumn.setId(String.valueOf(++modelManager.TABLE_COLUMN_ID));
@@ -412,6 +417,7 @@ public class DataFlowAnalyzer {
 				}
 				
 				List<sourceColumn> sources = relation.getSources();
+				Set<sourceColumn> sourceSet = new LinkedHashSet<>();
 				if (sources != null) {
 					for (sourceColumn source : sources) {
 						if (tableIdMap.containsKey(source.getParent_id())) {
@@ -425,6 +431,9 @@ public class DataFlowAnalyzer {
 							source.setCoordinate(columnMergeIdMap.get(source.getId()).getCoordinate());
 						}
 					}
+					
+					sourceSet.addAll(sources);
+					relation.setSources(new ArrayList<>(sourceSet));
 				}
 				
 				JSONObject relationJSON = (JSONObject)JSON.toJSON(relation);
@@ -580,38 +589,71 @@ public class DataFlowAnalyzer {
 					}
 				}
 
-				for (int i = 0; i < sqlContents.length; i++) {
-					if (handleListener != null && handleListener.isCanceled()) {
-						break;
-					}
-
-					String content = sqlContents[i];
-
-					ModelBindingManager.removeGlobalDatabase();
-					ModelBindingManager.removeGlobalSchema();
-
-					if (content != null && content.trim().startsWith("{")) {
-						JSONObject queryObject = JSON.parseObject(content);
-						content = queryObject.getString("sourceCode");
-						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
-						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+				if (sqlenv != null) {
+					Map<String, StringBuilder> databaseMap = new LinkedHashMap<String, StringBuilder>();
+					for (int i = 0; i < sqlContents.length; i++) {
+						String content = sqlContents[i];
+						if (content != null && content.trim().startsWith("{")) {
+							JSONObject queryObject = JSON.parseObject(content);
+							content = queryObject.getString("sourceCode");
+							String database = queryObject.getString("database");
+							String schema = queryObject.getString("schema");
+							String group = database + "." + schema;
+							databaseMap.putIfAbsent(group, new StringBuilder());
+							databaseMap.get(group).append(content).append("\r\n");
+						}
 					}
 					
-					if(content == null){
-						continue;
-					}
+					Iterator<String> schemaIter = databaseMap.keySet().iterator();
+					while(schemaIter.hasNext()){
+						if (handleListener != null && handleListener.isCanceled()) {
+							break;
+						}
+						String group = schemaIter.next();
+						String[] split = group.split("\\.");
+						ModelBindingManager.setGlobalDatabase(split[0]);
+						ModelBindingManager.setGlobalSchema(split[1]);
+						if (handleListener != null) {
+							handleListener.startParse(null, databaseMap.get(group).length(), 0);
+						}
 
-					if (handleListener != null) {
-						handleListener.startParse(null, content.length(), 0);
-					}
-
-					TGSqlParser sqlparser = new TGSqlParser(vendor);
-					if (sqlenv != null) {
+						TGSqlParser sqlparser = new TGSqlParser(vendor);	
 						sqlparser.setSqlEnv(sqlenv);
 						ModelBindingManager.setGlobalSQLEnv(sqlenv);
+						sqlparser.sqltext = databaseMap.get(group).toString();
+						analyzeAndOutputResult(sqlparser);
 					}
-					sqlparser.sqltext = content;
-					analyzeAndOutputResult(sqlparser);
+				}
+				else{
+					for (int i = 0; i < sqlContents.length; i++) {
+						if (handleListener != null && handleListener.isCanceled()) {
+							break;
+						}
+	
+						String content = sqlContents[i];
+	
+						ModelBindingManager.removeGlobalDatabase();
+						ModelBindingManager.removeGlobalSchema();
+	
+						if (content != null && content.trim().startsWith("{")) {
+							JSONObject queryObject = JSON.parseObject(content);
+							content = queryObject.getString("sourceCode");
+							ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+							ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+						}
+						
+						if(content == null){
+							continue;
+						}
+	
+						if (handleListener != null) {
+							handleListener.startParse(null, content.length(), 0);
+						}
+	
+						TGSqlParser sqlparser = new TGSqlParser(vendor);
+						sqlparser.sqltext = content;
+						analyzeAndOutputResult(sqlparser);
+					}
 				}
 				
 				appendProcedures(doc, dlineageResult);
@@ -984,7 +1026,55 @@ public class DataFlowAnalyzer {
 				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
-						analyzeCustomSqlStmt(stmt);
+						if(stmt instanceof TCreateTableSqlStatement){
+							analyzeCustomSqlStmt(stmt);
+						}
+					}
+				}
+
+				if (handleListener != null) {
+					handleListener.endAnalyzeStatment(i);
+				}
+			}
+			
+			for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
+				if (handleListener != null && handleListener.isCanceled()) {
+					break;
+				}
+
+				if (handleListener != null) {
+					handleListener.startAnalyzeStatment(i);
+				}
+
+				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
+				if (stmt.getErrorCount() == 0) {
+					if (stmt.getParentStmt() == null) {
+						if(stmt instanceof TCreateViewSqlStatement){
+							analyzeCustomSqlStmt(stmt);
+						}
+					}
+				}
+
+				if (handleListener != null) {
+					handleListener.endAnalyzeStatment(i);
+				}
+			}
+			
+			for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
+				if (handleListener != null && handleListener.isCanceled()) {
+					break;
+				}
+
+				if (handleListener != null) {
+					handleListener.startAnalyzeStatment(i);
+				}
+
+				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
+				if (stmt.getErrorCount() == 0) {
+					if (stmt.getParentStmt() == null) {
+						if (!(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TCreateViewSqlStatement)) {
+							analyzeCustomSqlStmt(stmt);
+						}
 					}
 				}
 
@@ -3573,6 +3663,22 @@ public class DataFlowAnalyzer {
 			stmtStack.push(stmt);
 			SelectSetResultSet resultSet = modelFactory.createSelectSetResultSet(stmt);
 
+			ResultSet leftResultSetModel = (ResultSet) modelManager.getModel(stmt.getLeftStmt());
+			if(leftResultSetModel!=null && leftResultSetModel!=resultSet && !leftResultSetModel.getPseudoRows().getHoldRelations().isEmpty()){
+				ImpactRelation impactRelation = modelFactory.createImpactRelation();
+				impactRelation.setEffectType(EffectType.select);
+				impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(leftResultSetModel.getPseudoRows()));
+				impactRelation.setTarget(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSet.getPseudoRows()));
+			}
+			
+			ResultSet rightResultSetModel = (ResultSet) modelManager.getModel(stmt.getRightStmt());
+			if(rightResultSetModel!=null && rightResultSetModel!=resultSet && !rightResultSetModel.getPseudoRows().getHoldRelations().isEmpty()){
+				ImpactRelation impactRelation = modelFactory.createImpactRelation();
+				impactRelation.setEffectType(EffectType.select);
+				impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(rightResultSetModel.getPseudoRows()));
+				impactRelation.setTarget(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSet.getPseudoRows()));
+			}
+			
 			if (resultSet.getColumns() == null || resultSet.getColumns().isEmpty()) {
 				if (stmt.getLeftStmt().getResultColumnList() != null) {
 					createSelectSetResultColumns(resultSet, stmt.getLeftStmt());
@@ -3621,7 +3727,7 @@ public class DataFlowAnalyzer {
 			TTableList fromTables = stmt.tables;
 			for (int i = 0; i < fromTables.size(); i++) {
 				TTable table = fromTables.getTable(i);
-
+				
 				if (table.getSubquery() != null) {
 					QueryTable queryTable = modelFactory.createQueryTable(table);
 					TSelectSqlStatement subquery = table.getSubquery();
@@ -3712,7 +3818,11 @@ public class DataFlowAnalyzer {
 					} else if (table.getCTE().getDeleteStmt() != null) {
 						analyzeCustomSqlStmt(table.getCTE().getDeleteStmt());
 					}
-				} else if (table.getObjectNameReferences() != null && table.getObjectNameReferences().size() > 0) {
+				}
+				else if (table.getTableType().name().startsWith("open")){
+					continue;
+				}
+				else if (table.getObjectNameReferences() != null && table.getObjectNameReferences().size() > 0) {
 					Table tableModel = modelFactory.createTable(table);
 					for (int j = 0; j < table.getObjectNameReferences().size(); j++) {
 						TObjectName object = table.getObjectNameReferences().getObjectName(j);
@@ -4642,7 +4752,10 @@ public class DataFlowAnalyzer {
 								break;
 
 							TTable tTable = stmt.tables.getTable(j);
-							if (tTable.getObjectNameReferences() != null
+							if (tTable.getTableType().name().startsWith("open")){
+								continue;
+							}
+							else if (tTable.getObjectNameReferences() != null
 									&& tTable.getObjectNameReferences().size() > 0) {
 								for (int z = 0; z < tTable.getObjectNameReferences().size(); z++) {
 									TObjectName refer = tTable.getObjectNameReferences().getObjectName(z);
@@ -4881,6 +4994,40 @@ public class DataFlowAnalyzer {
 			}
 			if (relation.getSources().length == 0 && isKeyword(columnName)) {
 				relation.addSource(new ConstantRelationElement(new Constant(columnName)));
+			}
+			
+			if(relation.getSources().length>0){
+				for(int j=0;j<relation.getSources().length;j++){
+					Object source = relation.getSources()[j].getElement();
+					ImpactRelation impactRelation = null;
+					if(source instanceof ResultColumn  && !((ResultColumn)source).getResultSet().getPseudoRows().getHoldRelations().isEmpty()){
+						impactRelation = modelFactory.createImpactRelation();
+						impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(((ResultColumn)source).getResultSet().getPseudoRows()));
+					}
+					else if(source instanceof TableColumn && !((TableColumn)source).getTable().getPseudoRows().getHoldRelations().isEmpty()){
+						impactRelation = modelFactory.createImpactRelation();
+						impactRelation.addSource(new PseudoRowsRelationElement<TablePseudoRows>(((TableColumn)source).getTable().getPseudoRows()));
+					}
+					else if(source instanceof ViewColumn && !((ViewColumn)source).getView().getPseudoRows().getHoldRelations().isEmpty()){
+						impactRelation = modelFactory.createImpactRelation();
+						impactRelation.addSource(new PseudoRowsRelationElement<ViewPseudoRows>(((ViewColumn)source).getView().getPseudoRows()));
+					}
+					
+					if(impactRelation==null){
+						continue;
+					}
+					
+					Object target = relation.getTarget().getElement();
+					if(target instanceof ResultColumn){
+						impactRelation.setTarget(new PseudoRowsRelationElement<ResultSetPseudoRows>(((ResultColumn)target).getResultSet().getPseudoRows()));
+					}
+					else if(source instanceof TableColumn){
+						impactRelation.setTarget(new PseudoRowsRelationElement<TablePseudoRows>(((TableColumn)target).getTable().getPseudoRows()));
+					}
+					else if(source instanceof ViewColumn){
+						impactRelation.setTarget(new PseudoRowsRelationElement<ViewPseudoRows>(((ViewColumn)target).getView().getPseudoRows()));
+					}
+				}
 			}
 		}
 	}
