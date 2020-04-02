@@ -23,6 +23,7 @@ public class ViewColumn {
     private List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
 
     private int columnIndex;
+    private boolean showStar;
 
     public ViewColumn(View view, TObjectName columnObject, int index) {
         if (view == null || columnObject == null)
@@ -88,5 +89,13 @@ public class ViewColumn {
     public int getColumnIndex() {
         return columnIndex;
     }
+
+	public boolean isShowStar() {
+		return showStar;
+	}
+
+	public void setShowStar(boolean showStar) {
+		this.showStar = showStar;
+	}
 
 }

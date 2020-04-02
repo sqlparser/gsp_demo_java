@@ -1,10 +1,23 @@
 
 package demos.dlineage.dataflow.model;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import demos.dlineage.util.Pair;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.TCaseExpression;
+import gudusoft.gsqlparser.nodes.TConstant;
+import gudusoft.gsqlparser.nodes.TFunctionCall;
+import gudusoft.gsqlparser.nodes.TObjectName;
+import gudusoft.gsqlparser.nodes.TObjectNameList;
+import gudusoft.gsqlparser.nodes.TParameterDeclaration;
+import gudusoft.gsqlparser.nodes.TParseTreeNode;
+import gudusoft.gsqlparser.nodes.TResultColumn;
+import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.TWhenClauseItemList;
 import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
@@ -257,13 +270,34 @@ public class ModelFactory {
                     column));
         }
         
-        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){
-        	return null;
-        }
+//        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){
+//        	return null;
+//        }
         
         TableColumn columnModel = new TableColumn(table, column);
         modelManager.bindModel(new Pair<Table, TObjectName>(table,
                 column), columnModel);
+
+        if("*".equals(column.getColumnNameOnly()) && column.getSourceTable()!=null){
+        	TObjectNameList columns = column.getSourceTable().getLinkedColumns();
+        	Map<String, TObjectName> columnMap = new LinkedHashMap<>();
+        	for(int i=0;i<columns.size();i++){
+        		TObjectName item = columns.getObjectName(i);
+        		String columnName = item.getColumnNameOnly();
+        		if(item.getSourceTable().equals( column.getSourceTable()) && !"*".equals(columnName)){
+        			columnMap.put(SQLUtil.getIdentifierNormalName(columnName), item);
+        		}
+        	}
+        	for(int i=0;i<columns.size();i++){
+        		TObjectName item = columns.getObjectName(i);
+        		String columnName = item.getColumnNameOnly();
+        		if(!item.getSourceTable().equals( column.getSourceTable()) && !"*".equals(columnName)){
+        			columnMap.putIfAbsent(SQLUtil.getIdentifierNormalName(columnName), item);
+        		}
+        	}
+        	columnModel.bindStarLinkColumns(new ArrayList<>(columnMap.values()));
+        }
+        
         return columnModel;
     }
 

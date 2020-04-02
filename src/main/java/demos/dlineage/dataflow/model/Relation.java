@@ -12,4 +12,6 @@ public interface Relation {
 	EffectType getEffectType();
 
 	String getFunction();
+	
+	boolean isShowStarRelation();
 }
