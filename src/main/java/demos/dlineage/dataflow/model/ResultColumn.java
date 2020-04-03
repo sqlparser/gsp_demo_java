@@ -31,6 +31,8 @@ public class ResultColumn {
     protected TParseTreeNode columnObject;
 
     protected List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
+    
+    private boolean showStar = true;
 
     public ResultColumn() {
 
@@ -229,4 +231,13 @@ public class ResultColumn {
         return starLinkColumns;
     }
 
+	public boolean isShowStar() {
+		return showStar;
+	}
+
+	public void setShowStar(boolean showStar) {
+		this.showStar = showStar;
+	}
+
+    
 }

@@ -25,6 +25,8 @@ public class TableColumn {
 
     private TObjectName columnObject;
     private List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
+    
+    private boolean showStar;
 
     public TableColumn(Table table, TObjectName columnObject) {
         if (table == null || columnObject == null)
@@ -108,5 +110,13 @@ public class TableColumn {
     public List<TObjectName> getStarLinkColumns() {
         return starLinkColumns;
     }
+
+	public boolean isShowStar() {
+		return showStar;
+	}
+
+	public void setShowStar(boolean showStar) {
+		this.showStar = showStar;
+	}
 
 }

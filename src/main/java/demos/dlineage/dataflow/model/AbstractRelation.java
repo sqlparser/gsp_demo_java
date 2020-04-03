@@ -11,6 +11,8 @@ public abstract class AbstractRelation implements Relation {
     private String function; 
     
     private EffectType effectType;
+    
+    private boolean showStarRelation;
 
     protected RelationElement<?> target;
     
@@ -61,4 +63,12 @@ public abstract class AbstractRelation implements Relation {
 		this.function = function;
 	}
 
+	public boolean isShowStarRelation() {
+		return showStarRelation;
+	}
+
+	public void setShowStarRelation(boolean showStarRelation) {
+		this.showStarRelation = showStarRelation;
+	}
+	
 }
