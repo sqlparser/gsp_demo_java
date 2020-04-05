@@ -307,7 +307,7 @@ public class ModelBindingManager {
             return columns;
         }
 
-        TObjectNameList list = table.getObjectNameReferences();
+        TObjectNameList list = table.getLinkedColumns();
         List<TObjectName> columns = new ArrayList<TObjectName>();
 
         if (table.getCTE() != null) {

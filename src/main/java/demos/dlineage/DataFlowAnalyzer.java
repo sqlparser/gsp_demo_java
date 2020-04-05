@@ -2658,6 +2658,7 @@ public class DataFlowAnalyzer {
 				}
 
 				String targetName = null;
+				Object columnObject = null;
 				List<TObjectName> targetObjectNames = null;
 
 				if (targetElement instanceof ResultSetPseudoRows) {
@@ -2735,6 +2736,11 @@ public class DataFlowAnalyzer {
 								.inOrderTraverse(visitor);
 						targetObjectNames = visitor.getObjectNames();
 					}
+					
+					if(targetElement instanceof FunctionResultColumn){
+						columnObject = ((FunctionResultColumn)targetElement).getColumnObject();
+					}
+					
 					relationElement.appendChild(target);
 				} else if (targetElement instanceof TableColumn) {
 					TableColumn targetColumn = (TableColumn) targetElement;
@@ -2850,25 +2856,60 @@ public class DataFlowAnalyzer {
 										}
 									}
 								} else {
-									int index = getColumnIndex(sourceColumn.getStarLinkColumns(), targetName);
-									if (index != -1) {
-										source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + index);
-										source.setAttribute("column",
-												getColumnName(sourceColumn.getStarLinkColumns().get(index)));
-									} else {
-										source.setAttribute("id", String.valueOf(sourceColumn.getId()));
-										source.setAttribute("column", sourceColumn.getName());
+									if(columnObject instanceof TWhenClauseItemList){
+										TWhenClauseItemList list = (TWhenClauseItemList)columnObject;
+										for (int k = 0; k < list.size(); k++) {
+											TWhenClauseItem element = (TWhenClauseItem) list.getElement(k);
+											columnsInExpr visitor = new columnsInExpr();
+											element.getReturn_expr().inOrderTraverse(visitor);
+											List<TObjectName> objectNames = visitor.getObjectNames();
+											if(objectNames==null){
+												continue;
+											}
+											for(int x=0;x<objectNames.size();x++){
+												int index = getColumnIndex(sourceColumn.getStarLinkColumns(), objectNames.get(x).getColumnNameOnly());
+												if (index != -1) {
+													source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + index);
+													source.setAttribute("column",
+															getColumnName(sourceColumn.getStarLinkColumns().get(index)));
+												} else {
+													source.setAttribute("id", String.valueOf(sourceColumn.getId()));
+													source.setAttribute("column", sourceColumn.getName());
+												}
+												source.setAttribute("parent_id",
+														String.valueOf(sourceColumn.getResultSet().getId()));
+												source.setAttribute("parent_name", getResultSetName(sourceColumn.getResultSet()));
+												if (sourceColumn.getStartPosition() != null
+														&& sourceColumn.getEndPosition() != null) {
+													source.setAttribute("coordinate",
+															sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+												}
+												append = true;
+												relationElement.appendChild(source);
+											}	
+										}
 									}
-									source.setAttribute("parent_id",
-											String.valueOf(sourceColumn.getResultSet().getId()));
-									source.setAttribute("parent_name", getResultSetName(sourceColumn.getResultSet()));
-									if (sourceColumn.getStartPosition() != null
-											&& sourceColumn.getEndPosition() != null) {
-										source.setAttribute("coordinate",
-												sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+									else{
+										int index = getColumnIndex(sourceColumn.getStarLinkColumns(), targetName);
+										if (index != -1) {
+											source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + index);
+											source.setAttribute("column",
+													getColumnName(sourceColumn.getStarLinkColumns().get(index)));
+										} else {
+											source.setAttribute("id", String.valueOf(sourceColumn.getId()));
+											source.setAttribute("column", sourceColumn.getName());
+										}
+										source.setAttribute("parent_id",
+												String.valueOf(sourceColumn.getResultSet().getId()));
+										source.setAttribute("parent_name", getResultSetName(sourceColumn.getResultSet()));
+										if (sourceColumn.getStartPosition() != null
+												&& sourceColumn.getEndPosition() != null) {
+											source.setAttribute("coordinate",
+													sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+										}
+										append = true;
+										relationElement.appendChild(source);
 									}
-									append = true;
-									relationElement.appendChild(source);
 								}
 							}
 						} else {
@@ -5013,12 +5054,32 @@ public class DataFlowAnalyzer {
 
 									if (flag) {
 										break;
+									} else if(columnIndex != -1){
+										for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
+											ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
+											if (!sourceColumn.getStarLinkColumns().isEmpty()) {
+												ResultColumn targetColumn = modelFactory.createSelectSetResultColumn(queryTable,
+														selectSetResultSetModel.getColumns().get(j), columnIndex);
+
+												relation.addSource(new ResultColumnRelationElement(targetColumn));
+												flag = true;
+												break;
+											}
+										}
+									}
+									
+									if (flag) {
+										break;
 									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
 											&& columnIndex != -1) {
 										ResultColumn targetColumn = modelFactory.createSelectSetResultColumn(queryTable,
 												selectSetResultSetModel.getColumns().get(columnIndex), columnIndex);
-
 										relation.addSource(new ResultColumnRelationElement(targetColumn));
+										flag = true;
+										break;
+									}
+									
+									if (flag) {
 										break;
 									}
 								}
