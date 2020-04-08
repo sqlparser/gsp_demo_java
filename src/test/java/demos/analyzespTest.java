@@ -58,11 +58,12 @@ public class analyzespTest extends TestCase
 		Analyze_SP analyze = new Analyze_SP( files, "|" );
 		analyze.setCheckDBObjectRelation( true );
 		analyze.analyzeSQL( );
-		//System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
+		System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
 		String result = "[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Insert|AltDepoIsEmriRef,AnaDepo,FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
                 +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
                 +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
                 +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Delete|";
+		System.out.println(result);
 		assertTrue( analyze.getDBObjectRelationsAnalysisResult( )
 				.trim( )
 				.equalsIgnoreCase( result ) );
