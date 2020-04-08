@@ -88,6 +88,17 @@ public class ModelFactory {
         return column;
     }
     
+	public ResultColumn createResultColumn(ResultSet resultSet, TObjectName resultColumn, boolean forceCreate) {
+		if (!forceCreate) {
+			if (modelManager.getModel(resultColumn) instanceof ResultColumn) {
+				return (ResultColumn) modelManager.getModel(resultColumn);
+			}
+		}
+		ResultColumn column = new ResultColumn(resultSet, resultColumn);
+		modelManager.bindModel(resultColumn, column);
+		return column;
+	}
+    
 	public FunctionResultColumn createFunctionResultColumn(Function function, TObjectName functionName) {
 		if (modelManager.getModel(functionName) instanceof FunctionResultColumn) {
 			return (FunctionResultColumn) modelManager.getModel(functionName);
