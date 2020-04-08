@@ -1926,7 +1926,7 @@ public class DataFlowAnalyzer {
 										TObjectName[] columns = modelManager.getTableColumns(sourceTable);
 										for (int j = 0; j < columns.length; j++) {
 											TObjectName columnName = columns[j];
-											if ("*".equals(getColumnName(columnName))) {
+											if (columnName == null || "*".equals(getColumnName(columnName))) {
 												continue;
 											}
 											resultColumn.bindStarLinkColumn(columnName);
@@ -1938,7 +1938,7 @@ public class DataFlowAnalyzer {
 											TObjectName[] columns = modelManager.getTableColumns(tableElement);
 											for (int j = 0; j < columns.length; j++) {
 												TObjectName columnName = columns[j];
-												if ("*".equals(getColumnName(columnName))) {
+												if (columnName == null || "*".equals(getColumnName(columnName))) {
 													continue;
 												}
 												resultColumn.bindStarLinkColumn(columnName);
@@ -3189,6 +3189,9 @@ public class DataFlowAnalyzer {
 	}
 
 	private String getColumnName(TObjectName column) {
+		if(column == null){
+			return null;
+		}
 		String name = column.getColumnNameOnly();
 		if (name == null || "".equals(name.trim())) {
 			return SQLUtil.trimColumnStringQuote(column.toString().trim());
@@ -4036,7 +4039,7 @@ public class DataFlowAnalyzer {
 										TObjectName[] columns = modelManager.getTableColumns(sourceTable);
 										for (int j = 0; j < columns.length; j++) {
 											TObjectName columnName = columns[j];
-											if ("*".equals(getColumnName(columnName))) {
+											if (columnName == null || "*".equals(getColumnName(columnName))) {
 												continue;
 											}
 											resultColumn.bindStarLinkColumn(columnName);
@@ -4048,6 +4051,9 @@ public class DataFlowAnalyzer {
 											TObjectName[] columns = modelManager.getTableColumns(table);
 											for (int j = 0; j < columns.length; j++) {
 												TObjectName columnName = columns[j];
+												if(columnName == null){
+													continue;
+												}
 												if ("*".equals(getColumnName(columnName))) {
 													if (modelManager.getModel(table) instanceof Table) {
 														Table tableModel = (Table) modelManager.getModel(table);
@@ -4099,7 +4105,7 @@ public class DataFlowAnalyzer {
 									TObjectName[] columns = modelManager.getTableColumns(sourceTable);
 									for (int j = 0; j < columns.length; j++) {
 										TObjectName columnName = columns[j];
-										if ("*".equals(getColumnName(columnName))) {
+										if (columnName == null || "*".equals(getColumnName(columnName))) {
 											continue;
 										}
 										resultColumn.bindStarLinkColumn(columnName);
@@ -4111,8 +4117,10 @@ public class DataFlowAnalyzer {
 										TObjectName[] columns = modelManager.getTableColumns(table);
 										for (int j = 0; j < columns.length; j++) {
 											TObjectName columnName = columns[j];
+											if(columnName == null){
+												continue;
+											}
 											if ("*".equals(getColumnName(columnName))) {
-												
 												if (modelManager.getModel(table) instanceof Table) {
 													Table tableModel = (Table) modelManager.getModel(table);
 													if (tableModel != null && !tableModel.getColumns().isEmpty()) {
@@ -4167,7 +4175,7 @@ public class DataFlowAnalyzer {
 								TObjectName[] columns = modelManager.getTableColumns(sourceTable);
 								for (int j = 0; j < columns.length; j++) {
 									TObjectName columnName = columns[j];
-									if ("*".equals(getColumnName(columnName))) {
+									if (columnName == null || "*".equals(getColumnName(columnName))) {
 										continue;
 									}
 									resultColumn.bindStarLinkColumn(columnName);
@@ -4179,6 +4187,9 @@ public class DataFlowAnalyzer {
 									TObjectName[] columns = modelManager.getTableColumns(table);
 									for (int j = 0; j < columns.length; j++) {
 										TObjectName columnName = columns[j];
+										if(columnName == null){
+											continue;
+										}
 										if ("*".equals(getColumnName(columnName))) {
 											if (modelManager.getModel(table) instanceof Table) {
 												Table tableModel = (Table) modelManager.getModel(table);
@@ -4634,6 +4645,9 @@ public class DataFlowAnalyzer {
 								TObjectName[] columns = modelManager.getTableColumns(sourceTable);
 								for (int j = 0; j < columns.length; j++) {
 									TObjectName columnName = columns[j];
+									if(columnName == null){
+										continue;
+									}
 									if ("*".equals(getColumnName(columnName))) {
 										continue;
 									}
@@ -4646,6 +4660,9 @@ public class DataFlowAnalyzer {
 									TObjectName[] columns = modelManager.getTableColumns(tableElement);
 									for (int j = 0; j < columns.length; j++) {
 										TObjectName columnName = columns[j];
+										if(columnName == null){
+											continue;
+										}
 										if ("*".equals(getColumnName(columnName))) {
 											if (modelManager.getModel(tableElement) instanceof Table) {
 												Table tableModel = (Table) modelManager.getModel(tableElement);
@@ -4940,18 +4957,18 @@ public class DataFlowAnalyzer {
 					if (modelManager.getModel(table) instanceof Table) {
 						Table tableModel = (Table) modelManager.getModel(table);
 						if (tableModel != null) {
-							if (!isStar && getColumnName(columnName).equals("*")) {
+							if (!isStar && "*".equals(getColumnName(columnName))) {
 								TObjectName[] columns = modelManager.getTableColumns(table);
 								for (int j = 0; j < columns.length; j++) {
 									TObjectName objectName = columns[j];
-									if ("*".equals(getColumnName(objectName))) {
+									if (objectName == null || "*".equals(getColumnName(objectName))) {
 										continue;
 									}
 									TableColumn columnModel = modelFactory.createTableColumn(tableModel, objectName);
 									relation.addSource(new TableColumnRelationElement(columnModel));
 								}
 							} else {
-								if(getColumnName(columnName).equals("*") && !tableModel.getColumns().isEmpty()){
+								if("*".equals(getColumnName(columnName)) && !tableModel.getColumns().isEmpty()){
 									
 									for (int j = 0; j < tableModel.getColumns().size(); j++) {
 ;										TableColumn columnModel = tableModel.getColumns().get(j);
