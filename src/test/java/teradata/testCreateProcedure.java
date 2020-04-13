@@ -6,14 +6,45 @@ import gudusoft.gsqlparser.nodes.TDeclareVariable;
 import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
 import gudusoft.gsqlparser.stmt.TRepeatStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+import gudusoft.gsqlparser.stmt.TWhileStmt;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlOpen;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import junit.framework.TestCase;
 
+import static gudusoft.gsqlparser.ESqlStatementType.sstWhilestmt;
 import static gudusoft.gsqlparser.ESqlStatementType.sstmssqldeclare;
 
 public class testCreateProcedure extends TestCase {
+
+    public void testWhile(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "CREATE PROCEDURE proc (\n" +
+                "        IN i INTEGER,\n" +
+                "        IN j INTEGER)\n" +
+                "BEGIN\n" +
+                "    DECLARE ii integer;\n" +
+                "    set ii=i;\n" +
+                "    while (ii<j) do\n" +
+                "    begin\n" +
+                "        set ii=ii+1;\n" +
+                "    end;\n" +
+                "    end while;\n" +
+                "END;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("proc"));
+
+        assertTrue(cp.getBodyStatements().size() == 3);
+
+        assertTrue(cp.getBodyStatements().get(2).sqlstatementtype == sstWhilestmt);
+        TWhileStmt whileStmt = (TWhileStmt)cp.getBodyStatements().get(2);
+        assertTrue(whileStmt.getCondition().toString().equalsIgnoreCase("(ii<j)"));
+        assertTrue(whileStmt.getBodyStatements().size() == 1);
+
+    }
 
     public void test1(){
 
