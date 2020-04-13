@@ -1194,9 +1194,9 @@ public class DataFlowAnalyzer {
 	private void analyzeDeleteStmt(TDeleteSqlStatement stmt) {
 		TTable table = stmt.getTargetTable();
 		Table tableModel = modelFactory.createTable(table);
-		if (table.getObjectNameReferences() != null && table.getObjectNameReferences().size() > 0) {
-			for (int j = 0; j < table.getObjectNameReferences().size(); j++) {
-				TObjectName object = table.getObjectNameReferences().getObjectName(j);
+		if (table.getLinkedColumns() != null && table.getLinkedColumns().size() > 0) {
+			for (int j = 0; j < table.getLinkedColumns().size(); j++) {
+				TObjectName object = table.getLinkedColumns().getObjectName(j);
 
 				if (object.getDbObjectType() == EDbObjectType.variable) {
 					continue;
@@ -3972,10 +3972,10 @@ public class DataFlowAnalyzer {
 				else if (table.getTableType().name().startsWith("open")){
 					continue;
 				}
-				else if (table.getObjectNameReferences() != null && table.getObjectNameReferences().size() > 0) {
+				else if (table.getLinkedColumns() != null && table.getLinkedColumns().size() > 0) {
 					Table tableModel = modelFactory.createTable(table);
-					for (int j = 0; j < table.getObjectNameReferences().size(); j++) {
-						TObjectName object = table.getObjectNameReferences().getObjectName(j);
+					for (int j = 0; j < table.getLinkedColumns().size(); j++) {
+						TObjectName object = table.getLinkedColumns().getObjectName(j);
 
 						if (object.getDbObjectType() == EDbObjectType.variable) {
 							continue;
@@ -3983,8 +3983,10 @@ public class DataFlowAnalyzer {
 
 						if (!isFunctionName(object)) {
 							if (object.getSourceTable() == null || object.getSourceTable() == table) {
-								if(!"*".equals(object.toString()) || table.getObjectNameReferences().size() == 1){ 
-									modelFactory.createTableColumn(tableModel, object);
+								if(!"*".equals(object.toString()) || table.getLinkedColumns().size() == 1){ 
+									if(tableModel.getTableObject().getLinkedColumns().searchColumnReference(object)!=-1){
+										modelFactory.createTableColumn(tableModel, object);
+									}
 								}
 							}
 						}
@@ -4919,10 +4921,10 @@ public class DataFlowAnalyzer {
 							if (tTable.getTableType().name().startsWith("open")){
 								continue;
 							}
-							else if (tTable.getObjectNameReferences() != null
-									&& tTable.getObjectNameReferences().size() > 0) {
-								for (int z = 0; z < tTable.getObjectNameReferences().size(); z++) {
-									TObjectName refer = tTable.getObjectNameReferences().getObjectName(z);
+							else if (tTable.getLinkedColumns() != null
+									&& tTable.getLinkedColumns().size() > 0) {
+								for (int z = 0; z < tTable.getLinkedColumns().size(); z++) {
+									TObjectName refer = tTable.getLinkedColumns().getObjectName(z);
 									if ("*".equals(getColumnName(refer)))
 										continue;
 									if (refer == columnName) {
