@@ -223,6 +223,9 @@ public class ResultColumn {
 
     public void bindStarLinkColumn(TObjectName objectName) {
         if (objectName != null && !starLinkColumns.contains(objectName)) {
+        	if("*".equals(objectName.getColumnNameOnly())){
+        		return;
+        	}
             starLinkColumns.add(objectName);
         }
     }
