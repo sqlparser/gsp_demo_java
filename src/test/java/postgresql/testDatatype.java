@@ -58,6 +58,18 @@ public class testDatatype extends TestCase {
         assertTrue(cd.getDatatype().getDataType() == EDataType.serial_t);
     }
 
+    public void test31(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "create table t(time time, id int);";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        TColumnDefinition cd = createTable.getColumnList().getColumn(0);
+        assertTrue(cd.getColumnName().toString().equalsIgnoreCase("time"));
+        assertTrue(cd.getDatatype().getDataType() == EDataType.time_t);
+    }
+
     public void test4(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);

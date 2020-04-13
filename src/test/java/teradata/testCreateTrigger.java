@@ -137,6 +137,8 @@ public class testCreateTrigger extends TestCase {
                 "END ) = 'Y';\n" +
                 ");";
 
+        //System.out.println(sqlparser.sqltext);
+
         assertTrue(sqlparser.parse() == 0);
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstcreatetrigger);
         TCreateTriggerStmt createTriggerStmt = (TCreateTriggerStmt)sqlparser.sqlstatements.get(0);

@@ -37,7 +37,7 @@ public class toXml
 		if ( index != -1 && args.length > index + 1 )
 		{
 
-			dbVendor = SQLUtil.getVendor(args[index + 1]);
+			dbVendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 
 		}
 		System.out.println( "Selected SQL dialect: " + dbVendor.toString( ) );
