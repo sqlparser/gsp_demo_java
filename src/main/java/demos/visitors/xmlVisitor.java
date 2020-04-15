@@ -389,6 +389,13 @@ public class xmlVisitor extends TParseTreeVisitor
 	StringBuilder sb;
 	private String xsdfile = null;
 
+	private int sequenceId = 0;
+
+	protected String getSequenceId(){
+		sequenceId++;
+		return   Integer.toString(sequenceId);
+	}
+
 	public xmlVisitor( String pXsdfile )
 	{
 		sb = new StringBuilder( 1024 );
@@ -1946,6 +1953,7 @@ public class xmlVisitor extends TParseTreeVisitor
 
 		Element e_identifier = xmldoc.createElement( TAG_FULLNAME );
 		e_object_name.appendChild( e_identifier );
+		//e_object_name.setAttribute("id", getSequenceId());
 		e_object_name.setAttribute( "object_type", node.getDbObjectType( )
 				.toString( ) );
 		e_identifier.setTextContent( node.toString( ) );

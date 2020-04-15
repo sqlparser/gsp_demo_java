@@ -49,7 +49,7 @@ public class toXml
 		int ret = sqlparser.parse( );
 		if ( ret == 0 )
 		{
-			String xsdfile = "file:/C:/prg/gsp_java/library/doc/xml/sqlschema.xsd";
+			String xsdfile = "file:/C:/prg/gsp_java_maven/doc/xml/sqlschema.xsd";
 			xmlVisitor xv2 = new xmlVisitor( xsdfile );
 			xv2.run( sqlparser );
 			xv2.validXml();
