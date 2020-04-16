@@ -32,7 +32,7 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
-%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\dlineage\model\xml\*.java src\main\java\demos\dlineage\model\view\*.java src\main\java\demos\dlineage\model\metadata\*.java src\main\java\demos\dlineage\model\ddl\schema\*.java src\main\java\demos\dlineage\metadata\*.java src\main\java\demos\dlineage\util\*.java src\main\java\demos\dlineage\columnImpact\*.java src\main\java\demos\dlineage\dataflow\listener\*.java src\main\java\demos\dlineage\dataflow\model\*.java src\main\java\demos\dlineage\dataflow\model\xml\*.java src\main\java\demos\dlineage\*.java
+%JAVAC_CMD% -encoding UTF-8 -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\dlineage\model\xml\*.java src\main\java\demos\dlineage\model\view\*.java src\main\java\demos\dlineage\model\metadata\*.java src\main\java\demos\dlineage\model\ddl\schema\*.java src\main\java\demos\dlineage\metadata\*.java src\main\java\demos\dlineage\util\*.java src\main\java\demos\dlineage\columnImpact\*.java src\main\java\demos\dlineage\dataflow\listener\*.java src\main\java\demos\dlineage\dataflow\model\*.java src\main\java\demos\dlineage\dataflow\model\xml\*.java src\main\java\demos\dlineage\*.java
 
 echo Completed.
 

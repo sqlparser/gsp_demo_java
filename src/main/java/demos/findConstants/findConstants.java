@@ -1,6 +1,7 @@
 
 package demos.findConstants;
 
+import demos.utils.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETokenType;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import demos.utils.SQLUtil;
 
 public class findConstants
 {
@@ -94,7 +94,7 @@ public class findConstants
 
 		if ( index != -1 && args.length > index + 1 )
 		{
-			vendor = SQLUtil.getVendor( args[index + 1] );
+			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 		}
 
 		String sqltext = SQLUtil.getFileContent( new File( args[0] ) );
