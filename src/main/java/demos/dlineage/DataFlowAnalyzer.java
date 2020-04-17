@@ -860,15 +860,12 @@ public class DataFlowAnalyzer {
 			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes) {
 		findStarSourceRaltions(instance, null, sourceIdRelationMap, targetRelation, relationSources, pathTypes, new ArrayList<String>());
 	}
+	
 	private void findStarSourceRaltions(dataflow instance, targetColumn starRelationTarget, Map<String, Set<relation>> sourceIdRelationMap,
 			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes, List<String> paths) {
 		if (targetRelation != null && targetRelation.getSources() != null) {
 			for (int i = 0; i < targetRelation.getSources().size(); i++) {
 				sourceColumn source = targetRelation.getSources().get(i);
-				
-				/*
-				 * target不为null，意味着中间传递 *，需要进行匹配
-				 */
 				if(starRelationTarget!=null  
 						&& !"*".equals(source.getColumn()) 
 						&& !SQLUtil.getIdentifierNormalName(starRelationTarget.getColumn()).equals(SQLUtil.getIdentifierNormalName(source.getColumn()))){
