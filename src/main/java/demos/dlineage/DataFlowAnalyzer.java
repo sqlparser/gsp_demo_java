@@ -297,6 +297,8 @@ public class DataFlowAnalyzer {
 		tables.addAll(dataflow.getTables());
 		tables.addAll(dataflow.getViews());
 		tables.addAll(dataflow.getResultsets());
+		
+		Map<String, String> duplicateColumnIdMap = new HashMap<>();
 
 		for (table table : tables) {
 			String tableName = SQLUtil.getIdentifierNormalName(table.getFullName());
@@ -311,11 +313,23 @@ public class DataFlowAnalyzer {
 				tableColumnMap.putIfAbsent(tableName, new LinkedHashSet<>());
 				for(column column:table.getColumns()){
 					String columnName = SQLUtil.getIdentifierNormalName(table.getFullName()+"."+column.getName() );
+					
 					if(!columnMap.containsKey(columnName)){
 						columnMap.put(columnName, new LinkedHashSet<column>());
 						tableColumnMap.get(tableName).add(columnName);
 					}
-					columnMap.get(columnName).add(column);
+					
+					if(!columnMap.get(columnName).contains(column)){
+						columnMap.get(columnName).add(column);
+					}
+					else{
+						columnMap.get(columnName).forEach(t->{
+							if(t.equals(column)){
+								duplicateColumnIdMap.put(column.getId(), t.getId());
+							}
+						});
+						
+					}
 				}
 			}
 		}
@@ -415,6 +429,14 @@ public class DataFlowAnalyzer {
 				if (columnIdMap.containsKey(target.getId())) {
 					target.setId(columnIdMap.get(target.getId()));
 					target.setCoordinate(columnMergeIdMap.get(target.getId()).getCoordinate());
+				}	
+				else if(duplicateColumnIdMap.containsKey(target.getId()) && columnIdMap.containsKey(duplicateColumnIdMap.get(target.getId()))){
+					String id = duplicateColumnIdMap.get(target.getId());
+					target.setId(columnIdMap.get(id));
+					target.setCoordinate(columnMergeIdMap.get(id).getCoordinate());
+				}
+				else{
+					continue;
 				}
 				
 				List<sourceColumn> sources = relation.getSources();
@@ -430,6 +452,14 @@ public class DataFlowAnalyzer {
 						if (columnIdMap.containsKey(source.getId())) {
 							source.setId(columnIdMap.get(source.getId()));
 							source.setCoordinate(columnMergeIdMap.get(source.getId()).getCoordinate());
+						}
+						else if(duplicateColumnIdMap.containsKey(source.getId()) && columnIdMap.containsKey(duplicateColumnIdMap.get(source.getId()))){
+							String id = duplicateColumnIdMap.get(source.getId());
+							source.setId(columnIdMap.get(id));
+							source.setCoordinate(columnMergeIdMap.get(id).getCoordinate());
+						}
+						else{
+							continue;
 						}
 					}
 					
@@ -860,15 +890,12 @@ public class DataFlowAnalyzer {
 			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes) {
 		findStarSourceRaltions(instance, null, sourceIdRelationMap, targetRelation, relationSources, pathTypes, new ArrayList<String>());
 	}
+	
 	private void findStarSourceRaltions(dataflow instance, targetColumn starRelationTarget, Map<String, Set<relation>> sourceIdRelationMap,
 			relation targetRelation, List<Pair<sourceColumn, List<String>>> relationSources, String[] pathTypes, List<String> paths) {
 		if (targetRelation != null && targetRelation.getSources() != null) {
 			for (int i = 0; i < targetRelation.getSources().size(); i++) {
 				sourceColumn source = targetRelation.getSources().get(i);
-				
-				/*
-				 * target不为null，意味着中间传递 *，需要进行匹配
-				 */
 				if(starRelationTarget!=null  
 						&& !"*".equals(source.getColumn()) 
 						&& !SQLUtil.getIdentifierNormalName(starRelationTarget.getColumn()).equals(SQLUtil.getIdentifierNormalName(source.getColumn()))){

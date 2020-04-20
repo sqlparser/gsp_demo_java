@@ -57,7 +57,7 @@ public class Table {
         }
         else if(table.getTableType() == ETableSource.function && table.getFuncCall()!=null) {
         	TFunctionCall function = table.getFuncCall();
-        	this.fullName = function.toString();
+        	this.fullName = function.getFunctionName().toString();
             this.name = function.getFunctionName().toString();
             this.alias = table.getAliasName();
         }

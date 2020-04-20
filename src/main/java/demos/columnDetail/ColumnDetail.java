@@ -1,17 +1,5 @@
 package demos.columnDetail;
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.IMetaDatabase;
-import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.TStatementList;
-import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.stmt.TAlterTableStatement;
-import gudusoft.gsqlparser.stmt.TCreateIndexSqlStatement;
-import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.TCommentOnSqlStmt;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,9 +13,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+
+import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.TCustomSqlStatement;
+import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.TStatementList;
+import gudusoft.gsqlparser.nodes.TAlterTableOption;
+import gudusoft.gsqlparser.nodes.TColumnDefinition;
+import gudusoft.gsqlparser.nodes.TColumnWithSortOrder;
+import gudusoft.gsqlparser.nodes.TConstraint;
+import gudusoft.gsqlparser.nodes.TObjectName;
+import gudusoft.gsqlparser.nodes.TObjectNameList;
+import gudusoft.gsqlparser.nodes.TPTNodeList;
+import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.TTableList;
+import gudusoft.gsqlparser.nodes.TTypeName;
+import gudusoft.gsqlparser.stmt.TAlterTableStatement;
+import gudusoft.gsqlparser.stmt.TCommentOnSqlStmt;
+import gudusoft.gsqlparser.stmt.TCreateIndexSqlStatement;
+import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 public class ColumnDetail {
 	private Map<TableMetaData, List<ColumnMetaData>> tableColumns = new HashMap<TableMetaData, List<ColumnMetaData>>();
@@ -657,10 +666,10 @@ public class ColumnDetail {
 					ColumnMetaData column = columnList.get(i);
 					JSONObject columnObj = new JSONObject();
 					columnObj.put(column.getName(), column);
-					columns.put(columnObj);
+					columns.add(columnObj);
 				}
 			}
-			System.out.println(object.toString(4));
+			System.out.println(JSONObject.toJSONString(object, true).replace("\t", "  "));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
