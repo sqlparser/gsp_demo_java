@@ -31,7 +31,7 @@ public class searchFunction {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvmssql;
+        EDbVendor dbVendor = EDbVendor.dbvoracle;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);

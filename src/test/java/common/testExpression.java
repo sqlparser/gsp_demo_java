@@ -102,4 +102,16 @@ public class testExpression extends TestCase {
         assertTrue(expressionList.getExpression(2).toString().equalsIgnoreCase("3+4"));
 
     }
+
+
+    public void testExprSearchColumn(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "SELECT name FROM tb1 Where length(trim(name)) = 13 and rownum = 1;";
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TWhereClause where = select.getWhereClause();
+        TExpression expr = where.getCondition();
+        TExpressionList expressionList =  expr.searchColumn("name");
+        System.out.println(expressionList.size());
+    }
 }

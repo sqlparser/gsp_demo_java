@@ -56,7 +56,8 @@ public class ColumnInWhereClause {
 			System.out.println("");
 		}else {
 			for(int i=0;i<sqlparser.sqlstatements.size();i++){
-				sqlparser.sqlstatements.get(i).acceptChildren( new WhereVisitor());
+				// sqlparser.sqlstatements.get(i).acceptChildren( new WhereVisitor());
+				sqlparser.sqlstatements.get(i).acceptChildren( new ColumnVisitor("name"));
 			}
 		}
 
