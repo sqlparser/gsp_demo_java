@@ -19,7 +19,7 @@ public class toXml
 		if ( args.length < 1 )
 		{
 			System.out.println( "Usage: java toXml sqlfile.sql [/t <database type>]" );
-			System.out.println( "/t: Option, set the database type. Support oracle, mysql, mssql and db2, the default type is mysql" );
+			System.out.println( "/t: Option, set the database type." );
 			return;
 		}
 		File file = new File( args[0] );
