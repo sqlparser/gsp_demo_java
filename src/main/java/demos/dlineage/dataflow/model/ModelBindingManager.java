@@ -337,7 +337,7 @@ public class ModelBindingManager {
                     }
                 }
             }
-        } else if (list.size() == 0 && table.getSubquery() != null) {
+		} else if (list.size() == 1 && list.toString().indexOf("*") != -1 && table.getSubquery() != null) {
             ResultSet resultSet = (ResultSet) getModel(table.getSubquery());
             if (resultSet != null) {
                 List<ResultColumn> columnList = resultSet.getColumns();
@@ -366,7 +366,8 @@ public class ModelBindingManager {
             }
         } else {
             for (int i = 0; i < list.size(); i++) {
-                columns.add(list.getObjectName(i));
+				TObjectName object = list.getObjectName(i);
+				columns.add(object);
             }
         }
         Collections.sort(columns, new Comparator<TObjectName>() {

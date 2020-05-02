@@ -29,6 +29,7 @@ public class Table {
 
     private TTable tableObject;
     private TObjectName tableName;
+    private boolean isCreateTable;
     
     
     private TablePseudoRows pseudoRows = new TablePseudoRows(this);
@@ -199,6 +200,14 @@ public class Table {
 	
 	public TablePseudoRows getPseudoRows(){
 		return pseudoRows;
+	}
+
+	public boolean isCreateTable() {
+		return isCreateTable;
+	}
+
+	public void setCreateTable(boolean isCreateTable) {
+		this.isCreateTable = isCreateTable;
 	}
 
 }

@@ -147,7 +147,7 @@ public class ModelFactory {
         return column;
     }
 
-    public Table createTableFromCreateDML(TTable table) {
+    public Table createTableFromCreateDDL(TTable table) {
         if (modelManager.getCreateModel(table) instanceof Table) {
             return (Table) modelManager.getCreateModel(table);
         }
@@ -158,6 +158,7 @@ public class ModelFactory {
         	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
         Table tableModel = new Table(table);
+        tableModel.setCreateTable(true);
         modelManager.bindCreateModel(table, tableModel);
         modelManager.bindTableByName(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         return tableModel;
@@ -274,11 +275,15 @@ public class ModelFactory {
         return tableModel;
     }
 
-    public TableColumn createTableColumn(Table table, TObjectName column) {
+    public TableColumn createTableColumn(Table table, TObjectName column, boolean fromCreateTable) {
         if (modelManager.getModel(new Pair<Table, TObjectName>(table,
                 column)) instanceof TableColumn) {
             return (TableColumn) modelManager.getModel(new Pair<Table, TObjectName>(table,
                     column));
+        }
+        
+        if(table.isCreateTable() && !fromCreateTable){
+        	return null;
         }
         
 //        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){

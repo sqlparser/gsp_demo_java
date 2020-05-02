@@ -20,9 +20,6 @@ public abstract class AbstractRelation implements Relation {
 
     public AbstractRelation() {
         id = ++ModelBindingManager.get().RELATION_ID;
-        if(id == 54){
-        	System.out.println("??");
-        }
     }
 
     public int getId() {
