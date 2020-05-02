@@ -11,12 +11,25 @@ import junit.framework.TestCase;
 
 /**
  * Illustrates how to modify SQL clauses.
- *
+ * <p></p>
  * <ul>
- *     <li>{@link #testSimpleConverter}: turn {@code "where t1.f1=t2.f2" } into {@code "t1 LEFT JOIN t2 ON t1.f1 = t2.f2"}</li>
+ *    <li>adding/modifying filter condition.<br>
+ *          {@link #testAddNewConditionInWhereClause},{@link #testAddNewConditionInWhereClause2},{@link #testAddORConditionInWhereClause},
+ *          {@link #testAddWhereClause}, {@link #testAddWhereClause2()},{@link #testAddWhereClauseAfterJoin()},{@link #testAddWhereClauseBeforeGrouBy()},
+ *          {@link #testSetNewWhereCondition()}
+ *          {@link #testRemoveWhereClause()},
+ *          {@link #testModifyJoinCondition()}
+ *    </li>
+ *    <li>adding/remove new columns in select list.<br>
+ *        {@link #testAddResultColumnInSelectList}, {@link #testRemoveResultColumnInSelectList()},{@link #testModifySelectList()}
+ *    </li>
+ *    <li>adding/modify/remove a new join.<br>
+ *          {@link #testFromClaueJoinTable()}, {@link #testModifyTableInFromClause()}, {@link #testRemoveJoin()},
+ *          {@link #testRemoveTableAndAddJoinClause()},{@link #testRemoveTableInFromClauseAndRemoveWhereClause()}
+ *
+ *    </li>
  * </ul>
- *
- *
+ * <p></p>
  *
  *
  * @see <a href="http://support.sqlparser.com/tutorials/gsp-howto-script-writer/">http://support.sqlparser.com/tutorials/gsp-howto-script-writer/</a>

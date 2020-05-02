@@ -13,6 +13,18 @@ import junit.framework.TestCase;
 
 public class testDatatype extends TestCase {
 
+    public void testNvarchar(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvnetezza);
+        sqlparser.sqltext = "Select 1::nvarchar(20)";
+        assertTrue(sqlparser.parse() == 0);
+
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TResultColumn resultColumn = selectSqlStatement.getResultColumnList().getResultColumn(0);
+        assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.typecast_t);
+        assertTrue(resultColumn.getExpr().getTypeName().getDataType() == EDataType.nvarchar_t);
+        assertTrue(resultColumn.getExpr().getTypeName().getLength().toString().equalsIgnoreCase("20"));
+    }
+
     public void testDateAttribute(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
         sqlparser.sqltext = "select CAST('20120802' AS DATE FORMAT 'yyyymmdd') from b;";

@@ -6,11 +6,9 @@ package test;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.TMergeInsertClause;
-import gudusoft.gsqlparser.nodes.TMergeUpdateClause;
-import gudusoft.gsqlparser.nodes.TMergeWhenClause;
-import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testMerge extends TestCase {
@@ -190,6 +188,41 @@ public class testMerge extends TestCase {
 
     }
 
+    public void testMergeVisitor(){
 
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "MERGE INTO t1 USING t2 ON a1=c2 AND b1=b2 WHEN NOT MATCHED THEN INSERT (c2, b2, a2);";
+        assertTrue(sqlparser.parse() == 0);
+
+        TMergeSqlStatement mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);
+        mergeSqlStatement.acceptChildren(new mergeVisitor());
+
+        sqlparser.sqltext = "MERGE INTO t1 USING t2 ON a1=b2 AND c1=10 AND b1<b2 WHEN MATCHED THEN UPDATE SET b1=b2";
+        assertTrue(sqlparser.parse() == 0);
+
+        mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);
+        mergeSqlStatement.acceptChildren(new mergeVisitor());
+
+        sqlparser.sqltext = "MERGE INTO t1 USING t2 ON a1=c2 WHEN MATCHED THEN DELETE";
+        assertTrue(sqlparser.parse() == 0);
+
+        mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);
+        mergeSqlStatement.acceptChildren(new mergeVisitor());
+    }
+
+}
+
+class mergeVisitor extends TParseTreeVisitor {
+
+    public void preVisit(TMergeInsertClause node){
+       // System.out.println("Found:"+node.getClass().getName());
+    }
+
+    public void preVisit(TMergeUpdateClause node){
+       // System.out.println("Found:"+node.getClass().getName());
+    }
+    public void preVisit(TMergeDeleteClause node){
+        //System.out.println("Found:"+node.getClass().getName());
+    }
 
 }

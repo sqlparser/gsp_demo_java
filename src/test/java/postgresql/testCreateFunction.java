@@ -190,7 +190,7 @@ public class testCreateFunction extends TestCase {
         assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
-    public void testCoordinates(){
+    public void testCoordinates1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
         sqlparser.sqltext = "CREATE OR REPLACE FUNCTION totalRecords (emp_id int)\n" +
                 "RETURNS integer AS $total$\n" +
@@ -212,4 +212,51 @@ public class testCreateFunction extends TestCase {
         assertTrue(table.getTableName().getLineNo() == 6);
         assertTrue(table.getTableName().getColumnNo() == 36);
     }
+
+    public void testCoordinates2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION\n" +
+                "foo.func1(integer, OUT f1 integer, OUT f2 text)\n" +
+                "RETURNS record\n" +
+                "LANGUAGE sql\n" +
+                "AS $function$ SELECT $1, CAST($1 AS text) || ' is text' $function$";
+        assertTrue(sqlparser.parse() == 0);
+
+        functionVisitor fv = new functionVisitor();
+        sqlparser.sqlstatements.get(0).acceptChildren(fv);
+        assertTrue(fv.LineNo == 5);
+        assertTrue(fv.ColumnNo == 26);
+
+    }
+
+    public void testCoordinates3(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION\n" +
+                "foo.func1(integer, OUT f1 integer, OUT f2 text)\n" +
+                "RETURNS record\n" +
+                "LANGUAGE sql\n" +
+                "AS $function$\n" +
+                "SELECT $1, CAST($1 AS text) || ' is text' $function$";
+        assertTrue(sqlparser.parse() == 0);
+
+        functionVisitor fv = new functionVisitor();
+        sqlparser.sqlstatements.get(0).acceptChildren(fv);
+        assertTrue(fv.LineNo == 6);
+        assertTrue(fv.ColumnNo == 12);
+
+    }
+}
+
+class functionVisitor extends TParseTreeVisitor {
+
+    public long LineNo, ColumnNo;
+    public void preVisit(TFunctionCall functionCall){
+        if (functionCall.getFunctionName().toString().equalsIgnoreCase("cast")){
+            LineNo = functionCall.getFunctionName().getLineNo();
+            ColumnNo = functionCall.getFunctionName().getColumnNo();
+//            System.out.println(functionCall.getFunctionName().getLineNo());
+//            System.out.println(functionCall.getFunctionName().getColumnNo());
+        }
+    }
+
 }
