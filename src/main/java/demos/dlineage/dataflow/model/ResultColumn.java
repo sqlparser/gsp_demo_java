@@ -223,12 +223,23 @@ public class ResultColumn {
 
     public void bindStarLinkColumn(TObjectName objectName) {
         if (objectName != null && !starLinkColumns.contains(objectName)) {
-        	if("*".equals(objectName.getColumnNameOnly())){
+        	if("*".equals(getColumnName(objectName))){
         		return;
         	}
             starLinkColumns.add(objectName);
         }
     }
+    
+	private String getColumnName(TObjectName column) {
+		if(column == null){
+			return null;
+		}
+		String name = column.getColumnNameOnly();
+		if (name == null || "".equals(name.trim())) {
+			return SQLUtil.trimColumnStringQuote(column.toString().trim());
+		} else
+			return SQLUtil.trimColumnStringQuote(name.trim());
+	}
 
     public List<TObjectName> getStarLinkColumns() {
         return starLinkColumns;

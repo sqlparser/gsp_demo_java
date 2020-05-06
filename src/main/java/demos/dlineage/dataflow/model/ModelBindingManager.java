@@ -22,22 +22,22 @@ public class ModelBindingManager {
     private final Map viewModelBindingMap = new LinkedHashMap();
     private final Map insertModelBindingMap = new LinkedHashMap();
     private final Map createModelBindingMap = new LinkedHashMap();
-    private final Map createModelQuickBindingMap = new HashMap();
+    private final Map createModelQuickBindingMap = new LinkedHashMap();
     private final Map mergeModelBindingMap = new LinkedHashMap();
     private final Map updateModelBindingMap = new LinkedHashMap();
     private final Map cursorModelBindingMap = new LinkedHashMap();
     private final Map tableNamesMap = new LinkedHashMap();
     private final List<Relation> relationHolder = new CopyOnWriteArrayList<Relation>();
 
-    private final Map<String, TTable> tableAliasMap = new HashMap();
-    private final Set tableSet = new HashSet();
+    private final Map<String, TTable> tableAliasMap = new LinkedHashMap();
+    private final Set tableSet = new LinkedHashSet();
     
     public int TABLE_COLUMN_ID = 0;
-    public Map<String, Integer> DISPLAY_ID = new HashMap<String, Integer>();
-    public Map<Integer, String> DISPLAY_NAME = new HashMap<Integer, String>();
+    public Map<String, Integer> DISPLAY_ID = new LinkedHashMap<String, Integer>();
+    public Map<Integer, String> DISPLAY_NAME = new LinkedHashMap<Integer, String>();
     public int RELATION_ID = 0;
     public int virtualTableIndex = -1;
-    public Map<String, String> virtualTableNames = new HashMap<String, String>();
+    public Map<String, String> virtualTableNames = new LinkedHashMap<String, String>();
 
     private final static ThreadLocal localManager = new ThreadLocal();
     private final static ThreadLocal globalDatabase = new ThreadLocal();
@@ -337,7 +337,7 @@ public class ModelBindingManager {
                     }
                 }
             }
-        } else if (list.size() == 0 && table.getSubquery() != null) {
+		} else if (list.size() == 1 && list.toString().indexOf("*") != -1 && table.getSubquery() != null) {
             ResultSet resultSet = (ResultSet) getModel(table.getSubquery());
             if (resultSet != null) {
                 List<ResultColumn> columnList = resultSet.getColumns();
@@ -366,7 +366,8 @@ public class ModelBindingManager {
             }
         } else {
             for (int i = 0; i < list.size(); i++) {
-                columns.add(list.getObjectName(i));
+				TObjectName object = list.getObjectName(i);
+				columns.add(object);
             }
         }
         Collections.sort(columns, new Comparator<TObjectName>() {
@@ -382,6 +383,10 @@ public class ModelBindingManager {
 
     public TTable getTable(TCustomSqlStatement stmt,
                            TObjectName column) {
+    	if(column.getSourceTable()!=null){
+    		return column.getSourceTable();
+    	}
+    	
         if (column.getTableString() != null
                 && column.getTableString().trim().length() > 0) {
             TTable table = tableAliasMap
