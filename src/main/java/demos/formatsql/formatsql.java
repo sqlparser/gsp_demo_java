@@ -10,6 +10,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 
 import gudusoft.gsqlparser.pp.para.GFmtOptFactory;
 import gudusoft.gsqlparser.pp.para.GFmtOpt;
+import gudusoft.gsqlparser.pp.para.styleenums.TCaseOption;
 import gudusoft.gsqlparser.pp.stmtformatter.FormatterFactory;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class formatsql {
              return;
          }
 
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
          sqlparser.sqlfilename = args[0];
 
 //        sqlparser.sqltext = "insert into emp(empno,empnm,deptnm,sal) select empno, empnm, dptnm, sal from emp where empno=:empno;\n" +
@@ -56,6 +57,7 @@ public class formatsql {
             // umcomment next line generate formatted sql in html
             //option.outputFmt =  GOutputFmt.ofhtml;
            // option.removeComment = true;
+            //option.caseFuncname = TCaseOption.CoNoChange;
             String result = FormatterFactory.pp(sqlparser, option);
             System.out.println(result);
         }else{
