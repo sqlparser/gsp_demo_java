@@ -632,6 +632,8 @@ public class xmlVisitor extends TParseTreeVisitor
 
 		Element e_query_expression;
 
+		boolean cteVisited = false;
+
 		if ( node.getDummyTag( ) == TOP_STATEMENT )
 		{
 			// if (elementStack.size() == 2){ // tag stack: sqlscript/statement
@@ -643,6 +645,7 @@ public class xmlVisitor extends TParseTreeVisitor
 			if ( node.getCteList( ) != null )
 			{
 				node.getCteList( ).accept( this );
+				cteVisited = true;
 			}
 		}
 
@@ -659,7 +662,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent.appendChild( e_query_expression );
 		elementStack.push( e_query_expression );
 
-		if ( node.getCteList( ) != null )
+		if (( node.getCteList( ) != null ) && (!cteVisited))
 		{
 			node.getCteList( ).accept( this );
 		}
