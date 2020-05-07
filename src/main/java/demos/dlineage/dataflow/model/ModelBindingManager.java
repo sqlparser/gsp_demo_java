@@ -338,35 +338,13 @@ public class ModelBindingManager {
                 }
             }
 		} else if (list.size() == 1 && list.toString().indexOf("*") != -1 && table.getSubquery() != null) {
-            ResultSet resultSet = (ResultSet) getModel(table.getSubquery());
-            if (resultSet != null) {
-                List<ResultColumn> columnList = resultSet.getColumns();
-                for (int i = 0; i < columnList.size(); i++) {
-                    ResultColumn resultColumn = columnList.get(i);
-                    if (resultColumn
-                            .getColumnObject() instanceof TResultColumn) {
-                        TResultColumn columnObject = ((TResultColumn) resultColumn
-                                .getColumnObject());
-                        TAliasClause alias = columnObject.getAliasClause();
-                        if (alias != null && alias.getAliasName() != null) {
-                            columns.add(alias.getAliasName());
-                        } else {
-                            if (columnObject.getFieldAttr() != null) {
-                                columns.add(columnObject.getFieldAttr());
-                            } else {
-                                continue;
-                            }
-                        }
-                    } else if (resultColumn
-                            .getColumnObject() instanceof TObjectName) {
-                        columns.add(
-                                (TObjectName) resultColumn.getColumnObject());
-                    }
-                }
-            }
+            addSubqueryColumns(table, columns);
         } else {
             for (int i = 0; i < list.size(); i++) {
 				TObjectName object = list.getObjectName(i);
+				if(object.toString().indexOf("*")!=-1 && table.getSubquery()!=null){
+					addSubqueryColumns(table, columns);
+				}
 				columns.add(object);
             }
         }
@@ -380,6 +358,35 @@ public class ModelBindingManager {
         });
         return columns.toArray(new TObjectName[0]);
     }
+
+	private void addSubqueryColumns(TTable table, List<TObjectName> columns) {
+		ResultSet resultSet = (ResultSet) getModel(table.getSubquery());
+		if (resultSet != null) {
+		    List<ResultColumn> columnList = resultSet.getColumns();
+		    for (int i = 0; i < columnList.size(); i++) {
+		        ResultColumn resultColumn = columnList.get(i);
+		        if (resultColumn
+		                .getColumnObject() instanceof TResultColumn) {
+		            TResultColumn columnObject = ((TResultColumn) resultColumn
+		                    .getColumnObject());
+		            TAliasClause alias = columnObject.getAliasClause();
+		            if (alias != null && alias.getAliasName() != null) {
+		                columns.add(alias.getAliasName());
+		            } else {
+		                if (columnObject.getFieldAttr() != null) {
+		                    columns.add(columnObject.getFieldAttr());
+		                } else {
+		                    continue;
+		                }
+		            }
+		        } else if (resultColumn
+		                .getColumnObject() instanceof TObjectName) {
+		            columns.add(
+		                    (TObjectName) resultColumn.getColumnObject());
+		        }
+		    }
+		}
+	}
 
     public TTable getTable(TCustomSqlStatement stmt,
                            TObjectName column) {

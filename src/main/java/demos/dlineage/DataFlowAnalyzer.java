@@ -1784,7 +1784,7 @@ public class DataFlowAnalyzer {
 
 							} else {
 								tableColumn = matchColumn(tableColumns, column);
-								if (tableColumn != null) {
+								if (tableColumn == null) {
 									continue;
 								}
 							}

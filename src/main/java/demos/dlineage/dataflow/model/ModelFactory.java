@@ -282,9 +282,16 @@ public class ModelFactory {
                     column));
         }
         
-        if(table.isCreateTable() && !fromCreateTable){
-        	return null;
-        }
+		if (table.isCreateTable() && !fromCreateTable) {
+			String columnName = SQLUtil.getIdentifierNormalName(column.getColumnNameOnly());
+			for (int i = 0; i < table.getColumns().size(); i++) {
+				TableColumn columnModel = table.getColumns().get(i);
+				if(SQLUtil.getIdentifierNormalName(columnModel.getName()).equals(columnName)){
+					return columnModel;
+				}
+			}
+			return null;
+		}
         
 //        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){
 //        	return null;
