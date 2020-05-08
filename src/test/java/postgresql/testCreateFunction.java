@@ -185,8 +185,9 @@ public class testCreateFunction extends TestCase {
         assertTrue(createFunction.getBodyStatements().size() == 2);
         TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
         TIntoClause intoClause = selectSqlStatement.getIntoClause();
-        assertTrue(intoClause.getExprList().getExpression(0).getExpressionType() == EExpressionType.simple_object_name_t);
-        TObjectName variableName = intoClause.getExprList().getExpression(0).getObjectOperand();
+       // System.out.println(intoClause.getExprList().getExpression(0).getExpressionType());
+        //assertTrue(intoClause.getExprList().getExpression(0).getExpressionType() == EExpressionType.simple_object_name_t);
+        TObjectName variableName = intoClause.getVariableList().getObjectName(0);
         assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
