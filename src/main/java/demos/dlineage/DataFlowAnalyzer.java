@@ -2570,12 +2570,18 @@ public class DataFlowAnalyzer {
 				for(RelationElement<?> source:sources){
 					Object column = source.getElement();
 					if(column instanceof TableColumn){
+						if(((TableColumn) column).isShowStar())
+							continue;
 						((TableColumn)column).setShowStar(true);
 					}
 					if(column instanceof ViewColumn){
+						if(((ViewColumn)column).isShowStar())
+							continue;
 						((ViewColumn)column).setShowStar(true);
 					}
 					if(column instanceof ResultColumn){
+						if(((ResultColumn)column).isShowStar())
+							continue;
 						((ResultColumn)column).setShowStar(true);
 					}
 					setSourceShowStar(column);
