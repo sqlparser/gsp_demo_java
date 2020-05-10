@@ -344,6 +344,7 @@ public class testCreateProcedure extends TestCase {
                 "SET OUT_LOAD_QRY = V_LOAD_QRY; \n" +
                 "\n" +
                 "END ;\n";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
