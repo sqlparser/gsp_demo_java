@@ -57,7 +57,7 @@ public class searchFunction {
 
 class functionVisitor extends TParseTreeVisitor {
     public void preVisit(TFunctionCall node){
-        System.out.println("--> function: "+node.getFunctionName().toString());
+        System.out.println("--> function: "+node.getFunctionName().toString()+",type:"+node.getFunctionType());
     }
 
     public void preVisit(TCallStatement statement){
