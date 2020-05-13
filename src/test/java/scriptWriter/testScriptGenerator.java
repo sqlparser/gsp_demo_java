@@ -15,6 +15,17 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+	public void testNullsFirst( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvredshift );
+		sqlparser.sqltext = "select start_date from datetable order by start_date desc nulls first";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvredshift,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+
+	}
 
 	public void testHiveLimit( )
 	{

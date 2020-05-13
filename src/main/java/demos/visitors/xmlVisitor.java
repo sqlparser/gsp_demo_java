@@ -9,83 +9,7 @@ import gudusoft.gsqlparser.ETriggerDmlType;
 import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TStatementList;
-import gudusoft.gsqlparser.nodes.TAliasClause;
-import gudusoft.gsqlparser.nodes.TAlterTableOption;
-import gudusoft.gsqlparser.nodes.TCTE;
-import gudusoft.gsqlparser.nodes.TCTEList;
-import gudusoft.gsqlparser.nodes.TCaseExpression;
-import gudusoft.gsqlparser.nodes.TColumnDefinition;
-import gudusoft.gsqlparser.nodes.TColumnDefinitionList;
-import gudusoft.gsqlparser.nodes.TConnectByClause;
-import gudusoft.gsqlparser.nodes.TConstant;
-import gudusoft.gsqlparser.nodes.TConstraint;
-import gudusoft.gsqlparser.nodes.TConstraintList;
-import gudusoft.gsqlparser.nodes.TDeclareVariable;
-import gudusoft.gsqlparser.nodes.TDeclareVariableList;
-import gudusoft.gsqlparser.nodes.TExceptionClause;
-import gudusoft.gsqlparser.nodes.TExceptionHandler;
-import gudusoft.gsqlparser.nodes.TExceptionHandlerList;
-import gudusoft.gsqlparser.nodes.TExecParameter;
-import gudusoft.gsqlparser.nodes.TExpression;
-import gudusoft.gsqlparser.nodes.TExpressionList;
-import gudusoft.gsqlparser.nodes.TForUpdate;
-import gudusoft.gsqlparser.nodes.TFunctionCall;
-import gudusoft.gsqlparser.nodes.TGroupBy;
-import gudusoft.gsqlparser.nodes.TGroupByItem;
-import gudusoft.gsqlparser.nodes.TGroupByItemList;
-import gudusoft.gsqlparser.nodes.TGroupingExpressionItem;
-import gudusoft.gsqlparser.nodes.TGroupingExpressionItemList;
-import gudusoft.gsqlparser.nodes.TGroupingSet;
-import gudusoft.gsqlparser.nodes.THierarchical;
-import gudusoft.gsqlparser.nodes.TInExpr;
-import gudusoft.gsqlparser.nodes.TIntoClause;
-import gudusoft.gsqlparser.nodes.TJoin;
-import gudusoft.gsqlparser.nodes.TJoinItem;
-import gudusoft.gsqlparser.nodes.TJoinItemList;
-import gudusoft.gsqlparser.nodes.TJoinList;
-import gudusoft.gsqlparser.nodes.TKeepDenseRankClause;
-import gudusoft.gsqlparser.nodes.TMergeDeleteClause;
-import gudusoft.gsqlparser.nodes.TMergeInsertClause;
-import gudusoft.gsqlparser.nodes.TMergeUpdateClause;
-import gudusoft.gsqlparser.nodes.TMergeWhenClause;
-import gudusoft.gsqlparser.nodes.TMultiTarget;
-import gudusoft.gsqlparser.nodes.TMultiTargetList;
-import gudusoft.gsqlparser.nodes.TObjectName;
-import gudusoft.gsqlparser.nodes.TObjectNameList;
-import gudusoft.gsqlparser.nodes.TOrderBy;
-import gudusoft.gsqlparser.nodes.TOrderByItem;
-import gudusoft.gsqlparser.nodes.TOrderByItemList;
-import gudusoft.gsqlparser.nodes.TParameterDeclaration;
-import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
-import gudusoft.gsqlparser.nodes.TParseTreeNode;
-import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
-import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
-import gudusoft.gsqlparser.nodes.TPivotClause;
-import gudusoft.gsqlparser.nodes.TPivotInClause;
-import gudusoft.gsqlparser.nodes.TPivotedTable;
-import gudusoft.gsqlparser.nodes.TResultColumn;
-import gudusoft.gsqlparser.nodes.TResultColumnList;
-import gudusoft.gsqlparser.nodes.TRollupCube;
-import gudusoft.gsqlparser.nodes.TSelectDistinct;
-import gudusoft.gsqlparser.nodes.TSequenceOption;
-import gudusoft.gsqlparser.nodes.TTable;
-import gudusoft.gsqlparser.nodes.TTableHint;
-import gudusoft.gsqlparser.nodes.TTopClause;
-import gudusoft.gsqlparser.nodes.TTrimArgument;
-import gudusoft.gsqlparser.nodes.TTypeAttribute;
-import gudusoft.gsqlparser.nodes.TTypeAttributeList;
-import gudusoft.gsqlparser.nodes.TTypeName;
-import gudusoft.gsqlparser.nodes.TUnpivotInClause;
-import gudusoft.gsqlparser.nodes.TUnpivotInClauseItem;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
-import gudusoft.gsqlparser.nodes.TViewAliasItem;
-import gudusoft.gsqlparser.nodes.TWhenClauseItem;
-import gudusoft.gsqlparser.nodes.TWhenClauseItemList;
-import gudusoft.gsqlparser.nodes.TWhereClause;
-import gudusoft.gsqlparser.nodes.TWindowDef;
-import gudusoft.gsqlparser.nodes.TWindowFrame;
-import gudusoft.gsqlparser.nodes.TWindowFrameBoundary;
-import gudusoft.gsqlparser.nodes.TWithinGroup;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
 import gudusoft.gsqlparser.nodes.mdx.TMdxAxis;
@@ -622,6 +546,44 @@ public class xmlVisitor extends TParseTreeVisitor
 		appendEndTag( node );
 	}
 
+
+	public void preVisit( TValueClause node ){
+		Element e_value_clause = xmldoc.createElement( "value_clause" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_value_clause );
+		elementStack.push( e_value_clause );
+
+		Element e_value_rows = xmldoc.createElement( "value_rows" );
+		e_value_clause.appendChild(e_value_rows);
+		elementStack.push(e_value_rows);
+		node.getValueRows().acceptChildren(this);
+		elementStack.pop();
+
+		if ( node.getNameList( ) != null )
+		{
+			Element e_into_names = xmldoc.createElement( "into_names" );
+			e_value_clause.appendChild(e_into_names);
+			elementStack.push(e_into_names);
+			node.getNameList( ).accept( this );
+			elementStack.pop();
+		}
+
+		elementStack.pop( );
+	}
+
+	public void preVisit( TValueRowItem node ){
+		Element e_valueRow_item = xmldoc.createElement( "value_item" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_valueRow_item );
+		elementStack.push( e_valueRow_item );
+		if (node.getExpr() != null){
+			node.getExpr().accept(this);
+		}else if (node.getExprList() != null){
+			node.getExprList().accept(this);
+		}
+		elementStack.pop( );
+	}
+
 	public void preVisit( TSelectSqlStatement node )
 	{
 		// sb.append(String.format("<%s setOperator='%d'>"+crlf,getTagName(node),node.getSetOperator())
@@ -724,6 +686,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		if ( node.getValueClause( ) != null )
 		{
 			// DB2 values constructor
+			node.getValueClause().accept(this);
 
 			elementStack.pop( ); // query specification
 			elementStack.pop( ); // query expression
@@ -1273,6 +1236,13 @@ public class xmlVisitor extends TParseTreeVisitor
 		current_objectName_tag = "object_name";
 		node.getAliasName( ).accept( this );
 		current_objectName_tag = null;
+		if (node.getColumns() != null){
+			Element e_columns = xmldoc.createElement( "columns" );
+			e_alias_clause.appendChild( e_columns );
+			elementStack.push(e_columns);
+			node.getColumns().acceptChildren(this);
+			elementStack.pop();
+		}
 		elementStack.pop( );
 		// sb.append(node.toString());
 	}

@@ -52,4 +52,16 @@ public class testCastDate extends TestCase {
         //System.out.println(order.getExpressionType());
     }
 
+    public void testDateAsColumn(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "select \"date\" , col from emp";
+
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
+        System.out.println(resultColumn.getExpr().getExpressionType() );
+//        assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.simple_object_name_t);
+    }
+
 }

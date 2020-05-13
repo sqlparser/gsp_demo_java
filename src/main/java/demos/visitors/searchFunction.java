@@ -31,7 +31,7 @@ public class searchFunction {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvoracle;
+        EDbVendor dbVendor = EDbVendor.dbvredshift;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -58,6 +58,12 @@ public class searchFunction {
 class functionVisitor extends TParseTreeVisitor {
     public void preVisit(TFunctionCall node){
         System.out.println("--> function: "+node.getFunctionName().toString()+",type:"+node.getFunctionType());
+        if (node.getArgs() != null){
+            for(int i=0;i<node.getArgs().size();i++){
+                System.out.println(node.getArgs().getExpression(i).toString());
+            }
+
+        }
     }
 
     public void preVisit(TCallStatement statement){
