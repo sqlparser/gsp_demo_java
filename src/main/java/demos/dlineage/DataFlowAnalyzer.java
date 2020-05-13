@@ -244,7 +244,9 @@ public class DataFlowAnalyzer {
 		dataflowString = analyzeSqlScript();
 
 		if (dataflowString != null && !isShowJoin()) {
+			ModelBindingManager.setGlobalVendor(vendor);
 			dataflowString = mergeTables(dataflowString);
+			ModelBindingManager.removeGlobalVendor();
 		}
 
 		if (handleListener != null) {

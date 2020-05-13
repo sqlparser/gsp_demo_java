@@ -517,9 +517,9 @@ public class SQLUtil {
 		return ret;
 	}
 
-	public static String getIdentifierNormalName(String name) {
+	public static String getIdentifierNormalName(EDbVendor vendor, String name) {
 		String normalName = null;
-		switch (ModelBindingManager.getGlobalVendor()) {
+		switch (vendor) {
 		case dbvbigquery:
 		case dbvcouchbase:
 		case dbvhive:
@@ -588,6 +588,10 @@ public class SQLUtil {
 
 			return normalName;
 		}
+	}
+	
+	public static String getIdentifierNormalName(String name) {
+		return getIdentifierNormalName(ModelBindingManager.getGlobalVendor(), name);
 	}
 
 	public static boolean isTempTable(Table tableModel, EDbVendor vendor) {

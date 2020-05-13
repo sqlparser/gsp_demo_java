@@ -4,6 +4,9 @@ package demos.dlineage.dataflow.model.xml;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
+import demos.dlineage.dataflow.model.ModelBindingManager;
+import demos.dlineage.util.SQLUtil;
+
 @Element(name = "source")
 public class sourceColumn
 {
@@ -153,10 +156,18 @@ public class sourceColumn
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((column == null) ? 0 : column.hashCode());
+		result = prime * result + ((column == null) ? 0 : getColumnName(column).hashCode());
 		result = prime * result + ((coordinate == null) ? 0 : coordinate.hashCode());
 		result = prime * result + ((parent_id == null) ? 0 : parent_id.hashCode());
 		return result;
+	}
+
+	private String getColumnName(String columnName) {
+		if (ModelBindingManager.getGlobalVendor() != null) {
+			return SQLUtil.getIdentifierNormalName(columnName);
+		}
+		
+		return columnName;
 	}
 
 	@Override
@@ -171,7 +182,7 @@ public class sourceColumn
 		if (column == null) {
 			if (other.column != null)
 				return false;
-		} else if (!column.equals(other.column))
+		} else if (!getColumnName(column).equals(getColumnName(other.column)))
 			return false;
 		if (coordinate == null) {
 			if (other.coordinate != null)
