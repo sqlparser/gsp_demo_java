@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -290,7 +291,7 @@ public class DataFlowAnalyzer {
 		Map<String, String> tableTypeMap = new HashMap<String, String>();
 		Map<String, String> tableIdMap = new HashMap<String, String>();
 		
-		Map<String, Set<column>> columnMap = new HashMap<>();
+		Map<String, List<column>> columnMap = new HashMap<>();
 		Map<String, Set<String>> tableColumnMap = new HashMap<>();
 		Map<String, String> columnIdMap = new HashMap<String, String>();
 		Map<String, column> columnMergeIdMap = new HashMap<String, column>();
@@ -315,7 +316,7 @@ public class DataFlowAnalyzer {
 					String columnName = SQLUtil.getIdentifierNormalName(table.getFullName()+"."+column.getName() );
 					
 					if(!columnMap.containsKey(columnName)){
-						columnMap.put(columnName, new LinkedHashSet<column>());
+						columnMap.put(columnName, new LinkedList<column>());
 						tableColumnMap.get(tableName).add(columnName);
 					}
 					
@@ -381,7 +382,7 @@ public class DataFlowAnalyzer {
 			List<column> mergeColumns = new ArrayList<column>();
 			while(columnIter.hasNext()){
 				String columnName = columnIter.next();
-				Set<column> columnList = columnMap.get(columnName);
+				List<column> columnList = columnMap.get(columnName);
 				column firstColumn = columnList.iterator().next();
 				if(columnList.size()>1){
 					column mergeColumn = new column();
@@ -443,7 +444,7 @@ public class DataFlowAnalyzer {
 				
 				JSONObject relationJSON = (JSONObject)JSON.toJSON(relation);
 				String jsonString = relationJSON.toJSONString().replaceAll("\"id\":\".+?\"", "");
-				String key = SHA256.getSHA256(jsonString);
+				String key = SHA256.getSHA256(SQLUtil.getIdentifierNormalName(jsonString));
 				if(!mergeRelations.containsKey(key)){
 					mergeRelations.put(key, relation);
 				}
@@ -5894,10 +5895,18 @@ public class DataFlowAnalyzer {
 		}
 	}
 
+	public static String getVersion(){
+		return "1.0.0";
+	}
+	
+	public static String getReleaseDate(){
+		return "2020-05-19";
+	} 
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/t <database type>] [/o <output file path>]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/t <database type>] [/o <output file path>][/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
@@ -5914,6 +5923,12 @@ public class DataFlowAnalyzer {
 		File sqlFiles = null;
 
 		List<String> argList = Arrays.asList(args);
+		
+		if(argList.indexOf("/version")!=-1){
+			System.out.println("Version: "+DataFlowAnalyzer.getVersion());
+			System.out.println("Release Date: "+DataFlowAnalyzer.getReleaseDate());
+			return;
+		}
 
 		if (argList.indexOf("/f") != -1 && argList.size() > argList.indexOf("/f") + 1) {
 			sqlFiles = new File(args[argList.indexOf("/f") + 1]);
