@@ -1,5 +1,6 @@
 package demos.visitors;
 
+import demos.joinConvert.JoinConverter;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -50,7 +51,7 @@ public class SearchSelect {
 
         int ret = sqlparser.parse();
         if (ret == 0){
-            selectVisitor fv = new selectVisitor();
+            selectVisitor fv = new selectVisitor(dbVendor);
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
@@ -67,16 +68,40 @@ public class SearchSelect {
 
 class selectVisitor extends TParseTreeVisitor {
 
+    public selectVisitor(){
+        this.dbVendor = EDbVendor.dbvoracle;
+    }
+
+    public selectVisitor(EDbVendor dbVendor){
+        this.dbVendor = dbVendor;
+    }
+
+    private EDbVendor dbVendor;
+
+    private int counter = 1;
     public void preVisit(TSelectSqlStatement select){
         if (select.isCombinedQuery()){
            // System.out.println("find set operator:"+select.getSetOperatorType());
            // System.out.println(select.toString());
         }
+        System.out.println("\n\n"+counter++);
+        System.out.println(select.toString());
+
+        JoinConverter converter = new JoinConverter( select.toString(), dbVendor );
+        if ( converter.convert( ) != 0 )
+        {
+            System.out.println( converter.getErrorMessage( ) );
+        }
+        else
+        {
+            System.out.println( "\nSQL in ANSI joins" );
+            System.out.println( converter.getQuery( ) );
+        }
     }
 
     public void preVisit(TResultColumn resultColumn){
         if (resultColumn.getAliasClause() != null){
-            System.out.println("alias:"+resultColumn.getAliasClause().toString()+",filed:"+resultColumn.toString());
+         //   System.out.println("alias:"+resultColumn.getAliasClause().toString()+",filed:"+resultColumn.toString());
         }
     }
 
