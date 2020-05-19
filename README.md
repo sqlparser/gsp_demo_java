@@ -2,7 +2,12 @@
 Java demos for the General SQL Parser library
 
 ## compile and run
-Just type `ant` in the command line.
+1. open setenv/setenv.bat, and set JAVA_HOME to the path where JDK installed.
+2. create a build directory.
+2. cd src/main/java/demos
+3. enter any sub-directory which includes a demo, for example, cd checksyntax
+4. execute compile_checksyntax.bat
+5. execute run_checksyntax.bat
 
 ### tutorial
 
