@@ -3557,6 +3557,9 @@ public class DataFlowAnalyzer {
 			QueryTable table = (QueryTable) resultSetModel;
 			if (table.getAlias() != null && table.getAlias().trim().length() > 0) {
 				String name = "RESULT_OF_" + table.getAlias().trim();
+				if (table.getTableObject().getCTE() != null) {
+					name = "RESULT_OF_" + table.getTableObject().getCTE().getTableName().toString() + "_" + table.getAlias().trim();
+				}
 				modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
 				return name;
 			} else if (table.getTableObject().getCTE() != null) {
@@ -5896,11 +5899,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.0";
+		return "1.0.1";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-19";
+		return "2020-05-20";
 	} 
 
 	public static void main(String[] args) {
