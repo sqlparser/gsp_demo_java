@@ -9,6 +9,10 @@ public class Column {
 	private String name;
 	@JSONField(ordinal = 3)
 	private Coordinate[] coordinates;
+	@JSONField(ordinal = 4)
+	private String qualifiedTable;
+	@JSONField(ordinal = 5)
+	private String source;
 
 	public String getId() {
 		return id;
@@ -32,6 +36,22 @@ public class Column {
 
 	public void setCoordinates(Coordinate[] coordinates) {
 		this.coordinates = coordinates;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getQualifiedTable() {
+		return qualifiedTable;
+	}
+
+	public void setQualifiedTable(String qualifiedTable) {
+		this.qualifiedTable = qualifiedTable;
 	}
 
 }
