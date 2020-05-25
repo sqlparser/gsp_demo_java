@@ -30,7 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class JoinConverter
 {
@@ -44,6 +46,7 @@ public class JoinConverter
 
 		TTable table;
 		TTable joinTable;
+		Set<TTable> joinTableOthers;
 		String joinClause;
 		String condition;
 	}
@@ -622,6 +625,7 @@ public class JoinConverter
 										leftTable = lcTable2;
 										rightTable = lcTable1;
 									}
+//									System.out.println("leftTable:" + leftTable + ", rightTable:" + rightTable);
 
 									if ( ( leftTable != null )
 											&& ( rightTable != null ) )
@@ -741,6 +745,43 @@ public class JoinConverter
 								}
 							} );
 
+					// add other join tables
+					for ( int i = 0; i < fromClauses.size( ); i++ )
+					{
+						FromClause fc = fromClauses.get( i );
+						TTable leftTable = fc.table;
+						TTable joinTable = fc.joinTable;
+						String condition = fc.condition;
+						fc.joinTableOthers = new HashSet<>();
+						String[] conditionArray = condition.replace(".", ".,_,").replace(" ", ",_,").split(",_,");
+						for (String conditionStr : conditionArray) {
+							if (conditionStr.endsWith(".") && conditionStr.length() > 1) {
+								String tableName = conditionStr.substring(0, conditionStr.length() - 1);
+								if (!isNameOrAliasOfTable(leftTable, tableName) && !isNameOrAliasOfTable(joinTable, tableName)) {
+									for (TTable table : tables) {
+										if (isNameOrAliasOfTable(table, tableName)) {
+											fc.joinTableOthers.add(table);
+										}
+									}
+								}
+							}
+						}
+					}
+					// sort by other join tables
+					Collections.sort( fromClauses,
+							new Comparator<FromClause>( ) {
+
+								public int compare( FromClause o1, FromClause o2 )
+								{
+									if ( o1.joinTableOthers.contains( o2.table ) || o1.joinTableOthers.contains( o2.joinTable ) )
+										return 1;
+									else if ( o2.joinTableOthers.contains( o1.table ) || o2.joinTableOthers.contains( o1.joinTable ) )
+										return -1;
+									else
+										return fromClauses.indexOf( o1 )
+												- fromClauses.indexOf( o2 );
+								}
+							} );
 					// link all join clause
 					for ( int i = 0; i < fromClauses.size( ); i++ )
 					{
