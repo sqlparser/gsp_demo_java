@@ -230,6 +230,8 @@ public class SQLFlow {
 						columnModel.setId(column.getId());
 						columnModel.setName(column.getName());
 						columnModel.setCoordinates(Coordinate.parse(column.getCoordinate()));
+						columnModel.setSource(column.getSource());
+						columnModel.setQualifiedTable(column.getQualifiedTable());
 						columnModels.add(columnModel);
 					}
 				}

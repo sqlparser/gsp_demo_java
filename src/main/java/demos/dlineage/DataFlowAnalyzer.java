@@ -314,6 +314,10 @@ public class DataFlowAnalyzer {
 				tableColumnMap.putIfAbsent(tableName, new LinkedHashSet<>());
 				for(column column:table.getColumns()){
 					String columnName = SQLUtil.getIdentifierNormalName(table.getFullName()+"."+column.getName() );
+					if (!SQLUtil.isEmpty(column.getQualifiedTable())) {
+						columnName = SQLUtil.getIdentifierNormalName(
+								table.getFullName() + "." + column.getQualifiedTable() + "." + column.getName());
+					}
 					
 					if(!columnMap.containsKey(columnName)){
 						columnMap.put(columnName, new LinkedList<column>());
@@ -343,7 +347,9 @@ public class DataFlowAnalyzer {
 				table.setType(type);
 				for (table item : tableList) {
 					if (!SQLUtil.isEmpty(table.getCoordinate()) && !SQLUtil.isEmpty(item.getCoordinate())) {
-						table.setCoordinate(table.getCoordinate() + "," + item.getCoordinate());
+						if(table.getCoordinate().indexOf(item.getCoordinate())==-1){
+							table.setCoordinate(table.getCoordinate() + "," + item.getCoordinate());
+						}
 					} else if (!SQLUtil.isEmpty(item.getCoordinate())) {
 						table.setCoordinate(item.getCoordinate());
 					}
@@ -392,7 +398,9 @@ public class DataFlowAnalyzer {
 					mergeColumns.add(mergeColumn);
 					for (column item : columnList) {
 						if (!SQLUtil.isEmpty(mergeColumn.getCoordinate()) && !SQLUtil.isEmpty(item.getCoordinate())) {
-							mergeColumn.setCoordinate(mergeColumn.getCoordinate() + "," + item.getCoordinate());
+							if(mergeColumn.getCoordinate().indexOf(item.getCoordinate())==-1){
+								mergeColumn.setCoordinate(mergeColumn.getCoordinate() + "," + item.getCoordinate());
+							}
 						} else if (!SQLUtil.isEmpty(item.getCoordinate())) {
 							mergeColumn.setCoordinate(item.getCoordinate());
 						}
@@ -3418,7 +3426,6 @@ public class DataFlowAnalyzer {
 			resultSetElement.setAttribute("schema", resultSetModel.getSchema());
 		}
 		resultSetElement.setAttribute("name", getResultSetName(resultSetModel));
-		resultSetElement.setAttribute("name", getResultSetName(resultSetModel));
 		resultSetElement.setAttribute("type", getResultSetType(resultSetModel));
 		if ((ignoreRecordSet || simpleOutput) && resultSetModel.isTarget()) {
 			resultSetElement.setAttribute("isTarget", String.valueOf(resultSetModel.isTarget()));
@@ -3430,16 +3437,44 @@ public class DataFlowAnalyzer {
 		dlineageResult.appendChild(resultSetElement);
 
 		List<ResultColumn> columns = resultSetModel.getColumns();
+		
+		Map<String, Integer> columnCounts = new HashMap<String, Integer>();
+		for (ResultColumn column : columns) {
+			String columnName = SQLUtil.getIdentifierNormalName(column.getName());
+			if(!columnCounts.containsKey(columnName)){
+				columnCounts.put(columnName, 0);
+			}
+			columnCounts.put(columnName, columnCounts.get(columnName)+1);
+			if (!column.getStarLinkColumns().isEmpty()) {
+				for (int k = 0; k < column.getStarLinkColumns().size(); k++) {
+					columnName = SQLUtil.getIdentifierNormalName(getColumnName(column.getStarLinkColumns().get(k)));
+					if(!columnCounts.containsKey(columnName)){
+						columnCounts.put(columnName, 0);
+					}
+					columnCounts.put(columnName, columnCounts.get(columnName)+1);
+				}
+			}
+		}
+		
+		
 		for (int j = 0; j < columns.size(); j++) {
 			ResultColumn columnModel = columns.get(j);
 			if (!columnModel.getStarLinkColumns().isEmpty()) {
 				for (int k = 0; k < columnModel.getStarLinkColumns().size(); k++) {
 					Element columnElement = doc.createElement("column");
 					columnElement.setAttribute("id", String.valueOf(columnModel.getId()) + "_" + k);
-					columnElement.setAttribute("name", getColumnName(columnModel.getStarLinkColumns().get(k)));
+					TObjectName column = columnModel.getStarLinkColumns().get(k);
+					String columnName =  getColumnName(column);
+					columnElement.setAttribute("name",columnName);
 					if (columnModel.getStartPosition() != null && columnModel.getEndPosition() != null) {
 						columnElement.setAttribute("coordinate",
 								columnModel.getStartPosition() + "," + columnModel.getEndPosition());
+					}
+					String identifier = SQLUtil.getIdentifierNormalName(columnName);
+					if(columnCounts.containsKey(identifier) && columnCounts.get(identifier)>1){
+						if(!SQLUtil.isEmpty(getQualifiedTable(column))){
+							columnElement.setAttribute("qualifiedTable", getQualifiedTable(column));
+						}
 					}
 					resultSetElement.appendChild(columnElement);
 				}
@@ -3451,6 +3486,14 @@ public class DataFlowAnalyzer {
 						columnElement.setAttribute("coordinate",
 								columnModel.getStartPosition() + "," + columnModel.getEndPosition());
 					}
+					
+					String identifier = SQLUtil.getIdentifierNormalName(columnModel.getName());
+					if (columnCounts.containsKey(identifier) && columnCounts.get(identifier) > 1) {
+						String qualifiedTable = getQualifiedTable(columnModel);
+						if(!SQLUtil.isEmpty(qualifiedTable)) {
+							columnElement.setAttribute("qualifiedTable", qualifiedTable);
+						}
+					}
 					resultSetElement.appendChild(columnElement);
 				}
 			} else {
@@ -3461,6 +3504,16 @@ public class DataFlowAnalyzer {
 					columnElement.setAttribute("coordinate",
 							columnModel.getStartPosition() + "," + columnModel.getEndPosition());
 				}
+	
+
+				String identifier = SQLUtil.getIdentifierNormalName(columnModel.getName());
+				if (columnCounts.containsKey(identifier) && columnCounts.get(identifier) > 1) {
+					String qualifiedTable = getQualifiedTable(columnModel);
+					if(!SQLUtil.isEmpty(qualifiedTable)) {
+						columnElement.setAttribute("qualifiedTable", qualifiedTable);
+					}
+				}
+			
 				resultSetElement.appendChild(columnElement);
 			}
 		}
@@ -3475,6 +3528,29 @@ public class DataFlowAnalyzer {
 		}
 		pseudoRowsElement.setAttribute("source", "system");
 		resultSetElement.appendChild(pseudoRowsElement);
+	}
+
+	private String getQualifiedTable(ResultColumn columnModel) {
+		if(columnModel.getColumnObject() instanceof TObjectName){
+			return getQualifiedTable((TObjectName)columnModel.getColumnObject());
+		}
+		if(columnModel.getColumnObject() instanceof TResultColumn){
+			TObjectName field = ((TResultColumn)columnModel.getColumnObject()).getFieldAttr();
+			if(field!=null){
+				return getQualifiedTable(field);
+			}
+		}
+		return null;
+	}
+	
+	private String getQualifiedTable(TObjectName column) {
+		if (column == null)
+			return null;
+		String[] splits = column.toString().split("\\.");
+		if (splits.length > 1) {
+			return splits[splits.length - 2];
+		}
+		return null;
 	}
 
 	private String getResultSetType(ResultSet resultSetModel) {
@@ -3528,7 +3604,7 @@ public class DataFlowAnalyzer {
 			return tableModel.getFullName();
 		}
 		if (tableModel.getAlias() != null && tableModel.getAlias().trim().length() > 0) {
-			tableName = "RESULT_OF_" + tableModel.getAlias().trim();
+			tableName = getResultSetWithId("RESULT_OF_" + tableModel.getAlias());
 
 		} else {
 			tableName = getResultSetDisplayId("RS");
@@ -3556,9 +3632,9 @@ public class DataFlowAnalyzer {
 		if (resultSetModel instanceof QueryTable) {
 			QueryTable table = (QueryTable) resultSetModel;
 			if (table.getAlias() != null && table.getAlias().trim().length() > 0) {
-				String name = "RESULT_OF_" + table.getAlias().trim();
+				String name = getResultSetWithId("RESULT_OF_" + table.getAlias().trim());
 				if (table.getTableObject().getCTE() != null) {
-					name = "RESULT_OF_" + table.getTableObject().getCTE().getTableName().toString() + "_" + table.getAlias().trim();
+					name = getResultSetWithId("RESULT_OF_" + table.getTableObject().getCTE().getTableName().toString() + "_" + table.getAlias().trim());
 				}
 				modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
 				return name;
@@ -3625,6 +3701,17 @@ public class DataFlowAnalyzer {
 		return name;
 	}
 
+	private String getResultSetWithId(String type) {
+		if (!modelManager.DISPLAY_ID.containsKey(type)) {
+			modelManager.DISPLAY_ID.put(type, 0);
+			return type;
+		} else {
+			int id = modelManager.DISPLAY_ID.get(type);
+			modelManager.DISPLAY_ID.put(type, id + 1);
+			return type + "(" + (id + 1)+")";
+		}
+	}
+	
 	private String getResultSetDisplayId(String type) {
 		if (!modelManager.DISPLAY_ID.containsKey(type)) {
 			modelManager.DISPLAY_ID.put(type, 1);
@@ -5899,11 +5986,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.1";
+		return "1.0.2";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-20";
+		return "2020-05-24";
 	} 
 
 	public static void main(String[] args) {
