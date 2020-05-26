@@ -178,19 +178,33 @@ public class testJoinConverter extends TestCase
 
 		assertTrue( converter.getQuery( )
 				.trim( )
-				.equalsIgnoreCase( "SELECT ppp.project_name proj_name,\n"
-						+ "       pr.role_title    user_role\n"
-						+ "FROM   jboss_admin.portal_application_location pal\n"
-						+ "inner join jboss_admin.portal_application pa on pal.application_id = pa.application_id\n"
-						+ "inner join jboss_admin.portal_user_app_location_role pualr on pal.application_location_id = pualr.application_location_id\n"
-						+ "inner join jboss_admin.portal_location pl on pal.uidr_uid = pl.uidr_uid\n"
-						+ "inner join jboss_admin.portal_role pr on pal.application_id = pr.application_id and pualr.role_id = pr.role_id\n"
-						+ "inner join jboss_admin.portal_pep_project ppp on pualr.project_id = ppp.project_id\n"
-						+ "inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid\n"
-						+ "WHERE  ( pu.username = 'USERID')\n"
-						+ "       AND pa.application_id = 'APPID'" ) );
+				.equalsIgnoreCase( "SELECT ppp.project_name proj_name,\n" +
+						"       pr.role_title    user_role\n" +
+						"FROM   jboss_admin.portal_application_location pal\n" +
+						"inner join jboss_admin.portal_application pa on pal.application_id = pa.application_id\n" +
+						"inner join jboss_admin.portal_user_app_location_role pualr on pal.application_location_id = pualr.application_location_id\n" +
+						"inner join jboss_admin.portal_location pl on pal.uidr_uid = pl.uidr_uid\n" +
+						"inner join jboss_admin.portal_pep_project ppp on pualr.project_id = ppp.project_id\n" +
+						"inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid\n" +
+						"inner join jboss_admin.portal_role pr on pal.application_id = pr.application_id and pualr.role_id = pr.role_id\n" +
+						"WHERE  ( pu.username = 'USERID')\n" +
+						"       AND pa.application_id = 'APPID'" ) );
 
-		// assertTrue(converter.getQuery().trim().equalsIgnoreCase(""));
+//		assertTrue( converter.getQuery( )
+//				.trim( )
+//				.equalsIgnoreCase( "SELECT ppp.project_name proj_name,\n"
+//						+ "       pr.role_title    user_role\n"
+//						+ "FROM   jboss_admin.portal_application_location pal\n"
+//						+ "inner join jboss_admin.portal_application pa on pal.application_id = pa.application_id\n"
+//						+ "inner join jboss_admin.portal_user_app_location_role pualr on pal.application_location_id = pualr.application_location_id\n"
+//						+ "inner join jboss_admin.portal_location pl on pal.uidr_uid = pl.uidr_uid\n"
+//						+ "inner join jboss_admin.portal_role pr on pal.application_id = pr.application_id and pualr.role_id = pr.role_id\n"
+//						+ "inner join jboss_admin.portal_pep_project ppp on pualr.project_id = ppp.project_id\n"
+//						+ "inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid\n"
+//						+ "WHERE  ( pu.username = 'USERID')\n"
+//						+ "       AND pa.application_id = 'APPID'" ) );
+
+	//	 System.out.println(converter.getQuery().trim());
 	}
 
 	public void testOutterJoin5( )

@@ -54,8 +54,14 @@ public class SearchSelect {
             selectVisitor fv = new selectVisitor(dbVendor);
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
-                System.out.println(sqlStatement.sqlstatementtype);
+               // System.out.println(sqlStatement.sqlstatementtype);
+                fv.init();
                 sqlStatement.acceptChildren(fv);
+                if (fv.getSkippedQuery() > 0){
+                    System.out.println("Warning:"+fv.getSkippedQuery()+" query is skipped!");
+                }
+
+                System.out.println(sqlStatement.toString(true));
             }
 
         }else{
@@ -79,13 +85,30 @@ class selectVisitor extends TParseTreeVisitor {
     private EDbVendor dbVendor;
 
     private int counter = 1;
+    private int nestedQuery = 0;
+    private int skippedQuery = 0;
+
+    public int getSkippedQuery() {
+        return skippedQuery;
+    }
+
+    public void init(){
+        skippedQuery = 0;
+        nestedQuery = 0;
+    }
+
     public void preVisit(TSelectSqlStatement select){
+        if (nestedQuery > 0){ // tokens of subquery is override, so, just skip it
+            skippedQuery++;
+            return;
+        }
+        nestedQuery++;
         if (select.isCombinedQuery()){
            // System.out.println("find set operator:"+select.getSetOperatorType());
            // System.out.println(select.toString());
         }
-        System.out.println("\n\n"+counter++);
-        System.out.println(select.toString());
+        //System.out.println("\n\n"+counter++);
+        //System.out.println(select.toString());
 
         JoinConverter converter = new JoinConverter( select.toString(), dbVendor );
         if ( converter.convert( ) != 0 )
@@ -94,9 +117,14 @@ class selectVisitor extends TParseTreeVisitor {
         }
         else
         {
-            System.out.println( "\nSQL in ANSI joins" );
-            System.out.println( converter.getQuery( ) );
+            //System.out.println( "\nSQL in ANSI joins" );
+            //System.out.println( converter.getQuery( ) );
+            select.setText(converter.getQuery());
         }
+    }
+
+    public void postVisit(TSelectSqlStatement select){
+        nestedQuery--;
     }
 
     public void preVisit(TResultColumn resultColumn){
