@@ -2,18 +2,27 @@
 package demos.dlineage.dataflow.model;
 
 import gudusoft.gsqlparser.ESqlClause;
+import gudusoft.gsqlparser.nodes.TObjectName;
 
 public class ResultColumnRelationElement implements
 		RelationElement<ResultColumn>
 {
 
 	private ResultColumn column;
+	
+	private TObjectName columnName;
 
 	private ESqlClause relationLocation;
 
 	public ResultColumnRelationElement( ResultColumn column )
 	{
 		this.column = column;
+	}
+	
+	public ResultColumnRelationElement( ResultColumn column, TObjectName columnName )
+	{
+		this.column = column;
+		this.columnName = columnName;
 	}
 
 	public ResultColumnRelationElement( ResultColumn column,
@@ -32,6 +41,11 @@ public class ResultColumnRelationElement implements
 	public ESqlClause getRelationLocation( )
 	{
 		return relationLocation;
+	}
+
+
+	public TObjectName getColumnName() {
+		return columnName;
 	}
 
 	@Override
