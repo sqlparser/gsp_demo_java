@@ -52,7 +52,7 @@ public class formatsql {
         int ret = sqlparser.parse();
         if (ret == 0){
             GFmtOpt option = GFmtOptFactory.newInstance();
-           // option.wsPaddingParenthesesInExpression = false;
+            option.wsPaddingParenthesesInExpression = false;
             //option.selectColumnlistComma =     TLinefeedsCommaOption.LfBeforeComma;
             // umcomment next line generate formatted sql in html
             //option.outputFmt =  GOutputFmt.ofhtml;
