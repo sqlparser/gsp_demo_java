@@ -334,6 +334,66 @@ public class testJoinConverter extends TestCase
 
     }
 
+    public void testSubQueryJoin( )
+    {
 
+        String sqltext = "insert into tableF\n" + 
+        		"SELECT  *\n" + 
+        		"FROM    TableA AS A, TableB AS B\n" + 
+        		"WHERE   A.ColA *= B.ColB\n" + 
+        		"and EXISTS(\n" + 
+        		"	SELECT  *\n" + 
+        		"	FROM    TableC AS C, TableD AS D\n" + 
+        		"	WHERE   C.ColC *= D.ColD\n" + 
+        		")";
+
+        JoinConverter converter = new JoinConverter( sqltext ,EDbVendor.dbvmssql);
+        assertTrue( converter.convert( ) == 0 );
+
+//        System.out.println(converter.getQuery( ).trim());
+        assertTrue( converter.getQuery( )
+                .trim( )
+                .equalsIgnoreCase("insert into tableF\n" + 
+                		"SELECT  *\n" + 
+                		"FROM    TableA A\n" + 
+                		"left outer join TableB B on A.ColA = B.ColB\n" + 
+                		"WHERE   EXISTS(\n" + 
+                		"	SELECT  *\n" + 
+                		"	FROM    TableC C\n" + 
+                		"left outer join TableD D on C.ColC = D.ColD\n" + 
+                		")"));
+
+
+    }
+
+    public void testCrossJoinWithOuterJoin( )
+    {
+
+        String sqltext = "select  \n" + 
+        		"    b.Amount\n" + 
+        		"from \n" + 
+        		"    TableA a, TableB b,TableC c, TableD d \n" + 
+        		"where \n" + 
+        		"    a.inv_no *= b.inv_no and \n" + 
+        		"    a.inv_item *= b.inv_item and \n" + 
+        		"    c.currency *= b.cash_ccy and\n" + 
+        		"    d.tx_code *= b.cash_receipt";
+
+        JoinConverter converter = new JoinConverter( sqltext ,EDbVendor.dbvmssql);
+        assertTrue( converter.convert( ) == 0 );
+
+//        System.out.println(converter.getQuery( ).trim());
+        assertTrue( converter.getQuery( )
+                .trim( )
+                .equalsIgnoreCase("select  \n" + 
+                		"    b.Amount\n" + 
+                		"from \n" + 
+                		"    TableA a\n" + 
+                		"cross join TableC c\n" + 
+                		"cross join TableD d\n" + 
+                		"left outer join TableB b on a.inv_no = b.inv_no and a.inv_item = b.inv_item and c.currency = b.cash_ccy and d.tx_code = b.cash_receipt"));
+
+
+    }
 
 }

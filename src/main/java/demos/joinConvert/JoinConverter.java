@@ -294,6 +294,11 @@ public class JoinConverter
 
 	private String query;
 	private EDbVendor vendor;
+	private boolean converted = false;
+
+	public boolean isConverted() {
+		return converted;
+	}
 
 	public JoinConverter( String sql, EDbVendor vendor )
 	{
@@ -321,7 +326,11 @@ public class JoinConverter
 
 		TCustomSqlStatement stmt = sqlparser.sqlstatements.get( 0 );
 		analyzeSelect( stmt );
-		this.query = stmt.toString( );
+		String convertedQuery = stmt.toString();
+		if (!convertedQuery.equals(this.query)) {
+			converted = true;
+		}
+		this.query = convertedQuery;
 		return ErrorNo;
 	}
 
@@ -367,6 +376,36 @@ public class JoinConverter
 				break;
 			ret = isNameOrAliasOfTable( lefttable, jc.righttable )
 					&& isNameOrAliasOfTable( righttable, jc.lefttable );
+			if ( ret )
+				break;
+		}
+
+		return ret;
+	}
+
+	private boolean areTableJoinedExcludeOuterJoin( TTable lefttable, TTable righttable,
+			ArrayList<JoinCondition> jrs )
+	{
+
+		boolean ret = false;
+
+		for ( int i = 0; i < jrs.size( ); i++ )
+		{
+			JoinCondition jc = jrs.get( i );
+			if ( jc.used )
+			{
+				continue;
+			}
+			ret = isNameOrAliasOfTable( lefttable, jc.lefttable )
+					&& isNameOrAliasOfTable( righttable, jc.righttable )
+					&& jc.jt != jointype.left
+					&& jc.jt != jointype.full;
+			if ( ret )
+				break;
+			ret = isNameOrAliasOfTable( lefttable, jc.righttable )
+					&& isNameOrAliasOfTable( righttable, jc.lefttable )
+					&& jc.jt != jointype.right
+					&& jc.jt != jointype.full;
 			if ( ret )
 				break;
 		}
@@ -577,7 +616,7 @@ public class JoinConverter
 					TCustomSqlStatement parentStmt = select;
 					while(parentStmt.getParentStmt() !=null)
 					{
-						parentStmt = select.getParentStmt();
+						parentStmt = parentStmt.getParentStmt();
 						if(parentStmt instanceof TSelectSqlStatement)
 						{
 							TSelectSqlStatement temp = (TSelectSqlStatement)parentStmt;
@@ -601,6 +640,62 @@ public class JoinConverter
 					tableUsed[0] = true;
 					boolean foundTableJoined;
 					final ArrayList<FromClause> fromClauses = new ArrayList<FromClause>( );
+					// cross join
+					TTable prTable = tables.get(0);
+					for ( int i = 1; i < tables.size( ); i++ )
+					{
+						TTable lcTable1 = tables.get( i );
+						if ( !areTableJoined( prTable, lcTable1, jrs ) )
+						{
+							boolean joined = false;
+							boolean acrossJoined = true;
+							for ( int j = 1; j < tables.size( ); j++ )
+							{
+								TTable lcTable2 = tables.get( j );
+								if ( lcTable1.equals( lcTable2 ) ) {
+									continue;
+								}
+								if (areTableJoined( lcTable1, lcTable2, jrs ))
+								{
+									joined = true;
+									if ( !areTableJoinedExcludeOuterJoin( lcTable1, lcTable2, jrs ) )
+									{
+										for ( int k = 0; k < tables.size( ); k++ )
+										{
+											TTable lcTable3 = tables.get( k );
+											if ( lcTable2.equals( lcTable3 ) ) {
+												continue;
+											}
+											if ( !areTableJoinedExcludeOuterJoin( lcTable2, lcTable3, jrs ) )
+											{
+												acrossJoined = false;
+												break;
+											}
+										}
+										if ( !acrossJoined )
+										{
+											break;
+										}
+									}
+									else
+									{
+										acrossJoined = false;
+										break;
+									}
+								}
+							}
+							if (joined && acrossJoined) {
+								FromClause fc = new FromClause( );
+								fc.table = prTable;
+								fc.joinTable = lcTable1;
+								fc.joinClause = "cross join";
+								fc.condition = "";
+	
+								fromClauses.add( fc );
+								tableUsed[i] = true;
+							}
+						}
+					}
 					for ( ;; )
 					{
 						foundTableJoined = false;
@@ -789,9 +884,11 @@ public class JoinConverter
 						fromclause += "\n"
 								+ fc.joinClause
 								+ " "
-								+ getFullNameWithAliasString( fc.joinTable )
-								+ " on "
-								+ fc.condition;
+								+ getFullNameWithAliasString( fc.joinTable );
+						if (!"cross join".equals( fc.joinClause )) {
+							fromclause += " on "
+									+ fc.condition;
+						}
 					}
 
 					for ( int k = select.joins.size( ) - 1; k > 0; k-- )
