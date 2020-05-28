@@ -708,8 +708,10 @@ public class TGetTableColumn{
                 indexRecord.setTable(indexColumn.getOwnerTable());
             }
             if (indexColumn.getOwnerConstraint() != null){
-                indexName = indexColumn.getOwnerConstraint().getConstraintName().toString();
-                indexRecord.setIndex(indexColumn.getOwnerConstraint().getConstraintName());
+                if (indexColumn.getOwnerConstraint().getConstraintName() != null){
+                    indexName = indexColumn.getOwnerConstraint().getConstraintName().toString();
+                    indexRecord.setIndex(indexColumn.getOwnerConstraint().getConstraintName());
+                }
             }
             indexList.add(tableName + ":" + indexColumn.getColumnName().toString()+":"+indexName);
         }
