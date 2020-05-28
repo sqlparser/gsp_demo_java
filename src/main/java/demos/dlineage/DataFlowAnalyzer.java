@@ -2840,6 +2840,10 @@ public class DataFlowAnalyzer {
 				boolean append = false;
 				for (int j = 0; j < sourceElements.length; j++) {
 					Object sourceElement = sourceElements[j].getElement();
+					TObjectName sourceColumnName = null;
+					if(sourceElements[j] instanceof ResultColumnRelationElement){
+						sourceColumnName = ((ResultColumnRelationElement)sourceElements[j]).getColumnName();
+					}
 					if (sourceElement instanceof ResultColumn) {
 						ResultColumn sourceColumn = (ResultColumn) sourceElement;
 						if (!sourceColumn.getStarLinkColumns().isEmpty() && !relation.isShowStarRelation()) {
@@ -2940,7 +2944,18 @@ public class DataFlowAnalyzer {
 											source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + index);
 											source.setAttribute("column",
 													getColumnName(sourceColumn.getStarLinkColumns().get(index)));
-										} else {
+										} 
+										
+										if(index == -1 && sourceColumnName!=null){
+											index = getColumnIndex(sourceColumn.getStarLinkColumns(), sourceColumnName.getColumnNameOnly());
+										}
+										
+										if (index != -1) {
+											source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + index);
+											source.setAttribute("column",
+													getColumnName(sourceColumn.getStarLinkColumns().get(index)));
+										} 
+										else {
 											source.setAttribute("id", String.valueOf(sourceColumn.getId()));
 											source.setAttribute("column", sourceColumn.getName());
 										}
@@ -5278,7 +5293,7 @@ public class DataFlowAnalyzer {
 											if(!containsStarColumn(column, columnName)){
 												column.bindStarLinkColumn(columnName);
 											}
-											relation.addSource(new ResultColumnRelationElement(column));
+											relation.addSource(new ResultColumnRelationElement(column, columnName));
 										}
 										else if (SQLUtil.compareIdentifier(getColumnName(columnName), column.getName())) {
 											if (!column.equals(modelObject)) {
@@ -5314,7 +5329,7 @@ public class DataFlowAnalyzer {
 													if(!containsStarColumn(column, columnName)){
 														column.bindStarLinkColumn(columnName);
 													}
-													relation.addSource(new ResultColumnRelationElement(column));
+													relation.addSource(new ResultColumnRelationElement(column, columnName));
 													flag = true;
 													break;
 												}
@@ -5986,11 +6001,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.2";
+		return "1.0.3";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-24";
+		return "2020-05-27";
 	} 
 
 	public static void main(String[] args) {
