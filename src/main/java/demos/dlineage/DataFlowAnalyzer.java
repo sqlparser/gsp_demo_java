@@ -4216,6 +4216,15 @@ public class DataFlowAnalyzer {
 																else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 																	resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
 																}
+																else if(tableModel.getColumns().get(z).getColumnObject() instanceof TResultColumn){
+																	TResultColumn queryTableColumn = (TResultColumn)tableModel.getColumns().get(z).getColumnObject() ;
+																	TObjectName tableColumnObject = queryTableColumn.getFieldAttr();
+																	if(tableColumnObject!=null){
+																		resultColumn.bindStarLinkColumn(tableColumnObject);
+																	} else if(queryTableColumn.getAliasClause()!=null){
+																		resultColumn.bindStarLinkColumn(queryTableColumn.getAliasClause().getAliasName());
+																	}
+																}
 															}
 														}
 													}
@@ -4286,6 +4295,15 @@ public class DataFlowAnalyzer {
 															else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 																resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
 															}
+															else if(tableModel.getColumns().get(z).getColumnObject() instanceof TResultColumn){
+																TResultColumn queryTableColumn = (TResultColumn)tableModel.getColumns().get(z).getColumnObject() ;
+																TObjectName tableColumnObject = queryTableColumn.getFieldAttr();
+																if(tableColumnObject!=null){
+																	resultColumn.bindStarLinkColumn(tableColumnObject);
+																} else if(queryTableColumn.getAliasClause()!=null){
+																	resultColumn.bindStarLinkColumn(queryTableColumn.getAliasClause().getAliasName());
+																}
+															}
 														}
 													}
 												}
@@ -4322,17 +4340,41 @@ public class DataFlowAnalyzer {
 							TObjectName columnObject = column.getFieldAttr();
 							TTable sourceTable = columnObject.getSourceTable();
 							if (columnObject.getTableToken() != null && sourceTable != null) {
-								Table tableModel = (Table) modelManager.getModel(sourceTable);
-								if (tableModel != null) {
-									modelFactory.createTableColumn(tableModel, columnObject, false);
-								}
-								TObjectName[] columns = modelManager.getTableColumns(sourceTable);
-								for (int j = 0; j < columns.length; j++) {
-									TObjectName columnName = columns[j];
-									if (columnName == null || "*".equals(getColumnName(columnName))) {
-										continue;
+								if (modelManager.getModel(sourceTable) instanceof Table) {
+									Table tableModel = (Table) modelManager.getModel(sourceTable);
+									if (tableModel != null) {
+										modelFactory.createTableColumn(tableModel, columnObject, false);
 									}
-									resultColumn.bindStarLinkColumn(columnName);
+									TObjectName[] columns = modelManager.getTableColumns(sourceTable);
+									for (int j = 0; j < columns.length; j++) {
+										TObjectName columnName = columns[j];
+										if (columnName == null || "*".equals(getColumnName(columnName))) {
+											continue;
+										}
+										resultColumn.bindStarLinkColumn(columnName);
+									}
+								}
+								else if (modelManager.getModel(sourceTable) instanceof QueryTable) {
+									QueryTable tableModel = (QueryTable) modelManager.getModel(sourceTable);
+									if (tableModel != null && !tableModel.getColumns().isEmpty()) {
+										for (int z = 0; z < tableModel.getColumns().size(); z++) {
+											if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
+												resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+											}
+											else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
+												resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
+											}
+											else if(tableModel.getColumns().get(z).getColumnObject() instanceof TResultColumn){
+												TResultColumn queryTableColumn = (TResultColumn)tableModel.getColumns().get(z).getColumnObject() ;
+												TObjectName tableColumnObject = queryTableColumn.getFieldAttr();
+												if(tableColumnObject!=null){
+													resultColumn.bindStarLinkColumn(tableColumnObject);
+												} else if(queryTableColumn.getAliasClause()!=null){
+													resultColumn.bindStarLinkColumn(queryTableColumn.getAliasClause().getAliasName());
+												}
+											}
+										}
+									}
 								}
 							} else {
 								TTableList tables = stmt.getTables();
@@ -4366,6 +4408,15 @@ public class DataFlowAnalyzer {
 														}
 														else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 															resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
+														}
+														else if(tableModel.getColumns().get(z).getColumnObject() instanceof TResultColumn){
+															TResultColumn queryTableColumn = (TResultColumn)tableModel.getColumns().get(z).getColumnObject() ;
+															TObjectName tableColumnObject = queryTableColumn.getFieldAttr();
+															if(tableColumnObject!=null){
+																resultColumn.bindStarLinkColumn(tableColumnObject);
+															} else if(queryTableColumn.getAliasClause()!=null){
+																resultColumn.bindStarLinkColumn(queryTableColumn.getAliasClause().getAliasName());
+															}
 														}
 													}
 												}
@@ -6001,11 +6052,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.3";
+		return "1.0.4";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-27";
+		return "2020-05-29";
 	} 
 
 	public static void main(String[] args) {
