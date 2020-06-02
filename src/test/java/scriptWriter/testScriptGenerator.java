@@ -15,6 +15,32 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+	public void testCastDecimal( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
+		sqlparser.sqltext = "SELECT CAST(t5.column AS DECIMAL(20)) AS c1 from t5.xxx;";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+
+	}
+
+	public void testIntervalConstant( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
+		sqlparser.sqltext = " SELECT date_add(last_day (CAST(concat (concat (concat (2019,'-'),12),'-01') AS DATETIME)),INTERVAL 1 DAY) AS firstdayofnextmonth \n" +
+				" FROM analytics.xxx t19 \n" +
+				" WHERE t19.date < date_add(last_day(CAST(concat(concat(concat(2019,'-'),12),'-01') AS DATETIME)),INTERVAL 1 DAY)";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+
+	}
+
 	public void testNullsFirst( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvredshift );
