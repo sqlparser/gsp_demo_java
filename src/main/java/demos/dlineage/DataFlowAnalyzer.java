@@ -4047,7 +4047,7 @@ public class DataFlowAnalyzer {
 							selectSetRalation.addSource(new ResultColumnRelationElement(sourceColumn));
 						}
 					}
-				} else if (table.getCTE() != null && modelManager.getModel(table.getCTE()) == null) {
+				} else if (table.getCTE() != null) {
 					QueryTable queryTable = modelFactory.createQueryTable(table);
 
 					TObjectNameList cteColumns = table.getCTE().getColumnList();
@@ -6052,11 +6052,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.4";
+		return "1.0.5";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-29";
+		return "2020-05-31";
 	} 
 
 	public static void main(String[] args) {
