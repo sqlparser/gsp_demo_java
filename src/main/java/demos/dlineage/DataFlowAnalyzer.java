@@ -115,6 +115,8 @@ import gudusoft.gsqlparser.nodes.TMultiTarget;
 import gudusoft.gsqlparser.nodes.TMultiTargetList;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TObjectNameList;
+import gudusoft.gsqlparser.nodes.TOrderByItem;
+import gudusoft.gsqlparser.nodes.TOrderByItemList;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
@@ -4699,6 +4701,7 @@ public class DataFlowAnalyzer {
 
 	private void createFunction(TParseTreeNode functionCall) {
 		if (functionCall instanceof TFunctionCall) {
+			TFunctionCall call = (TFunctionCall) functionCall;
 			Function function = modelFactory.createFunction((TFunctionCall) functionCall);
 			ResultColumn column = modelFactory.createFunctionResultColumn(function,
 					((TFunctionCall) functionCall).getFunctionName());
@@ -4765,6 +4768,14 @@ public class DataFlowAnalyzer {
 					}
 				}
 			}
+			if(functionCall.getWindowDef() != null &&  functionCall.getWindowDef().getOrderBy()!=null){
+				TOrderByItemList orderByList = functionCall.getWindowDef().getOrderBy().getItems();
+				for(int i=0;i<orderByList.size();i++){
+					TOrderByItem element = orderByList.getOrderByItem(i);
+					TExpression expression = element.getSortKey();
+					expressions.add(expression);
+				}
+			}
 		} else if (gspObject instanceof TCaseExpression) {
 			TCaseExpression expr = (TCaseExpression) gspObject;
 			TExpression inputExpr = expr.getInput_expr();
@@ -4777,7 +4788,7 @@ public class DataFlowAnalyzer {
 			}
 			TWhenClauseItemList list = expr.getWhenClauseItemList();
 			for (int i = 0; i < list.size(); i++) {
-				TWhenClauseItem element = (TWhenClauseItem) list.getElement(i);
+				TWhenClauseItem element = list.getWhenClauseItem(i);
 				expressions.add(element.getComparison_expr());
 				expressions.add(element.getReturn_expr());
 			}
@@ -6052,11 +6063,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.5";
+		return "1.0.6";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-05-31";
+		return "2020-06-04";
 	} 
 
 	public static void main(String[] args) {
