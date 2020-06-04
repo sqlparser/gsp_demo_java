@@ -1136,7 +1136,8 @@ public class testCreateNode extends TestCase
 				+ "SELECT ename INTO my_ename FROM emp WHERE empno = my_empno;\r\n"
 				+ "END ;";
 
-		assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmssql
+		//System.out.println(createProcedure.toScript());
+		assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvoracle
 				,createProcedure.toScript()
 				,createProcedureQuery
 		));
