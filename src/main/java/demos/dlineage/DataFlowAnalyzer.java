@@ -397,6 +397,7 @@ public class DataFlowAnalyzer {
 					mergeColumn.setId(String.valueOf(++modelManager.TABLE_COLUMN_ID));
 					mergeColumn.setName(firstColumn.getName());
 					mergeColumn.setSource(firstColumn.getSource());
+					mergeColumn.setQualifiedTable(firstColumn.getQualifiedTable());
 					mergeColumns.add(mergeColumn);
 					for (column item : columnList) {
 						if (!SQLUtil.isEmpty(mergeColumn.getCoordinate()) && !SQLUtil.isEmpty(item.getCoordinate())) {
@@ -4042,7 +4043,9 @@ public class DataFlowAnalyzer {
 							ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
 							ResultColumn targetColumn = modelFactory.createSelectSetResultColumn(queryTable,
 									sourceColumn, j);
-							targetColumn.getStarLinkColumns().addAll(sourceColumn.getStarLinkColumns());
+							for(TObjectName starLinkColumn: sourceColumn.getStarLinkColumns()){
+								targetColumn.bindStarLinkColumn(starLinkColumn);
+							}
 							DataFlowRelation selectSetRalation = modelFactory.createDataFlowRelation();
 							selectSetRalation.setEffectType(EffectType.select);
 							selectSetRalation.setTarget(new ResultColumnRelationElement(targetColumn));
@@ -4082,7 +4085,9 @@ public class DataFlowAnalyzer {
 									targetColumn = modelFactory.createSelectSetResultColumn(queryTable, sourceColumn,
 											j);
 								}
-								targetColumn.getStarLinkColumns().addAll(sourceColumn.getStarLinkColumns());
+								for(TObjectName starLinkColumn: sourceColumn.getStarLinkColumns()){
+									targetColumn.bindStarLinkColumn(starLinkColumn);
+								}
 								DataFlowRelation selectSetRalation = modelFactory.createDataFlowRelation();
 								selectSetRalation.setEffectType(EffectType.select);
 								selectSetRalation.setTarget(new ResultColumnRelationElement(targetColumn));
@@ -4098,7 +4103,9 @@ public class DataFlowAnalyzer {
 									targetColumn = modelFactory.createSelectSetResultColumn(queryTable, sourceColumn,
 											j);
 								}
-								targetColumn.getStarLinkColumns().addAll(sourceColumn.getStarLinkColumns());
+								for(TObjectName starLinkColumn: sourceColumn.getStarLinkColumns()){
+									targetColumn.bindStarLinkColumn(starLinkColumn);
+								}
 								DataFlowRelation selectSetRalation = modelFactory.createDataFlowRelation();
 								selectSetRalation.setEffectType(EffectType.select);
 								selectSetRalation.setTarget(new ResultColumnRelationElement(targetColumn));
@@ -4213,7 +4220,9 @@ public class DataFlowAnalyzer {
 														if (tableModel != null && !tableModel.getColumns().isEmpty()) {
 															for (int z = 0; z < tableModel.getColumns().size(); z++) {
 																if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
-																	resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+																	for(TObjectName starLinkColumn: tableModel.getColumns().get(z).getStarLinkColumns()){
+																		resultColumn.bindStarLinkColumn(starLinkColumn);
+																	}
 																}
 																else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 																	resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
@@ -4292,7 +4301,9 @@ public class DataFlowAnalyzer {
 													if (tableModel != null && !tableModel.getColumns().isEmpty()) {
 														for (int z = 0; z < tableModel.getColumns().size(); z++) {
 															if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
-																resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+																for(TObjectName starLinkColumn: tableModel.getColumns().get(z).getStarLinkColumns()){
+																	resultColumn.bindStarLinkColumn(starLinkColumn);
+																}
 															}
 															else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 																resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
@@ -4361,7 +4372,9 @@ public class DataFlowAnalyzer {
 									if (tableModel != null && !tableModel.getColumns().isEmpty()) {
 										for (int z = 0; z < tableModel.getColumns().size(); z++) {
 											if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
-												resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+												for(TObjectName starLinkColumn: tableModel.getColumns().get(z).getStarLinkColumns()){
+													resultColumn.bindStarLinkColumn(starLinkColumn);
+												}
 											}
 											else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 												resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
@@ -4406,7 +4419,9 @@ public class DataFlowAnalyzer {
 												if (tableModel != null && !tableModel.getColumns().isEmpty()) {
 													for (int z = 0; z < tableModel.getColumns().size(); z++) {
 														if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
-															resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+															for(TObjectName starLinkColumn: tableModel.getColumns().get(z).getStarLinkColumns()){
+																resultColumn.bindStarLinkColumn(starLinkColumn);
+															}
 														}
 														else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 															resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
@@ -4901,7 +4916,8 @@ public class DataFlowAnalyzer {
 												if (tableModel != null && !tableModel.getColumns().isEmpty()) {
 													for (int z = 0; z < tableModel.getColumns().size(); z++) {
 														if(!tableModel.getColumns().get(z).getStarLinkColumns().isEmpty()){
-															resultColumn.getStarLinkColumns().addAll(tableModel.getColumns().get(z).getStarLinkColumns());
+															for(TObjectName starLinkColumn: tableModel.getColumns().get(z).getStarLinkColumns())
+															resultColumn.bindStarLinkColumn(starLinkColumn);
 														}
 														else if(tableModel.getColumns().get(z).getColumnObject() instanceof TObjectName){
 															resultColumn.bindStarLinkColumn((TObjectName)tableModel.getColumns().get(z).getColumnObject());
@@ -6063,11 +6079,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.6";
+		return "1.0.7";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-06-04";
+		return "2020-06-07";
 	} 
 
 	public static void main(String[] args) {
