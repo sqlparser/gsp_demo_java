@@ -5375,7 +5375,7 @@ public class DataFlowAnalyzer {
 										}
 										else if (SQLUtil.compareIdentifier(getColumnName(columnName), column.getName())) {
 											if (!column.equals(modelObject)) {
-												relation.addSource(new ResultColumnRelationElement(column));
+												relation.addSource(new ResultColumnRelationElement(column, columnName));
 											}
 											break;
 										}
@@ -5388,7 +5388,7 @@ public class DataFlowAnalyzer {
 											if("*".equals(resultColumn.getName()) && !containsStarColumn(resultColumn, columnName)){
 												resultColumn.bindStarLinkColumn(columnName);
 											}
-											relation.addSource(new ResultColumnRelationElement(resultColumn));
+											relation.addSource(new ResultColumnRelationElement(resultColumn, columnName));
 										}
 									} else if (columnName.getSourceTable() != null) {
 										Object tableModel = modelManager.getModel(columnName.getSourceTable());
@@ -5414,7 +5414,7 @@ public class DataFlowAnalyzer {
 												else if (SQLUtil.compareIdentifier(getColumnName(columnName),
 														column.getName())) {
 													if (!column.equals(modelObject)) {
-														relation.addSource(new ResultColumnRelationElement(column));
+														relation.addSource(new ResultColumnRelationElement(column, columnName));
 														flag = true;
 													}
 													break;
@@ -5422,7 +5422,7 @@ public class DataFlowAnalyzer {
 											}
 											if (!flag && columnIndex < queryColumns.size() && columnIndex != -1) {
 												relation.addSource(
-														new ResultColumnRelationElement(queryColumns.get(columnIndex)));
+														new ResultColumnRelationElement(queryColumns.get(columnIndex), columnName));
 											}
 										}
 									}
