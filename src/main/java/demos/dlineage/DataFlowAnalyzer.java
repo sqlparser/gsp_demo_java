@@ -4212,6 +4212,9 @@ public class DataFlowAnalyzer {
 															for (int z = 0; z < tableModel.getColumns().size(); z++) {
 																resultColumn.bindStarLinkColumn(tableModel.getColumns()
 																		.get(z).getColumnObject());
+																if(table.getSubquery() == null && table.getCTE() == null && !tableModel.isCreateTable()){
+																	resultColumn.setShowStar(true);
+																}
 															}
 														}
 													}
@@ -5081,6 +5084,7 @@ public class DataFlowAnalyzer {
 			return;
 
 		boolean isStar = false;
+		boolean showStar = false;
 
 		DataFlowRelation relation = modelFactory.createDataFlowRelation();
 		relation.setEffectType(effectType);
@@ -5096,6 +5100,7 @@ public class DataFlowAnalyzer {
 
 			if ("*".equals(((ResultColumn) modelObject).getName())) {
 				isStar = true;
+				showStar = ((ResultColumn) modelObject).isShowStar();
 			}
 
 			if (((ResultColumn) modelObject).getResultSet() != null) {
@@ -5211,6 +5216,11 @@ public class DataFlowAnalyzer {
 									
 									for (int j = 0; j < tableModel.getColumns().size(); j++) {
 ;										TableColumn columnModel = tableModel.getColumns().get(j);
+										relation.addSource(new TableColumnRelationElement(columnModel));
+									}
+									
+									if(isStar && showStar){
+										TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName, false);
 										relation.addSource(new TableColumnRelationElement(columnModel));
 									}
 								}
@@ -6079,11 +6089,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.7";
+		return "1.0.8";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-06-07";
+		return "2020-06-10";
 	} 
 
 	public static void main(String[] args) {
