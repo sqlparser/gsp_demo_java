@@ -5,6 +5,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
+import gudusoft.gsqlparser.stmt.TCallStatement;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
@@ -40,5 +41,28 @@ public class testCreateProcedure extends TestCase {
 
         //assertTrue(createProcedure.getBodyStatements().get(1).sqlstatementtype == ESqlStatementType.sstcommit);
         //System.out.print(createProcedure.getBodyStatements().get(1).sqlstatementtype );
+    }
+
+    public void testCall(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE public.test1()\n" +
+                "AS $$\n" +
+                "DECLARE\n" +
+                "  rec_JOB_BATCH RECORD;\n" +
+                "begin\n" +
+                "    call public.test1();\n" +
+                "END;\n" +
+                "$$ LANGUAGE plpgsql\n" +
+                "SECURITY INVOKER;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("public.test1"));
+
+        assertTrue(createProcedure.getBodyStatements().size() == 1);
+        assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstcall);
+        TCallStatement callStatement = (TCallStatement)createProcedure.getBodyStatements().get(0);
+        assertTrue(callStatement.getRoutineName().toString().equalsIgnoreCase("public.test1"));
+        //System.out.print(createProcedure.getBodyStatements().get(0).sqlstatementtype );
     }
 }
