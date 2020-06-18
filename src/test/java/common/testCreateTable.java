@@ -10,6 +10,17 @@ import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
 
+    public void testDuplicateColumn(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "create table all_data_types ( \n" +
+                " col1 GOOGLE,\n" +
+                " col1 CRICBUZZ,\n" +
+                " col1 GOIBIBO,\n" +
+                " col1 AIRINDIA\n" +
+                ");";
+        assertTrue(sqlparser.parse() != 0);
+    }
+
     public void testTemporaryTable(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvnetezza);
         sqlparser.sqltext = "create temporary table vt (id int, name varchar(1)) distribute on(id)";

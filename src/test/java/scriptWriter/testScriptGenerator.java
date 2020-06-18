@@ -14,6 +14,16 @@ import junit.framework.TestCase;
 
 public class testScriptGenerator extends TestCase
 {
+	public void testInterval( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
+		sqlparser.sqltext = "SELECT DATE_ADD(DATE(datecol), INTERVAL (-WEEKDAY(DATE(datecol))) DAY) AS finalDate FROM table ";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
 
 	public void testCastDecimal( )
 	{
@@ -24,8 +34,8 @@ public class testScriptGenerator extends TestCase
 		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
 
 		assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
-
 	}
+
 
 	public void testIntervalConstant( )
 	{

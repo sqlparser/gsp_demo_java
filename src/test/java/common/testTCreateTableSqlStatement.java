@@ -18,13 +18,13 @@ public class testTCreateTableSqlStatement extends TestCase {
         sqlparser.sqltext = "create table new_employees\n" +
                 "(employee_id  number not null,\n" +
                 " first_name  char2(15) null,\n" +
-                " first_name  char2(15) primary key,\n" +
+                " first_name2  char2(15) primary key,\n" +
                 "last_name char2(15) unique,\n" +
-                "last_name char2(15) check(last_name>10),\n" +
+                "last_name2 char2(15) check(last_name>10),\n" +
                 "hire_date date default 5,\n" +
                 "start_date timestamp(7) references scott.dept(start_date),\n" +
                 "end_date timestamp(7) references dept.end_date on delete cascade,\n" +
-                "end_date timestamp(7) references dept.end_date on update set null,\n" +
+                "end_date2 timestamp(7) references dept.end_date on update set null,\n" +
                 "check (start_date>end_date),\n" +
                 "constraint abc unique(a,b),\n" +
                 "primary key(a),\n" +
