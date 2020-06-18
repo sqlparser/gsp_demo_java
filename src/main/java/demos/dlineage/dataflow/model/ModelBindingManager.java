@@ -664,6 +664,21 @@ public class ModelBindingManager {
         }
         return resultSets;
     }
+    
+    public List<TParseTreeNode> getCursors() {
+        List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TCursorDeclStmt)) {
+                continue;
+            }
+            TParseTreeNode resultset = (TParseTreeNode) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
 
     public void addRelation(Relation relation) {
         if (relation != null && !relationHolder.contains(relation)) {
