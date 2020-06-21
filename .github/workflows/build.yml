@@ -28,7 +28,7 @@ jobs:
           git commit -m "path1-success" -a
             
       - name: Push changes
-        uses: ad-m/github-push-action@release
+        uses: ad-m/github-push-action@master
         with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
     
