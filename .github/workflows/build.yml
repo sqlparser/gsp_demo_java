@@ -9,13 +9,13 @@ jobs:
     name: my test
     runs-on: windows-latest
     steps:
+      - name: release
+        uses: actions/checkout@master
+        
       - name: Setup Java JDK
         uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.8
-    
-      - name: release
-        uses: actions/checkout@release
       
       - name: set path
         run: |
