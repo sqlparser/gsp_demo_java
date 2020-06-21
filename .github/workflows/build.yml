@@ -15,4 +15,7 @@ jobs:
           java-version: 1.8
     
       - name: Setup path1
-        run: cd src/main/java/demos/checksyntax/
+        run: |
+          cd src/main/java/demos/checksyntax/
+          ./compile_checksyntax.bat
+          ./run_checksyntax.bat
