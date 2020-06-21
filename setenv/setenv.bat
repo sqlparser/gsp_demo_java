@@ -10,7 +10,7 @@ set PATH=%PATH%;lib\;external_lib\
 
 REM # set the Java home directory
 rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_181
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_181
+set JAVA_HOME=C:\Program Files\Java\zulu-8-azure-jdk_8.40.0.25-8.0.222-win_x64
 
 set JAVA_CMD="%JAVA_HOME%\bin\java.exe"
 
