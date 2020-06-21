@@ -20,10 +20,10 @@ jobs:
       - name: set path1
         run: |
           cd setenv
-          setenv.bat
+          ./setenv.bat
           
       - name: set path2
         run: |
           cd src/main/java/demos/checksyntax/
-          compile_checksyntax.bat
-          run_checksyntax.bat
+          ./compile_checksyntax.bat
+          ./run_checksyntax.bat 
