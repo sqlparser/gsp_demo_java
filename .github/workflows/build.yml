@@ -15,4 +15,4 @@ jobs:
           java-version: 1.8
     
       - name: Setup path1
-        run: ./src/main/java/demos/checksyntax/compile_checksyntax.bat
+        run: cd src/main/java/demos/checksyntax/
