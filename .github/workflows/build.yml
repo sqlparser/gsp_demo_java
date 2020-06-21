@@ -15,4 +15,4 @@ jobs:
           java-version: 1.8
     
       - name: Setup path1
-        run: set PATH=%PATH%;lib\\;external_lib\\
+        run: ./src/main/java/demos/checksyntax/compile_checksyntax.bat
