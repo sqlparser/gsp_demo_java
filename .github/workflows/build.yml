@@ -21,7 +21,6 @@ jobs:
         run: |
           cd setenv
           ./setenv.bat
-        if: ${{ success() }}
           echo "set path1 success!" >> README.md
           git add .
           git commit -m "path1-success"
