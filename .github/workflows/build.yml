@@ -26,16 +26,11 @@ jobs:
           git config --global user.name marsggbo
           git add .
           git commit -m "path1-success" -a
-          
-      - name: Pull
-        uses: ad-m/github-pull-action@master
-        with:
-         github_token: ${{ secrets.GITHUB_TOKEN }}
-            
+      
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: actions-go/push@master
         with:
-         github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
     
       - name: build checksyntax and run
         run: |
