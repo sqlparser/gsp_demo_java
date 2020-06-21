@@ -16,6 +16,6 @@ jobs:
     
       - name: Setup path1
         run: |
-          cd src/main/java/demos/checksyntax/
+          cd ../../../../../src/main/java/demos/checksyntax/
           ./compile_checksyntax.bat
           ./run_checksyntax.bat
