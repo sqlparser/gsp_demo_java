@@ -21,14 +21,13 @@ jobs:
         run: |
           cd setenv
           ./setenv.bat
+          git pull
           echo "set path1 success!" >> ../README.md
           git config --global user.email 1435679023@qq.com
           git config --global user.name marsggbo
           git add .
           git commit -m "path1-success" -a
       
-      - name: Github Pull Request
-        run: git pull
 
       - name: Push changes
         uses: ad-m/github-push-action@master
