@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: release
-        uses: actions/checkout@release
+        uses: actions/checkout@master
         
       - name: Setup Java JDK
         uses: actions/setup-java@v1.3.0
@@ -27,9 +27,8 @@ jobs:
           git add .
           git commit -m "path1-success" -a
       
-
       - name: Push changes
-        uses: ad-m/github-push-action@release
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
     
