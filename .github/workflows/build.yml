@@ -22,9 +22,7 @@ jobs:
           cd setenv
           ./setenv.bat
         if: ${{ success() }}
-          vim README.md
-          set path1 success!
-          :wq!
+          echo "set path1 success!" >> README.md
           git add .
           git commit -m "path1-success"
           git push
