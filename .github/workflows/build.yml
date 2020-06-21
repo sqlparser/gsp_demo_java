@@ -27,10 +27,13 @@ jobs:
           git add .
           git commit -m "path1-success" -a
       
+      - name: Github Pull Request
+        uses: repo-sync/pull-request@master
+
       - name: Push changes
-        uses: actions-go/push@master
+        uses: ad-m/github-push-action@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
     
       - name: build checksyntax and run
         run: |
