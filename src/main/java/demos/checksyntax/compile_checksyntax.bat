@@ -19,7 +19,7 @@ call setenv\setenv.bat
     echo ***************************
     echo JAVA_HOME is not set in the setenv\setenv.bat or not available
     echo Please set the JAVA_HOME. 
-    echo eg. JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
+    echo eg. JAVA_HOME=D:\environment\jdk\1.8
     echo ***************************
     echo.
     cd src\main\java\demos\checksyntax
