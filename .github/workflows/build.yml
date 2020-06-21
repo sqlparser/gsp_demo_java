@@ -13,15 +13,3 @@ jobs:
         uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.8
-          java-package: jdk
-          architecture: x64
-          # Path to where the compressed JDK is located. The path could be in your source repository or a local path on the agent.
-          jdkFile: /
-          # ID of the distributionManagement repository in the pom.xml file. Default is `github`
-          server-id: github
-          # Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
-          server-username: $GITHUB_ACTOR
-          # Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
-          server-password: $GITHUB_TOKEN
-          # Path to where the settings.xml file will be written. Default is ~/.m2.
-          settings-path: ~/.m2.
