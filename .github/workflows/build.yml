@@ -16,5 +16,5 @@ jobs:
           MIDDLE_NAME: The
           LAST_NAME: Octocat
         run: |
-           cd setenv
+           cd D:\project\gsp_demo_java\setenv
            ./setenv.bat
