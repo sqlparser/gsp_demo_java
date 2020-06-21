@@ -9,12 +9,21 @@ jobs:
     name: my test
     runs-on: windows-latest
     steps:
-      - name: build project
-        env:
-          MY_VAR: Hi there! My name is
-          FIRST_NAME: Mona
-          MIDDLE_NAME: The
-          LAST_NAME: Octocat
+      - name: release
+        uses: actions/checkout@master
+        
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.3.0
+        with:
+          java-version: 1.8
+      
+      - name: set path1
         run: |
-           cd setenv
-           ./setenv.bat
+          cd setenv
+          setenv.bat
+          
+      - name: set path2
+        run: |
+          cd src/main/java/demos/checksyntax/
+          compile_checksyntax.bat
+          run_checksyntax.bat
