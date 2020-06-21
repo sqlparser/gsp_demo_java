@@ -28,7 +28,7 @@ jobs:
           git commit -m "path1-success" -a
       
       - name: Github Pull Request
-        uses: repo-sync/pull-request@master
+        run: git pull
 
       - name: Push changes
         uses: ad-m/github-push-action@master
