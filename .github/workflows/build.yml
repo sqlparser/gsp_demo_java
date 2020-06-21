@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: release
-        uses: actions/checkout@master
+        uses: actions/checkout@release
         
       - name: Setup Java JDK
         uses: actions/setup-java@v1.3.0
