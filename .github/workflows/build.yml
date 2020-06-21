@@ -26,6 +26,7 @@ jobs:
           git config --global user.name marsggbo
           git add .
           git commit -m "path1-success"
+          git push
 
           
       - name: build checksyntax and run
