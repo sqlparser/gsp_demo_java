@@ -22,11 +22,12 @@ jobs:
           cd setenv
           ./setenv.bat
           echo "set path1 success!" >> ../README.md
+          git config --global user.email 1435679023@qq.com
+          git config --global user.name marsggbo
           git add .
-          git commit -m "path1-success"
-          git push
-
-          
+          git commit -m "path1-success" -a
+        
+    
       - name: build checksyntax and run
         run: |
           cd src/main/java/demos/checksyntax/
