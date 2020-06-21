@@ -22,7 +22,7 @@ jobs:
           cd setenv
           ./setenv.bat
         if: ${{ success() }}
-          vim readme.md
+          vim README.md
           set path1 success!
           :wq!
           git add .
