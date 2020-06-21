@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: release
-        uses: actions/checkout@release
+        uses: actions/checkout@matser
         
       - name: Setup Java JDK
         uses: actions/setup-java@v1.3.0
@@ -28,11 +28,9 @@ jobs:
           git commit -m "path1-success" -a
             
       - name: Push changes
-        uses: ad-m/github-push-action@release
+        uses: ad-m/github-push-action@matser
         with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-        
     
       - name: build checksyntax and run
         run: |
