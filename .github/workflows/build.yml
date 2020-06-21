@@ -21,9 +21,22 @@ jobs:
         run: |
           cd setenv
           ./setenv.bat
+        if: ${{ success() }}
+          vim readme.md
+          set path1 success!
+          :wq!
+          git add .
+          git commit -m "path1-success"
+          git push
           
-      - name: set path2
+      - name: build checksyntax and run
         run: |
           cd src/main/java/demos/checksyntax/
           ./compile_checksyntax.bat
           ./run_checksyntax.bat /f test/test.sql /t mysql
+          
+      - name: build gettablecolumns and run
+        run: |
+          cd src/main/java/demos/gettablecolumns/
+          ./compile_gettablecolumns.bat
+          ./run_getResultColumn.bat
