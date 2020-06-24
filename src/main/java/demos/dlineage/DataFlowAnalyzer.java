@@ -2406,46 +2406,84 @@ public class DataFlowAnalyzer {
 			TViewAliasItemList viewItems = viewAlias.getViewAliasItemList();
 			View viewModel = modelFactory.createView(stmt, viewName);
 			ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
-			for (int i = 0; i < viewItems.size(); i++) {
-				TObjectName alias = viewItems.getViewAliasItem(i).getAlias();
-				ResultColumn resultColumn;
-				if (resultSetModel.getColumns().size() <= i) {
-					resultColumn = resultSetModel.getColumns().get(resultSetModel.getColumns().size() - 1);
-				} else {
-					resultColumn = resultSetModel.getColumns().get(i);
-				}
-				if (alias != null) {
-					ViewColumn viewColumn = modelFactory.createViewColumn(viewModel, alias, i);
-					DataFlowRelation relation = modelFactory.createDataFlowRelation();
-					relation.setEffectType(EffectType.create_view);
-					relation.setTarget(new ViewColumnRelationElement(viewColumn));
-					relation.addSource(new ResultColumnRelationElement(resultColumn));
-				} else if (resultColumn.getColumnObject() instanceof TObjectName) {
-					ViewColumn viewColumn = modelFactory.createViewColumn(viewModel,
-							(TObjectName) resultColumn.getColumnObject(), i);
-					DataFlowRelation relation = modelFactory.createDataFlowRelation();
-					relation.setEffectType(EffectType.create_view);
-					relation.setTarget(new ViewColumnRelationElement(viewColumn));
-					relation.addSource(new ResultColumnRelationElement(resultColumn));
-				} else if (resultColumn.getColumnObject() instanceof TResultColumn) {
-					ViewColumn viewColumn = modelFactory.createViewColumn(viewModel,
-							((TResultColumn) resultColumn.getColumnObject()).getFieldAttr(), i);
-					ResultColumn column = (ResultColumn) modelManager.getModel(resultColumn.getColumnObject());
-					if (column != null && !column.getStarLinkColumns().isEmpty()) {
-						viewColumn.bindStarLinkColumns(column.getStarLinkColumns());
+			if (resultSetModel != null) {
+				for (int i = 0; i < viewItems.size(); i++) {
+					TObjectName alias = viewItems.getViewAliasItem(i).getAlias();
+					ResultColumn resultColumn = null;
+					if (resultSetModel != null) {
+						if (resultSetModel.getColumns().size() <= i) {
+							resultColumn = resultSetModel.getColumns().get(resultSetModel.getColumns().size() - 1);
+						} else {
+							resultColumn = resultSetModel.getColumns().get(i);
+						}
 					}
-					DataFlowRelation relation = modelFactory.createDataFlowRelation();
-					relation.setEffectType(EffectType.create_view);
-					relation.setTarget(new ViewColumnRelationElement(viewColumn));
-					relation.addSource(new ResultColumnRelationElement(resultColumn));
+					if (alias != null) {
+						ViewColumn viewColumn = modelFactory.createViewColumn(viewModel, alias, i);
+						if (resultColumn != null) {
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.create_view);
+							relation.setTarget(new ViewColumnRelationElement(viewColumn));
+							relation.addSource(new ResultColumnRelationElement(resultColumn));
+						}
+					} else if (resultColumn.getColumnObject() instanceof TObjectName) {
+						ViewColumn viewColumn = modelFactory.createViewColumn(viewModel,
+								(TObjectName) resultColumn.getColumnObject(), i);
+						if (resultColumn != null) {
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.create_view);
+							relation.setTarget(new ViewColumnRelationElement(viewColumn));
+							relation.addSource(new ResultColumnRelationElement(resultColumn));
+						}
+					} else if (resultColumn.getColumnObject() instanceof TResultColumn) {
+						ViewColumn viewColumn = modelFactory.createViewColumn(viewModel,
+								((TResultColumn) resultColumn.getColumnObject()).getFieldAttr(), i);
+						ResultColumn column = (ResultColumn) modelManager.getModel(resultColumn.getColumnObject());
+						if (column != null && !column.getStarLinkColumns().isEmpty()) {
+							viewColumn.bindStarLinkColumns(column.getStarLinkColumns());
+						}
+						if (resultColumn != null) {
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.create_view);
+							relation.setTarget(new ViewColumnRelationElement(viewColumn));
+							relation.addSource(new ResultColumnRelationElement(resultColumn));
+						}
+					}
+				}
+				if (resultSetModel != null && !resultSetModel.getPseudoRows().getHoldRelations().isEmpty()) {
+					ImpactRelation impactRelation = modelFactory.createImpactRelation();
+					impactRelation.setEffectType(EffectType.create_view);
+					impactRelation.addSource(
+							new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSetModel.getPseudoRows()));
+					impactRelation.setTarget(new PseudoRowsRelationElement<ViewPseudoRows>(viewModel.getPseudoRows()));
 				}
 			}
-			if(!resultSetModel.getPseudoRows().getHoldRelations().isEmpty()){
-				ImpactRelation impactRelation = modelFactory.createImpactRelation();
-				impactRelation.setEffectType(EffectType.create_view);
-				impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSetModel.getPseudoRows()));
-				impactRelation.setTarget(new PseudoRowsRelationElement<ViewPseudoRows>(viewModel.getPseudoRows()));
+			
+			if(subquery.getResultColumnList() == null && subquery.getValueClause()!=null && subquery.getValueClause().getValueRows().size() == viewItems.size()){
+				for (int i = 0; i < viewItems.size(); i++) {
+					TObjectName alias = viewItems.getViewAliasItem(i).getAlias();
+			
+					if (alias != null) {
+						ViewColumn viewColumn = modelFactory.createViewColumn(viewModel, alias, i);
+						
+						TExpression expression = subquery.getValueClause().getValueRows().getValueRowItem(i).getExpr();
+						
+						columnsInExpr visitor = new columnsInExpr();
+						expression.inOrderTraverse(visitor);
+						List<TObjectName> objectNames = visitor.getObjectNames();
+						List<TParseTreeNode> functions = visitor.getFunctions();
+						
+						if (functions != null && !functions.isEmpty()) {
+							analyzeFunctionDataFlowRelation(viewColumn, functions, EffectType.select);
+
+						}
+
+						analyzeDataFlowRelation(viewColumn, objectNames, EffectType.select, functions);
+						List<TConstant> constants = visitor.getConstants();
+						analyzeConstantDataFlowRelation(viewColumn, constants, EffectType.select, functions);
+					} 
+				}
 			}
+			
 		} else {
 			View viewModel = modelFactory.createView(stmt, viewName);
 			if (subquery != null && subquery.getResultColumnList() != null) {
@@ -3408,6 +3446,7 @@ public class DataFlowAnalyzer {
 		List<TParseTreeNode> mergeResultSets = modelManager.getMergeResultSets();
 		List<TParseTreeNode> updateResultSets = modelManager.getUpdateResultSets();
 		List<TParseTreeNode> functionCalls = modelManager.getFunctoinCalls();
+		List<TParseTreeNode> cursors = modelManager.getCursors();
 
 		List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
 		resultSets.addAll(selectResultSets);
@@ -3417,6 +3456,7 @@ public class DataFlowAnalyzer {
 		resultSets.addAll(mergeResultSets);
 		resultSets.addAll(updateResultSets);
 		resultSets.addAll(functionCalls);
+		resultSets.addAll(cursors);
 
 		for (int i = 0; i < resultSets.size(); i++) {
 			ResultSet resultSetModel = (ResultSet) modelManager.getModel(resultSets.get(i));
@@ -3611,6 +3651,10 @@ public class DataFlowAnalyzer {
 
 		if (resultSetModel.getGspObject() instanceof TCaseExpression) {
 			return "function";
+		}
+		
+		if (resultSetModel.getGspObject() instanceof TCursorDeclStmt) {
+			return "cursor";
 		}
 
 		return "select_list";
@@ -6089,11 +6133,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.8";
+		return "1.0.9";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-06-10";
+		return "2020-06-18";
 	} 
 
 	public static void main(String[] args) {
