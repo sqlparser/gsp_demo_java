@@ -14,6 +14,18 @@ import junit.framework.TestCase;
 
 public class testScriptGenerator extends TestCase
 {
+
+	public void testMySQLChar( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
+		sqlparser.sqltext = "SELECT CAST(t5.column AS CHAR) AS c1 from xxx t5";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmysql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
 	public void testInterval( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
