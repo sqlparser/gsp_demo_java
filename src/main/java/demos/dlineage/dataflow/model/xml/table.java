@@ -29,6 +29,9 @@ public class table
 
 	@Attribute(required = false)
 	private String type;
+	
+	@Attribute(required = false)
+	private String tableType;
 
 	@Attribute(required = false)
 	private String isTarget;
@@ -163,6 +166,14 @@ public class table
 		this.schema = schema;
 	}
 	
+	public String getTableType() {
+		return tableType;
+	}
+
+	public void setTableType(String tableType) {
+		this.tableType = tableType;
+	}
+
 	public String getFullName(){
 		StringBuilder fullName = new StringBuilder();
 		if(!SQLUtil.isEmpty(database)){

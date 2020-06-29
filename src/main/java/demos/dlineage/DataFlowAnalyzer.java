@@ -231,6 +231,83 @@ public class DataFlowAnalyzer {
 		this.sqlenv = sqlenv;
 	}
 
+	
+	public synchronized String chechSyntax() {
+		StringBuilder builder = new StringBuilder();
+		if (sqlFile != null) {
+			File[] children = listFiles(sqlFile);
+			for (int i = 0; i < children.length; i++) {
+				String text = SQLUtil.getFileContent(children[i].getAbsolutePath());
+				String[] contents = SQLUtil.convertSQL(text);
+				for (String content : contents) {
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+
+					}
+					TGSqlParser sqlparser = new TGSqlParser(vendor);
+					sqlparser.sqltext = content;
+					int result = sqlparser.parse();
+					if (result != 0) {
+						builder.append("Parsing " + children[i].getName()).append("occurs errors.\n")
+								.append(sqlparser.getErrormessage()).append("\n");
+					}
+				}
+			}
+
+		} else if (sqlContent != null) {
+			if (sqlContent != null && sqlContent.trim().startsWith("{")) {
+				JSONObject queryObject = JSON.parseObject(sqlContent);
+				sqlContent = queryObject.getString("sourceCode");
+			}
+			TGSqlParser sqlparser = new TGSqlParser(vendor);
+			sqlparser.sqltext = sqlContent;
+			int result = sqlparser.parse();
+			if (result != 0) {
+				builder.append(sqlparser.getErrormessage()).append("\n");
+			}
+
+		} else if (sqlContents != null) {
+			for (int i = 0; i < sqlContents.length; i++) {
+				String content = sqlContents[i];
+				if (content != null && content.trim().startsWith("{")) {
+					JSONObject queryObject = JSON.parseObject(content);
+					content = queryObject.getString("sourceCode");
+				}
+
+				if (content == null) {
+					continue;
+				}
+
+				TGSqlParser sqlparser = new TGSqlParser(vendor);
+				sqlparser.sqltext = content;
+				int result = sqlparser.parse();
+				if (result != 0) {
+					builder.append(sqlparser.getErrormessage()).append("\n");
+				}
+			}
+
+		} else if (sqlFiles != null) {
+			File[] children = sqlFiles;
+			for (int i = 0; i < children.length; i++) {
+				String content = SQLUtil.getFileContent(children[i].getAbsolutePath());
+				if (content != null && content.trim().startsWith("{")) {
+					JSONObject queryObject = JSON.parseObject(content);
+					content = queryObject.getString("sourceCode");
+
+				}
+				TGSqlParser sqlparser = new TGSqlParser(vendor);
+				sqlparser.sqltext = content;
+				int result = sqlparser.parse();
+				if (result != 0) {
+					builder.append("Parsing " + children[i].getName()).append("occurs errors.\n")
+							.append(sqlparser.getErrormessage()).append("\n");
+				}
+			}
+		}
+		return builder.toString();
+	}
+	
 	public synchronized String generateDataFlow(StringBuffer errorMessage) {
 		if (ModelBindingManager.get() == null) {
 			ModelBindingManager.set(modelManager);
@@ -238,7 +315,6 @@ public class DataFlowAnalyzer {
 		PrintStream pw = null;
 		ByteArrayOutputStream sw = null;
 		PrintStream systemSteam = System.err;
-		;
 
 		sw = new ByteArrayOutputStream();
 		pw = new PrintStream(sw);
@@ -3935,6 +4011,10 @@ public class DataFlowAnalyzer {
 		}
 		tableElement.setAttribute("name", tableModel.getName());
 		tableElement.setAttribute("type", "table");
+		
+		if (tableModel.getTableType() != null) {
+			tableElement.setAttribute("tableType", tableModel.getTableType());
+		}
 		if (tableModel.getParent() != null) {
 			tableElement.setAttribute("parent", tableModel.getParent());
 		}
@@ -6133,11 +6213,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.0.9";
+		return "1.1.1";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-06-18";
+		return "2020-06-30";
 	} 
 
 	public static void main(String[] args) {

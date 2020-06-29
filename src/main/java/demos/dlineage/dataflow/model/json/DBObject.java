@@ -16,10 +16,12 @@ public class DBObject {
 	@JSONField(ordinal = 6)
 	private String type;
 	@JSONField(ordinal = 7)
-	private Argument[] arguments;
+	private String tableType;
 	@JSONField(ordinal = 8)
-	private Column[] columns;
+	private Argument[] arguments;
 	@JSONField(ordinal = 9)
+	private Column[] columns;
+	@JSONField(ordinal = 10)
 	private Coordinate[] coordinates;
 
 	public String getId() {
@@ -93,4 +95,13 @@ public class DBObject {
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
+
+	public String getTableType() {
+		return tableType;
+	}
+
+	public void setTableType(String tableType) {
+		this.tableType = tableType;
+	}
+	
 }

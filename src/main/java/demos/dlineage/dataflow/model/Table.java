@@ -30,6 +30,7 @@ public class Table {
     private TTable tableObject;
     private TObjectName tableName;
     private boolean isCreateTable;
+    private String tableType;
     
     
     private TablePseudoRows pseudoRows = new TablePseudoRows(this);
@@ -86,6 +87,10 @@ public class Table {
 			this.database = table.getTableName().getDatabaseString();
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
+		}
+		
+		if(table.getTableType() == ETableSource.function){
+			tableType = "function";
 		}
 		
     }
@@ -210,4 +215,8 @@ public class Table {
 		this.isCreateTable = isCreateTable;
 	}
 
+	public String getTableType() {
+		return tableType;
+	}
+	
 }

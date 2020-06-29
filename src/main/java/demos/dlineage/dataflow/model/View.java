@@ -52,13 +52,13 @@ public class View {
         this.endPosition = new Pair<Long, Long>(endToken.lineNo,
                 endToken.columnNo + endToken.astext.length());
         
-        if (!SQLUtil.isEmpty(viewName.getSchemaString())) {
+        if (viewName!=null && !SQLUtil.isEmpty(viewName.getSchemaString())) {
 			this.schema = viewName.getSchemaString();
 		} else {
 			this.schema = ModelBindingManager.getGlobalSchema();
 		}
 		
-		if (!SQLUtil.isEmpty(viewName.getDatabaseString())) {
+		if (viewName!=null && !SQLUtil.isEmpty(viewName.getDatabaseString())) {
 			this.database = viewName.getDatabaseString();
 		} else {
 			this.database = ModelBindingManager.getGlobalDatabase();
