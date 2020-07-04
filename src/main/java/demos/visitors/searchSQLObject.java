@@ -65,10 +65,8 @@ class objectNameVisitor extends TParseTreeVisitor {
                 }
                 break;
             case table:
+            case function:
                 System.out.println("\t\tObject token:"+node.getObjectToken().toString());
-                if (node.getSchemaToken() != null){
-                    System.out.println("\t\tSchema token:"+node.getSchemaToken().toString());
-                }
                 if (node.getSchemaToken() != null){
                     System.out.println("\t\tSchema token:"+node.getSchemaToken().toString());
                 }
@@ -77,6 +75,15 @@ class objectNameVisitor extends TParseTreeVisitor {
                 }
                 if (node.getServerToken() != null){
                     System.out.println("\t\tServer token:"+node.getServerToken().toString());
+                }
+                break;
+            case method:
+                System.out.println("\t\tMethod token:"+node.getMethodToken().toString());
+                if (node.getPartToken() != null){
+                    System.out.println("\t\tColumn token:"+node.getPartToken().toString());
+                }
+                if (node.getObjectToken() != null){
+                    System.out.println("\t\tObject token:"+node.getObjectToken().toString());
                 }
                 break;
             default:

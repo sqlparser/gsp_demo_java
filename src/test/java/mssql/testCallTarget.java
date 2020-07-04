@@ -20,6 +20,7 @@ public class testCallTarget  extends TestCase {
                 "        FOR XML PATH(''), TYPE\n" +
                 "        ).value('.', 'NVARCHAR(MAX)'),1,1,'') Col2\n" +
                 "FROM sampleSchema.table2 p WHERE SourceSchema +'.'+ SourceObject = @table";
+       // System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TExpression expr = select.getResultColumnList().getResultColumn(1).getExpr();
@@ -51,7 +52,7 @@ public class testCallTarget  extends TestCase {
         TExpression expr = select.getResultColumnList().getResultColumn(0).getExpr();
         assertTrue(expr.getExpressionType() == EExpressionType.function_t);
         TFunctionCall f2 = expr.getFunctionCall();
-        assertTrue(f2.getFunctionName().toString().equalsIgnoreCase("value"));
+        assertTrue(f2.getFunctionName().toString().equalsIgnoreCase("CatalogDescription.value"));
         assertTrue(f2.getArgs().getExpression(1).toString().equalsIgnoreCase("'int'"));
         TExpressionCallTarget ct = f2.getCallTarget();
         TExpression expr2 = ct.getExpr();
