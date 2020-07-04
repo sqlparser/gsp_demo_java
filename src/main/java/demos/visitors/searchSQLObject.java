@@ -1,14 +1,11 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
-import gudusoft.gsqlparser.stmt.TCallStatement;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlExecute;
+
 
 import java.io.File;
 import java.io.IOException;
