@@ -10,7 +10,7 @@ set PATH=%PATH%;lib\;external_lib\
 
 REM # set the Java home directory
 rem set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_181
+set JAVA_HOME=D:\envir\java
 
 set JAVA_CMD="%JAVA_HOME%\bin\java.exe"
 
