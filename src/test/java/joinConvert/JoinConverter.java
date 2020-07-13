@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 public class JoinConverter {
-
     enum jointype {
         inner, left, right, cross, join, full
     }
@@ -475,6 +474,9 @@ public class JoinConverter {
                                         .getJoinItem(j);
                                 JoinCondition jr = new JoinCondition();
                                 jr.expr = item.getOnCondition();
+                                if (null == jr.expr) {
+                                    continue;
+                                }
                                 jr.used = false;
                                 jr.lexpr = jr.expr.getLeftOperand();
                                 jr.rexpr = jr.expr.getRightOperand();
@@ -551,7 +553,7 @@ public class JoinConverter {
                                 if (lcTable1.equals(lcTable2)) {
                                     continue;
                                 }
-                                if (areTableJoined(lcTable1, lcTable2, jrs)) {
+                                if (!areTableJoined(lcTable1, lcTable2, jrs)) {
                                     joined = true;
                                     if (!areTableJoinedExcludeOuterJoin(lcTable1, lcTable2, jrs)) {
                                         for (int k = 0; k < tables.size(); k++) {
@@ -559,7 +561,7 @@ public class JoinConverter {
                                             if (lcTable2.equals(lcTable3)) {
                                                 continue;
                                             }
-                                            if (!areTableJoinedExcludeOuterJoin(lcTable2, lcTable3, jrs)) {
+                                            if (areTableJoinedExcludeOuterJoin(lcTable2, lcTable3, jrs)) {
                                                 acrossJoined = false;
                                                 break;
                                             }
@@ -571,6 +573,9 @@ public class JoinConverter {
                                         acrossJoined = false;
                                         break;
                                     }
+                                } else {
+                                    acrossJoined = false;
+                                    break;
                                 }
                             }
                             if (joined && acrossJoined) {
