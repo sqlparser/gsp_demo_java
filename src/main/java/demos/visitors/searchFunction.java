@@ -1,10 +1,7 @@
 package demos.visitors;
 
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TBaseType;
-import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
 import gudusoft.gsqlparser.stmt.TCallStatement;
@@ -31,7 +28,7 @@ public class searchFunction {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvredshift;
+        EDbVendor dbVendor = EDbVendor.dbvmssql;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -57,22 +54,26 @@ public class searchFunction {
 
 class functionVisitor extends TParseTreeVisitor {
     public void preVisit(TFunctionCall node){
-        System.out.println("--> function: "+node.getFunctionName().toString()+",type:"+node.getFunctionType());
+        System.out.print("--> function: "+node.getFunctionName().toString()+", type:"+node.getFunctionType());
         if (node.getArgs() != null){
             for(int i=0;i<node.getArgs().size();i++){
-                System.out.println(node.getArgs().getExpression(i).toString());
+                System.out.print(",\targ"+i+": "+node.getArgs().getExpression(i).toString());
             }
-
         }
-    }
-
-    public void preVisit(TCallStatement statement){
-        System.out.println("--> call: " + statement.getRoutineName().toString());
-    }
-
-    public void preVisit(TMssqlExecute statement){
-        if (statement.getExecType() == TBaseType.metExecSp){
-            System.out.println("--> execute: " + statement.getModuleName().toString());
+        if (node.getAggregateType() != EAggregateType.none){
+            System.out.print(",\taggregate type:"+node.getAggregateType());
         }
+
+        System.out.println("");
     }
+
+//    public void preVisit(TCallStatement statement){
+//        System.out.println("--> call: " + statement.getRoutineName().toString());
+//    }
+//
+//    public void preVisit(TMssqlExecute statement){
+//        if (statement.getExecType() == TBaseType.metExecSp){
+//            System.out.println("--> execute: " + statement.getModuleName().toString());
+//        }
+//    }
 }
