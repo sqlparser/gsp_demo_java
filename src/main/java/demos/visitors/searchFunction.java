@@ -4,6 +4,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
+import gudusoft.gsqlparser.nodes.TWindowDef;
 import gudusoft.gsqlparser.stmt.TCallStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlExecute;
 
@@ -63,10 +64,35 @@ class functionVisitor extends TParseTreeVisitor {
         if (node.getAggregateType() != EAggregateType.none){
             System.out.print(",\taggregate type:"+node.getAggregateType());
         }
+        switch (node.getFunctionType()){
+            case cast_t:
+                System.out.print("\n\tcast: "+node.getExpr1()+", datatype:"+node.getTypename().toString());
+                break;
+        }
 
         System.out.println("");
     }
 
+    public void preVisit(TWindowDef windowDef){
+        System.out.println("\twindow_specification");
+        if (windowDef.getPartitionClause() != null)
+        {
+            System.out.print("\t\tParition value: ");
+            for(int i=0;i<windowDef.getPartitionClause().getExpressionList().size();i++){
+                System.out.print(windowDef.getPartitionClause().getExpressionList().getExpression(i).toString());
+            }
+
+        }
+        if(windowDef.getOrderBy() != null){
+            System.out.print("\n\t\tOrder by clause: ");
+            for(int i=0;i<windowDef.getOrderBy().getItems().size();i++){
+                System.out.print(windowDef.getOrderBy().getItems().getOrderByItem(i).toString());
+            }
+        }
+
+        System.out.println("");
+
+    }
 //    public void preVisit(TCallStatement statement){
 //        System.out.println("--> call: " + statement.getRoutineName().toString());
 //    }
