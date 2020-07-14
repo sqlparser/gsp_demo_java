@@ -3,6 +3,7 @@ package gudusoft.gsqlparser.test.joinConvert;
 import demos.joinConvert.JoinConverter;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
+import demos.joinConvert.JoinConverter;
 
 public class JoinConverterTest extends TestCase {
 
