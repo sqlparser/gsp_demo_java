@@ -1,6 +1,8 @@
 package test.mssql;
 
+import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.EFunctionType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
@@ -28,17 +30,11 @@ public class testXMLfunction extends TestCase {
         TExpression expression = column.getExpr();
         TFunctionCall functionCall = expression.getFunctionCall();
         //System.out.println(functionCall.getFunctionName().getObjectToken().toString());
-        assertTrue(functionCall.getFunctionName().getObjectToken().getDbObjType() == TObjectName.ttobjFunctionName);
+        assertTrue(functionCall.getFunctionType() == EFunctionType.xmlvalue_t);
+        assertTrue(functionCall.getFunctionName().getObjectToken().toString().equalsIgnoreCase("p"));
 
         TExpressionCallTarget   callTarget = functionCall.getCallTarget();
         assertTrue(callTarget.getExpr().toString().equalsIgnoreCase("p.Demographics"));
-
-//        //System.out.println(functionCall.getFunctionName().getSchemaToken().toString());
-//        assertTrue(functionCall.getFunctionName().getSchemaToken().getDbObjType() == TObjectName.ttobjColumn);
-//        //System.out.println(functionCall.getFunctionName().getDatabaseToken().toString());
-//        assertTrue((functionCall.getFunctionName().getDatabaseToken().getDbObjType() == TObjectName.ttobjTable)
-//        ||(functionCall.getFunctionName().getDatabaseToken().getDbObjType() == TObjectName.ttObjTableAlias));
-
 
         TResultColumn column1 = selectSqlStatement.getResultColumnList().getResultColumn(1);
         TExpression expression1 = column1.getExpr();
