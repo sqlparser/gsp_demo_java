@@ -1365,6 +1365,10 @@ public class DataFlowAnalyzer {
 	}
 
 	private void analyzeCursorDeclStmt(TCursorDeclStmt stmt) {
+		if(stmt.getSubquery() == null){
+			return;
+		}
+		
 		CursorResultSet resultSet = modelFactory.createCursorResultSet(stmt);
 		modelManager.bindCursorModel(stmt, resultSet);
 		analyzeSelectStmt(stmt.getSubquery());
@@ -4076,8 +4080,16 @@ public class DataFlowAnalyzer {
 
 	private void analyzeSelectStmt(TSelectSqlStatement stmt) {
 		if (stmt.getSetOperatorType() != ESetOperatorType.none) {
-			analyzeSelectStmt(stmt.getLeftStmt());
-			analyzeSelectStmt(stmt.getRightStmt());
+			
+			if(!accessedStatements.contains(stmt.getLeftStmt())){
+				accessedStatements.add(stmt.getLeftStmt());
+				analyzeSelectStmt(stmt.getLeftStmt());
+			}
+			
+			if(!accessedStatements.contains(stmt.getRightStmt())){
+				accessedStatements.add(stmt.getRightStmt());
+				analyzeSelectStmt(stmt.getRightStmt());
+			}
 
 			stmtStack.push(stmt);
 			SelectSetResultSet resultSet = modelFactory.createSelectSetResultSet(stmt);
@@ -4128,7 +4140,7 @@ public class DataFlowAnalyzer {
 				if (stmt.getRightStmt().getResultColumnList() != null) {
 					ResultSet sourceResultSet = (ResultSet) modelManager
 							.getModel(stmt.getRightStmt().getResultColumnList());
-					if (sourceResultSet.getColumns().size() > i) {
+					if (sourceResultSet!=null && sourceResultSet.getColumns().size() > i) {
 						relation.addSource(new ResultColumnRelationElement(sourceResultSet.getColumns().get(i)));
 					}
 				} else {
@@ -4186,7 +4198,7 @@ public class DataFlowAnalyzer {
 						}
 					}
 					TSelectSqlStatement subquery = table.getCTE().getSubquery();
-					if (subquery != null) {
+					if (subquery != null && !stmtStack.contains(subquery)) {
 						analyzeSelectStmt(subquery);
 						
 						ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
