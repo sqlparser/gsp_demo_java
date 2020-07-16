@@ -41,7 +41,6 @@ public class searchSQLObject {
                 System.out.println(sqlStatement.sqlstatementtype);
                 sqlStatement.acceptChildren(objectNameVisitor);
             }
-
         }else{
             System.out.println(sqlparser.getErrormessage());
         }
