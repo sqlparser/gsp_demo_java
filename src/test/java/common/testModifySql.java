@@ -587,6 +587,9 @@ public class testModifySql extends TestCase {
         assertTrue(lcparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)lcparser.sqlstatements.get(0);
+//        TWhereClause whereClause = new TWhereClause();
+//        whereClause.setText("where f > 0");
+
         TSourceToken prevToken = select.joins.getEndToken();
 
         TDummy dummy  = new TDummy();

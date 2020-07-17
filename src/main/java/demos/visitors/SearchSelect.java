@@ -61,7 +61,7 @@ public class SearchSelect {
                     System.out.println("Warning:"+fv.getSkippedQuery()+" query is skipped!");
                 }
 
-                System.out.println(sqlStatement.toString(true));
+                System.out.println(sqlStatement.toString());
             }
 
         }else{
