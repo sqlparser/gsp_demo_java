@@ -1086,9 +1086,7 @@ public class DataFlowAnalyzer {
 			stmtStack.clear();
 
 			try {
-				long time = System.currentTimeMillis();
 				int result = sqlparser.parse();
-				System.out.println(System.currentTimeMillis() - time);
 				if (result != 0) {
 					System.err.println(sqlparser.getErrormessage());
 				}
@@ -6321,7 +6319,6 @@ public class DataFlowAnalyzer {
 			dlineage.setTextFormat(textFormat);
 		}
 
-		try{
 		StringBuffer errorBuffer = new StringBuffer();
 		String result = dlineage.generateDataFlow(errorBuffer);
 
@@ -6373,10 +6370,6 @@ public class DataFlowAnalyzer {
 				System.setErr(systemSteam);
 				System.err.println(errorMessage);
 			}
-		}
-		}catch(Throwable e){
-			e.printStackTrace();
-			System.out.println(e);
 		}
 	}
 
