@@ -1086,7 +1086,9 @@ public class DataFlowAnalyzer {
 			stmtStack.clear();
 
 			try {
+				long time = System.currentTimeMillis();
 				int result = sqlparser.parse();
+				System.out.println(System.currentTimeMillis() - time);
 				if (result != 0) {
 					System.err.println(sqlparser.getErrormessage());
 				}
@@ -3294,6 +3296,11 @@ public class DataFlowAnalyzer {
 				if (!sourceColumn.getStarLinkColumns().isEmpty()) {
 					for (int k = 0; k < sourceColumn.getStarLinkColumns().size(); k++) {
 						TObjectName sourceName = sourceColumn.getStarLinkColumns().get(k);
+						if (relation.getRelationType() == RelationType.fdd) {
+							if (!targetName.equalsIgnoreCase(getColumnName(sourceName))
+									&& !"*".equals(getColumnName(sourceName)))
+								continue;
+						}
 						Element source = doc.createElement("source");
 						source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + k);
 						source.setAttribute("column", getColumnName(sourceName));
@@ -3303,14 +3310,13 @@ public class DataFlowAnalyzer {
 							source.setAttribute("coordinate",
 									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
 						}
-						if (relation.getRelationType() == RelationType.fdd) {
-							if (!targetName.equalsIgnoreCase(getColumnName(sourceName))
-									&& !"*".equals(getColumnName(sourceName)))
-								continue;
-						}
 						relationElement.appendChild(source);
 					}
 				} else {
+					if (relation.getRelationType() == RelationType.fdd) {
+						if (!targetName.equalsIgnoreCase(sourceColumn.getName()) && !"*".equals(sourceColumn.getName()))
+							continue;
+					}
 					Element source = doc.createElement("source");
 					source.setAttribute("id", String.valueOf(sourceColumn.getId()));
 					source.setAttribute("column", sourceColumn.getName());
@@ -3320,10 +3326,6 @@ public class DataFlowAnalyzer {
 						source.setAttribute("coordinate",
 								sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
 					}
-					if (relation.getRelationType() == RelationType.fdd) {
-						if (!targetName.equalsIgnoreCase(sourceColumn.getName()) && !"*".equals(sourceColumn.getName()))
-							continue;
-					}
 					relationElement.appendChild(source);
 				}
 			} else if (sourceElement instanceof TableColumn) {
@@ -3331,6 +3333,11 @@ public class DataFlowAnalyzer {
 				if (!sourceColumn.getStarLinkColumns().isEmpty()) {
 					for (int k = 0; k < sourceColumn.getStarLinkColumns().size(); k++) {
 						TObjectName sourceName = sourceColumn.getStarLinkColumns().get(k);
+						if (relation.getRelationType() == RelationType.fdd) {
+							if (!targetName.equalsIgnoreCase(getColumnName(sourceName))
+									&& !"*".equals(getColumnName(sourceName)))
+								continue;
+						}
 						Element source = doc.createElement("source");
 						source.setAttribute("id", String.valueOf(sourceColumn.getId()) + "_" + k);
 						source.setAttribute("column", getColumnName(sourceName));
@@ -3340,14 +3347,13 @@ public class DataFlowAnalyzer {
 							source.setAttribute("coordinate",
 									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
 						}
-						if (relation.getRelationType() == RelationType.fdd) {
-							if (!targetName.equalsIgnoreCase(getColumnName(sourceName))
-									&& !"*".equals(getColumnName(sourceName)))
-								continue;
-						}
 						relationElement.appendChild(source);
 					}
 				} else {
+					if (relation.getRelationType() == RelationType.fdd) {
+						if (!targetName.equalsIgnoreCase(sourceColumn.getName()) && !"*".equals(sourceColumn.getName()))
+							continue;
+					}
 					Element source = doc.createElement("source");
 					source.setAttribute("id", String.valueOf(sourceColumn.getId()));
 					source.setAttribute("column", sourceColumn.getName());
@@ -3357,15 +3363,11 @@ public class DataFlowAnalyzer {
 						source.setAttribute("coordinate",
 								sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
 					}
-					if (relation.getRelationType() == RelationType.fdd) {
-						if (!targetName.equalsIgnoreCase(sourceColumn.getName()) && !"*".equals(sourceColumn.getName()))
-							continue;
-					}
 					relationElement.appendChild(source);
 				}
 			}
 		}
-
+		
 		dlineageResult.appendChild(relationElement);
 	}
 
@@ -6225,11 +6227,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.1.1";
+		return "1.1.2";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-06-30";
+		return "2020-07-18";
 	} 
 
 	public static void main(String[] args) {
@@ -6319,6 +6321,7 @@ public class DataFlowAnalyzer {
 			dlineage.setTextFormat(textFormat);
 		}
 
+		try{
 		StringBuffer errorBuffer = new StringBuffer();
 		String result = dlineage.generateDataFlow(errorBuffer);
 
@@ -6370,6 +6373,10 @@ public class DataFlowAnalyzer {
 				System.setErr(systemSteam);
 				System.err.println(errorMessage);
 			}
+		}
+		}catch(Throwable e){
+			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 
