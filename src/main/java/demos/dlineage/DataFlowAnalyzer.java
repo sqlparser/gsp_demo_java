@@ -707,6 +707,11 @@ public class DataFlowAnalyzer {
 						}
 						String group = schemaIter.next();
 						String[] split = group.split("\\.");
+						
+						ModelBindingManager.removeGlobalDatabase();
+						ModelBindingManager.removeGlobalSchema();
+						ModelBindingManager.removeGlobalSQLEnv();
+						
 						ModelBindingManager.setGlobalDatabase(split[0]);
 						ModelBindingManager.setGlobalSchema(split[1]);
 						if (handleListener != null) {
