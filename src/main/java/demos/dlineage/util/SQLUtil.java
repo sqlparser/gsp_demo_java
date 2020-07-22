@@ -491,6 +491,18 @@ public class SQLUtil {
 			} else {
 				normalSource = source;
 			}
+			
+			if (target.indexOf('\'') >= 0) {
+				normalTarget = target.replaceAll("[']", "");
+			} else {
+				normalTarget = target;
+			}
+
+			if (source.indexOf('\'') >= 0) {
+				normalSource = source.replaceAll("[']", "");
+			} else {
+				normalSource = source;
+			}
 
 			// depends on the sql server case sensitive setting, need to add an
 			// option to control the comparision
@@ -571,7 +583,9 @@ public class SQLUtil {
 			}
 			return normalName;
 		case dbvmssql:
-			if (name.indexOf('"') >= 0) {
+			if (name.indexOf('\'') >= 0) {
+				normalName = name.replaceAll("[']", "");
+			} else if (name.indexOf('"') >= 0) {
 				normalName = name.replaceAll("\"", "");
 			} else if (name.indexOf("[") >= 0) {
 				normalName = name.replaceAll("\\[", "").replaceAll("]", "");

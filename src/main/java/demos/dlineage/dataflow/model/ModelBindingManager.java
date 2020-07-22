@@ -403,6 +403,27 @@ public class ModelBindingManager {
                 return table;
         }
 
+		if (stmt.getTables() != null) {
+			for (int j = 0; j < stmt.getTables().size(); j++) {
+				 TTable table = (TTable)  stmt.getTables().getTable(j);
+				 if (table.getSubquery() == stmt)
+		                continue;
+
+	            TObjectName[] columns = getTableColumns(table);
+	            for (int i = 0; i < columns.length; i++) {
+	                TObjectName columnName = columns[i];
+	                if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
+	                    continue;
+	                if (SQLUtil.getIdentifierNormalName(columnName.toString()).equals(SQLUtil.getIdentifierNormalName(column.toString()))) {
+	                    if (columnName.getSourceTable() == null
+	                            || columnName.getSourceTable() == table) {
+	                        return table;
+	                    }
+	                }
+	            }
+			}
+		}
+		
         Iterator iter = tableSet.iterator();
         while (iter.hasNext()) {
             TTable table = (TTable) iter.next();
