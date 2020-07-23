@@ -27,7 +27,7 @@ public class searchSQLObject {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvmssql;
+        EDbVendor dbVendor = EDbVendor.dbvbigquery;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
