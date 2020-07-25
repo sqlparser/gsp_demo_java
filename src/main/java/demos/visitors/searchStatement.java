@@ -1,7 +1,9 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.*;
+import gudusoft.gsqlparser.nodes.ENodeStatus;
 import gudusoft.gsqlparser.nodes.TDeclareVariable;
+import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 
@@ -49,11 +51,15 @@ public class searchStatement {
         int ret = sqlparser.parse();
         if (ret == 0){
             stmtVisitor fv = new stmtVisitor();
+            TCustomSqlStatement sqlStatement = null;
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
-                TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
+                sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
                 sqlStatement.acceptChildren(fv);
             }
+
+            System.out.println("\n\nvisit again:");
+            sqlStatement.acceptChildren(fv);
 
         }else{
             System.out.println(sqlparser.getErrormessage());
@@ -72,6 +78,17 @@ class stmtVisitor extends TParseTreeVisitor {
     }
     public void preVisit(TDeclareVariable declareVariable){
         System.out.print("\tvariable name:"+declareVariable.getVariableName().toString()+", data type:"+declareVariable.getDatatype().toString());
+    }
+
+    public void preVisit(TExpression expressionNode){
+        System.out.println("expr:"+expressionNode.getNodeStatus()+",\ttext:"+expressionNode.toString());
+        if (expressionNode.toString().equalsIgnoreCase("fx(2)")){
+            if (expressionNode.getNodeStatus() == ENodeStatus.nsNormal){
+                System.out.println("remove:"+expressionNode.toString());
+                expressionNode.removeFromTokenChain();
+            }
+
+        }
     }
 
 }
