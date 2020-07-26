@@ -583,14 +583,15 @@ public class SQLUtil {
 			}
 			return normalName;
 		case dbvmssql:
-			if (name.indexOf('\'') >= 0) {
-				normalName = name.replaceAll("[']", "");
-			} else if (name.indexOf('"') >= 0) {
-				normalName = name.replaceAll("\"", "");
-			} else if (name.indexOf("[") >= 0) {
-				normalName = name.replaceAll("\\[", "").replaceAll("]", "");
-			} else {
-				normalName = name;
+			normalName = name;
+			if (normalName.indexOf('\'') >= 0) {
+				normalName = normalName.replaceAll("[']", "");
+			} 
+			if (normalName.indexOf('"') >= 0) {
+				normalName = normalName.replaceAll("\"", "");
+			}
+			if (normalName.indexOf("[") >= 0) {
+				normalName = normalName.replaceAll("\\[", "").replaceAll("]", "");
 			}
 			return normalName.toUpperCase();
 		default:
