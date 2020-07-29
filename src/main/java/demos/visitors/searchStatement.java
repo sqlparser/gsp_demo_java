@@ -85,7 +85,7 @@ class stmtVisitor extends TParseTreeVisitor {
         if (expressionNode.toString().equalsIgnoreCase("fx(2)")){
             if (expressionNode.getNodeStatus() == ENodeStatus.nsNormal){
                 System.out.println("remove:"+expressionNode.toString());
-                expressionNode.removeFromTokenChain();
+                expressionNode.removeTokens();
             }
 
         }
