@@ -633,6 +633,7 @@ public class DataFlowAnalyzer {
 							ModelBindingManager.setGlobalSQLEnv(sqlenv);
 						}
 						sqlparser.sqltext = content;
+						SQLUtil.writeToFile(new File("D:\\null.txt"), content);
 						analyzeAndOutputResult(sqlparser);
 					}
 				}
@@ -2324,6 +2325,10 @@ public class DataFlowAnalyzer {
 		for (int i = 0; i < stmt.getResultColumnList().size(); i++) {
 			TResultColumn field = stmt.getResultColumnList().getResultColumn(i);
 
+			if(field.getExpr().getExpressionType() == EExpressionType.function_t){
+				continue;
+			}
+			
 			TExpression expression = field.getExpr().getLeftOperand();
 			if (expression == null) {
 				System.err.println();
