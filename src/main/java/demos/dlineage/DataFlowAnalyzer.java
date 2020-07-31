@@ -633,7 +633,7 @@ public class DataFlowAnalyzer {
 							ModelBindingManager.setGlobalSQLEnv(sqlenv);
 						}
 						sqlparser.sqltext = content;
-						SQLUtil.writeToFile(new File("D:\\null.txt"), content);
+						//SQLUtil.writeToFile(new File("D:\\null.txt"), content);
 						analyzeAndOutputResult(sqlparser);
 					}
 				}
