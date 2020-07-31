@@ -104,23 +104,26 @@ class selectVisitor extends TParseTreeVisitor {
         }
         nestedQuery++;
         if (select.isCombinedQuery()){
-           // System.out.println("find set operator:"+select.getSetOperatorType());
-           // System.out.println(select.toString());
+            System.out.println("\n\nfind set operator:"+select.getSetOperatorType());
+            System.out.println("\n\nfind left");
+            System.out.println(select.getLeftStmt().toString());
+            System.out.println("\n\nfind right");
+            System.out.println(select.getRightStmt().toString());
         }
         //System.out.println("\n\n"+counter++);
         //System.out.println(select.toString());
 
-        JoinConverter converter = new JoinConverter( select.toString(), dbVendor );
-        if ( converter.convert( ) != 0 )
-        {
-            System.out.println( converter.getErrorMessage( ) );
-        }
-        else
-        {
-            //System.out.println( "\nSQL in ANSI joins" );
-            //System.out.println( converter.getQuery( ) );
-            select.setText(converter.getQuery());
-        }
+//        JoinConverter converter = new JoinConverter( select.toString(), dbVendor );
+//        if ( converter.convert( ) != 0 )
+//        {
+//            System.out.println( converter.getErrorMessage( ) );
+//        }
+//        else
+//        {
+//            //System.out.println( "\nSQL in ANSI joins" );
+//            //System.out.println( converter.getQuery( ) );
+//            select.setText(converter.getQuery());
+//        }
     }
 
     public void postVisit(TSelectSqlStatement select){

@@ -15,6 +15,17 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+	public void testAtlerTableAddColumn( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
+		sqlparser.sqltext = "ALTER TABLE ALLERGY_RECIPE_LABS ADD SHOT_FAC_TYPE TINYINT DEFAULT 0, MAILTO_TEL VARCHAR(20);";
+
+		sqlparser.parse( );
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
 	public void testMySQLChar( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmysql);
