@@ -24,7 +24,7 @@ public class testMySQL extends TestCase
 
         sqlparser.parse( );
 
-       // System.out.println(sqlparser.sqlstatements.get(0).toScript());
+        //System.out.println(sqlparser.sqlstatements.get(0).toScript());
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
     }
 

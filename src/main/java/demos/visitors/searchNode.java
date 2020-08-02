@@ -3,13 +3,14 @@ package demos.visitors;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.nodes.TAlterTableOption;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
 import gudusoft.gsqlparser.nodes.TTypeName;
 
 import java.io.File;
 import java.io.IOException;
 
-public class searchDatatype {
+public class searchNode {
     public static void main(String args[]) throws IOException
     {
         long t;
@@ -34,11 +35,11 @@ public class searchDatatype {
 
         int ret = sqlparser.parse();
         if (ret == 0){
-            datatypeVisitor datatypeVisitor = new datatypeVisitor();
+            nodeVisitor nodeVisitor = new nodeVisitor();
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
-                sqlStatement.acceptChildren(datatypeVisitor);
+                sqlStatement.acceptChildren(nodeVisitor);
             }
 
         }else{
@@ -49,21 +50,13 @@ public class searchDatatype {
     }
 }
 
-class datatypeVisitor extends TParseTreeVisitor {
-    public void preVisit(TTypeName node){
-        System.out.print("--> full name"
+class nodeVisitor extends TParseTreeVisitor {
+    public void preVisit(TAlterTableOption node){
+        System.out.print("--> node pos"
                 +"("+ node.getStartToken().lineNo+","+node.getStartToken().columnNo +"): "
-                +node.toString()+", \tshort name:"+node.getDataTypeName()
-                +", \ttype:"+node.getDataType());
-        if (node.getLength() != null){
-            System.out.print(",\tlength:"+node.getLength().toString());
-        }
-        if (node.getPrecision() != null){
-            System.out.print(",\tprecision:"+node.getPrecision().toString());
-        }
-        if (node.getScale() != null){
-            System.out.print(",\tscale:"+node.getScale().toString());
-        }
+                +node.toString()
+                +", \ttype:"+node.getOptionType());
+
         System.out.println("");
     }
 }
