@@ -172,14 +172,14 @@ public class ModelBindingManager {
                 return modelBindingMap.get(table.getCTE());
             }
             if (table.getSubquery() != null
-                    && table.getSubquery().getResultColumnList() != null) {
+                    && !table.getSubquery().isCombinedQuery()) {
                 return modelBindingMap
                         .get(table.getSubquery().getResultColumnList());
             }
         }
         if (gspModel instanceof TSelectSqlStatement) {
             TSelectSqlStatement select = (TSelectSqlStatement) gspModel;
-            if (select.getResultColumnList() != null) {
+            if (!select.isCombinedQuery()) {
                 return modelBindingMap.get(select.getResultColumnList());
             }
         }

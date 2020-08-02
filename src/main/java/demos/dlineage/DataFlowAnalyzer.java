@@ -386,7 +386,16 @@ public class DataFlowAnalyzer {
 			}
 
 			tableMap.get(tableName).add(table);
-			tableTypeMap.put(tableName, table.getType());
+			
+			if(!tableTypeMap.containsKey(tableName)){
+				tableTypeMap.put(tableName, table.getType());
+			}
+			else if("view".equals(table.getTableType())){
+				tableTypeMap.put(tableName, table.getType());
+			}
+			else if("table".equals(tableTypeMap.get(tableName))){
+				tableTypeMap.put(tableName, table.getType());
+			}
 			
 			if(table.getColumns()!=null){
 				tableColumnMap.putIfAbsent(tableName, new LinkedHashSet<>());
@@ -1417,7 +1426,7 @@ public class DataFlowAnalyzer {
 				}
 			}
 
-			if (stmt.getSubQuery() != null && stmt.getSubQuery().getResultColumnList() != null) {
+			if (stmt.getSubQuery() != null && !stmt.getSubQuery().isCombinedQuery()) {
 				SelectResultSet resultSetModel = (SelectResultSet) modelManager
 						.getModel(stmt.getSubQuery().getResultColumnList());
 				for (int i = 0; i < resultSetModel.getColumns().size(); i++) {
@@ -1894,7 +1903,7 @@ public class DataFlowAnalyzer {
 							relation.addSource(new ResultColumnRelationElement(resultColumn));
 						}
 					}
-				} else if (stmt.getSubQuery().getResultColumnList() != null) {
+				} else if (!stmt.getSubQuery().isCombinedQuery()) {
 					SelectResultSet resultSetModel = (SelectResultSet) modelManager
 							.getModel(stmt.getSubQuery().getResultColumnList());
 					
@@ -2578,7 +2587,7 @@ public class DataFlowAnalyzer {
 			
 		} else {
 			View viewModel = modelFactory.createView(stmt, viewName);
-			if (subquery != null && subquery.getResultColumnList() != null) {
+			if (subquery != null && !subquery.isCombinedQuery()) {
 				SelectResultSet resultSetModel = (SelectResultSet) modelManager
 						.getModel(subquery.getResultColumnList());
 				for (int i = 0; i < resultSetModel.getColumns().size(); i++) {
@@ -2643,7 +2652,7 @@ public class DataFlowAnalyzer {
 					impactRelation.addSource(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSetModel.getPseudoRows()));
 					impactRelation.setTarget(new PseudoRowsRelationElement<ViewPseudoRows>(viewModel.getPseudoRows()));
 				}
-			} else if (subquery != null) {
+			} else if (subquery != null && subquery.isCombinedQuery()) {
 				SelectSetResultSet resultSetModel = (SelectSetResultSet) modelManager.getModel(subquery);
 				for (int i = 0; i < resultSetModel.getColumns().size(); i++) {
 					ResultColumn resultColumn = resultSetModel.getColumns().get(i);
@@ -4113,7 +4122,7 @@ public class DataFlowAnalyzer {
 				relation.setEffectType(EffectType.select);
 				relation.setTarget(new ResultColumnRelationElement(columns.get(i)));
 
-				if (stmt.getLeftStmt().getResultColumnList() != null) {
+				if (!stmt.getLeftStmt().isCombinedQuery()) {
 					ResultSet sourceResultSet = (ResultSet) modelManager
 							.getModel(stmt.getLeftStmt().getResultColumnList());
 					if (sourceResultSet.getColumns().size() > i) {
@@ -4126,7 +4135,7 @@ public class DataFlowAnalyzer {
 					}
 				}
 
-				if (stmt.getRightStmt().getResultColumnList() != null) {
+				if (!stmt.getRightStmt().isCombinedQuery()) {
 					ResultSet sourceResultSet = (ResultSet) modelManager
 							.getModel(stmt.getRightStmt().getResultColumnList());
 					if (sourceResultSet!=null && sourceResultSet.getColumns().size() > i) {
@@ -4268,7 +4277,7 @@ public class DataFlowAnalyzer {
 				}
 			}
 
-			if (stmt.getResultColumnList() != null) {
+			if (!stmt.isCombinedQuery()) {
 				Object queryModel = modelManager.getModel(stmt.getResultColumnList());
 
 				if (queryModel == null) {
@@ -4751,7 +4760,7 @@ public class DataFlowAnalyzer {
 	}
 
 	private TResultColumnList getResultColumnList(TSelectSqlStatement stmt) {
-		if (stmt.getSetOperatorType() != ESetOperatorType.none) {
+		if (stmt.isCombinedQuery()) {
 			TResultColumnList columns = getResultColumnList(stmt.getLeftStmt());
 			if(columns!=null){
 				return columns;
@@ -5321,6 +5330,40 @@ public class DataFlowAnalyzer {
 				} else if (table != null) {
 					tables.add(table);
 				} 
+				
+				//此处特殊处理，多表关联无法找到 column 所属的 Table, tTable.getLinkedColumns 也找不到，退而求其次采用 tTable.getObjectNameReferences() 再找一遍
+				if(stmt.tables != null && tables.size() == 0){
+					for (int j = 0; j < stmt.tables.size(); j++) {
+						if (table != null)
+							break;
+
+						TTable tTable = stmt.tables.getTable(j);
+						if (tTable.getTableType().name().startsWith("open")){
+							continue;
+						}
+						else if (tTable.getObjectNameReferences() != null
+								&& tTable.getObjectNameReferences().size() > 0) {
+							for (int z = 0; z < tTable.getObjectNameReferences().size(); z++) {
+								TObjectName refer = tTable.getObjectNameReferences().getObjectName(z);
+								if ("*".equals(getColumnName(refer)))
+									continue;
+								if (refer == columnName) {
+									table = tTable;
+									break;
+								}
+							}
+						} else if (columnName.getTableToken() != null && (columnName.getTableToken().astext
+								.equalsIgnoreCase(tTable.getName())
+								|| columnName.getTableToken().astext.equalsIgnoreCase(tTable.getAliasName()))) {
+							table = tTable;
+							break;
+						}
+					}
+					
+					if (table != null) {
+						tables.add(table);
+					} 
+				}
 			}
 
 			for (int k = 0; k < tables.size(); k++) {
@@ -5376,7 +5419,7 @@ public class DataFlowAnalyzer {
 							}
 						}
 
-						if (subquery != null && subquery.getSetOperatorType() != ESetOperatorType.none) {
+						if (subquery != null && subquery.isCombinedQuery()) {
 							SelectSetResultSet selectSetResultSetModel = (SelectSetResultSet) modelManager
 									.getModel(subquery);
 							
@@ -5511,7 +5554,7 @@ public class DataFlowAnalyzer {
 											}
 											relation.addSource(new ResultColumnRelationElement(column, columnName));
 										}
-										else if (SQLUtil.compareIdentifier(getColumnName(columnName), column.getName())) {
+										else if (SQLUtil.compareIdentifier(getColumnName(columnName), SQLUtil.getIdentifierNormalName(column.getName()))) {
 											if (!column.equals(modelObject)) {
 												relation.addSource(new ResultColumnRelationElement(column, columnName));
 											}
@@ -5550,7 +5593,7 @@ public class DataFlowAnalyzer {
 													break;
 												}
 												else if (SQLUtil.compareIdentifier(getColumnName(columnName),
-														column.getName())) {
+														SQLUtil.getIdentifierNormalName(column.getName()))) {
 													if (!column.equals(modelObject)) {
 														relation.addSource(new ResultColumnRelationElement(column, columnName));
 														flag = true;
@@ -5752,10 +5795,10 @@ public class DataFlowAnalyzer {
 					}
 				} else if (modelManager.getModel(table) instanceof QueryTable) {
 					if (table.getSubquery() != null
-							&& table.getSubquery().getSetOperatorType() != ESetOperatorType.none) {
+							&& table.getSubquery().isCombinedQuery()) {
 						TSelectSqlStatement subquery = table.getSubquery();
 						List<ResultSet> resultSets = new ArrayList<>();
-						if (subquery.getResultColumnList() != null) {
+						if (!subquery.getLeftStmt().isCombinedQuery()) {
 							ResultSet sourceResultSet = (ResultSet) modelManager
 									.getModel(subquery.getLeftStmt().getResultColumnList());
 							resultSets.add(sourceResultSet);
@@ -5764,11 +5807,10 @@ public class DataFlowAnalyzer {
 							resultSets.add(sourceResultSet);
 						}
 
-						if (subquery.getRightStmt().getResultColumnList() != null) {
+						if (!subquery.getRightStmt().isCombinedQuery()) {
 							ResultSet sourceResultSet = (ResultSet) modelManager
 									.getModel(subquery.getRightStmt().getResultColumnList());
 							resultSets.add(sourceResultSet);
-							
 						} else {
 							ResultSet sourceResultSet = (ResultSet) modelManager.getModel(subquery.getRightStmt());
 							resultSets.add(sourceResultSet);
@@ -6059,11 +6101,11 @@ public class DataFlowAnalyzer {
 		}
 
 		private void inOrderTraverse(TSelectSqlStatement select, columnsInExpr columnsInExpr) {
-			if (select.getResultColumnList() != null) {
+			if (!select.isCombinedQuery()) {
 				for (int i = 0; i < select.getResultColumnList().size(); i++) {
 					select.getResultColumnList().getResultColumn(i).getExpr().inOrderTraverse(columnsInExpr);
 				}
-			} else if (select.getSetOperatorType() != ESetOperatorType.none) {
+			} else {
 				inOrderTraverse(select.getLeftStmt(), columnsInExpr);
 				inOrderTraverse(select.getRightStmt(), columnsInExpr);
 			}

@@ -239,7 +239,7 @@ public class ModelFactory {
 
             modelManager.bindModel(table.getCTE(), tableModel);
         } else if (table.getSubquery() != null
-                && table.getSubquery().getResultColumnList() != null) {
+                && !table.getSubquery().isCombinedQuery()) {
             if (modelManager.getModel(table.getSubquery()
                     .getResultColumnList()) instanceof QueryTable) {
                 return (QueryTable) modelManager.getModel(table.getSubquery()
