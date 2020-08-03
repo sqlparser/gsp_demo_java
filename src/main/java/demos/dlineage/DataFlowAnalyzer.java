@@ -5336,7 +5336,7 @@ public class DataFlowAnalyzer {
 						&& stmt.getGsqlparser().getSqlEnv() == null
 						&& !isFunctionName(columnName)){
 					tables.add(stmt.tables.getTable(0));	
-					System.err.println("guess column ["+columnName.toString()+"] table is:"+ stmt.tables.getTable(0).getFullNameWithAliasString());
+					System.err.println("guessing orphan column ["+columnName.toString()+"] table is:"+ stmt.tables.getTable(0).getFullNameWithAliasString());
 				}
 			}
 
