@@ -3,19 +3,97 @@ package teradata;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TDeclareVariable;
-import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
-import gudusoft.gsqlparser.stmt.TRepeatStmt;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.TWhileStmt;
+import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
+import gudusoft.gsqlparser.stmt.mssql.TMssqlFetch;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlOpen;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
+import gudusoft.gsqlparser.stmt.mssql.TMssqlSet;
 import junit.framework.TestCase;
 
-import static gudusoft.gsqlparser.ESqlStatementType.sstWhilestmt;
-import static gudusoft.gsqlparser.ESqlStatementType.sstmssqldeclare;
+import static gudusoft.gsqlparser.ESqlStatementType.*;
 
 public class testCreateProcedure extends TestCase {
+
+    public void testPrepare(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "CREATE PROCEDURE S1.GetEmployeeSalary\n" +
+                "(IN EmpName VARCHAR(100), OUT Salary DEC(10,2))\n" +
+                "BEGIN\n" +
+                "DECLARE SqlStr VARCHAR(1000);\n" +
+                "DECLARE C1 CURSOR FOR S1;\n" +
+                "SET SqlStr = 'SELECT Salary FROM EmployeeTable WHERE EmpName = ?';\n" +
+                "PREPARE S1 FROM SqlStr;\n" +
+                "OPEN C1 USING EmpName;\n" +
+                "FETCH C1 INTO Salary;\n" +
+                "CLOSE C1;\n" +
+                "END;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("S1.GetEmployeeSalary"));
+
+        assertTrue(cp.getBodyStatements().size() == 7);
+
+
+        System.out.println(cp.getBodyStatements().get(3).sqlstatementtype);
+        assertTrue(cp.getBodyStatements().get(3).sqlstatementtype == sstPrepare);
+        TPrepareStmt prepareStmt =(TPrepareStmt)cp.getBodyStatements().get(3);
+        assertTrue(prepareStmt.getStmtName().toString().equalsIgnoreCase("S1"));
+        assertTrue(prepareStmt.getPreparableStmtStr().equalsIgnoreCase("SqlStr"));
+    }
+
+    public void testFetch(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "REPLACE PROCEDURE S1.CURSOR_PROC(IN SCENARIO VARCHAR(20), OUT RUN_STATUS VARCHAR(20) )\n" +
+                "BEGIN\n" +
+                "\n" +
+                "DECLARE id INTEGER DEFAULT 0;\n" +
+                "DECLARE desc VARCHAR(50);\n" +
+                "\n" +
+                "DECLARE C4 CURSOR FOR\n" +
+                "select department_id, department_description from foodmart.department;\n" +
+                "\n" +
+                "OPEN C4;\n" +
+                "FETCH C4 INTO id, desc;\n" +
+                "CLOSE C4;\n" +
+                "END;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("S1.CURSOR_PROC"));
+
+        assertTrue(cp.getBodyStatements().size() == 6);
+
+
+        assertTrue(cp.getBodyStatements().get(4).sqlstatementtype == sstmssqlfetch);
+        TMssqlFetch fetch =(TMssqlFetch)cp.getBodyStatements().get(4);
+        assertTrue(fetch.getCursorName().toString().equalsIgnoreCase("C4"));
+        assertTrue(fetch.getVariableNames().getObjectName(0).toString().equalsIgnoreCase("id"));
+        assertTrue(fetch.getVariableNames().getObjectName(1).toString().equalsIgnoreCase("desc"));
+    }
+
+    public void testSet(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "REPLACE PROCEDURE S1.SET_CHECK()\n" +
+                "BEGIN\n" +
+                "\tDECLARE A INTEGER DEFAULT 0;\n" +
+                "\tSET A = 10;\n" +
+                "END;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("S1.SET_CHECK"));
+
+        assertTrue(cp.getBodyStatements().size() == 2);
+
+
+        assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == sstmssqlset);
+        TMssqlSet setStmt = (TMssqlSet)cp.getBodyStatements().get(1);
+        assertTrue(setStmt.toString().equalsIgnoreCase("SET A = 10;"));
+    }
 
     public void testWhile(){
 
@@ -34,7 +112,7 @@ public class testCreateProcedure extends TestCase {
                 "END;";
         assertTrue(sqlparser.parse() == 0);
 
-        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("proc"));
 
         assertTrue(cp.getBodyStatements().size() == 3);
@@ -62,7 +140,7 @@ public class testCreateProcedure extends TestCase {
              "    update set qty=u.qty, discount=u.discount";
      assertTrue(sqlparser.parse() == 0);
 
-        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("merge_salesdetail"));
 
         assertTrue(cp.getBodyStatements().size() == 1);
@@ -95,7 +173,7 @@ public class testCreateProcedure extends TestCase {
                 "END;";
         assertTrue(sqlparser.parse() == 0);
 
-        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("EDW_TABLES_DEV.samplesp2"));
 
         assertTrue(cp.getBodyStatements().size() == 2);
@@ -135,7 +213,7 @@ public class testCreateProcedure extends TestCase {
                 "END P1;";
         assertTrue(sqlparser.parse() == 0);
 
-        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("EDW_TABLES_DEV.samplesp7"));
 
         assertTrue(cp.getBodyStatements().size() == 4);
@@ -347,7 +425,7 @@ public class testCreateProcedure extends TestCase {
         //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
-        TTeradataCreateProcedure cp = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt cp = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(cp.getProcedureName().toString().equalsIgnoreCase("EDW1_RBG_APPLOGIC.LOAD_TMDW_SVC_LOAN_H_MSCC"));
 
 
