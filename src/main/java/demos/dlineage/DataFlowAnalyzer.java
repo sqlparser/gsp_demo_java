@@ -5331,38 +5331,12 @@ public class DataFlowAnalyzer {
 					tables.add(table);
 				} 
 				
-				//此处特殊处理，多表关联无法找到 column 所属的 Table, tTable.getLinkedColumns 也找不到，退而求其次采用 tTable.getObjectNameReferences() 再找一遍
-				if(stmt.tables != null && tables.size() == 0){
-					for (int j = 0; j < stmt.tables.size(); j++) {
-						if (table != null)
-							break;
-
-						TTable tTable = stmt.tables.getTable(j);
-						if (tTable.getTableType().name().startsWith("open")){
-							continue;
-						}
-						else if (tTable.getObjectNameReferences() != null
-								&& tTable.getObjectNameReferences().size() > 0) {
-							for (int z = 0; z < tTable.getObjectNameReferences().size(); z++) {
-								TObjectName refer = tTable.getObjectNameReferences().getObjectName(z);
-								if ("*".equals(getColumnName(refer)))
-									continue;
-								if (refer == columnName) {
-									table = tTable;
-									break;
-								}
-							}
-						} else if (columnName.getTableToken() != null && (columnName.getTableToken().astext
-								.equalsIgnoreCase(tTable.getName())
-								|| columnName.getTableToken().astext.equalsIgnoreCase(tTable.getAliasName()))) {
-							table = tTable;
-							break;
-						}
-					}
-					
-					if (table != null) {
-						tables.add(table);
-					} 
+				//此处特殊处理，多表关联无法找到 column 所属的 Table, tTable.getLinkedColumns 也找不到，退而求其次采用第一个表
+				if(stmt.tables != null && tables.size() == 0 
+						&& stmt.getGsqlparser().getSqlEnv() == null
+						&& !isFunctionName(columnName)){
+					tables.add(stmt.tables.getTable(0));	
+					System.err.println("guess column ["+columnName.toString()+"] table is:"+ stmt.tables.getTable(0).getFullNameWithAliasString());
 				}
 			}
 
@@ -6428,15 +6402,15 @@ public class DataFlowAnalyzer {
 				for (int i = 0; i < versions.size(); i++) {
 					boolean result = functionChecker.isBuiltInFunction(object.toString(),
 							object.getGsqlparser().getDbVendor(), versions.get(i));
-					if (!result) {
-						return false;
+					if (result) {
+						return result;
 					}
 				}
 
-				boolean result = TERADATA_BUILTIN_FUNCTIONS.contains(object.toString());
-				if (result) {
-					return true;
-				}
+//				boolean result = TERADATA_BUILTIN_FUNCTIONS.contains(object.toString());
+//				if (result) {
+//					return true;
+//				}
 			}
 		} catch (Exception e) {
 		}
