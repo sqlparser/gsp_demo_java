@@ -5,6 +5,7 @@ package test;
  */
 
 import gudusoft.gsqlparser.*;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateProcedure;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
@@ -137,7 +138,7 @@ public class testToString extends TestCase {
                 "  \n" +
                 "END;";
         assertTrue(sqlparser.parse() == 0);
-        TTeradataCreateProcedure procedure = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt procedure = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         TInsertSqlStatement insert = (TInsertSqlStatement)procedure.getStatements().get(0);
         assertTrue(insert.getTargetTable().getName().equalsIgnoreCase("Employee"));
         assertTrue(insert.toString().equalsIgnoreCase("INSERT INTO Employee (EmpName, EmpNo, DeptNo )\n" +

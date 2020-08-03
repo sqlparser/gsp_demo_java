@@ -2,11 +2,11 @@ package teradata;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import junit.framework.TestCase;
 
-import static gudusoft.gsqlparser.ESqlStatementType.sstmssqldeclare;
-import static gudusoft.gsqlparser.ESqlStatementType.sstteradatacreateprocedure;
+import static gudusoft.gsqlparser.ESqlStatementType.*;
 
 public class testGetDiagnostics extends TestCase {
 
@@ -30,8 +30,8 @@ public class testGetDiagnostics extends TestCase {
                 "\n" +
                 "END MAIN;";
         assertTrue(sqlparser.parse() == 0);
-        assertTrue (sqlparser.sqlstatements.get(0).sqlstatementtype == sstteradatacreateprocedure);
-        TTeradataCreateProcedure procedure = (TTeradataCreateProcedure)sqlparser.sqlstatements.get(0);
+        assertTrue (sqlparser.sqlstatements.get(0).sqlstatementtype == sstcreateprocedure);
+        TCreateProcedureStmt procedure = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(procedure.getProcedureName().toString().equalsIgnoreCase("SIT07_PRES_BLC_PGM.P_BLC_EXECUTEANDLOG"));
         assertTrue(procedure.getBodyStatements().size() == 1);
         assertTrue(procedure.getBodyStatements().get(0).sqlstatementtype == sstmssqldeclare);
