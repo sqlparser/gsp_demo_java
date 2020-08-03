@@ -19,15 +19,20 @@ public class SelectSetResultSet extends ResultSet {
     }
 
     public TResultColumnList getResultColumnObject() {
-        if (selectObject.getLeftStmt() != null
-                && selectObject.getLeftStmt().getResultColumnList() != null) {
-            return selectObject.getLeftStmt().getResultColumnList();
-        } else if (selectObject.getRightStmt() != null
-                && selectObject.getRightStmt().getResultColumnList() != null) {
-            return selectObject.getRightStmt().getResultColumnList();
-        }
-        return selectObject.getResultColumnList();
+        return getResultColumnList(selectObject);
     }
+    
+	private TResultColumnList getResultColumnList(TSelectSqlStatement stmt) {
+		if (stmt.isCombinedQuery()) {
+			TResultColumnList columns = getResultColumnList(stmt.getLeftStmt());
+			if(columns!=null){
+				return columns;
+			}
+			return getResultColumnList(stmt.getRightStmt());
+		} else {
+			return stmt.getResultColumnList();
+		}
+	}
 
     public TSelectSqlStatement getSelectObject() {
         return selectObject;
