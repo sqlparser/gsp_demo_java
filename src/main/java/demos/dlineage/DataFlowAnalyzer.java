@@ -4266,13 +4266,16 @@ public class DataFlowAnalyzer {
 							continue;
 						}
 
-						if (!isFunctionName(object)) {
-							if (object.getSourceTable() == null || object.getSourceTable() == table || "*".equals(object.toString())) {
-								if(!"*".equals(object.toString()) || table.getLinkedColumns().size() == 1){ 
-									modelFactory.createTableColumn(tableModel, object, false);
-								}
+						if (isFunctionName(object) && isFromFunction(object)) {
+							continue;
+						}
+						
+						if (object.getSourceTable() == null || object.getSourceTable() == table || "*".equals(object.toString())) {
+							if(!"*".equals(object.toString()) || table.getLinkedColumns().size() == 1){ 
+								modelFactory.createTableColumn(tableModel, object, false);
 							}
 						}
+						
 					}
 				}
 			}
@@ -4757,6 +4760,18 @@ public class DataFlowAnalyzer {
 
 			stmtStack.pop();
 		}
+	}
+
+	private boolean isFromFunction(TObjectName object) {
+		TParseTreeNodeList nodes = object.getStartToken().getNodesStartFromThisToken();
+		if(nodes!=null){
+			for(int i=0;i<nodes.size();i++){
+				if(nodes.getElement(i) instanceof TFunctionCall){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private TResultColumnList getResultColumnList(TSelectSqlStatement stmt) {
@@ -5332,9 +5347,9 @@ public class DataFlowAnalyzer {
 				} 
 				
 				//此处特殊处理，多表关联无法找到 column 所属的 Table, tTable.getLinkedColumns 也找不到，退而求其次采用第一个表
-				if(stmt.tables != null && tables.size() == 0 
+				if(stmt.tables != null && stmt.tables.size()!=0 && tables.size() == 0 
 						&& stmt.getGsqlparser().getSqlEnv() == null
-						&& !isFunctionName(columnName)){
+						&& !(isFunctionName(columnName) && isFromFunction(columnName))){
 					tables.add(stmt.tables.getTable(0));	
 					System.err.println("guessing orphan column ["+columnName.toString()+"] table is:"+ stmt.tables.getTable(0).getFullNameWithAliasString());
 				}
@@ -5990,7 +6005,7 @@ public class DataFlowAnalyzer {
 					constants.add(lcexpr.getConstantOperand());
 				}
 			} else if (lcexpr.getExpressionType() == EExpressionType.simple_object_name_t) {
-				if (lcexpr.getObjectOperand() != null && !isFunctionName(lcexpr.getObjectOperand())) {
+				if (lcexpr.getObjectOperand() != null && !(isFunctionName(lcexpr.getObjectOperand()) && isFromFunction(lcexpr.getObjectOperand()))) {
 					objectNames.add(lcexpr.getObjectOperand());
 				}
 			} else if (lcexpr.getExpressionType() == EExpressionType.function_t) {
