@@ -372,6 +372,7 @@ public class ModelFactory {
         }
         View viewModel = new View(viewStmt, viewName);
         modelManager.bindViewModel(viewStmt, viewModel);
+        modelManager.bindTableByName(SQLUtil.getTableFullName(viewName.toString()), viewModel);
         return viewModel;
     }
 
