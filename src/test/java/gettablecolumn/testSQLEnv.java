@@ -91,6 +91,27 @@ class TSQLServerEnv extends TSQLEnv {
     }
 }
 
+class TSQLServerEnvSearchUpLevel extends TSQLEnv {
+
+    public TSQLServerEnvSearchUpLevel(){
+        super(EDbVendor.dbvmssql);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+
+        // add a new database: master
+        TSQLCatalog sqlCatalog = createSQLCatalog("master");
+        // add a new schema: dbo
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("dbo");
+        //add a new table: cTab
+        TSQLTable ExecutionLogStorage = sqlSchema.createTable("ExecutionLogStorage");
+        ExecutionLogStorage.addColumn("UserName");
+
+    }
+}
+
 class TOracleEnv2 extends TSQLEnv {
 
     public TOracleEnv2(){
@@ -226,5 +247,39 @@ public class testSQLEnv extends TestCase {
                 "some_table.c123"));
     }
 
+
+
+    public static void testSearchUpLevel(){
+        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvmssql);
+        getTableColumn.isConsole = false;
+        getTableColumn.listStarColumn = true;
+        getTableColumn.setSqlEnv(new TSQLServerEnvSearchUpLevel());
+
+        getTableColumn.runText("insert into [dbo].[ExecutionLogStorage]\n" +
+                "            ([InstanceName],\n" +
+                "             [ReportID],\n" +
+                "             [UserName]\n" +
+                "             )\n" +
+                "        select top (1024) with ties\n" +
+                "            [InstanceName],\n" +
+                "            [ReportID],\n" +
+                "            [UserName]\n" +
+                "         from [dbo].[ExecutionLog_Old] WITH (XLOCK)\n" +
+                "         order by TimeStart ;");
+        String strActual = getTableColumn.outList.toString();
+//        System.out.println(strActual);
+        assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
+                "[dbo].[ExecutionLog_Old]\n" +
+                "[dbo].[ExecutionLogStorage]\n" +
+                "\n" +
+                "Fields:\n" +
+                "[dbo].[ExecutionLog_Old].[InstanceName]\n" +
+                "[dbo].[ExecutionLog_Old].[ReportID]\n" +
+                "[dbo].[ExecutionLog_Old].[UserName]\n" +
+                "[dbo].[ExecutionLog_Old].TimeStart\n" +
+                "[dbo].[ExecutionLogStorage].[InstanceName]\n" +
+                "[dbo].[ExecutionLogStorage].[ReportID]\n" +
+                "[dbo].[ExecutionLogStorage].[UserName]"));
+    }
 
 }
