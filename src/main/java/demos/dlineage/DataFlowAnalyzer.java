@@ -3402,7 +3402,20 @@ public class DataFlowAnalyzer {
 								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
 					}
 					relationElement.appendChild(target);
-				}  
+				} else if (targetElement instanceof ResultSetPseudoRows) {
+					ResultSetPseudoRows targetColumn = (ResultSetPseudoRows) targetElement;
+					Element target = doc.createElement("target");
+					target.setAttribute("id", String.valueOf(targetColumn.getId()));
+					target.setAttribute("column", targetColumn.getName());
+					target.setAttribute("parent_id", String.valueOf(targetColumn.getHolder().getId()));
+					target.setAttribute("parent_name", getResultSetName(targetColumn.getHolder()));
+					if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
+						target.setAttribute("coordinate",
+								targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+					}
+					target.setAttribute("source", "system");
+					relationElement.appendChild(target);
+				} 
 				else {
 					continue;
 				}
@@ -3459,6 +3472,32 @@ public class DataFlowAnalyzer {
 							source.setAttribute("coordinate", pseudoRows.getStartPosition() + "," + pseudoRows.getEndPosition());
 						}
 						source.setAttribute("source", "system");
+						append = true;
+						relationElement.appendChild(source);
+					} else if (sourceElement instanceof TableColumn) {
+						TableColumn sourceColumn = (TableColumn) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(sourceColumn.getId()));
+						source.setAttribute("column", sourceColumn.getName());
+						source.setAttribute("parent_id", String.valueOf(sourceColumn.getTable().getId()));
+						source.setAttribute("parent_name", getTableName(sourceColumn.getTable()));
+						if (sourceColumn.getStartPosition() != null && sourceColumn.getEndPosition() != null) {
+							source.setAttribute("coordinate",
+									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+						}
+						append = true;
+						relationElement.appendChild(source);
+					}if (sourceElement instanceof ResultColumn) {
+						ResultColumn sourceColumn = (ResultColumn) sourceElement;
+						Element source = doc.createElement("source");
+						source.setAttribute("id", String.valueOf(sourceColumn.getId()));
+						source.setAttribute("column", sourceColumn.getName());
+						source.setAttribute("parent_id", String.valueOf(sourceColumn.getResultSet().getId()));
+						source.setAttribute("parent_name", getResultSetName(sourceColumn.getResultSet()));
+						if (sourceColumn.getStartPosition() != null && sourceColumn.getEndPosition() != null) {
+							source.setAttribute("coordinate",
+									sourceColumn.getStartPosition() + "," + sourceColumn.getEndPosition());
+						}
 						append = true;
 						relationElement.appendChild(source);
 					}
@@ -5606,80 +5645,68 @@ public class DataFlowAnalyzer {
 		}
 
 		TCustomSqlStatement stmt = stmtStack.peek();
-
 		columnsInExpr visitor = new columnsInExpr();
 		expr.inOrderTraverse(visitor);
-		List<TObjectName> objectNames = visitor.getObjectNames();
+		List<TObjectName> objectNames = visitor.getObjectNames();		
+		ResultSet resultSet = (ResultSet) modelManager.getModel(stmt.getResultColumnList());
+		if(resultSet == null){
+			return;
+		}
+		
+		for (int j = 0; j < objectNames.size(); j++) {
+			TObjectName columnName = objectNames.get(j);
 
-		TResultColumnList columns = stmt.getResultColumnList();
-		for (int i = 0; i < columns.size(); i++) {
-			TResultColumn column = columns.getResultColumn(i);
-//			AbstractRelation relation;
-			AbstractRelation functionRelation = null;
-			if (isAggregateFunction(column.getExpr().getFunctionCall())) {
-//				relation = modelFactory.createRecordSetRelation();
-//				relation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-//				relation.setEffectType(effectType);
-//
-				TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
-//				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-//				((RecordSetRelation) relation).setAggregateFunction(functionName.toString());
-
-				functionRelation = modelFactory.createRecordSetRelation();
-				functionRelation.setFunction(column.getExpr().getFunctionCall().getFunctionName().toString());
-				functionRelation.setEffectType(EffectType.function);
-				functionRelation
-						.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
-				((RecordSetRelation) functionRelation).setAggregateFunction(functionName.toString());
-			} 
-//			else {
-//				relation = modelFactory.createImpactRelation();
-//				relation.setEffectType(effectType);
-//				relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager.getModel(column)));
-//
-//				if (column.getExpr().getFunctionCall() != null) {
-//					functionRelation = modelFactory.createImpactRelation();
-//					TObjectName functionName = column.getExpr().getFunctionCall().getFunctionName();
-//					functionRelation.setTarget(
-//							new ResultColumnRelationElement((ResultColumn) modelManager.getModel(functionName)));
-//					functionRelation.setEffectType(EffectType.function);
-//				}
-//				if (column.getExpr().getCaseExpression() != null) {
-//					functionRelation = modelFactory.createImpactRelation();
-//					functionRelation.setTarget(new ResultColumnRelationElement((ResultColumn) modelManager
-//							.getModel(column.getExpr().getCaseExpression().getWhenClauseItemList())));
-//					functionRelation.setEffectType(EffectType.function);
-//				}
-//			}
-
-			for (int j = 0; j < objectNames.size(); j++) {
-				TObjectName columnName = objectNames.get(j);
-
-				if (columnName.getDbObjectType() == EDbObjectType.variable) {
-					continue;
+			if (columnName.getDbObjectType() == EDbObjectType.variable) {
+				continue;
+			}
+			RecordSetRelation relation = modelFactory.createRecordSetRelation();
+			relation.setEffectType(effectType);
+			relation.setTarget(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSet.getPseudoRows()));
+			TTable table = modelManager.getTable(stmt, columnName);
+			if (table != null) {
+				if (modelManager.getModel(table) instanceof Table) {
+					Table tableModel = (Table) modelManager.getModel(table);
+					if (tableModel != null) {
+						TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName, false);
+						relation.addSource(
+									new TableColumnRelationElement(columnModel, columnName.getLocation()));
+					}
+				} else if (modelManager.getModel(table) instanceof QueryTable) {
+					ResultColumn resultColumn = (ResultColumn) modelManager.getModel(columnName.getSourceColumn());
+					if (resultColumn != null) {
+						relation.addSource(new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
+					}
 				}
-
-				TTable table = modelManager.getTable(stmt, columnName);
-				if (table != null) {
-					if (modelManager.getModel(table) instanceof Table) {
-						Table tableModel = (Table) modelManager.getModel(table);
-						if (tableModel != null) {
-							TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName, false);
-//							relation.addSource(new TableColumnRelationElement(columnModel, columnName.getLocation()));
-							if (functionRelation != null) {
-								functionRelation.addSource(
-										new TableColumnRelationElement(columnModel, columnName.getLocation()));
-							}
-						}
-					} else if (modelManager.getModel(table) instanceof QueryTable) {
-						ResultColumn resultColumn = (ResultColumn) modelManager.getModel(columnName.getSourceColumn());
-						if (resultColumn != null) {
-//							relation.addSource(new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
-							if (functionRelation != null) {
-								functionRelation.addSource(
-										new ResultColumnRelationElement(resultColumn, columnName.getLocation()));
-							}
-						}
+			}
+		}
+		
+		List<TParseTreeNode> functions = visitor.getFunctions();
+		for (int j = 0; j < functions.size(); j++) {
+			TParseTreeNode functionObj = functions.get(j);
+			if (modelManager.getModel(functionObj) == null) {
+				createFunction(functionObj);
+			}
+			if (modelManager.getModel(functionObj) instanceof Function) {
+				
+				RecordSetRelation relation = modelFactory.createRecordSetRelation();
+				relation.setEffectType(effectType);
+				relation.setTarget(new PseudoRowsRelationElement<ResultSetPseudoRows>(resultSet.getPseudoRows()));
+				
+				if (functionObj instanceof TFunctionCall) {
+					ResultColumn resultColumn = (ResultColumn) modelManager
+							.getModel(((TFunctionCall) functionObj).getFunctionName());
+					if (resultColumn != null) {
+						ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn,
+								((TFunctionCall) functionObj).getFunctionName().getLocation());
+						relation.addSource(element);
+					}
+				}
+				if (functionObj instanceof TCaseExpression) {
+					ResultColumn resultColumn = (ResultColumn) modelManager
+							.getModel(((TCaseExpression) functionObj).getWhenClauseItemList());
+					if (resultColumn != null) {
+						ResultColumnRelationElement element = new ResultColumnRelationElement(resultColumn);
+						relation.addSource(element);
 					}
 				}
 			}
@@ -5717,6 +5744,14 @@ public class DataFlowAnalyzer {
 			}
 	
 			TTable table = modelManager.getTable(stmt, columnName);
+			
+			if(table == null && stmt.tables != null && stmt.tables.size()!=0
+					&& stmt.getGsqlparser().getSqlEnv() == null
+					&& !(isFunctionName(columnName) && isFromFunction(columnName))){
+				table = stmt.tables.getTable(0);	
+				System.err.println("guessing orphan column ["+columnName.toString()+"] table is:"+ stmt.tables.getTable(0).getFullNameWithAliasString());
+			}
+			
 			if (table != null) {
 				if (modelManager.getModel(table) instanceof Table) {
 					Table tableModel = (Table) modelManager.getModel(table);
@@ -5925,9 +5960,15 @@ public class DataFlowAnalyzer {
 
 	class columnsInExpr implements IExpressionVisitor {
 
+		
 		private List<TConstant> constants = new ArrayList<TConstant>();
 		private List<TObjectName> objectNames = new ArrayList<TObjectName>();
 		private List<TParseTreeNode> functions = new ArrayList<TParseTreeNode>();
+		private boolean skipFunction = false;
+
+		public void setSkipFunction(boolean skipFunction) {
+			this.skipFunction = skipFunction;
+		}
 
 		public List<TParseTreeNode> getFunctions() {
 			return functions;
@@ -5952,79 +5993,73 @@ public class DataFlowAnalyzer {
 				if (lcexpr.getObjectOperand() != null && !(isFunctionName(lcexpr.getObjectOperand()) && isFromFunction(lcexpr.getObjectOperand()))) {
 					objectNames.add(lcexpr.getObjectOperand());
 				}
+			} else if (lcexpr.getExpressionType() == EExpressionType.between_t) {
+				if (lcexpr.getBetweenOperand()!=null && lcexpr.getBetweenOperand().getObjectOperand()!=null) {
+					objectNames.add(lcexpr.getBetweenOperand().getObjectOperand());
+				}
 			} else if (lcexpr.getExpressionType() == EExpressionType.function_t) {
 				TFunctionCall func = lcexpr.getFunctionCall();
-				// if ( isAggregateFunction( func ) )
-				{
+				if(skipFunction){
+					if (func.getArgs() != null) {
+						for (int k = 0; k < func.getArgs().size(); k++) {
+							TExpression expr = func.getArgs().getExpression(k);
+							if (expr != null)
+								expr.inOrderTraverse(this);
+						}
+					}
+
+					if (func.getTrimArgument() != null) {
+						TTrimArgument args = func.getTrimArgument();
+						TExpression expr = args.getStringExpression();
+						if (expr != null) {
+							expr.inOrderTraverse(this);
+						}
+						expr = args.getTrimCharacter();
+						if (expr != null) {
+							expr.inOrderTraverse(this);
+						}
+					}
+
+					if (func.getAgainstExpr() != null) {
+						func.getAgainstExpr().inOrderTraverse(this);
+					}
+					if (func.getBetweenExpr() != null) {
+						func.getBetweenExpr().inOrderTraverse(this);
+					}
+					if (func.getExpr1() != null) {
+						func.getExpr1().inOrderTraverse(this);
+					}
+					if (func.getExpr2() != null) {
+						func.getExpr2().inOrderTraverse(this);
+					}
+					if (func.getExpr3() != null) {
+						func.getExpr3().inOrderTraverse(this);
+					}
+					if (func.getParameter() != null) {
+						func.getParameter().inOrderTraverse(this);
+					}
+				}
+				else{
 					functions.add(func);
 				}
 
-				// if ( func.getArgs( ) != null )
-				// {
-				// for ( int k = 0; k < func.getArgs( ).size( ); k++ )
-				// {
-				// TExpression expr = func.getArgs( ).getExpression( k );
-				// if ( expr != null )
-				// expr.inOrderTraverse( this );
-				// }
-				// }
-				//
-				// if ( func.getTrimArgument( ) != null )
-				// {
-				// TTrimArgument args = func.getTrimArgument( );
-				// TExpression expr = args.getStringExpression( );
-				// if ( expr != null )
-				// {
-				// expr.inOrderTraverse( this );
-				// }
-				// expr = args.getTrimCharacter( );
-				// if ( expr != null )
-				// {
-				// expr.inOrderTraverse( this );
-				// }
-				// }
-				//
-				// if ( func.getAgainstExpr( ) != null )
-				// {
-				// func.getAgainstExpr( ).inOrderTraverse( this );
-				// }
-				// if ( func.getBetweenExpr( ) != null )
-				// {
-				// func.getBetweenExpr( ).inOrderTraverse( this );
-				// }
-				// if ( func.getExpr1( ) != null )
-				// {
-				// func.getExpr1( ).inOrderTraverse( this );
-				// }
-				// if ( func.getExpr2( ) != null )
-				// {
-				// func.getExpr2( ).inOrderTraverse( this );
-				// }
-				// if ( func.getExpr3( ) != null )
-				// {
-				// func.getExpr3( ).inOrderTraverse( this );
-				// }
-				// if ( func.getParameter( ) != null )
-				// {
-				// func.getParameter( ).inOrderTraverse( this );
-				// }
 			} else if (lcexpr.getExpressionType() == EExpressionType.case_t) {
 				TCaseExpression expr = lcexpr.getCaseExpression();
-				functions.add(expr);
-				// TExpression defaultExpr = expr.getElse_expr( );
-				// if ( defaultExpr != null )
-				// {
-				// defaultExpr.inOrderTraverse( this );
-				// }
-				// TWhenClauseItemList list = expr.getWhenClauseItemList( );
-				// for ( int i = 0; i < list.size( ); i++ )
-				// {
-				// TWhenClauseItem element = (TWhenClauseItem) list.getElement(
-				// i );
-				// ( ( (TWhenClauseItem) element ).getReturn_expr( )
-				// ).inOrderTraverse( this );
-				//
-				// }
+				if(skipFunction){
+					TExpression defaultExpr = expr.getElse_expr();
+					if (defaultExpr != null) {
+						defaultExpr.inOrderTraverse(this);
+					}
+					TWhenClauseItemList list = expr.getWhenClauseItemList();
+					for (int i = 0; i < list.size(); i++) {
+						TWhenClauseItem element = (TWhenClauseItem) list.getElement(i);
+						(((TWhenClauseItem) element).getReturn_expr()).inOrderTraverse(this);
+
+					}
+				}
+				else{
+					functions.add(expr);
+				}
 			} else if (lcexpr.getSubQuery() != null) {
 				TSelectSqlStatement select = lcexpr.getSubQuery();
 				analyzeSelectStmt(select);

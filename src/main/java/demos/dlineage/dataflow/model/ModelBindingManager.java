@@ -420,6 +420,12 @@ public class ModelBindingManager {
 	                        return table;
 	                    }
 	                }
+	                if (columnName.getColumnNameOnly()!=null && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
+	                    if (columnName.getSourceTable() == null
+	                            || columnName.getSourceTable() == table) {
+	                        return table;
+	                    }
+	                }
 	            }
 			}
 		}
@@ -430,6 +436,14 @@ public class ModelBindingManager {
 
             if (table.getSubquery() == stmt)
                 continue;
+            
+			if (table.getSubquery() != null) {
+				int start = table.getSubquery().getStartToken().posinlist;
+				int end = table.getSubquery().getEndToken().posinlist;
+				if (start <= stmt.getStartToken().posinlist && end >= stmt.getEndToken().posinlist) {
+					continue;
+				}
+			}
 
             TObjectName[] columns = getTableColumns(table);
             for (int i = 0; i < columns.length; i++) {
@@ -437,6 +451,12 @@ public class ModelBindingManager {
                 if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
                     continue;
                 if (SQLUtil.getIdentifierNormalName(columnName.toString()).equals(SQLUtil.getIdentifierNormalName(column.toString()))) {
+                    if (columnName.getSourceTable() == null
+                            || columnName.getSourceTable() == table) {
+                        return table;
+                    }
+                }
+                if (columnName.getColumnNameOnly()!=null && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
                     if (columnName.getSourceTable() == null
                             || columnName.getSourceTable() == table) {
                         return table;
