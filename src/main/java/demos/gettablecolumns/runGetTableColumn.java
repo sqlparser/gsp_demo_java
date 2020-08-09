@@ -300,17 +300,20 @@ class TSQLServerEnv extends TSQLEnv{
 		TSQLCatalog sqlCatalog = createSQLCatalog("master");
 		// add a new schema: dbo
 		TSQLSchema sqlSchema = sqlCatalog.createSchema("dbo");
-		//add a new table: aTab
-		TSQLTable aTab = sqlSchema.createTable("aTab");
-		aTab.addColumn("Quantity1");
-
-		//add a new table: bTab
-		TSQLTable bTab = sqlSchema.createTable("bTab");
-		bTab.addColumn("Quantity2");
+//		//add a new table: aTab
+//		TSQLTable aTab = sqlSchema.createTable("aTab");
+//		aTab.addColumn("Quantity1");
+//
+//		//add a new table: bTab
+//		TSQLTable bTab = sqlSchema.createTable("bTab");
+//		bTab.addColumn("Quantity2");
+//
+//		//add a new table: cTab
+//		TSQLTable cTab = sqlSchema.createTable("cTab");
+//		cTab.addColumn("Quantity");
 
 		//add a new table: cTab
-		TSQLTable cTab = sqlSchema.createTable("cTab");
-		cTab.addColumn("Quantity");
-
+		TSQLTable ExecutionLogStorage = sqlSchema.createTable("ExecutionLogStorage");
+		ExecutionLogStorage.addColumn("UserName");
 	}
 }

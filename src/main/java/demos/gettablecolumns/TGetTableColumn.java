@@ -278,6 +278,8 @@ class TInfoRecord {
 }
 
 public class TGetTableColumn{
+
+
     private EDbVendor dbVendor;
     private String queryStr;
     private TGSqlParser sqlParser;

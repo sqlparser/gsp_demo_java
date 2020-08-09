@@ -10,6 +10,17 @@ import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
 
+    public void testTableTransient(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE TRANSIENT TABLE \"TestTable4\" CLUSTER BY LINEAR(CR_RETURNED_DATE_SK, CR_ITEM_SK)\n" +
+                "(\n" +
+                "\"Col1\" int NOT NULL\n" +
+                ");";
+        assertTrue(sqlparser.parse() == 0);
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createTable.getTableKinds().contains(ETableKind.etkTransient));
+    }
+
     public void testDuplicateColumn(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
         sqlparser.sqltext = "create table all_data_types ( \n" +
