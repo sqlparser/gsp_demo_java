@@ -266,7 +266,7 @@ public class ModelBindingManager {
             // }
             // }
             return (Table) createModelQuickBindingMap
-                    .get(SQLUtil.getIdentifierNormalName(table.getFullName()));
+                    .get(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
         return null;
     }
@@ -277,8 +277,8 @@ public class ModelBindingManager {
 
     public void bindCreateModel(TTable table, Table tableModel) {
         createModelBindingMap.put(table, tableModel);
-        if (!createModelQuickBindingMap.containsKey(SQLUtil.getIdentifierNormalName(table.getFullName()))) {
-            createModelQuickBindingMap.put(SQLUtil.getIdentifierNormalName(table.getFullName()), tableModel);
+        if (!createModelQuickBindingMap.containsKey(SQLUtil.getTableFullName(table.getTableName().toString()))) {
+            createModelQuickBindingMap.put(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         }
     }
 
