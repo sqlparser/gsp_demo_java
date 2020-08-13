@@ -1,6 +1,8 @@
 package demos.dlineage.dataflow.model.xml;
 
 import demos.dlineage.util.Pair;
+
+import java.util.LinkedList;
 import java.util.List;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
@@ -69,6 +71,9 @@ public class procedure {
 	}
 
 	public List<argument> getArguments() {
+		if(this.arguments == null){
+			this.arguments = new LinkedList<>();
+		}
 		return this.arguments;
 	}
 

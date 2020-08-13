@@ -5,6 +5,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class relation implements Cloneable
@@ -69,6 +70,9 @@ public class relation implements Cloneable
 
 	public List<sourceColumn> getSources( )
 	{
+		if(this.sources == null){
+			this.sources = new LinkedList<>();
+		}
 		return sources;
 	}
 

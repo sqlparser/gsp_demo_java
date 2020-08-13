@@ -27,7 +27,7 @@ public class ModelBindingManager {
     private final Map updateModelBindingMap = new LinkedHashMap();
     private final Map cursorModelBindingMap = new LinkedHashMap();
     private final Map tableNamesMap = new LinkedHashMap();
-    private final List<Relation> relationHolder = new CopyOnWriteArrayList<Relation>();
+    private final Set<Relation> relationHolder = Collections.synchronizedSet(new LinkedHashSet<Relation>());
 
     private final Map<String, TTable> tableAliasMap = new LinkedHashMap();
     private final Set tableSet = new LinkedHashSet();
@@ -430,40 +430,40 @@ public class ModelBindingManager {
 			}
 		}
 		
-        Iterator iter = tableSet.iterator();
-        while (iter.hasNext()) {
-            TTable table = (TTable) iter.next();
-
-            if (table.getSubquery() == stmt)
-                continue;
-            
-			if (table.getSubquery() != null) {
-				int start = table.getSubquery().getStartToken().posinlist;
-				int end = table.getSubquery().getEndToken().posinlist;
-				if (start <= stmt.getStartToken().posinlist && end >= stmt.getEndToken().posinlist) {
-					continue;
-				}
-			}
-
-            TObjectName[] columns = getTableColumns(table);
-            for (int i = 0; i < columns.length; i++) {
-                TObjectName columnName = columns[i];
-                if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
-                    continue;
-                if (SQLUtil.getIdentifierNormalName(columnName.toString()).equals(SQLUtil.getIdentifierNormalName(column.toString()))) {
-                    if (columnName.getSourceTable() == null
-                            || columnName.getSourceTable() == table) {
-                        return table;
-                    }
-                }
-                if (columnName.getColumnNameOnly()!=null && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
-                    if (columnName.getSourceTable() == null
-                            || columnName.getSourceTable() == table) {
-                        return table;
-                    }
-                }
-            }
-        }
+//        Iterator iter = tableSet.iterator();
+//        while (iter.hasNext()) {
+//            TTable table = (TTable) iter.next();
+//
+//            if (table.getSubquery() == stmt)
+//                continue;
+//            
+//			if (table.getSubquery() != null) {
+//				int start = table.getSubquery().getStartToken().posinlist;
+//				int end = table.getSubquery().getEndToken().posinlist;
+//				if (start <= stmt.getStartToken().posinlist && end >= stmt.getEndToken().posinlist) {
+//					continue;
+//				}
+//			}
+//
+//            TObjectName[] columns = getTableColumns(table);
+//            for (int i = 0; i < columns.length; i++) {
+//                TObjectName columnName = columns[i];
+//                if (columnName == null || "*".equals(columnName.getColumnNameOnly()))
+//                    continue;
+//                if (SQLUtil.getIdentifierNormalName(columnName.toString()).equals(SQLUtil.getIdentifierNormalName(column.toString()))) {
+//                    if (columnName.getSourceTable() == null
+//                            || columnName.getSourceTable() == table) {
+//                        return table;
+//                    }
+//                }
+//                if (columnName.getColumnNameOnly()!=null && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
+//                    if (columnName.getSourceTable() == null
+//                            || columnName.getSourceTable() == table) {
+//                        return table;
+//                    }
+//                }
+//            }
+//        }
         return null;
     }
 

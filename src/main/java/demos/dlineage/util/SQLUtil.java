@@ -1,12 +1,18 @@
 
 package demos.dlineage.util;
 
-import demos.dlineage.dataflow.model.ModelBindingManager;
-import demos.dlineage.dataflow.model.Table;
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TCustomSqlStatement;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.PushbackInputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +20,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import demos.dlineage.dataflow.model.ModelBindingManager;
+import demos.dlineage.dataflow.model.Table;
+import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TCustomSqlStatement;
+import gudusoft.gsqlparser.nodes.TTable;
 
 public class SQLUtil {
 
@@ -613,6 +624,15 @@ public class SQLUtil {
 		switch (vendor) {
 		case dbvmssql:
 			return tableModel.getName().startsWith("#");
+		default:
+			return false;
+		}
+	}
+	
+	public static boolean isTempTable(TTable table, EDbVendor vendor) {
+		switch (vendor) {
+		case dbvmssql:
+			return table.getName().startsWith("#");
 		default:
 			return false;
 		}
