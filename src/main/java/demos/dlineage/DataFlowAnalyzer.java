@@ -4014,7 +4014,7 @@ public class DataFlowAnalyzer {
 		List<TTable> tables = modelManager.getBaseTables();
 		for (int i = 0; i < tables.size(); i++) {
 			Object model = modelManager.getModel(tables.get(i));
-			if (model instanceof Table) {
+			if (model instanceof Table && !(model instanceof View)) {
 				Table tableModel = (Table) model;
 				if (!tableIds.contains(tableModel.getId())) {
 					appendTableModel(dataflow, tableModel);
@@ -4032,6 +4032,9 @@ public class DataFlowAnalyzer {
 		List<Table> tableNames = modelManager.getTablesByName();
 		for (int i = 0; i < tableNames.size(); i++) {
 			Table tableModel = tableNames.get(i);
+			if (tableModel instanceof View) {
+				continue;
+			}
 			if (!tableIds.contains(tableModel.getId())) {
 				appendTableModel(dataflow, tableModel);
 				tableIds.add(tableModel.getId());
