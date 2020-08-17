@@ -1,5 +1,6 @@
 package demos.dlineage.dataflow.model.xml;
 
+import java.util.LinkedList;
 import java.util.List;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -21,6 +22,9 @@ public class dataflow {
 	}
 
 	public List<relation> getRelations() {
+		if(this.relations == null){
+			this.relations = new LinkedList<>();
+		}
 		return this.relations;
 	}
 
@@ -29,6 +33,9 @@ public class dataflow {
 	}
 
 	public List<table> getTables() {
+		if(this.tables == null){
+			this.tables = new LinkedList<>();
+		}
 		return this.tables;
 	}
 
@@ -37,6 +44,9 @@ public class dataflow {
 	}
 
 	public List<table> getViews() {
+		if(this.views == null){
+			this.views = new LinkedList<>();
+		}
 		return this.views;
 	}
 
@@ -45,6 +55,9 @@ public class dataflow {
 	}
 
 	public List<table> getResultsets() {
+		if(this.resultsets == null){
+			this.resultsets = new LinkedList<>();
+		}
 		return this.resultsets;
 	}
 
@@ -53,6 +66,9 @@ public class dataflow {
 	}
 
 	public List<procedure> getProcedures() {
+		if(this.procedures == null){
+			this.procedures = new LinkedList<>();
+		}
 		return this.procedures;
 	}
 

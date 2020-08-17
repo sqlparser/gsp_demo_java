@@ -1,6 +1,7 @@
 
 package demos.dlineage.dataflow.model.xml;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.simpleframework.xml.Attribute;
@@ -57,6 +58,9 @@ public class table
 
 	public List<column> getColumns( )
 	{
+		if(this.columns == null){
+			this.columns = new LinkedList<>();
+		}
 		return columns;
 	}
 
@@ -197,4 +201,8 @@ public class table
 		return fullName.toString();
 	}
 
+	public void setIsTarget(String isTarget) {
+		this.isTarget = isTarget;
+	}
+	
 }
