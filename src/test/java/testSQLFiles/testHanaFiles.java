@@ -8,5 +8,7 @@ import static testSQLFiles.parseTest.parsefiles;
 public class testHanaFiles extends TestCase {
     public  void testHana(){
         parsefiles(EDbVendor.dbvhana,test.gspCommon.BASE_SQL_DIR+"hana");
+        parsefiles(EDbVendor.dbvhana,test.gspCommon.BASE_SQL_DIR+"java/hana/");
     }
+
 }
