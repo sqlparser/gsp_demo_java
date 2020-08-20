@@ -67,7 +67,11 @@ public class TJsonSQLEnv extends TSQLEnv implements Iterable<Query> {
 
 	@Override
 	public Iterator<Query> iterator() {
-		return jsonContent.getJSONArray("queries").toJavaList(Query.class).iterator();
+		JSONArray queries = jsonContent.getJSONArray("queries");
+		if (queries != null) {
+			return queries.toJavaList(Query.class).iterator();
+		}
+		return null;
 	}
 }
 
