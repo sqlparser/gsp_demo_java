@@ -1,35 +1,18 @@
 package demos.dlineage.sqlenv.sqldep;
 
-import java.util.Iterator;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
 
-public class SQLDepSQLEnv extends TSQLEnv implements Iterable<Query>{
+public class SQLDepSQLEnv extends TSQLEnv {
 
 	private JSONObject jsonContent;
 
 	private Boolean init = false;
-	
-	private boolean debug = false;
-	
-	/**
-	 * @deprecated
-	 * Debug API, please don't use it at the product environment.
-	 */
-	public SQLDepSQLEnv(EDbVendor dbVendor, String jsonFilePath) {
-		super(dbVendor);
-		this.jsonContent = JSON.parseObject(SQLUtil.getFileContent(jsonFilePath));
-		this.debug = true;
-		initSQLEnv();
-	}
 
 	public SQLDepSQLEnv(EDbVendor dbVendor, JSONObject jsonContent) {
 		super(dbVendor);
@@ -40,7 +23,7 @@ public class SQLDepSQLEnv extends TSQLEnv implements Iterable<Query>{
 	@Override
 	public void initSQLEnv() {
 		synchronized (init) {
-			if (init)
+			if (jsonContent == null || init)
 				return;
 
 			JSONObject databaseModel = jsonContent.getJSONObject("databaseModel");
@@ -68,59 +51,10 @@ public class SQLDepSQLEnv extends TSQLEnv implements Iterable<Query>{
 						}
 					}
 				}
+				jsonContent = null;
 				init = true;
-				if(!debug){
-					jsonContent = null;
-				}
 			}
 		}
 	}
 
-	@Override
-	public Iterator<Query> iterator() {
-		if(!debug){
-			throw new UnsupportedOperationException("Only use this api at the debug mode.");
-		}
-		return jsonContent.getJSONArray("queries").toJavaList(Query.class).iterator();
-	}
-}
-
-class Query{
-	private String name;
-	private String database;
-	private String schema;
-	private String groupName;
-	private String sourceCode;
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getDatabase() {
-		return database;
-	}
-	public void setDatabase(String database) {
-		this.database = database;
-	}
-	public String getSchema() {
-		return schema;
-	}
-	public void setSchema(String schema) {
-		this.schema = schema;
-	}
-	public String getGroupName() {
-		return groupName;
-	}
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
-	}
-	public String getSourceCode() {
-		return sourceCode;
-	}
-	public void setSourceCode(String sourceCode) {
-		this.sourceCode = sourceCode;
-	}
-	
-	
 }
