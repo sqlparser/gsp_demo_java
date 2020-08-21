@@ -26,7 +26,7 @@ public class searchDatatype {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvpostgresql;
+        EDbVendor dbVendor = EDbVendor.dbvmysql;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);

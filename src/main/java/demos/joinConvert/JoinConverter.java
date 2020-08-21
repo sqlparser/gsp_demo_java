@@ -279,8 +279,8 @@ public class JoinConverter {
             ErrorMessage = sqlparser.getErrormessage();
             return ErrorNo;
         }
-
-        sqlparser.sqlstatements.forEachRemaining(it -> {
+        sqlparser.sqlstatements.forEach(it -> {
+        //sqlparser.sqlstatements.forEachRemaining(it -> {
             analyzeSelect(it);
             String convertedQuery = it.toString();
             if (!convertedQuery.equals(this.query)) {
