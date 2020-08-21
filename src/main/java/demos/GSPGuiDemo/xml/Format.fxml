@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="907.0" prefWidth="1285.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gudusoft.format.controller.Controller">
+    <children>
+        <Group />
+        <TabPane layoutX="14.0" layoutY="58.0" prefHeight="835.0" prefWidth="1271.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab fx:id="formatMenu" text="pretty print">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="423.0" prefWidth="1271.0" style="-fx-background-color: ;">
+                            <children>
+                                <Group layoutX="-1.0" layoutY="-13.0">
+                                    <children>
+                                        <TextArea fx:id="sqlData" layoutX="5.0" layoutY="15.0" prefHeight="353.0" prefWidth="580.0" style="-fx-font-size: 15; -fx-text-fill: #fc5;" text="SELECT Orders.OrderID,&#10;       Customers.CustomerName,&#10;       Orders.OrderDate&#10;FROM   Orders&#10;       INNER JOIN Customers&#10;       ON Orders. CustomerID = Customers.CustomerID;">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </TextArea>
+                                    </children>
+                                </Group>
+                                <TextArea fx:id="formatResult" layoutX="687.0" layoutY="3.0" prefHeight="353.0" prefWidth="580.0" />
+                                <Button fx:id="formatButton" graphicTextGap="0.0" layoutX="594.0" layoutY="113.0" mnemonicParsing="false" onAction="#format" prefHeight="23.0" prefWidth="84.0" text="format" />
+                                <Button fx:id="copyButton" layoutX="593.0" layoutY="238.0" mnemonicParsing="false" onAction="#copy" prefHeight="30.0" prefWidth="85.0" text="copy" />
+                        <AnchorPane layoutX="7.0" layoutY="363.0" prefHeight="419.0" prefWidth="1259.0" style="-fx-border-color: ;">
+                           <children>
+                                  <Label layoutX="393.0" prefHeight="28.0" prefWidth="132.0" style="-fx-font-weight: bold;" text="General optins:" />
+                                  <VBox layoutY="29.0" prefHeight="95.0" prefWidth="354.0" style="-fx-border-color: black;">
+                                      <children>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="167.0" text="opearateSourceToken:" />
+                                                  <RadioButton fx:id="rd11" mnemonicParsing="false" prefWidth="80.0" text="true">
+                                                      <HBox.margin>
+                                                          <Insets />
+                                                      </HBox.margin>
+                                                      <padding>
+                                                          <Insets bottom="5.0" top="5.0" />
+                                                      </padding>
+                                                      <toggleGroup>
+                                                          <ToggleGroup fx:id="SampleModeGroup" />
+                                                      </toggleGroup>
+                                                  </RadioButton>
+                                                  <RadioButton fx:id="rd12" mnemonicParsing="false" prefWidth="80.0" text="false" toggleGroup="$SampleModeGroup">
+                                                      <HBox.margin>
+                                                          <Insets left="15.0" />
+                                                      </HBox.margin>
+                                                      <padding>
+                                                          <Insets bottom="5.0" top="5.0" />
+                                                      </padding>
+                                                  </RadioButton>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                              <rotationAxis>
+                                                  <Point3D x="10.0" z="1.0" />
+                                              </rotationAxis>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="167.0" text="        defaultAligntype:" />
+                                                  <ComboBox fx:id="type11" prefHeight="24.0" prefWidth="176.0" visibleRowCount="2" />
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                      </children>
+                                  </VBox>
+                                  <VBox layoutX="395.0" layoutY="29.0" prefHeight="180.0" prefWidth="354.0" style="-fx-border-color: black;">
+                                      <children>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="195.0" text="selectColumnlistStyle：" />
+                                                  <ComboBox fx:id="type211" prefHeight="24.0" prefWidth="160.0" visibleRowCount="2">
+                                                      <HBox.margin>
+                                                          <Insets left="-10.0" />
+                                                      </HBox.margin>
+                                                  </ComboBox>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                              <rotationAxis>
+                                                  <Point3D x="10.0" z="1.0" />
+                                              </rotationAxis>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="195.0" text="selectColumnlistComma:" />
+                                                  <ComboBox fx:id="type111" prefHeight="24.0" prefWidth="160.0" visibleRowCount="2">
+                                                      <HBox.margin>
+                                                          <Insets left="-10.0" />
+                                                      </HBox.margin>
+                                                  </ComboBox>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="195.0" text="selectItemInNewLine:" />
+                                                  <RadioButton fx:id="rd13" mnemonicParsing="false" prefWidth="70.0" text="true">
+                                                      <HBox.margin>
+                                                          <Insets left="-10.0" />
+                                                      </HBox.margin>
+                                                      <padding>
+                                                          <Insets bottom="5.0" />
+                                                      </padding>
+                                                      <toggleGroup>
+                                                          <ToggleGroup fx:id="SampleModeGroup2" />
+                                                      </toggleGroup>
+                                                  </RadioButton>
+                                                  <RadioButton fx:id="rd14" mnemonicParsing="false" prefWidth="70.0" text="false" toggleGroup="$SampleModeGroup2">
+                                                      <padding>
+                                                          <Insets bottom="5.0" />
+                                                      </padding>
+                                                      <HBox.margin>
+                                                          <Insets left="20.0" />
+                                                      </HBox.margin>
+                                                  </RadioButton>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="28.0" prefWidth="195.0" text="alignAliasInSelectList:" />
+                                          <RadioButton fx:id="rd141" mnemonicParsing="false" prefWidth="70.0" text="true">
+                                             <padding>
+                                                <Insets bottom="5.0" />
+                                             </padding>
+                                             <HBox.margin>
+                                                <Insets left="-10.0" />
+                                             </HBox.margin>
+                                              <toggleGroup>
+                                                  <ToggleGroup fx:id="SampleModeGroup3" />
+                                              </toggleGroup>
+                                          </RadioButton>
+                                          <RadioButton fx:id="rd131" mnemonicParsing="false" prefWidth="70.0" text="false" toggleGroup="$SampleModeGroup3">
+                                             <padding>
+                                                <Insets bottom="5.0" />
+                                             </padding>
+                                             <HBox.margin>
+                                                <Insets left="20.0" />
+                                             </HBox.margin>
+                                          </RadioButton>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                          <HBox prefHeight="47.0" prefWidth="394.0">
+                                              <children>
+                                                  <Label prefHeight="26.0" prefWidth="227.0" text="treatDistinctAsVirtualColumn:" />
+                                          <RadioButton fx:id="rd142" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="true">
+                                             <padding>
+                                                <Insets bottom="5.0" />
+                                             </padding>
+                                              <toggleGroup>
+                                                  <ToggleGroup fx:id="SampleModeGroup4" />
+                                              </toggleGroup>
+                                          </RadioButton>
+                                          <RadioButton fx:id="rd132" mnemonicParsing="false" prefHeight="25.0" prefWidth="64.0" text="false" toggleGroup="$SampleModeGroup4">
+                                             <padding>
+                                                <Insets bottom="5.0" />
+                                             </padding>
+                                          </RadioButton>
+                                              </children>
+                                              <padding>
+                                                  <Insets left="3.0" top="10.0" />
+                                              </padding>
+                                          </HBox>
+                                      </children>
+                                  </VBox>
+                                  <Label prefHeight="28.0" prefWidth="132.0" style="-fx-font-weight: bold;" text="Select list optins:" />
+                           </children>
+                        </AnchorPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="exportMenu" text="orther">
+                    <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+          <ComboBox fx:id="type" layoutX="154.0" layoutY="14.0" prefHeight="24.0" prefWidth="176.0" visibleRowCount="10" />
+          <Label fx:id="typeTitle" layoutX="14.0" layoutY="16.0" text="Database Vendor：" />
+    </children>
+
+</AnchorPane>
