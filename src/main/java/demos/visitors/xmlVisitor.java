@@ -3212,7 +3212,7 @@ public class xmlVisitor extends TParseTreeVisitor
 			for ( int i = 0; i < stmt.getOptions( ).size( ); i++ )
 			{
 				TSequenceOption sequenceOption = stmt.getOptions( )
-						.getElement( i );
+						.get( i );
 				switch ( sequenceOption.getSequenceOptionType( ) )
 				{
 					case start :

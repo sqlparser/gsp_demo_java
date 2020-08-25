@@ -17,8 +17,8 @@ public class testSequence extends TestCase {
                 "    INCREMENT BY 1 ;";
         assertTrue(sqlparser.parse() == 0);
         TCreateSequenceStmt stmt = (TCreateSequenceStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(stmt.getOptions().getElement(0).getSequenceOptionType() == ESequenceOptionType.startWith);
-        assertTrue(stmt.getOptions().getElement(0).getOptionValue().toString().equalsIgnoreCase("1"));
+        assertTrue(stmt.getOptions().get(0).getSequenceOptionType() == ESequenceOptionType.startWith);
+        assertTrue(stmt.getOptions().get(0).getOptionValue().toString().equalsIgnoreCase("1"));
     }
 
     public void testDrop(){

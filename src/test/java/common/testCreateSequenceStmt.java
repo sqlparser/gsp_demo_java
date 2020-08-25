@@ -12,6 +12,8 @@ import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
 
+import java.util.ArrayList;
+
 public class testCreateSequenceStmt extends TestCase {
 
     public void test1(){
@@ -22,16 +24,16 @@ public class testCreateSequenceStmt extends TestCase {
         TCreateSequenceStmt sequence = (TCreateSequenceStmt)sqlparser.sqlstatements.get(0);
         assertTrue(sequence.getSequenceName().toString().equalsIgnoreCase("\"ABCUSA_CUST\".\"DAYPART_CODE_SEQ\""));
 
-        TPTNodeList<TSequenceOption> options = sequence.getOptions();
+        ArrayList<TSequenceOption> options = sequence.getOptions();
         assertTrue(options.size() == 7);
-        assertTrue(options.getElement(0).toString().equalsIgnoreCase("MINVALUE 1"));
-        assertTrue(options.getElement(0).getSequenceOptionType() == ESequenceOptionType.minValue);
-        assertTrue(options.getElement(1).toString().equalsIgnoreCase("MAXVALUE 999999999999999999999999999"));
-        assertTrue(options.getElement(2).toString().equalsIgnoreCase("INCREMENT BY 1"));
-        assertTrue(options.getElement(3).toString().equalsIgnoreCase("START WITH 150"));
-        assertTrue(options.getElement(4).toString().equalsIgnoreCase("CACHE 20"));
-        assertTrue(options.getElement(5).toString().equalsIgnoreCase("NOORDER"));
-        assertTrue(options.getElement(6).toString().equalsIgnoreCase("NOCYCLE"));
+        assertTrue(options.get(0).toString().equalsIgnoreCase("MINVALUE 1"));
+        assertTrue(options.get(0).getSequenceOptionType() == ESequenceOptionType.minValue);
+        assertTrue(options.get(1).toString().equalsIgnoreCase("MAXVALUE 999999999999999999999999999"));
+        assertTrue(options.get(2).toString().equalsIgnoreCase("INCREMENT BY 1"));
+        assertTrue(options.get(3).toString().equalsIgnoreCase("START WITH 150"));
+        assertTrue(options.get(4).toString().equalsIgnoreCase("CACHE 20"));
+        assertTrue(options.get(5).toString().equalsIgnoreCase("NOORDER"));
+        assertTrue(options.get(6).toString().equalsIgnoreCase("NOCYCLE"));
     }
 
 }

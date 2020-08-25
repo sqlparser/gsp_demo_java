@@ -20,7 +20,7 @@ public class testSequence extends TestCase {
         TCreateSequenceStmt sequenceStmt = (TCreateSequenceStmt)sqlparser.sqlstatements.get(0);
         assertTrue(sequenceStmt.getSequenceName().toString().equalsIgnoreCase("SOME_SEQ"));
         for(int i=0;i<sequenceStmt.getOptions().size();i++){
-            TSequenceOption sequenceOption = sequenceStmt.getOptions().getElement(i);
+            TSequenceOption sequenceOption = sequenceStmt.getOptions().get(i);
            // System.out.println(dummy.toString());
         }
         //System.out.println(sequenceStmt.getSequenceName().toString());

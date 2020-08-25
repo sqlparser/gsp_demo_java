@@ -3,9 +3,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.TAlterTableOption;
-import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
-import gudusoft.gsqlparser.nodes.TTypeName;
+import gudusoft.gsqlparser.nodes.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +25,7 @@ public class searchNode {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvpostgresql;
+        EDbVendor dbVendor = EDbVendor.dbvoracle;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -59,4 +57,17 @@ class nodeVisitor extends TParseTreeVisitor {
 
         System.out.println("");
     }
+
+    public void preVisit(TColumnDefinition cd){
+        System.out.println("column:"+cd.getColumnName().toString());
+    }
+
+    public void preVisit(TIdentityClause identityClause){
+        System.out.println("\tidentityClause:"+identityClause.toString());
+    }
+
+    public void preVisit(TSequenceOption sequenceOption){
+        System.out.println("\t\tsequenceOption:"+sequenceOption.getSequenceOptionType().toString()+" ,value:"+sequenceOption.getOptionValue().toString());
+    }
+
 }
