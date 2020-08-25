@@ -11,7 +11,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="root" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1093.0" prefWidth="1582.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gudusoft.format.controller.Controller">
+<AnchorPane fx:id="root" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="893.0" prefWidth="1582.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gudusoft.format.controller.Controller">
     <children>
         <Group />
         <TabPane fx:id="tab" layoutX="14.0" layoutY="58.0" maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE">
@@ -22,17 +22,17 @@
                             <children>
                                 <Group layoutX="-1.0" layoutY="-13.0">
                                     <children>
-                                        <TextArea fx:id="sqlData" layoutX="5.0" layoutY="15.0" prefHeight="358.0" prefWidth="711.0" style="-fx-font-size: 15;" text="SELECT Orders.OrderID,&#10;       Customers.CustomerName,&#10;       Orders.OrderDate&#10;FROM   Orders&#10;       INNER JOIN Customers&#10;       ON Orders. CustomerID = Customers.CustomerID;">
+                                        <TextArea fx:id="sqlData" layoutX="5.0" layoutY="15.0" prefHeight="283.0" prefWidth="711.0" style="-fx-font-size: 15;" text="select last_name,job_id,salary from employees&#10;where job_id=(select job_id&#10;from employees&#10;where employee_id=141)&#10;and salary &gt;&#10;(select salary&#10;from employees&#10;where employee_id=141)&#10;and name='zs'&#10;and&#10;age &gt;10&#10;and job_id=132;">
                                             <font>
                                                 <Font size="16.0" />
                                             </font>
                                         </TextArea>
                                     </children>
                                 </Group>
-                                <TextArea fx:id="formatResult" layoutX="841.0" layoutY="2.0" prefHeight="358.0" prefWidth="711.0" />
-                                <Button fx:id="formatButton" graphicTextGap="0.0" layoutX="735.0" layoutY="105.0" mnemonicParsing="false" onAction="#format" prefHeight="23.0" prefWidth="84.0" text="format" />
-                                <Button fx:id="copyButton" layoutX="735.0" layoutY="237.0" mnemonicParsing="false" onAction="#copy" prefHeight="30.0" prefWidth="85.0" text="copy" />
-                                <AnchorPane fx:id="parametric" layoutX="3.0" layoutY="363.0" maxHeight="1.7976931348623157E308" prefHeight="621.0" prefWidth="1546.0">
+                                <TextArea fx:id="formatResult" layoutX="841.0" layoutY="2.0" prefHeight="283.0" prefWidth="711.0" />
+                                <Button fx:id="formatButton" graphicTextGap="0.0" layoutX="734.0" layoutY="76.0" mnemonicParsing="false" onAction="#format" prefHeight="23.0" prefWidth="84.0" text="format" />
+                                <Button fx:id="copyButton" layoutX="736.0" layoutY="193.0" mnemonicParsing="false" onAction="#copy" prefHeight="30.0" prefWidth="85.0" text="copy" />
+                                <AnchorPane fx:id="parametric" layoutX="3.0" layoutY="300.0" maxHeight="1.7976931348623157E308" prefHeight="480.0" prefWidth="1546.0">
                                     <children>
                                         <ScrollPane fx:id="scrollpane" layoutY="3.0" prefHeight="618.0" prefWidth="1542.0">
                                             <content>
@@ -129,19 +129,25 @@
                                                                         </HBox>
                                                                         <HBox prefHeight="47.0" prefWidth="394.0">
                                                                             <children>
-                                                                                <Label prefHeight="25.0" prefWidth="234.0" text="treatDistinctAsVirtualColumn:" />
-                                                                                <RadioButton fx:id="rd17" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="true">
+                                                                                <Label prefHeight="25.0" prefWidth="202.0" text="treatDistinctAsVirtualColumn:" />
+                                                                                <RadioButton fx:id="rd17" mnemonicParsing="false" prefHeight="25.0" prefWidth="70.0" text="true">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" />
                                                                                     </padding>
                                                                                     <toggleGroup>
                                                                                         <ToggleGroup fx:id="SampleModeGroup6" />
                                                                                     </toggleGroup>
+                                                               <HBox.margin>
+                                                                  <Insets left="5.0" />
+                                                               </HBox.margin>
                                                                                 </RadioButton>
                                                                                 <RadioButton fx:id="rd18" mnemonicParsing="false" prefHeight="25.0" prefWidth="64.0" text="false" toggleGroup="$SampleModeGroup6">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" />
                                                                                     </padding>
+                                                               <HBox.margin>
+                                                                  <Insets left="20.0" />
+                                                               </HBox.margin>
                                                                                 </RadioButton>
                                                                             </children>
                                                                             <padding>
@@ -262,11 +268,11 @@
                                                                     </children>
                                                                 </VBox>
                                                                 <Label layoutX="20.0" layoutY="20.0" prefHeight="28.0" prefWidth="132.0" style="-fx-font-weight: bold;" text="General optins:" />
-                                                                <VBox layoutX="20.0" layoutY="183.0" prefHeight="78.0" prefWidth="375.0" style="-fx-border-color: black;">
+                                                                <VBox layoutX="429.0" layoutY="820.0" prefHeight="70.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefHeight="62.0" prefWidth="373.0">
                                                                             <children>
-                                                                                <Label prefHeight="20.0" prefWidth="177.0" text="   andOrUnderWhere:">
+                                                                                <Label prefHeight="20.0" prefWidth="178.0" text="   andOrUnderWhere:">
                                                                                     <HBox.margin>
                                                                                         <Insets top="10.0" />
                                                                                     </HBox.margin>
@@ -297,11 +303,6 @@
                                                                             <rotationAxis>
                                                                                 <Point3D x="10.0" z="1.0" />
                                                                             </rotationAxis>
-                                                                        </HBox>
-                                                                        <HBox prefHeight="0.0" prefWidth="221.0">
-                                                                            <padding>
-                                                                                <Insets left="3.0" top="10.0" />
-                                                                            </padding>
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
@@ -351,12 +352,12 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-                                                                <Label layoutX="20.0" layoutY="155.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="And/Or keyword under where optins:" />
+                                                                <Label layoutX="429.0" layoutY="790.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="And/Or keyword under where optins:" />
                                                                 <VBox layoutX="20.0" layoutY="49.0" prefHeight="96.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefHeight="47.0" prefWidth="394.0">
                                                                             <children>
-                                                                                <Label prefHeight="20.0" prefWidth="194.0" text="opearateSourceToken:" />
+                                                                                <Label prefHeight="20.0" prefWidth="214.0" text="opearateSourceToken:" />
                                                                                 <RadioButton fx:id="rd11" mnemonicParsing="false" prefHeight="30.0" prefWidth="84.0" text="true">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" top="5.0" />
@@ -386,7 +387,7 @@
                                                                         </HBox>
                                                                         <HBox prefHeight="49.0" prefWidth="293.0">
                                                                             <children>
-                                                                                <Label prefHeight="25.0" prefWidth="186.0" text="        defaultAligntype:" />
+                                                                                <Label prefHeight="25.0" prefWidth="208.0" text="        defaultAligntype:" />
                                                                                 <ComboBox fx:id="type11" prefHeight="30.0" prefWidth="156.0" visibleRowCount="2">
                                                                                     <HBox.margin>
                                                                                         <Insets />
@@ -399,8 +400,8 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-                                                                <Label layoutX="20.0" layoutY="267.0" prefHeight="28.0" prefWidth="118.0" style="-fx-font-weight: bold;" text="Create table:" />
-                                                                <VBox layoutX="20.0" layoutY="293.0" prefWidth="375.0" style="-fx-border-color: black;">
+                                                                <Label layoutX="20.0" layoutY="155.0" prefHeight="28.0" prefWidth="118.0" style="-fx-font-weight: bold;" text="Create table:" />
+                                                                <VBox layoutX="20.0" layoutY="183.0" prefHeight="122.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefWidth="264.0">
                                                                             <children>
@@ -434,8 +435,8 @@
                                                                         </HBox>
                                                                         <HBox prefWidth="394.0">
                                                                             <children>
-                                                                                <Label prefHeight="25.0" prefWidth="255.0" text="createtableListitemInNewLine:" />
-                                                                                <RadioButton fx:id="rd31" mnemonicParsing="false" prefHeight="30.0" prefWidth="86.0" text="true">
+                                                                                <Label prefHeight="25.0" prefWidth="293.0" text="createtableListitemInNewLine:" />
+                                                                                <RadioButton fx:id="rd31" mnemonicParsing="false" prefHeight="30.0" prefWidth="85.0" text="true">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" top="5.0" />
                                                                                     </padding>
@@ -443,10 +444,10 @@
                                                                                         <ToggleGroup fx:id="SampleModeGroup123" />
                                                                                     </toggleGroup>
                                                                                     <HBox.margin>
-                                                                                        <Insets left="10.0" top="-5.0" />
+                                                                                        <Insets top="-5.0" />
                                                                                     </HBox.margin>
                                                                                 </RadioButton>
-                                                                                <RadioButton fx:id="rd32" mnemonicParsing="false" prefHeight="30.0" prefWidth="73.0" text="false" toggleGroup="$SampleModeGroup123">
+                                                                                <RadioButton fx:id="rd32" mnemonicParsing="false" prefHeight="30.0" prefWidth="74.0" text="false" toggleGroup="$SampleModeGroup123">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" top="5.0" />
                                                                                     </padding>
@@ -461,7 +462,7 @@
                                                                         </HBox>
                                                                         <HBox prefWidth="394.0">
                                                                             <children>
-                                                                                <Label prefHeight="25.0" prefWidth="243.0" text="createtableFieldlistAlignOption:" />
+                                                                                <Label prefHeight="25.0" prefWidth="282.0" text="createtableFieldlistAlignOption:" />
                                                                                 <ComboBox fx:id="type133" prefHeight="24.0" prefWidth="117.0" visibleRowCount="2">
                                                                                     <HBox.margin>
                                                                                         <Insets right="5.0" />
@@ -512,7 +513,7 @@
                                                                                 </HBox>
                                                                                 <HBox prefHeight="25.0" prefWidth="394.0">
                                                                                     <children>
-                                                                                        <Label prefHeight="25.0" prefWidth="256.0" text="beStyleBlockLeftBEOnNewline:" />
+                                                                                        <Label prefHeight="25.0" prefWidth="255.0" text="beStyleBlockLeftBEOnNewline:" />
                                                                                         <RadioButton fx:id="rd35" mnemonicParsing="false" prefHeight="30.0" prefWidth="89.0" text="true">
                                                                                             <padding>
                                                                                                 <Insets bottom="5.0" top="5.0" />
@@ -717,9 +718,9 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-                                                                <Label layoutX="20" layoutY="410.0" prefHeight="28.0" prefWidth="219.0" style="-fx-font-weight: bold;" text="Padding options:" />
-                                                                <VBox layoutX="20.0" layoutY="436.0" prefWidth="375.0" style="-fx-border-color: black;">
+            
+                                                                                  <Label layoutX="20.0" layoutY="304.0" prefHeight="28.0" prefWidth="219.0" style="-fx-font-weight: bold;" text="Padding options:" />
+                                                                <VBox layoutX="20.0" layoutY="332.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefWidth="264.0">
                                                                             <children>
@@ -999,14 +1000,14 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-
-                                                                <Label layoutX="429.0" layoutY="578.0" prefHeight="28.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Line number:" />
+            
+                        
+                                                                                        <Label layoutX="429.0" layoutY="578.0" prefHeight="28.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Line number:" />
                                                                 <VBox layoutX="429.0" layoutY="601.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefHeight="25.0" prefWidth="264.0">
                                                                             <children>
-                                                                                <Label prefHeight="25.0" prefWidth="223.0" text="linenumberEnabled:" />
+                                                                                <Label prefHeight="25.0" prefWidth="225.0" text="linenumberEnabled:" />
                                                                                 <RadioButton fx:id="rd332" mnemonicParsing="false" text="true">
                                                                                     <padding>
                                                                                         <Insets bottom="5.0" top="5.0" />
@@ -1154,8 +1155,8 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-                                                                <Label layoutX="1232.0" layoutY="650.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="Common Table Expression:" />
+            
+                                                                                  <Label layoutX="1232.0" layoutY="650.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="Common Table Expression:" />
                                                                 <VBox layoutX="1232.0" layoutY="680.0" prefHeight="51.0" prefWidth="283.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefHeight="47.0" prefWidth="394.0">
@@ -1184,8 +1185,8 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-                                                                <Label layoutX="1232.0" layoutY="735.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="Declare statement:" />
+            
+                                                                                  <Label layoutX="1232.0" layoutY="735.0" prefHeight="28.0" prefWidth="330.0" style="-fx-font-weight: bold;" text="Declare statement:" />
                                                                 <VBox layoutX="1232.0" layoutY="760.0" prefHeight="51.0" prefWidth="283.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefHeight="47.0" prefWidth="394.0">
@@ -1214,11 +1215,11 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-
-
-                                                                <Label layoutX="20" layoutY="700.0" prefHeight="28.0" prefWidth="325.0" style="-fx-font-weight: bold;" text="Parameters in create procedure/function:" />
-                                                                <VBox layoutX="20.0" layoutY="725.0" prefWidth="375.0" style="-fx-border-color: black;">
+            
+                        
+                              
+                                                                                        <Label layoutX="20" layoutY="600.0" prefHeight="28.0" prefWidth="325.0" style="-fx-font-weight: bold;" text="Parameters in create procedure/function:" />
+                                                                <VBox layoutX="20.0" layoutY="625.0" prefWidth="375.0" style="-fx-border-color: black;">
                                                                     <children>
                                                                         <HBox prefWidth="264.0">
                                                                             <children>
@@ -1358,8 +1359,8 @@
                                                                         </HBox>
                                                                     </children>
                                                                 </VBox>
-
-                                                            </children>
+            
+                                                                              </children>
                                                         </Group>
                                                     </children>
                                                 </AnchorPane>
