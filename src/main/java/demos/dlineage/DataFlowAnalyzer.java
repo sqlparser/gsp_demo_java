@@ -301,7 +301,7 @@ public class DataFlowAnalyzer {
 		return builder.toString();
 	}
 
-	public synchronized String generateDataFlow(StringBuffer errorMessage, boolean withTargetInfo) {
+	public synchronized String generateDataFlow(StringBuffer errorMessage, boolean withExtraInfo) {
 		if (ModelBindingManager.get() == null) {
 			ModelBindingManager.set(modelManager);
 		}
@@ -314,14 +314,18 @@ public class DataFlowAnalyzer {
 		System.setErr(pw);
 
 		dataflow dataflow = analyzeSqlScript();
-		if(!withTargetInfo){
-			dataflow.getResultsets().forEach( t -> t.setIsTarget(null));
-		}
 		
 		if (dataflow!=null && !isShowJoin()) {
 			ModelBindingManager.setGlobalVendor(vendor);
 			dataflow = mergeTables(dataflow);
 			ModelBindingManager.removeGlobalVendor();
+		}
+		
+		if(!withExtraInfo){
+			dataflow.getResultsets().forEach( t -> t.setIsTarget(null));
+			dataflow.getResultsets().forEach(t->{
+				t.getColumns().forEach(t1->t1.setIsFunction(null));
+			});
 		}
 		
 		if (dataflow != null) {
@@ -480,33 +484,45 @@ public class DataFlowAnalyzer {
 			Set<String> columns = tableColumnMap.get(tableName);
 			Iterator<String> columnIter = columns.iterator();
 			List<column> mergeColumns = new ArrayList<column>();
-			while(columnIter.hasNext()){
+			while (columnIter.hasNext()) {
 				String columnName = columnIter.next();
 				List<column> columnList = columnMap.get(columnName);
-				column firstColumn = columnList.iterator().next();
-				if(columnList.size()>1){
-					column mergeColumn = new column();
-					mergeColumn.setId(String.valueOf(++modelManager.TABLE_COLUMN_ID));
-					mergeColumn.setName(firstColumn.getName());
-					mergeColumn.setSource(firstColumn.getSource());
-					mergeColumn.setQualifiedTable(firstColumn.getQualifiedTable());
-					mergeColumns.add(mergeColumn);
-					for (column item : columnList) {
-						if (!SQLUtil.isEmpty(mergeColumn.getCoordinate()) && !SQLUtil.isEmpty(item.getCoordinate())) {
-							if(mergeColumn.getCoordinate().indexOf(item.getCoordinate())==-1){
-								mergeColumn.setCoordinate(mergeColumn.getCoordinate() + "," + item.getCoordinate());
-							}
-						} else if (!SQLUtil.isEmpty(item.getCoordinate())) {
-							mergeColumn.setCoordinate(item.getCoordinate());
-						}
-						columnIdMap.put(item.getId(), mergeColumn.getId());
+				List<column> functions = columnList.stream().filter(t->Boolean.TRUE.toString().equals(t.getIsFunction())).collect(Collectors.toList());
+				if(functions!=null && !functions.isEmpty()){
+					for(column function: functions){
+						mergeColumns.add(function);
+						columnIdMap.put(function.getId(), function.getId());
+						columnMergeIdMap.put(function.getId(), function);
 					}
-					columnMergeIdMap.put(mergeColumn.getId(), mergeColumn);
+					
+					columnList.removeAll(functions);
 				}
-				else{
-					mergeColumns.add(firstColumn);
-					columnIdMap.put(firstColumn.getId(), firstColumn.getId());
-					columnMergeIdMap.put(firstColumn.getId(), firstColumn);
+				if (!columnList.isEmpty()) {
+					column firstColumn = columnList.iterator().next();
+					if (columnList.size() > 1) {
+						column mergeColumn = new column();
+						mergeColumn.setId(String.valueOf(++modelManager.TABLE_COLUMN_ID));
+						mergeColumn.setName(firstColumn.getName());
+						mergeColumn.setSource(firstColumn.getSource());
+						mergeColumn.setQualifiedTable(firstColumn.getQualifiedTable());
+						mergeColumns.add(mergeColumn);
+						for (column item : columnList) {
+							if (!SQLUtil.isEmpty(mergeColumn.getCoordinate())
+									&& !SQLUtil.isEmpty(item.getCoordinate())) {
+								if (mergeColumn.getCoordinate().indexOf(item.getCoordinate()) == -1) {
+									mergeColumn.setCoordinate(mergeColumn.getCoordinate() + "," + item.getCoordinate());
+								}
+							} else if (!SQLUtil.isEmpty(item.getCoordinate())) {
+								mergeColumn.setCoordinate(item.getCoordinate());
+							}
+							columnIdMap.put(item.getId(), mergeColumn.getId());
+						}
+						columnMergeIdMap.put(mergeColumn.getId(), mergeColumn);
+					} else {
+						mergeColumns.add(firstColumn);
+						columnIdMap.put(firstColumn.getId(), firstColumn.getId());
+						columnMergeIdMap.put(firstColumn.getId(), firstColumn);
+					}
 				}
 			}
 			table.setColumns(mergeColumns);
@@ -3655,6 +3671,9 @@ public class DataFlowAnalyzer {
 					TObjectName column = columnModel.getStarLinkColumns().get(k);
 					String columnName =  getColumnName(column);
 					columnElement.setName(columnName);
+					if(columnModel.isFunction()){
+						columnElement.setIsFunction(String.valueOf(columnModel.isFunction()));
+					}
 					if (columnModel.getStartPosition() != null && columnModel.getEndPosition() != null) {
 						columnElement.setCoordinate(
 								columnModel.getStartPosition() + "," + columnModel.getEndPosition());
@@ -3671,6 +3690,9 @@ public class DataFlowAnalyzer {
 					column columnElement = new column();
 					columnElement.setId( String.valueOf(columnModel.getId()));
 					columnElement.setName( columnModel.getName());
+					if(columnModel.isFunction()){
+						columnElement.setIsFunction(String.valueOf(columnModel.isFunction()));
+					}
 					if (columnModel.getStartPosition() != null && columnModel.getEndPosition() != null) {
 						columnElement.setCoordinate(
 								columnModel.getStartPosition() + "," + columnModel.getEndPosition());
@@ -3689,6 +3711,9 @@ public class DataFlowAnalyzer {
 				column columnElement = new column();
 				columnElement.setId( String.valueOf(columnModel.getId()));
 				columnElement.setName( columnModel.getName());
+				if(columnModel.isFunction()){
+					columnElement.setIsFunction(String.valueOf(columnModel.isFunction()));
+				}
 				if (columnModel.getStartPosition() != null && columnModel.getEndPosition() != null) {
 					columnElement.setCoordinate(
 							columnModel.getStartPosition() + "," + columnModel.getEndPosition());
@@ -6374,11 +6399,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion(){
-		return "1.3.0";
+		return "1.3.1";
 	}
 	
 	public static String getReleaseDate(){
-		return "2020-08-13";
+		return "2020-08-27";
 	} 
 
 	public static void main(String[] args) {

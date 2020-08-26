@@ -33,6 +33,8 @@ public class ResultColumn {
     protected List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
     
     private boolean showStar = true;
+    
+    protected boolean isFunction = false;
 
     public ResultColumn() {
 
@@ -82,6 +84,10 @@ public class ResultColumn {
         resultSet.addColumn(this);
 
         this.columnObject = resultColumnObject;
+        
+        if(resultColumnObject.getExpr().getExpressionType() == EExpressionType.function_t){
+        	this.isFunction = true;
+        }
 
         if (resultColumnObject.getAliasClause() != null) {
             this.alias = resultColumnObject.getAliasClause().toString();
@@ -156,6 +162,10 @@ public class ResultColumn {
         this.resultSet = resultSet;
         resultSet.addColumn(this);
 
+        if(starColumnPair.first !=null && starColumnPair.first.getExpr().getExpressionType() == EExpressionType.function_t){
+        	this.isFunction = true;
+        }
+        
         this.columnObject = starColumnPair.first;
 
         TSourceToken startToken = columnObject.getStartToken();
@@ -253,5 +263,12 @@ public class ResultColumn {
 		this.showStar = showStar;
 	}
 
-    
+	public boolean isFunction() {
+		return isFunction;
+	}
+
+	public void setFunction(boolean isFunction) {
+		this.isFunction = isFunction;
+	}
+
 }

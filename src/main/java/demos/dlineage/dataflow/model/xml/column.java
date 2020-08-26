@@ -22,6 +22,9 @@ public class column
 	@Attribute(required = false)
 	private String qualifiedTable;
 	
+	@Attribute(required = false)
+	private String isFunction;
+	
 
 	public String getCoordinate( )
 	{
@@ -133,4 +136,11 @@ public class column
 		return true;
 	}
 
+	public String getIsFunction() {
+		return isFunction;
+	}
+
+	public void setIsFunction(String isFunction) {
+		this.isFunction = isFunction;
+	}
 }
