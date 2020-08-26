@@ -300,8 +300,8 @@ public class DataFlowAnalyzer {
 		}
 		return builder.toString();
 	}
-	
-	public synchronized String generateDataFlow(StringBuffer errorMessage) {
+
+	public synchronized String generateDataFlow(StringBuffer errorMessage, boolean withTargetInfo) {
 		if (ModelBindingManager.get() == null) {
 			ModelBindingManager.set(modelManager);
 		}
@@ -313,8 +313,11 @@ public class DataFlowAnalyzer {
 		pw = new PrintStream(sw);
 		System.setErr(pw);
 
-		dataflow dataflow = analyzeSqlScript();		
-
+		dataflow dataflow = analyzeSqlScript();
+		if(!withTargetInfo){
+			dataflow.getResultsets().forEach( t -> t.setIsTarget(null));
+		}
+		
 		if (dataflow!=null && !isShowJoin()) {
 			ModelBindingManager.setGlobalVendor(vendor);
 			dataflow = mergeTables(dataflow);
@@ -345,6 +348,10 @@ public class DataFlowAnalyzer {
 		}
 
 		return dataflowString;
+	}
+	
+	public synchronized String generateDataFlow(StringBuffer errorMessage) {
+		return generateDataFlow(errorMessage, false);
 	}
 
 	private dataflow mergeTables(dataflow dataflow) {
@@ -3609,9 +3616,9 @@ public class DataFlowAnalyzer {
 		}
 		resultSetElement.setName( getResultSetName(resultSetModel));
 		resultSetElement.setType(getResultSetType(resultSetModel));
-		if ((ignoreRecordSet || simpleOutput) && resultSetModel.isTarget()) {
+		//if ((ignoreRecordSet || simpleOutput) && resultSetModel.isTarget()) {
 			resultSetElement.setIsTarget(String.valueOf(resultSetModel.isTarget()));
-		}
+		//}
 		if (resultSetModel.getStartPosition() != null && resultSetModel.getEndPosition() != null) {
 			resultSetElement.setCoordinate(
 					resultSetModel.getStartPosition() + "," + resultSetModel.getEndPosition());
