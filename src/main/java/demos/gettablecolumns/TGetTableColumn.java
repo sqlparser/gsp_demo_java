@@ -577,7 +577,9 @@ public class TGetTableColumn{
                         + lcTable.getAliasName( )
                         + ")";
 
-                analyzeStmt(lcTable.getSubquery(),pNest++);
+                if (lcTable.getSubquery() != null){
+                    analyzeStmt(lcTable.getSubquery(),pNest++);
+                }
             }else if (lcTable.getTableType() == ETableSource.function){
                 tn = "(table-valued function:"
                         + lcTable.getTableName( )
