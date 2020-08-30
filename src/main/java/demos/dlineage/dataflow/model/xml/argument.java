@@ -1,6 +1,5 @@
 package demos.dlineage.dataflow.model.xml;
 
-import demos.dlineage.util.Pair;
 import org.simpleframework.xml.Attribute;
 
 public class argument {
@@ -21,19 +20,7 @@ public class argument {
 	public String getCoordinate() {
 		return this.coordinate;
 	}
-
-	public int getOccurrencesNumber() {
-		return PositionUtil.getOccurrencesNumber(this.coordinate);
-	}
-
-	public Pair<Integer, Integer> getStartPos(int index) {
-		return PositionUtil.getStartPos(this.coordinate, index);
-	}
-
-	public Pair<Integer, Integer> getEndPos(int index) {
-		return PositionUtil.getEndPos(this.coordinate, index);
-	}
-
+	
 	public void setCoordinate(String coordinate) {
 		this.coordinate = coordinate;
 	}

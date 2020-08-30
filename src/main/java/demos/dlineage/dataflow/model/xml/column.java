@@ -3,8 +3,6 @@ package demos.dlineage.dataflow.model.xml;
 
 import org.simpleframework.xml.Attribute;
 
-import demos.dlineage.util.Pair;
-
 public class column
 {
 	@Attribute(required = false)
@@ -29,21 +27,6 @@ public class column
 	public String getCoordinate( )
 	{
 		return coordinate;
-	}
-
-	public int getOccurrencesNumber( )
-	{
-		return PositionUtil.getOccurrencesNumber( coordinate );
-	}
-
-	public Pair<Integer, Integer> getStartPos( int index )
-	{
-		return PositionUtil.getStartPos( coordinate, index );
-	}
-
-	public Pair<Integer, Integer> getEndPos( int index )
-	{
-		return PositionUtil.getEndPos( coordinate, index );
 	}
 
 	public void setCoordinate( String coordinate )

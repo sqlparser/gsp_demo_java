@@ -1,7 +1,10 @@
 
 package demos.dlineage.dataflow.model;
 
-import demos.dlineage.util.Pair;
+import java.util.HashSet;
+import java.util.Set;
+
+import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.ESetOperatorType;
@@ -10,9 +13,6 @@ import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class SelectSetResultColumn extends ResultColumn {
 
@@ -150,10 +150,10 @@ public class SelectSetResultColumn extends ResultColumn {
                         .getStartToken();
                 TSourceToken endToken = resultColumnObject.getAliasClause()
                         .getEndToken();
-                this.aliasStartPosition = new Pair<Long, Long>(
-                        startToken.lineNo, startToken.columnNo);
-                this.aliasEndPosition = new Pair<Long, Long>(endToken.lineNo,
-                        endToken.columnNo + endToken.astext.length());
+                this.aliasStartPosition = new Pair3<Long, Long, String>(
+                        startToken.lineNo, startToken.columnNo, ModelBindingManager.getGlobalHash());
+                this.aliasEndPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                        endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
                 this.name = this.alias;
             } else if (resultColumnObject.getExpr()
@@ -192,10 +192,10 @@ public class SelectSetResultColumn extends ResultColumn {
 
             TSourceToken startToken = resultColumnObject.getStartToken();
             TSourceToken endToken = resultColumnObject.getEndToken();
-            this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                    startToken.columnNo);
-            this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                    endToken.columnNo + endToken.astext.length());
+            this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                    startToken.columnNo, ModelBindingManager.getGlobalHash());
+            this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                    endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
             this.columnObject = resultColumnObject;
         } else if (resultColumn.getColumnObject() instanceof TObjectName) {
             TObjectName resultColumnObject = (TObjectName) resultColumn
@@ -212,10 +212,10 @@ public class SelectSetResultColumn extends ResultColumn {
 
             TSourceToken startToken = resultColumnObject.getStartToken();
             TSourceToken endToken = resultColumnObject.getEndToken();
-            this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                    startToken.columnNo);
-            this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                    endToken.columnNo + endToken.astext.length());
+            this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                    startToken.columnNo, ModelBindingManager.getGlobalHash());
+            this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                    endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
             this.columnObject = resultColumnObject;
         } else {
             this.name = resultColumn.getName();
@@ -225,10 +225,10 @@ public class SelectSetResultColumn extends ResultColumn {
                     .getStartToken();
             TSourceToken endToken = resultColumn.getColumnObject()
                     .getEndToken();
-            this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                    startToken.columnNo);
-            this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                    endToken.columnNo + endToken.astext.length());
+            this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                    startToken.columnNo, ModelBindingManager.getGlobalHash());
+            this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                    endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
             this.columnObject = resultColumn.getColumnObject();
         }
     }

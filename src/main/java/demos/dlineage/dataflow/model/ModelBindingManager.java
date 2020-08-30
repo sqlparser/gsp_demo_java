@@ -44,6 +44,7 @@ public class ModelBindingManager {
     private final static ThreadLocal globalSchema = new ThreadLocal();
     private final static ThreadLocal globalVendor = new ThreadLocal();
     private final static ThreadLocal globalSQLEnv = new ThreadLocal();
+    private final static ThreadLocal globalHash = new ThreadLocal();
 
     
     public static void set(ModelBindingManager modelManager) {
@@ -82,6 +83,20 @@ public class ModelBindingManager {
 
     public static String getGlobalSchema() {
         return (String) globalSchema.get();
+    }
+    
+    public static void setGlobalHash(String hash) {
+        if (globalHash.get() == null && hash!=null) {
+        	globalHash.set(hash);
+        }
+    }
+    
+    public static void removeGlobalHash() {
+    	globalHash.remove();
+    }
+
+    public static String getGlobalHash() {
+        return (String) globalHash.get();
     }
 
     public static void setGlobalVendor(EDbVendor vendor) {
