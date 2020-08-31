@@ -1,4 +1,4 @@
-package demos.GSPGuiDemo.code.constant;
+package com.gudusoft.format.constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ public interface DbConstant {
     String MySQL = "mysql";
     String Oracle = "oracle";
     String DB2 = "db2";
-    String PostgreSQL = "postgres";
+    String PostgreSQL = "postgresql";
     String SQLServer = "mssql";
     String Snowflake = "snowflake";
     String Couchbase = "couchbase";
@@ -31,7 +31,7 @@ public interface DbConstant {
 
     List<String> dbs = new ArrayList() {{
         add(Couchbase);
-        add(Dax);
+//        add(Dax);
         add(DB2);
         add(Greenplum);
         add(Hana);

@@ -1,4 +1,4 @@
-package demos.GSPGuiDemo.code.util;
+package com.gudusoft.format.util;
 
 
 import javafx.scene.control.Alert;
@@ -16,7 +16,7 @@ public class BouncedUtil {
     }
 
     public static void failBounced(String messages) {
-        Alert alert = new Alert(Alert.AlertType.NONE, messages + " failed!", new ButtonType("ok", ButtonBar.ButtonData.YES));
+        Alert alert = new Alert(Alert.AlertType.NONE, messages, new ButtonType("ok", ButtonBar.ButtonData.YES));
         alert.show();
     }
 

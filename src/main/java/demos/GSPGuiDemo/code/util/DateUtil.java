@@ -1,4 +1,4 @@
-package demos.GSPGuiDemo.code.util;
+package com.gudusoft.format.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

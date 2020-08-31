@@ -1,6 +1,6 @@
-package demos.GSPGuiDemo.code.ui;
+package com.gudusoft.format.ui;
 
-import demos.GSPGuiDemo.code.constant.SystemConstant;
+import com.gudusoft.format.constant.SystemConstant;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,14 +14,14 @@ public class Format extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         primaryStage.setTitle(String.join(" ", SystemConstant.name,
                 SystemConstant.version));
-        URL resource = getClass().getClassLoader().getResource("build/demos/GSPGuiDemo/xml/Format.fxml");
-        Parent root = FXMLLoader.load(resource);
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("Format.fxml"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
-        URL url = getClass().getClassLoader().getResource("build/demos/GSPGuiDemo/icon/database.png");
+        URL url = getClass().getClassLoader().getResource("icon/database.png");
         primaryStage.getIcons().add(new Image(url.openStream()));
         primaryStage.show();
     }

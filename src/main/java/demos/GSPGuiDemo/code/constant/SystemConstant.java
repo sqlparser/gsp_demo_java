@@ -1,7 +1,7 @@
-package demos.GSPGuiDemo.code.constant;
+package com.gudusoft.format.constant;
 
 public interface SystemConstant {
 
     String name = "General SQL Parser Demo";
-    String version = "V1.0";
+    String version = "V2.0";
 }
