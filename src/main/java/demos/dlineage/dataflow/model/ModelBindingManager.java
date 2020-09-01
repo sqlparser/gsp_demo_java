@@ -48,7 +48,7 @@ public class ModelBindingManager {
 
     
     public static void set(ModelBindingManager modelManager) {
-        if (localManager.get() == null) {
+        if (modelManager!=null) {
             localManager.set(modelManager);
         }
     }
@@ -58,7 +58,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalDatabase(String database) {
-        if (globalDatabase.get() == null && database!=null) {
+        if (database!=null) {
         	globalDatabase.set(database);
         }
     }
@@ -72,7 +72,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalSchema(String schema) {
-        if (globalSchema.get() == null && schema!=null) {
+        if (schema!=null) {
         	globalSchema.set(schema);
         }
     }
@@ -86,7 +86,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalHash(String hash) {
-        if (globalHash.get() == null && hash!=null) {
+        if (hash!=null) {
         	globalHash.set(hash);
         }
     }
@@ -100,7 +100,7 @@ public class ModelBindingManager {
     }
 
     public static void setGlobalVendor(EDbVendor vendor) {
-        if (globalVendor.get() == null && vendor!=null) {
+        if (vendor!=null) {
         	globalVendor.set(vendor);
         }
     }
@@ -114,7 +114,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalSQLEnv(TSQLEnv sqlenv) {
-        if (globalSQLEnv.get() == null && sqlenv!=null) {
+        if (sqlenv!=null) {
         	globalSQLEnv.set(sqlenv);
         }
     }

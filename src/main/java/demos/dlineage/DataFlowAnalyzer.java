@@ -146,6 +146,7 @@ import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
+import gudusoft.gsqlparser.stmt.TUseDatabase;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import gudusoft.gsqlparser.util.functionChecker;
 import gudusoft.gsqlparser.util.keywordChecker;
@@ -1294,7 +1295,8 @@ public class DataFlowAnalyzer {
 				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
-						if (stmt instanceof TCreateTableSqlStatement) {
+						if (stmt instanceof TUseDatabase 
+								|| stmt instanceof TCreateTableSqlStatement) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1317,7 +1319,8 @@ public class DataFlowAnalyzer {
 				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
-						if (stmt instanceof TCreateViewSqlStatement) {
+						if (stmt instanceof TUseDatabase 
+								|| stmt instanceof TCreateViewSqlStatement) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1363,11 +1366,14 @@ public class DataFlowAnalyzer {
 	private void analyzeCustomSqlStmt(TCustomSqlStatement stmt) {
 		if (!accessedStatements.contains(stmt)) {
 			accessedStatements.add(stmt);
-		} else {
+		} else if(!(stmt instanceof TUseDatabase)){
 			return;
 		}
 
-		if (stmt instanceof TStoredProcedureSqlStatement) {
+		if (stmt instanceof TUseDatabase) {
+			ModelBindingManager.setGlobalDatabase(SQLUtil.getIdentifierNormalName(vendor,((TUseDatabase)stmt).getDatabaseName().toString()));
+		} 
+		else if (stmt instanceof TStoredProcedureSqlStatement) {
 			this.stmtStack.push(stmt);
 			this.analyzeStoredProcedureStmt((TStoredProcedureSqlStatement) stmt);
 			this.stmtStack.pop();
@@ -1425,7 +1431,7 @@ public class DataFlowAnalyzer {
 	private void analyzeAlterTableStmt(TAlterTableStatement stmt) {
 		TTable oldNameTable = stmt.getTargetTable();
 		Table oldNameTableModel = modelFactory.createTable(oldNameTable);
-		for (int i = 0; i < stmt.getAlterTableOptionList().size(); i++) {
+		for (int i = 0; stmt.getAlterTableOptionList()!=null && i < stmt.getAlterTableOptionList().size(); i++) {
 			TAlterTableOption option = stmt.getAlterTableOptionList().getAlterTableOption(i);
 			if (option.getOptionType() == EAlterTableOptionType.RenameTable
 					|| option.getOptionType() == EAlterTableOptionType.swapWith) {
@@ -6611,11 +6617,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.3";
+		return "1.3.4";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-08-30";
+		return "2020-09-01";
 	}
 
 	public static void main(String[] args) {
@@ -6638,10 +6644,10 @@ public class DataFlowAnalyzer {
 		File sqlFiles = null;
 
 		List<String> argList = Arrays.asList(args);
-
-		if (argList.indexOf("/version") != -1) {
-			System.out.println("Version: " + DataFlowAnalyzer.getVersion());
-			System.out.println("Release Date: " + DataFlowAnalyzer.getReleaseDate());
+		
+		if(argList.indexOf("/version")!=-1){
+			System.out.println("Version: "+DataFlowAnalyzer.getVersion());
+			System.out.println("Release Date: "+DataFlowAnalyzer.getReleaseDate());
 			return;
 		}
 
@@ -6695,45 +6701,11 @@ public class DataFlowAnalyzer {
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
-		
-//		List<SqlInfo> sqlInfos = new ArrayList<>();
-//		if(sqlFiles.isDirectory()){
-//			File[] children = sqlFiles.listFiles();
-//			if(children!=null){
-//				for(File child: children){
-//					SqlInfo info = new SqlInfo();
-//					info.setFileName(child.getName());
-//					info.setSql(SQLUtil.getFileContent(child));
-//					info.setOriginIndex(0);
-//					sqlInfos.add(info);
-//				}
-//			}
-//		}
-//		else{
-//			JSONArray array = new JSONArray();
-//			JSONObject object = new JSONObject();
-//			object.put("fileName", sqlFiles.getName());
-//			object.put("sql",SQLUtil.getFileContent(sqlFiles));
-//			array.add(object);
-//			List<SqlInfo> children = convertSQL(array.toJSONString());
-//			sqlInfos.addAll(children);
-//			
-//			if(children.isEmpty()){
-//				SqlInfo info = new SqlInfo();
-//				info.setFileName(sqlFiles.getName());
-//				info.setSql(SQLUtil.getFileContent(sqlFiles));
-//				info.setOriginIndex(0);
-//				sqlInfos.add(info);
-//			}
-//		}
-//
-//		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlInfos.toArray(new SqlInfo[0]), vendor, simple);
 
 		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlFiles, vendor, simple);
 
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
-		dlineage.setSqlEnv(new SQLDepSQLEnv(EDbVendor.dbvmssql, JSON.parseObject(SQLUtil.getFileContent(sqlFiles))));
 
 		if (simple) {
 			dlineage.setTextFormat(textFormat);
