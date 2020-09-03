@@ -2226,7 +2226,7 @@ public class DataFlowAnalyzer {
 
 								TableColumn tableColumn;
 								if (!initColumn) {
-									if(tableModel.isCreateTable()){
+									if(tableModel.isCreateTable() && !containStarColumn(tableModel.getColumns())){
 										tableColumn = tableModel.getColumns().get(i);
 									}
 									else{
@@ -2460,6 +2460,15 @@ public class DataFlowAnalyzer {
 		if (!expressions.isEmpty() && stmt.getSubQuery() != null) {
 			analyzeInsertImpactRelation(stmt.getSubQuery(), tableColumnMap, expressions);
 		}
+	}
+
+	private boolean containStarColumn(List<TableColumn> columns) {
+		for(TableColumn column: columns){
+			if(column.getName().endsWith("*")){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private int indexOfColumn(List<TResultColumn> columns, TObjectName objectName) {
@@ -4423,6 +4432,11 @@ public class DataFlowAnalyzer {
 
 			stmtStack.pop();
 		} else {
+			
+			if(stmt.getResultColumnList() == null){
+				return;
+			}
+			
 			stmtStack.push(stmt);
 
 			TTableList fromTables = stmt.tables;
@@ -4471,7 +4485,7 @@ public class DataFlowAnalyzer {
 						}
 					}
 					TSelectSqlStatement subquery = table.getCTE().getSubquery();
-					if (subquery != null && !stmtStack.contains(subquery)) {
+					if (subquery != null && !stmtStack.contains(subquery) && subquery.getResultColumnList()!=null) {
 						analyzeSelectStmt(subquery);
 
 						ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
@@ -6694,11 +6708,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.5";
+		return "1.3.6";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-09-02";
+		return "2020-09-03";
 	}
 
 	public static void main(String[] args) {

@@ -164,7 +164,11 @@ public class ModelFactory {
         return tableModel;
     }
 
-    public Table createTable(TTable table) {
+	public Table createTable(TTable table) {
+		if (table.isLinkTable()) {
+			table = table.getLinkTable();
+		}
+    	  
     	if(modelManager.getCreateTable(table)!=null) {
     		return modelManager.getCreateTable(table);
     	}
@@ -174,6 +178,7 @@ public class ModelFactory {
         if (modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString())) instanceof Table) {
         	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(table.getTableName().toString()));
         }
+      
         Table tableModel = new Table(table);
         modelManager.bindModel(table, tableModel);
         modelManager.bindTableByName(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);

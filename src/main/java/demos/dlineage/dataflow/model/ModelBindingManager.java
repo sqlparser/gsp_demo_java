@@ -227,11 +227,13 @@ public class ModelBindingManager {
         }
             
         if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
-        }
-        
-        if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
+        	TTable table = (TTable)gspModel;
+        	if(table.getLinkTable()!=null){
+        		result = (Table) getTableByName(SQLUtil.getTableFullName(table.getLinkTable().getTableName().toString()));
+        	}
+        	else{
+        		result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
+        	}
         }
         	
         return result;
