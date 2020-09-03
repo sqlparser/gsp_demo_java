@@ -197,11 +197,18 @@ public class ModelFactory {
     }
     
     public Table createTableByName(TObjectName tableName) {
+    	return createTableByName(tableName, false);
+    }
+    
+    public Table createTableByName(TObjectName tableName, boolean create) {
         if (modelManager.getTableByName(SQLUtil.getTableFullName(tableName.toString())) instanceof Table) {
         	return (Table) modelManager.getTableByName(SQLUtil.getTableFullName(tableName.toString()));
         }
         Table tableModel = new Table(tableName);
         modelManager.bindTableByName(SQLUtil.getTableFullName(tableName.toString()), tableModel);
+        if(create){
+        	 modelManager.bindCreateModel(tableName, tableModel);
+        }
         return tableModel;
     }
     

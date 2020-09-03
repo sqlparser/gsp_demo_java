@@ -296,6 +296,12 @@ public class ModelBindingManager {
             createModelQuickBindingMap.put(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
         }
     }
+    
+    public void bindCreateModel(TObjectName tableName, Table tableModel) {
+        if (!createModelQuickBindingMap.containsKey(SQLUtil.getTableFullName(tableName.toString()))) {
+            createModelQuickBindingMap.put(SQLUtil.getTableFullName(tableName.toString()), tableModel);
+        }
+    }
 
     public TObjectName[] getTableColumns(TTable table) {
         Table createTable = getCreateTable(table);

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.javafx.css.Declaration;
 
 import demos.dlineage.dataflow.listener.DataFlowHandleListener;
 import demos.dlineage.dataflow.model.AbstractRelation;
@@ -97,6 +98,8 @@ import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TCaseExpression;
 import gudusoft.gsqlparser.nodes.TColumnDefinition;
 import gudusoft.gsqlparser.nodes.TConstant;
+import gudusoft.gsqlparser.nodes.TDeclareVariable;
+import gudusoft.gsqlparser.nodes.TDeclareVariableList;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TExpressionList;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
@@ -122,6 +125,8 @@ import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.TTableElement;
+import gudusoft.gsqlparser.nodes.TTableElementList;
 import gudusoft.gsqlparser.nodes.TTableList;
 import gudusoft.gsqlparser.nodes.TTrimArgument;
 import gudusoft.gsqlparser.nodes.TViewAliasClause;
@@ -147,6 +152,7 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.TUseDatabase;
+import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import gudusoft.gsqlparser.util.functionChecker;
 import gudusoft.gsqlparser.util.keywordChecker;
@@ -1296,7 +1302,8 @@ public class DataFlowAnalyzer {
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
 						if (stmt instanceof TUseDatabase 
-								|| stmt instanceof TCreateTableSqlStatement) {
+								|| stmt instanceof TCreateTableSqlStatement
+								|| stmt instanceof TMssqlDeclare) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1343,7 +1350,7 @@ public class DataFlowAnalyzer {
 				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
-						if (!(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TCreateViewSqlStatement)) {
+						if (!(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TMssqlDeclare)) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1392,6 +1399,11 @@ public class DataFlowAnalyzer {
 			stmtStack.push(stmt);
 			TCreateViewSqlStatement view = (TCreateViewSqlStatement) stmt;
 			analyzeCreateViewStmt(view, view.getSubquery(), view.getViewAliasClause(), view.getViewName());
+			stmtStack.pop();
+		} else if (stmt instanceof TMssqlDeclare) {
+			stmtStack.push(stmt);
+			TMssqlDeclare declare = (TMssqlDeclare) stmt;
+			analyzeMssqlDeclare(declare);
 			stmtStack.pop();
 		} else if (stmt instanceof TInsertSqlStatement) {
 			stmtStack.push(stmt);
@@ -1568,6 +1580,36 @@ public class DataFlowAnalyzer {
 		}
 	}
 
+	
+	private void analyzeMssqlDeclare(TMssqlDeclare stmt) {
+		TDeclareVariableList variables = stmt.getVariables();
+		if(variables == null){
+			return;
+		}
+		for(int i=0;i<variables.size();i++){
+			TDeclareVariable variable = variables.getDeclareVariable(i);
+			if(variable.getTableTypeDefinitions() == null || variable.getTableTypeDefinitions().size()==0){
+				continue;
+			}
+			
+			TObjectName tableName = variable.getVariableName();
+			TTableElementList columns = variable.getTableTypeDefinitions();
+			
+			Table tableModel = modelFactory.createTableByName(tableName, true);
+			tableModel.setCreateTable(true);
+			String procedureParent = getProcedureParentName(stmt);
+			if (procedureParent != null) {
+				tableModel.setParent(procedureParent);
+			}
+			
+			for(int j=0;j<columns.size();j++){
+				TTableElement tableElement = columns.getTableElement(j);
+				TColumnDefinition column = tableElement.getColumnDefinition();
+				modelFactory.createTableColumn(tableModel, column.getColumnName(), true);
+			}
+		}
+	}
+	
 	private void analyzeCreateTableStmt(TCreateTableSqlStatement stmt) {
 		TTable table = stmt.getTargetTable();
 		if (table != null) {
@@ -2184,7 +2226,12 @@ public class DataFlowAnalyzer {
 
 								TableColumn tableColumn;
 								if (!initColumn) {
-									tableColumn = modelFactory.createInsertTableColumn(tableModel, fieldAttr);
+									if(tableModel.isCreateTable()){
+										tableColumn = tableModel.getColumns().get(i);
+									}
+									else{
+										tableColumn = modelFactory.createInsertTableColumn(tableModel, fieldAttr);
+									}
 								} else {
 									TObjectName matchedColumnName = fieldAttr;
 									tableColumn = matchColumn(tableColumns, matchedColumnName);
@@ -5671,7 +5718,7 @@ public class DataFlowAnalyzer {
 									TObjectName refer = tTable.getLinkedColumns().getObjectName(z);
 									if ("*".equals(getColumnName(refer)))
 										continue;
-									if (refer == columnName) {
+									if (SQLUtil.getIdentifierNormalName(getColumnName(refer)).equals(SQLUtil.getIdentifierNormalName(getColumnName(columnName)))) {
 										table = tTable;
 										break;
 									}
@@ -5681,6 +5728,36 @@ public class DataFlowAnalyzer {
 									|| columnName.getTableToken().astext.equalsIgnoreCase(tTable.getAliasName()))) {
 								table = tTable;
 								break;
+							}
+						}
+					}
+					
+					if(table == null){
+						for (int j = 0; j < stmt.tables.size(); j++) {
+							if (table != null)
+								break;
+
+							TTable tTable = stmt.tables.getTable(j);
+							Object model = ModelBindingManager.get().getModel(tTable);
+							if(model instanceof Table){
+								Table tableModel = (Table)model;
+								for (int z = 0; tableModel.getColumns()!=null && z < tableModel.getColumns().size(); z++) {
+									TableColumn refer = tableModel.getColumns().get(z);
+									if (SQLUtil.getIdentifierNormalName(refer.getName()).equals(SQLUtil.getIdentifierNormalName(getColumnName(columnName)))) {
+										table = tTable;
+										break;
+									}
+								}
+							}
+							else if(model instanceof QueryTable){
+								QueryTable tableModel = (QueryTable)model;
+								for (int z = 0; tableModel.getColumns()!=null && z < tableModel.getColumns().size(); z++) {
+									ResultColumn refer = tableModel.getColumns().get(z);
+									if (SQLUtil.getIdentifierNormalName(refer.getName()).equals(SQLUtil.getIdentifierNormalName(getColumnName(columnName)))) {
+										table = tTable;
+										break;
+									}
+								}
 							}
 						}
 					}
@@ -6617,11 +6694,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.4";
+		return "1.3.5";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-09-01";
+		return "2020-09-02";
 	}
 
 	public static void main(String[] args) {
