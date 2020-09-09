@@ -36,11 +36,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Analyze_SP
 {
@@ -497,10 +493,10 @@ public class Analyze_SP
 			TSourceToken token = tokenList.get( i );
 			if ( token.getDbObjType( ) == TObjectName.ttobjFunctionName )
 			{
-				TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+				Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 				for ( int j = 0; j < list.size( ); j++ )
 				{
-					TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+					TParseTreeNode node = (TParseTreeNode) list.get( j );
 					if ( node instanceof TFunctionCall )
 					{
 						builtInFunctionInfo function = new builtInFunctionInfo( );
@@ -520,10 +516,10 @@ public class Analyze_SP
 											.size( ); z++ )
 									{
 										if ( before.getNodesStartFromThisToken( )
-												.getElement( z ) instanceof TCustomSqlStatement )
+												.get( z ) instanceof TCustomSqlStatement )
 										{
 											TCustomSqlStatement tempStmt = (TCustomSqlStatement) before.getNodesStartFromThisToken( )
-													.getElement( z );
+													.get( z );
 											if ( tempStmt.getStartToken( ).posinlist <= token.posinlist
 													&& tempStmt.getEndToken( ).posinlist >= token.posinlist )
 											{

@@ -563,7 +563,7 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X order by a,b";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.getOrderbyClause().removeOrderByItem(1);
+        select.getOrderbyClause().getItems().removeItem(1);
 
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvoracle
                 ,select.toScript()

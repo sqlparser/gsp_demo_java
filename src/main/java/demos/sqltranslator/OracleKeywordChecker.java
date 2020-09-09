@@ -10,6 +10,8 @@ import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import demos.joinConvert.JoinConverter;
 
+import java.util.Stack;
+
 public class OracleKeywordChecker extends KeywordChecker
 {
 
@@ -67,10 +69,10 @@ public class OracleKeywordChecker extends KeywordChecker
 		}
 		else if ( token.toString( ).equalsIgnoreCase( "CONNECT" ) )
 		{
-			TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+			Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 			for ( int j = 0; j < list.size( ); j++ )
 			{
-				TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+				TParseTreeNode node = (TParseTreeNode) list.get( j );
 				if ( node instanceof THierarchical )
 				{
 					switch ( targetVendor )
@@ -102,10 +104,10 @@ public class OracleKeywordChecker extends KeywordChecker
 		}
 		else if ( token.toString( ).equalsIgnoreCase( "FOR" ) )
 		{
-			TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+			Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 			for ( int j = 0; j < list.size( ); j++ )
 			{
-				TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+				TParseTreeNode node = (TParseTreeNode) list.get( j );
 				if ( node instanceof TForUpdate )
 				{
 					switch ( targetVendor )
@@ -224,10 +226,10 @@ public class OracleKeywordChecker extends KeywordChecker
 		else if ( token.toString( ).matches( "(?i)\\(\\s*\\+s*\\)" ) )
 		{
 
-			TParseTreeNodeList list = token.getNodesEndWithThisToken( );
+			Stack<TParseTreeNode> list = token.getNodesEndWithThisToken( );
 			for ( int j = 0; j < list.size( ); j++ )
 			{
-				TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+				TParseTreeNode node = (TParseTreeNode) list.get( j );
 				if ( node instanceof TSelectSqlStatement )
 				{
 					String result = "The special outer join syntax with the (+) qualifier.";

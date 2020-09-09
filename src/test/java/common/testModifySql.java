@@ -121,11 +121,25 @@ public class testModifySql extends TestCase {
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         TResultColumnList columns = select.getResultColumnList();
-        columns.removeResultColumn(1);
-       // System.out.println(select.toString());
-        assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias FROM TABLE_X"));
-        columns.addResultColumn("x");
-        assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias,x FROM TABLE_X"));
+
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            columns.removeResultColumn(1);
+            //System.out.println(select.toString());
+            assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias  FROM TABLE_X"));
+            TResultColumn resultColumn = new TResultColumn();
+            resultColumn.setString("x");
+            columns.addResultColumn(resultColumn);
+            assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias,x  FROM TABLE_X"));
+
+        }else{
+            columns.removeResultColumn(1);
+            //System.out.println(select.toString());
+            assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias FROM TABLE_X"));
+
+            columns.addResultColumn("x");
+            assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias,x FROM TABLE_X"));
+        }
+
     }
 
 
@@ -135,7 +149,13 @@ public class testModifySql extends TestCase {
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         TResultColumnList columns = select.getResultColumnList();
-        columns.addResultColumn("d as d_alias");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TResultColumn resultColumn = new TResultColumn();
+            resultColumn.setString("d as d_alias");
+            columns.addResultColumn(resultColumn);
+        }else{
+            columns.addResultColumn("d as d_alias");
+        }
         assertTrue(select.toString().equalsIgnoreCase("SELECT A as A_Alias, B AS B_Alias,d as d_alias FROM TABLE_X"));
     }
 
@@ -148,7 +168,12 @@ public class testModifySql extends TestCase {
         TResultColumnList columns = select.getResultColumnList();
         columns.removeResultColumn(1);
         columns.getResultColumn(0).setString("B.COLUMN3");
-        assertTrue(select.toString().equalsIgnoreCase("SELECT B.COLUMN3 from TABLE1 A, TABLE2 B where A.COLUMN1=B.COLUMN1"));
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            assertTrue(select.toString().equalsIgnoreCase("SELECT B.COLUMN3  from TABLE1 A, TABLE2 B where A.COLUMN1=B.COLUMN1"));
+
+        }else{
+            assertTrue(select.toString().equalsIgnoreCase("SELECT B.COLUMN3 from TABLE1 A, TABLE2 B where A.COLUMN1=B.COLUMN1"));
+        }
        // System.out.print(select.toString());
     }
 
@@ -172,7 +197,12 @@ public class testModifySql extends TestCase {
         // let's remove t1 and where clause
 
         joinList.removeJoin(0);
-        select.getWhereClause().setString(" ");
+        if(TParseTreeNode.doubleLinkedTokenListToString){
+            select.setWhereClause(null);
+        }else{
+            select.getWhereClause().setString(" ");
+        }
+
 
         assertTrue(select.toString().trim().equalsIgnoreCase("SELECT * FROM t2"));
     }
@@ -187,7 +217,12 @@ public class testModifySql extends TestCase {
         // let's remove t2 and where clause
 
         joinList.removeJoin(1);
-        select.getWhereClause().setString(" ");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            select.setWhereClause(null);
+        }else{
+            select.getWhereClause().setString(" ");
+        }
+
 
         assertTrue(select.toString().trim().equalsIgnoreCase("SELECT * FROM t1"));
     }
@@ -218,7 +253,12 @@ public class testModifySql extends TestCase {
 
         joinList.getJoin(0).setString("t1 left join t2 on t1.f1=t2.f2");
         // remove where clause
-        select.getWhereClause().setString(" ");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            select.setWhereClause(null);
+        }else{
+            select.getWhereClause().setString(" ");
+        }
+
 
        // System.out.println(select.toString());
         assertTrue(select.toString().trim().equalsIgnoreCase("SELECT * FROM t1 left join t2 on t1.f1=t2.f2"));
@@ -283,9 +323,17 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addWhereClause("c>1");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TWhereClause whereClause = new TWhereClause("where c>1");
+            //whereClause.setText("where c>1");
+            select.setAnchorNode(select.joins);
+            select.setWhereClause(whereClause);
+        }else{
+            select.addWhereClause("c>1");
+        }
 
-      // System.out.println(select.toString());
+
+       System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where c>1"));
     }
 
@@ -295,7 +343,15 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X group by a";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addWhereClause("c>1");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TWhereClause whereClause = new TWhereClause("where c>1");
+            //whereClause.setText("where c>1");
+            select.setAnchorNode(select.joins);
+            select.setWhereClause(whereClause);
+        }else{
+            select.addWhereClause("c>1");
+        }
+
         //System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where c>1 group by a"));
     }
@@ -304,7 +360,7 @@ public class testModifySql extends TestCase {
 
 
 //
-    public void testAddWhereAfterJoin(){
+    public void testAddConditionAfterJoin(){
         parser.sqltext = "SELECT tableA.itemA1, tableB.itemB1\n"
                 + " FROM tableA\n"
                 + " INNER JOIN tableB\n"
@@ -320,13 +376,21 @@ public class testModifySql extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
 
         TJoinList joinList = select.joins;
-        TJoinItem item = joinList.getJoin( 0 ).getJoinItems( ).getJoinItem( 0 );
+        TJoinItem item0 = joinList.getJoin( 0 ).getJoinItems( ).getJoinItem( 0 );
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            item0.getOnCondition().setString("("+item0.getOnCondition()+")"+" and 1=1");
+            TWhereClause whereClause = new TWhereClause("where c>1");
+            //whereClause.setText("where c>1");
+            select.setAnchorNode(select.joins);
+            select.setWhereClause(whereClause);
+            //select.setWhereClause(whereClause);
 
-        item.getOnCondition( ).addANDCondition( "1=1" );
+        }else{
+            item0.getOnCondition( ).addANDCondition( "1=1" );
+            select.addWhereClause("c>1");
+        }
 
-        select.addWhereClause("c>1");
-
-        //System.out.println(select.toString().trim());
+       // System.out.println(select.toString().trim());
         assertTrue(select.toString().trim().equalsIgnoreCase("SELECT tableA.itemA1, tableB.itemB1\n" +
                 " FROM tableA\n" +
                 " INNER JOIN tableB\n" +
@@ -348,7 +412,12 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X where a>1 order by a";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.getWhereClause().setString(" ");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            select.setWhereClause(null);
+        }else {
+            select.getWhereClause().setString(" ");
+        }
+
        // System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X  order by a"));
     }
@@ -359,32 +428,70 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addOrderBy("a desc");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderBy orderBy = new TOrderBy("order by a desc");
+            //orderBy.setText("order by a desc");
+            select.setOrderbyClause(orderBy);
+        }else{
+            select.addOrderBy("a desc");
+        }
+
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X order by a desc"));
 
         parser.sqltext = "SELECT * FROM TABLE_X where a>1";
         assertTrue(parser.parse() == 0);
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addOrderBy("a desc");
+
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderBy orderBy = new TOrderBy("order by a desc");
+            //orderBy.setText("order by a desc");
+            select.setOrderbyClause(orderBy);
+        }else{
+            select.addOrderBy("a desc");
+        }
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where a>1 order by a desc"));
 
         parser.sqltext = "SELECT * FROM TABLE_X where a>1 group by a having count(*) > 1";
         assertTrue(parser.parse() == 0);
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addOrderBy("a asc");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderBy orderBy = new TOrderBy("order by a asc");
+            //orderBy.setText("order by a asc");
+            select.setOrderbyClause(orderBy);
+        }else{
+            select.addOrderBy("a asc");
+        }
+
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where a>1 group by a having count(*) > 1 order by a asc"));
 
         parser.sqltext = "SELECT * FROM TABLE_X where a>1 group by a having count(*) > 1 order by c desc";
         assertTrue(parser.parse() == 0);
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addOrderBy("a asc");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderByItem orderByItem = new TOrderByItem();
+            orderByItem.setText("a asc");
+            select.getOrderbyClause().getItems().addOrderByItem(orderByItem);
+        }else{
+            select.addOrderBy("a asc");
+        }
+
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where a>1 group by a having count(*) > 1 order by c desc,a asc"));
 
         parser.sqltext = "SELECT * FROM TABLE_X";
         assertTrue(parser.parse() == 0);
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.addWhereClause("a>1 and b>2") ;
-        select.addOrderBy("a desc");
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TWhereClause whereClause = new TWhereClause("where a>1 and b>2");
+            //whereClause.setText("where a>1 and b>2");
+            select.setWhereClause(whereClause);
+            TOrderBy orderBy = new TOrderBy("order by a desc");
+            //orderBy.setText("order by a desc");
+            select.setOrderbyClause(orderBy);
+
+        }else{
+            select.addWhereClause("a>1 and b>2") ;
+            select.addOrderBy("a desc");
+        }
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where a>1 and b>2 order by a desc"));
 
        // System.out.println(select.toString());
@@ -396,7 +503,14 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X order by a";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.getOrderbyClause().addOrderByItem("b");
+        if(TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderByItem orderByItem = new TOrderByItem();
+            orderByItem.setText("b");
+            select.getOrderbyClause().getItems().addOrderByItem(orderByItem);
+        }else{
+            select.getOrderbyClause().addOrderByItem("b");
+        }
+
 
         //System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X order by a,b"));
@@ -406,11 +520,15 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X order by a,b";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.getOrderbyClause().removeOrderByItem(1);
-        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X order by a"));
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            select.getOrderbyClause().getItems().removeItem(1);
+            assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X order by a"));
 
-        select.getOrderbyClause().removeOrderByItem(0);
-        assertTrue(select.toString().trim().equalsIgnoreCase("SELECT * FROM TABLE_X"));
+            select.getOrderbyClause().getItems().removeItem(0);
+            select.setOrderbyClause(null);
+            assertTrue(select.toString().trim().equalsIgnoreCase("SELECT * FROM TABLE_X"));
+
+        }
     }
 
 
@@ -431,8 +549,18 @@ public class testModifySql extends TestCase {
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         select.getOrderbyClause().getItems().getOrderByItem(0).setString("b asc");
-        select.getOrderbyClause().addOrderByItem("c desc");
-        select.getOrderbyClause().addOrderByItem("d desc");
+        if(TParseTreeNode.doubleLinkedTokenListToString){
+            TOrderByItem orderByItem1 = new TOrderByItem();
+            orderByItem1.setText("c desc");
+            select.getOrderbyClause().getItems().addOrderByItem(orderByItem1);
+
+            TOrderByItem orderByItem2 = new TOrderByItem();
+            orderByItem2.setText("d desc");
+            select.getOrderbyClause().getItems().addOrderByItem(orderByItem2);
+        }else{
+            select.getOrderbyClause().addOrderByItem("c desc");
+            select.getOrderbyClause().addOrderByItem("d desc");
+        }
 
        // System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X order by b asc,c desc,d desc"));
@@ -445,7 +573,12 @@ public class testModifySql extends TestCase {
         TUpdateSqlStatement updateSqlStatement = (TUpdateSqlStatement)parser.sqlstatements.get(0);
         TResultColumnList setClauses = updateSqlStatement.getResultColumnList();
         setClauses.removeResultColumn(1); // the second set expression
-        assertTrue(updateSqlStatement.toString().equalsIgnoreCase("UPDATE BLA SET A=2 WHERE X=5"));
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            assertTrue(updateSqlStatement.toString().equalsIgnoreCase("UPDATE BLA SET A=2  WHERE X=5"));
+
+        }else{
+            assertTrue(updateSqlStatement.toString().equalsIgnoreCase("UPDATE BLA SET A=2 WHERE X=5"));
+        }
     }
 
 
@@ -568,10 +701,16 @@ public class testModifySql extends TestCase {
         assertTrue(constraint.getConstraint_type() == EConstraintType.foreign_key);
         TObjectName refColumn = constraint.getReferencedColumnList().getObjectName(0);
 
-        TDummy dummy  = new TDummy();
-        dummy.setGsqlparser(lcparser);
-        dummy.setString("CEL_NEWID,");
-        dummy.addAllMyTokensToTokenList(refColumn.getStartToken().container,refColumn.getStartToken().posinlist );
+        if(TParseTreeNode.doubleLinkedTokenListToString){
+            TObjectName columnName0 = new TObjectName();
+            columnName0.setText("CEL_NEWID");
+            constraint.getReferencedColumnList().insertElementAt(columnName0,0);
+        }else{
+            TDummy dummy  = new TDummy();
+            dummy.setGsqlparser(lcparser);
+            dummy.setString("CEL_NEWID,");
+            dummy.addAllMyTokensToTokenList(refColumn.getStartToken().container,refColumn.getStartToken().posinlist );
+        }
 
        // System.out.println(at.toString());
         assertTrue(at.toString().equalsIgnoreCase("ALTER TABLE P_CAP \n" +
@@ -587,34 +726,40 @@ public class testModifySql extends TestCase {
         assertTrue(lcparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)lcparser.sqlstatements.get(0);
-//        TWhereClause whereClause = new TWhereClause();
-//        whereClause.setText("where f > 0");
 
-        TSourceToken prevToken = select.joins.getEndToken();
+        if (TParseTreeNode.doubleLinkedTokenListToString){
+            TWhereClause whereClause = new TWhereClause("where f > 0");
+            // whereClause.setText("where f > 0");
+            select.setAnchorNode(select.joins);
+            select.setWhereClause(whereClause);
+           // System.out.println(select.toString());
 
-        TDummy dummy  = new TDummy();
-        dummy.setGsqlparser(lcparser);
-        dummy.setString(" where f > 0");
-        dummy.addAllMyTokensToTokenList(prevToken.container,prevToken.posinlist + 1 );
+        }else{
+            TSourceToken prevToken = select.joins.getEndToken();
 
-        for(int i=0;i<prevToken.getNodesEndWithThisToken().size();i++){
-            TParseTreeNode node = prevToken.getNodesEndWithThisToken().getElement(i);
-            if (!((node instanceof TJoinList)
-                    ||(node instanceof TJoin)
-                    ||(node instanceof TJoinItemList)
-                    ||(node instanceof TJoinItem)
-                    ))
-            {
-                // change all end token of parse tree node except the table from join clause
-                node.setEndToken(dummy.getEndToken());
+            TDummy dummy  = new TDummy();
+            dummy.setGsqlparser(lcparser);
+            dummy.setString(" where f > 0");
+            dummy.addAllMyTokensToTokenList(prevToken.container,prevToken.posinlist + 1 );
+
+            for(int i=0;i<prevToken.getNodesEndWithThisToken().size();i++){
+                TParseTreeNode node = prevToken.getNodesEndWithThisToken().get(i);
+                if (!((node instanceof TJoinList)
+                        ||(node instanceof TJoin)
+                        ||(node instanceof TJoinItemList)
+                        ||(node instanceof TJoinItem)
+                ))
+                {
+                    // change all end token of parse tree node except the table from join clause
+                    node.setEndToken(dummy.getEndToken());
+                }
             }
         }
 
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where f > 0"));
 
-       // System.out.println(select.toString());
-    }
 
+    }
 
 
     public void testRemoveParenthesis(){

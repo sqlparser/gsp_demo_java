@@ -13,6 +13,7 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,10 +48,10 @@ public class MssqlKeywordChecker extends KeywordChecker
 			switch ( targetVendor )
 			{
 				case dbvoracle :
-					TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+					Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 					for ( int j = 0; j < list.size( ); j++ )
 					{
-						TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+						TParseTreeNode node = (TParseTreeNode) list.get( j );
 						if ( node instanceof TSelectSqlStatement )
 						{
 							TSelectSqlStatement select = (TSelectSqlStatement) node;
@@ -181,10 +182,10 @@ public class MssqlKeywordChecker extends KeywordChecker
 		}
 		if ( token.toString( ).equalsIgnoreCase( "DELETE" ) )
 		{
-			TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+			Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 			for ( int j = 0; j < list.size( ); j++ )
 			{
-				TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+				TParseTreeNode node = (TParseTreeNode) list.get( j );
 				if ( node instanceof TDeleteSqlStatement )
 				{
 					TDeleteSqlStatement delete = (TDeleteSqlStatement) node;

@@ -49,15 +49,7 @@ import gudusoft.gsqlparser.util.keywordChecker;
 import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -769,13 +761,13 @@ public class ColumnImpact
 					.replaceAll( "\n+", " " );
 			if ( column.expression.trim( ).length( ) > 0 )
 			{
-				TParseTreeNodeList tokens = expr.getStartToken( )
+				Stack<TParseTreeNode> tokens = expr.getStartToken( )
 						.getNodesStartFromThisToken( );
 				if ( tokens != null )
 				{
 					for ( int i = 0; i < tokens.size( ); i++ )
 					{
-						TParseTreeNode node = tokens.getElement( i );
+						TParseTreeNode node = tokens.get( i );
 						if ( node instanceof TResultColumn )
 						{
 							TResultColumn field = (TResultColumn) node;
@@ -979,7 +971,7 @@ public class ColumnImpact
 		column.offset = attr.getEndToken( ).offset;
 		column.length = attr.getEndToken( ).astext.length( );
 
-		TParseTreeNodeList tokens = attr.getObjectOperand( )
+		Stack<TParseTreeNode> tokens = attr.getObjectOperand( )
 				.getStartToken( )
 				.getNodesStartFromThisToken( );
 
@@ -987,7 +979,7 @@ public class ColumnImpact
 		{
 			for ( int i = 0; i < tokens.size( ); i++ )
 			{
-				TParseTreeNode node = tokens.getElement( i );
+				TParseTreeNode node = tokens.get( i );
 				if ( node instanceof TResultColumn )
 				{
 					TResultColumn field = (TResultColumn) node;
@@ -1352,14 +1344,14 @@ public class ColumnImpact
 		column.offset = objectName.getEndToken( ).offset;
 		column.length = objectName.getEndToken( ).astext.length( );
 
-		TParseTreeNodeList tokens = objectName.getStartToken( )
+		Stack<TParseTreeNode> tokens = objectName.getStartToken( )
 				.getNodesStartFromThisToken( );
 
 		if ( tokens != null )
 		{
 			for ( int i = 0; i < tokens.size( ); i++ )
 			{
-				TParseTreeNode node = tokens.getElement( i );
+				TParseTreeNode node = tokens.get( i );
 				if ( node instanceof TResultColumn )
 				{
 					TResultColumn field = (TResultColumn) node;

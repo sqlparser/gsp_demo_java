@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 public class SqlTranslator
 {
@@ -650,10 +651,10 @@ public class SqlTranslator
 			TSourceToken token = tokenList.get( i );
 			if ( token.getDbObjType( ) == TObjectName.ttobjFunctionName )
 			{
-				TParseTreeNodeList list = token.getNodesStartFromThisToken( );
+				Stack<TParseTreeNode> list = token.getNodesStartFromThisToken( );
 				for ( int j = 0; j < list.size( ); j++ )
 				{
-					TParseTreeNode node = (TParseTreeNode) list.getElement( j );
+					TParseTreeNode node = (TParseTreeNode) list.get( j );
 					if ( node instanceof TFunctionCall )
 					{
 						FunctionCheckResult result = FunctionChecker.checkFunction( (TFunctionCall) node,

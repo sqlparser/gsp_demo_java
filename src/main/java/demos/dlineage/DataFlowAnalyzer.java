@@ -1262,11 +1262,11 @@ public class DataFlowAnalyzer {
 			if (option.getOptionType() == EAlterTableOptionType.RenameTable
 					|| option.getOptionType() == EAlterTableOptionType.swapWith) {
 				TObjectName newTableName = option.getNewTableName();
-				TParseTreeNodeList list = newTableName.getStartToken().getNodesStartFromThisToken();
+				Stack<TParseTreeNode> list = newTableName.getStartToken().getNodesStartFromThisToken();
 				boolean containsTable = false;
 				for (int j = 0; j < list.size(); j++) {
-					if (list.getElement(j) instanceof TTable) {
-						TTable newTableTable = (TTable) list.getElement(j);
+					if (list.get(j) instanceof TTable) {
+						TTable newTableTable = (TTable) list.get(j);
 						Table newNameTableModel = modelFactory.createTable(newTableTable);
 						DataFlowRelation realtion = modelFactory.createDataFlowRelation();
 						realtion.setEffectType(option.getOptionType() == EAlterTableOptionType.RenameTable
@@ -4851,10 +4851,10 @@ public class DataFlowAnalyzer {
 	}
 
 	private boolean isFromFunction(TObjectName object) {
-		TParseTreeNodeList nodes = object.getStartToken().getNodesStartFromThisToken();
+		Stack<TParseTreeNode> nodes = object.getStartToken().getNodesStartFromThisToken();
 		if(nodes!=null){
 			for(int i=0;i<nodes.size();i++){
-				if(nodes.getElement(i) instanceof TFunctionCall){
+				if(nodes.get(i) instanceof TFunctionCall){
 					return true;
 				}
 			}

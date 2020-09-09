@@ -42,12 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -477,11 +472,11 @@ public class ColumnImpact {
 			column.expression = expr.toString().replace("\r\n", "\n")
 					.replaceAll("\n+", " ");
 			if (column.expression.trim().length() > 0) {
-				TParseTreeNodeList tokens = expr.getStartToken()
+				Stack<TParseTreeNode> tokens = expr.getStartToken()
 						.getNodesStartFromThisToken();
 				if (tokens != null) {
 					for (int i = 0; i < tokens.size(); i++) {
-						TParseTreeNode node = tokens.getElement(i);
+						TParseTreeNode node = tokens.get(i);
 						if (node instanceof TResultColumn) {
 							TResultColumn field = (TResultColumn) node;
 							if (field.getAliasClause() != null) {
@@ -641,11 +636,11 @@ public class ColumnImpact {
 				(int) attr.getObjectOperand().getEndToken().lineNo,
 				(int) attr.getEndToken().columnNo);
 
-		TParseTreeNodeList tokens = attr.getObjectOperand().getStartToken()
+		Stack<TParseTreeNode> tokens = attr.getObjectOperand().getStartToken()
 				.getNodesStartFromThisToken();
 		if (tokens != null) {
 			for (int i = 0; i < tokens.size(); i++) {
-				TParseTreeNode node = tokens.getElement(i);
+				TParseTreeNode node = tokens.get(i);
 				if (node instanceof TResultColumn) {
 					TResultColumn field = (TResultColumn) node;
 					if (field.getAliasClause() != null) {
