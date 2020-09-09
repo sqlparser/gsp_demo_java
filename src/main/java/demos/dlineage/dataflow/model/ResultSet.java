@@ -1,20 +1,20 @@
 
 package demos.dlineage.dataflow.model;
 
-import demos.dlineage.util.Pair;
-import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.nodes.TParseTreeNode;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import demos.dlineage.util.Pair3;
+import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.nodes.TParseTreeNode;
 
 public class ResultSet {
 
     private int id;
     protected String schema;
     protected String database;
-    private Pair<Long, Long> startPosition;
-    private Pair<Long, Long> endPosition;
+    private Pair3<Long, Long, String> startPosition;
+    private Pair3<Long, Long, String> endPosition;
     private List<ResultColumn> columns = new ArrayList<ResultColumn>();
 
     private TParseTreeNode gspObject;
@@ -35,15 +35,15 @@ public class ResultSet {
         TSourceToken startToken = gspObject.getStartToken();
         TSourceToken endToken = gspObject.getEndToken();
         if (startToken != null) {
-            this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                    startToken.columnNo);
+            this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                    startToken.columnNo, ModelBindingManager.getGlobalHash());
         } else {
             System.err.println();
             System.err.println("Can't get start token, the start token is null");
         }
         if (endToken != null) {
-            this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                    endToken.columnNo + endToken.astext.length());
+            this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                    endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
         } else {
             System.err.println();
             System.err.println("Can't get end token, the end token is null");
@@ -53,11 +53,11 @@ public class ResultSet {
         this.database = ModelBindingManager.getGlobalDatabase();
     }
 
-    public Pair<Long, Long> getStartPosition() {
+    public Pair3<Long, Long, String> getStartPosition() {
         return startPosition;
     }
 
-    public Pair<Long, Long> getEndPosition() {
+    public Pair3<Long, Long, String> getEndPosition() {
         return endPosition;
     }
 

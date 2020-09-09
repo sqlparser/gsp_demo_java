@@ -1,9 +1,8 @@
 package demos.dlineage.dataflow.model.xml;
 
-import demos.dlineage.util.Pair;
-
 import java.util.LinkedList;
 import java.util.List;
+
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 
@@ -56,18 +55,6 @@ public class procedure {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public int getOccurrencesNumber() {
-		return PositionUtil.getOccurrencesNumber(this.coordinate);
-	}
-
-	public Pair<Integer, Integer> getStartPos(int index) {
-		return PositionUtil.getStartPos(this.coordinate, index);
-	}
-
-	public Pair<Integer, Integer> getEndPos(int index) {
-		return PositionUtil.getEndPos(this.coordinate, index);
 	}
 
 	public List<argument> getArguments() {

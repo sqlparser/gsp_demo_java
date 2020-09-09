@@ -1,6 +1,6 @@
 package demos.dlineage.dataflow.model;
 
-import demos.dlineage.util.Pair;
+import demos.dlineage.util.Pair3;
 
 public class ResultSetPseudoRows extends PseudoRows<ResultSet> {
 
@@ -8,11 +8,11 @@ public class ResultSetPseudoRows extends PseudoRows<ResultSet> {
 		super(holder);
 	}
 
-	public Pair<Long, Long> getStartPosition() {
+	public Pair3<Long, Long, String> getStartPosition() {
 		return getHolder().getStartPosition();
 	}
 
-	public Pair<Long, Long> getEndPosition() {
+	public Pair3<Long, Long, String> getEndPosition() {
 		return getHolder().getEndPosition();
 	}
 }

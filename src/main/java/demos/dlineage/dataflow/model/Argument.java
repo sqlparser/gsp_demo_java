@@ -1,6 +1,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.Pair3;
 import gudusoft.gsqlparser.EParameterMode;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
@@ -10,8 +11,8 @@ public class Argument {
 	private Procedure procedure;
 	private int id;
 	private String name;
-	private Pair<Long, Long> startPosition;
-	private Pair<Long, Long> endPosition;
+	private Pair3<Long, Long, String> startPosition;
+	private Pair3<Long, Long, String> endPosition;
 	private TParameterDeclaration parameterObject;
 	private EParameterMode mode;
 	private TTypeName dataType;
@@ -22,9 +23,9 @@ public class Argument {
 			this.parameterObject = parameterObject;
 			TSourceToken startToken = parameterObject.getStartToken();
 			TSourceToken endToken = parameterObject.getEndToken();
-			this.startPosition = new Pair<Long, Long>(startToken.lineNo, startToken.columnNo);
-			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-					endToken.columnNo + (long) endToken.astext.length());
+			this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo, startToken.columnNo, ModelBindingManager.getGlobalHash());
+			this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+					endToken.columnNo + (long) endToken.astext.length(), ModelBindingManager.getGlobalHash());
 			if (parameterObject.getParameterName().getColumnNameOnly() != null
 					&& !"".equals(parameterObject.getParameterName().getColumnNameOnly())) {
 				this.name = parameterObject.getParameterName().getColumnNameOnly();
@@ -49,11 +50,11 @@ public class Argument {
 		return this.name;
 	}
 
-	public Pair<Long, Long> getStartPosition() {
+	public Pair3<Long, Long, String> getStartPosition() {
 		return this.startPosition;
 	}
 
-	public Pair<Long, Long> getEndPosition() {
+	public Pair3<Long, Long, String> getEndPosition() {
 		return this.endPosition;
 	}
 
@@ -73,11 +74,11 @@ public class Argument {
 		this.name = name;
 	}
 
-	public void setStartPosition(Pair<Long, Long> startPosition) {
+	public void setStartPosition(Pair3<Long, Long, String> startPosition) {
 		this.startPosition = startPosition;
 	}
 
-	public void setEndPosition(Pair<Long, Long> endPosition) {
+	public void setEndPosition(Pair3<Long, Long, String> endPosition) {
 		this.endPosition = endPosition;
 	}
 

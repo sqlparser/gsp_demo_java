@@ -3,7 +3,7 @@ package demos.dlineage.dataflow.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import demos.dlineage.util.Pair;
+import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TSourceToken;
@@ -17,8 +17,8 @@ public class Procedure {
 	private String schema;
 	private String name;
 	private String fullName;
-	private Pair<Long, Long> startPosition;
-	private Pair<Long, Long> endPosition;
+	private Pair3<Long, Long, String> startPosition;
+	private Pair3<Long, Long, String> endPosition;
 	private List<Argument> arguments = new ArrayList<Argument>();
 	private ESqlStatementType type;
 	private TStoredProcedureSqlStatement procedureObject;
@@ -31,9 +31,9 @@ public class Procedure {
 			this.procedureObject = procedure;
 			TSourceToken startToken = getProcedureName().getStartToken();
 			TSourceToken endToken = getProcedureName().getEndToken();
-			this.startPosition = new Pair<Long, Long>(startToken.lineNo, startToken.columnNo);
-			this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-					endToken.columnNo + (long) endToken.astext.length());
+			this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo, startToken.columnNo, ModelBindingManager.getGlobalHash());
+			this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+					endToken.columnNo + (long) endToken.astext.length(), ModelBindingManager.getGlobalHash());
 			this.fullName = getProcedureName().toString();
 			this.name = getProcedureName().toString();
 			
@@ -73,11 +73,11 @@ public class Procedure {
 		this.name = name;
 	}
 
-	public Pair<Long, Long> getStartPosition() {
+	public Pair3<Long, Long, String> getStartPosition() {
 		return this.startPosition;
 	}
 
-	public Pair<Long, Long> getEndPosition() {
+	public Pair3<Long, Long, String> getEndPosition() {
 		return this.endPosition;
 	}
 
@@ -124,11 +124,11 @@ public class Procedure {
 		this.id = id;
 	}
 
-	public void setStartPosition(Pair<Long, Long> startPosition) {
+	public void setStartPosition(Pair3<Long, Long, String> startPosition) {
 		this.startPosition = startPosition;
 	}
 
-	public void setEndPosition(Pair<Long, Long> endPosition) {
+	public void setEndPosition(Pair3<Long, Long, String> endPosition) {
 		this.endPosition = endPosition;
 	}
 

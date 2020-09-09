@@ -44,10 +44,11 @@ public class ModelBindingManager {
     private final static ThreadLocal globalSchema = new ThreadLocal();
     private final static ThreadLocal globalVendor = new ThreadLocal();
     private final static ThreadLocal globalSQLEnv = new ThreadLocal();
+    private final static ThreadLocal globalHash = new ThreadLocal();
 
     
     public static void set(ModelBindingManager modelManager) {
-        if (localManager.get() == null) {
+        if (modelManager!=null) {
             localManager.set(modelManager);
         }
     }
@@ -57,7 +58,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalDatabase(String database) {
-        if (globalDatabase.get() == null && database!=null) {
+        if (database!=null) {
         	globalDatabase.set(database);
         }
     }
@@ -71,7 +72,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalSchema(String schema) {
-        if (globalSchema.get() == null && schema!=null) {
+        if (schema!=null) {
         	globalSchema.set(schema);
         }
     }
@@ -83,9 +84,23 @@ public class ModelBindingManager {
     public static String getGlobalSchema() {
         return (String) globalSchema.get();
     }
+    
+    public static void setGlobalHash(String hash) {
+        if (hash!=null) {
+        	globalHash.set(hash);
+        }
+    }
+    
+    public static void removeGlobalHash() {
+    	globalHash.remove();
+    }
+
+    public static String getGlobalHash() {
+        return (String) globalHash.get();
+    }
 
     public static void setGlobalVendor(EDbVendor vendor) {
-        if (globalVendor.get() == null && vendor!=null) {
+        if (vendor!=null) {
         	globalVendor.set(vendor);
         }
     }
@@ -99,7 +114,7 @@ public class ModelBindingManager {
     }
     
     public static void setGlobalSQLEnv(TSQLEnv sqlenv) {
-        if (globalSQLEnv.get() == null && sqlenv!=null) {
+        if (sqlenv!=null) {
         	globalSQLEnv.set(sqlenv);
         }
     }
@@ -212,11 +227,13 @@ public class ModelBindingManager {
         }
             
         if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
-        }
-        
-        if(result == null && gspModel instanceof TTable){
-        	result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
+        	TTable table = (TTable)gspModel;
+        	if(table.getLinkTable()!=null){
+        		result = (Table) getTableByName(SQLUtil.getTableFullName(table.getLinkTable().getTableName().toString()));
+        	}
+        	else{
+        		result = (Table) getTableByName(SQLUtil.getTableFullName(((TTable)gspModel).getTableName().toString()));
+        	}
         }
         	
         return result;
@@ -279,6 +296,12 @@ public class ModelBindingManager {
         createModelBindingMap.put(table, tableModel);
         if (!createModelQuickBindingMap.containsKey(SQLUtil.getTableFullName(table.getTableName().toString()))) {
             createModelQuickBindingMap.put(SQLUtil.getTableFullName(table.getTableName().toString()), tableModel);
+        }
+    }
+    
+    public void bindCreateModel(TObjectName tableName, Table tableModel) {
+        if (!createModelQuickBindingMap.containsKey(SQLUtil.getTableFullName(tableName.toString()))) {
+            createModelQuickBindingMap.put(SQLUtil.getTableFullName(tableName.toString()), tableModel);
         }
     }
 

@@ -4,7 +4,7 @@ package demos.dlineage.dataflow.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import demos.dlineage.util.Pair;
+import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TSourceToken;
@@ -22,8 +22,8 @@ public class Table {
     private String fullName;
     private String alias;
     private String parent;
-    private Pair<Long, Long> startPosition;
-    private Pair<Long, Long> endPosition;
+    private Pair3<Long, Long, String> startPosition;
+    private Pair3<Long, Long, String> endPosition;
     private List<TableColumn> columns = new ArrayList<TableColumn>();
     private boolean subquery = false;
 
@@ -47,10 +47,10 @@ public class Table {
 
         TSourceToken startToken = table.getStartToken();
         TSourceToken endToken = table.getEndToken();
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
         if (table.getLinkTable() != null) {
             this.fullName = table.getLinkTable().getFullName();
@@ -106,10 +106,10 @@ public class Table {
 
         TSourceToken startToken = tableName.getStartToken();
         TSourceToken endToken = tableName.getEndToken();
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
         
         this.fullName = tableName.toString();
@@ -144,11 +144,11 @@ public class Table {
         this.name = name;
     }
 
-    public Pair<Long, Long> getStartPosition() {
+    public Pair3<Long, Long, String> getStartPosition() {
         return startPosition;
     }
 
-    public Pair<Long, Long> getEndPosition() {
+    public Pair3<Long, Long, String> getEndPosition() {
         return endPosition;
     }
 

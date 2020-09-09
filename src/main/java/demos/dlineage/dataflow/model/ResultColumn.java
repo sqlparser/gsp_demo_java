@@ -2,6 +2,7 @@
 package demos.dlineage.dataflow.model;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TSourceToken;
@@ -19,20 +20,22 @@ public class ResultColumn {
     protected int id;
 
     protected String alias;
-    protected Pair<Long, Long> aliasStartPosition;
-    protected Pair<Long, Long> aliasEndPosition;
+    protected Pair3<Long, Long, String> aliasStartPosition;
+    protected Pair3<Long, Long, String> aliasEndPosition;
 
     protected String fullName;
     protected String name;
 
-    protected Pair<Long, Long> startPosition;
-    protected Pair<Long, Long> endPosition;
+    protected Pair3<Long, Long, String> startPosition;
+    protected Pair3<Long, Long, String> endPosition;
 
     protected TParseTreeNode columnObject;
 
     protected List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
     
     private boolean showStar = true;
+    
+    protected boolean isFunction = false;
 
     public ResultColumn() {
 
@@ -66,10 +69,10 @@ public class ResultColumn {
 
         this.fullName = columnObject.toString();
 
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
     }
 
     public ResultColumn(ResultSet resultSet, TResultColumn resultColumnObject) {
@@ -89,10 +92,10 @@ public class ResultColumn {
                     .getStartToken();
             TSourceToken endToken = resultColumnObject.getAliasClause()
                     .getEndToken();
-            this.aliasStartPosition = new Pair<Long, Long>(startToken.lineNo,
-                    startToken.columnNo);
-            this.aliasEndPosition = new Pair<Long, Long>(endToken.lineNo,
-                    endToken.columnNo + endToken.astext.length());
+            this.aliasStartPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                    startToken.columnNo, ModelBindingManager.getGlobalHash());
+            this.aliasEndPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                    endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
             this.name = this.alias;
         } else {
@@ -108,10 +111,10 @@ public class ResultColumn {
                 TSourceToken endToken = resultColumnObject.getExpr()
                         .getLeftOperand()
                         .getEndToken();
-                this.aliasStartPosition = new Pair<Long, Long>(startToken.lineNo,
-                        startToken.columnNo);
-                this.aliasEndPosition = new Pair<Long, Long>(endToken.lineNo,
-                        endToken.columnNo + endToken.astext.length());
+                this.aliasStartPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                        startToken.columnNo, ModelBindingManager.getGlobalHash());
+                this.aliasEndPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                        endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
                 this.name = this.alias;
             } else if (resultColumnObject.getExpr().getExpressionType() == EExpressionType.function_t) {
@@ -140,10 +143,10 @@ public class ResultColumn {
         
         TSourceToken startToken = resultColumnObject.getStartToken();
         TSourceToken endToken = resultColumnObject.getEndToken();
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
     }
 
     public ResultColumn(SelectResultSet resultSet,
@@ -166,10 +169,10 @@ public class ResultColumn {
         
         this.name = SQLUtil.trimColumnStringQuote(name);
 
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
     }
 
 //    private int getIndexOf(TResultColumnList resultColumnList,
@@ -193,11 +196,11 @@ public class ResultColumn {
         return alias;
     }
 
-    public Pair<Long, Long> getAliasStartPosition() {
+    public Pair3<Long, Long, String> getAliasStartPosition() {
         return aliasStartPosition;
     }
 
-    public Pair<Long, Long> getAliasEndPosition() {
+    public Pair3<Long, Long, String> getAliasEndPosition() {
         return aliasEndPosition;
     }
 
@@ -205,11 +208,11 @@ public class ResultColumn {
         return fullName;
     }
 
-    public Pair<Long, Long> getStartPosition() {
+    public Pair3<Long, Long, String> getStartPosition() {
         return startPosition;
     }
 
-    public Pair<Long, Long> getEndPosition() {
+    public Pair3<Long, Long, String> getEndPosition() {
         return endPosition;
     }
 
@@ -253,5 +256,12 @@ public class ResultColumn {
 		this.showStar = showStar;
 	}
 
-    
+	public boolean isFunction() {
+		return isFunction;
+	}
+
+	public void setFunction(boolean isFunction) {
+		this.isFunction = isFunction;
+	}
+
 }

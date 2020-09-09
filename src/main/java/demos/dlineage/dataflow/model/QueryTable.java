@@ -1,17 +1,17 @@
 
 package demos.dlineage.dataflow.model;
 
+import demos.dlineage.util.Pair3;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TTable;
-import demos.dlineage.util.Pair;
 
 public class QueryTable extends ResultSet {
 
     private String alias;
-    private Pair<Long, Long> startPosition;
-    private Pair<Long, Long> endPosition;
+    private Pair3<Long, Long, String> startPosition;
+    private Pair3<Long, Long, String> endPosition;
 
     private TTable tableObject;
 
@@ -29,10 +29,10 @@ public class QueryTable extends ResultSet {
             endToken = tableObject.getAliasClause().getEndToken();
         }
 
-        this.startPosition = new Pair<Long, Long>(startToken.lineNo,
-                startToken.columnNo);
-        this.endPosition = new Pair<Long, Long>(endToken.lineNo,
-                endToken.columnNo + endToken.astext.length());
+        this.startPosition = new Pair3<Long, Long, String>(startToken.lineNo,
+                startToken.columnNo, ModelBindingManager.getGlobalHash());
+        this.endPosition = new Pair3<Long, Long, String>(endToken.lineNo,
+                endToken.columnNo + endToken.astext.length(), ModelBindingManager.getGlobalHash());
 
         if (tableObject.getAliasClause() != null) {
             this.alias = tableObject.getAliasName();
@@ -56,11 +56,11 @@ public class QueryTable extends ResultSet {
         return alias;
     }
 
-    public Pair<Long, Long> getStartPosition() {
+    public Pair3<Long, Long, String> getStartPosition() {
         return startPosition;
     }
 
-    public Pair<Long, Long> getEndPosition() {
+    public Pair3<Long, Long, String> getEndPosition() {
         return endPosition;
     }
 

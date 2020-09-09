@@ -20,6 +20,21 @@ public class SHA256 {
         }
         return encodestr;
     }
+    
+    public static String getMd5(String str) {
+        MessageDigest messageDigest;
+        String encodestr = "";
+        try {
+            messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest.update(str.getBytes("UTF-8"));
+            encodestr = byte2Hex(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return encodestr;
+    }
 
 
     private static String byte2Hex(byte[] bytes) {
