@@ -116,6 +116,58 @@ public class testModifySql extends TestCase {
 
     }
 
+    public void testRemoveExpression1() {
+      //  TGSqlParser parser = new TGSqlParser(EDbVendor.dbvoracle);
+
+        String sql = "SELECT SUM (d.amt)\r\n"
+                + "FROM summit.cntrb_detail d\r\n"
+                + "WHERE d.fund_coll_attrb IN ( '$Institute$' )\r\n"
+                + "AND d.fund_acct IN ( '$Fund$' )\r\n"
+                + "AND d.cntrb_date >= '$From_Date$'\r\n"
+                + "AND d.cntrb_date <= '$Thru_Date$'\r\n"
+                + "GROUP BY d.id;";
+
+        parser.sqltext = sql;
+        assertTrue(parser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement) parser.sqlstatements.get(0);
+        TExpression expression = select.getWhereClause().getCondition();
+        expression.getLeftOperand().remove2();
+//        System.out.println(select.toString().trim());
+
+//        assertTrue(select.toString().equalsIgnoreCase("SELECT SUM (d.amt)\n" +
+//                "FROM summit.cntrb_detail d\n" +
+//                "WHERE \n" +
+//                " d.cntrb_date <= '$Thru_Date$'\n" +
+//                "GROUP BY d.id;"));
+    }
+
+    public void testRemoveExpression2() {
+        //  TGSqlParser parser = new TGSqlParser(EDbVendor.dbvoracle);
+
+        String sql = "SELECT SUM (d.amt)\r\n"
+                + "FROM summit.cntrb_detail d\r\n"
+                + "WHERE d.fund_coll_attrb IN ( '$Institute$' )\r\n"
+                + "AND d.fund_acct IN ( '$Fund$' )\r\n"
+                + "AND d.cntrb_date >= '$From_Date$'\r\n"
+                + "AND d.cntrb_date <= '$Thru_Date$'\r\n"
+                + "GROUP BY d.id;";
+
+        parser.sqltext = sql;
+        assertTrue(parser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement) parser.sqlstatements.get(0);
+        TExpression expression = select.getWhereClause().getCondition();
+        expression.getRightOperand().remove2();
+ //       System.out.println(select.toString().trim());
+
+//        assertTrue(select.toString().equalsIgnoreCase("SELECT SUM (d.amt)\n" +
+//                "FROM summit.cntrb_detail d\n" +
+//                "WHERE d.fund_coll_attrb IN ( '$Institute$' )\n" +
+//                "AND d.fund_acct IN ( '$Fund$' )\n" +
+//                "AND d.cntrb_date >= '$From_Date$'\n" +
+//                " \n" +
+//                "GROUP BY d.id;"));
+    }
+
     public void testRemoveResultColumn(){
         parser.sqltext = "SELECT A as A_Alias, B AS B_Alias FROM TABLE_X";
         assertTrue(parser.parse() == 0);
