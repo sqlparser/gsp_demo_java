@@ -385,7 +385,7 @@ public class testModifySql extends TestCase {
         }
 
 
-       System.out.println(select.toString());
+       //System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where c>1"));
     }
 
