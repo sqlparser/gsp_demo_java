@@ -4,6 +4,7 @@ import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 
 import gudusoft.gsqlparser.stmt.TAlterTableStatement;
+import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
@@ -376,7 +377,7 @@ public class testModifySql extends TestCase {
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         if (TParseTreeNode.doubleLinkedTokenListToString){
-            TWhereClause whereClause = new TWhereClause("where c>1");
+            TWhereClause whereClause = new TWhereClause("c>1");
             //whereClause.setText("where c>1");
             select.setAnchorNode(select.joins);
             select.setWhereClause(whereClause);
@@ -386,7 +387,7 @@ public class testModifySql extends TestCase {
 
 
        //System.out.println(select.toString());
-        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where c>1"));
+        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere c>1"));
     }
 
 
@@ -397,15 +398,14 @@ public class testModifySql extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         if (TParseTreeNode.doubleLinkedTokenListToString){
             TWhereClause whereClause = new TWhereClause("where c>1");
-            //whereClause.setText("where c>1");
             select.setAnchorNode(select.joins);
             select.setWhereClause(whereClause);
         }else{
             select.addWhereClause("c>1");
         }
 
-        //System.out.println(select.toString());
-        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where c>1 group by a"));
+        System.out.println(select.toString());
+        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere c>1 group by a"));
     }
 
 
@@ -431,7 +431,7 @@ public class testModifySql extends TestCase {
         TJoinItem item0 = joinList.getJoin( 0 ).getJoinItems( ).getJoinItem( 0 );
         if (TParseTreeNode.doubleLinkedTokenListToString){
             item0.getOnCondition().setString("("+item0.getOnCondition()+")"+" and 1=1");
-            TWhereClause whereClause = new TWhereClause("where c>1");
+            TWhereClause whereClause = new TWhereClause("c>1");
             //whereClause.setText("where c>1");
             select.setAnchorNode(select.joins);
             select.setWhereClause(whereClause);
@@ -453,7 +453,7 @@ public class testModifySql extends TestCase {
                 "   WHERE tableC.itemC3='ABC'\n" +
                 "   GROUP BY tableC.itemC1\n" +
                 ") unNamedJoin\n" +
-                " ON unNamedJoin.itemC1 = tableB.itemB2 where c>1"));
+                " ON unNamedJoin.itemC1 = tableB.itemB2\nwhere c>1"));
 
     }
 
@@ -521,7 +521,7 @@ public class testModifySql extends TestCase {
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         if (TParseTreeNode.doubleLinkedTokenListToString){
             TOrderByItem orderByItem = new TOrderByItem();
-            orderByItem.setText("a asc");
+            orderByItem.setString("a asc");
             select.getOrderbyClause().getItems().addOrderByItem(orderByItem);
         }else{
             select.addOrderBy("a asc");
@@ -533,7 +533,7 @@ public class testModifySql extends TestCase {
         assertTrue(parser.parse() == 0);
         select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         if (TParseTreeNode.doubleLinkedTokenListToString){
-            TWhereClause whereClause = new TWhereClause("where a>1 and b>2");
+            TWhereClause whereClause = new TWhereClause("a>1 and b>2");
             //whereClause.setText("where a>1 and b>2");
             select.setWhereClause(whereClause);
             TOrderBy orderBy = new TOrderBy("order by a desc");
@@ -544,7 +544,7 @@ public class testModifySql extends TestCase {
             select.addWhereClause("a>1 and b>2") ;
             select.addOrderBy("a desc");
         }
-        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where a>1 and b>2 order by a desc"));
+        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere a>1 and b>2 order by a desc"));
 
        // System.out.println(select.toString());
     }
@@ -557,7 +557,7 @@ public class testModifySql extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
         if(TParseTreeNode.doubleLinkedTokenListToString){
             TOrderByItem orderByItem = new TOrderByItem();
-            orderByItem.setText("b");
+            orderByItem.setString("b");
             select.getOrderbyClause().getItems().addOrderByItem(orderByItem);
         }else{
             select.getOrderbyClause().addOrderByItem("b");
@@ -603,11 +603,11 @@ public class testModifySql extends TestCase {
         select.getOrderbyClause().getItems().getOrderByItem(0).setString("b asc");
         if(TParseTreeNode.doubleLinkedTokenListToString){
             TOrderByItem orderByItem1 = new TOrderByItem();
-            orderByItem1.setText("c desc");
+            orderByItem1.setString("c desc");
             select.getOrderbyClause().getItems().addOrderByItem(orderByItem1);
 
             TOrderByItem orderByItem2 = new TOrderByItem();
-            orderByItem2.setText("d desc");
+            orderByItem2.setString("d desc");
             select.getOrderbyClause().getItems().addOrderByItem(orderByItem2);
         }else{
             select.getOrderbyClause().addOrderByItem("c desc");
@@ -755,7 +755,7 @@ public class testModifySql extends TestCase {
 
         if(TParseTreeNode.doubleLinkedTokenListToString){
             TObjectName columnName0 = new TObjectName();
-            columnName0.setText("CEL_NEWID");
+            columnName0.setString("CEL_NEWID");
             constraint.getReferencedColumnList().insertElementAt(columnName0,0);
         }else{
             TDummy dummy  = new TDummy();
@@ -780,7 +780,7 @@ public class testModifySql extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)lcparser.sqlstatements.get(0);
 
         if (TParseTreeNode.doubleLinkedTokenListToString){
-            TWhereClause whereClause = new TWhereClause("where f > 0");
+            TWhereClause whereClause = new TWhereClause("f > 0");
             // whereClause.setText("where f > 0");
             select.setAnchorNode(select.joins);
             select.setWhereClause(whereClause);
@@ -808,7 +808,7 @@ public class testModifySql extends TestCase {
             }
         }
 
-        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X where f > 0"));
+        assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere f > 0"));
 
 
     }
@@ -913,6 +913,34 @@ public class testModifySql extends TestCase {
         for (int i=0;i<stmt.getStatements().size();i++){
            iterateStmt(stmt.getStatements().get(i));
         }
+    }
+
+
+    public void testRenameTableName(){
+        TGSqlParser lcparser = new TGSqlParser(EDbVendor.dbvnetezza);
+        lcparser.sqltext = "select * from \"emp\"";
+        lcparser.parse();
+        TSelectSqlStatement select = (TSelectSqlStatement)lcparser.sqlstatements.get(0);
+        TTable table = select.tables.getTable(0);
+        table.getTableName().setString(table.getTableName().toString().substring(1,4));
+        assertTrue(select.toString().equalsIgnoreCase("select * from emp"));
+    }
+
+    public void testRenameTableName2(){
+        TGSqlParser lcparser = new TGSqlParser(EDbVendor.dbvnetezza);
+        lcparser.sqltext = "CREATE EXTERNAL TABLE '\\\\.\\pipe\\datastageprod_10808_nzw_0_0_20190225084911825827' \n" +
+                "USING (remotesource 'odbc' delimiter ' ' ignorezero false ctrlchars true escapechar '\\' logDir 'c:/temp' boolStyle 'T_F' encoding 'internal' nullValue 'N' ) \n" +
+                "AS select count(*)::integer ROWCOUNT, 1::integer as sKey FROM SV_POLICY a JOIN SV_AUTO_OPERATORS b ON a.POLICY_SYMBOL = b.POLICY_SYMBOL AND a.POLICY_NUMBER = b.POLICY_NUMBER \n" +
+                "AND a.POLICY_EFFECTIVE_DATE = b.POLICY_EFFECTIVE_DATE;";
+        lcparser.parse();
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)lcparser.sqlstatements.get(0);
+        TTable table = createTable.getTargetTable();
+        table.getTableName().setString("dummy_table");
+        //System.out.println(createTable.toString());
+        assertTrue(createTable.toString().equalsIgnoreCase("CREATE EXTERNAL TABLE dummy_table \n" +
+                "USING (remotesource 'odbc' delimiter ' ' ignorezero false ctrlchars true escapechar '\\' logDir 'c:/temp' boolStyle 'T_F' encoding 'internal' nullValue 'N' ) \n" +
+                "AS select count(*)::integer ROWCOUNT, 1::integer as sKey FROM SV_POLICY a JOIN SV_AUTO_OPERATORS b ON a.POLICY_SYMBOL = b.POLICY_SYMBOL AND a.POLICY_NUMBER = b.POLICY_NUMBER \n" +
+                "AND a.POLICY_EFFECTIVE_DATE = b.POLICY_EFFECTIVE_DATE;"));
     }
 
 }

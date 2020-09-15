@@ -37,6 +37,21 @@ public class testFunction extends TestCase {
         assertTrue(functionCall.getFunctionName().getSchemaString().equalsIgnoreCase("schema1"));
         assertTrue(functionCall.getFunctionName().getPackageString().equalsIgnoreCase("pkg1"));
         assertTrue(functionCall.getFunctionName().getObjectString().equalsIgnoreCase("GETCUSTOMERNAME"));
+    }
 
+    public void testRemoveArg(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = " SELECT reporting.get_formal_salutation(m.id,'Y','$dns$') AS \"Formal Salutation\" FROM [bc].[SystemDate] sd";
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TExpression expr = selectSqlStatement.getResultColumnList().getResultColumn(0).getExpr();
+        TFunctionCall functionCall = expr.getFunctionCall();
+        assertTrue(functionCall.getFunctionName().toString().equalsIgnoreCase("reporting.get_formal_salutation"));
+        functionCall.getArgs().removeItem(2);
+        assertTrue(functionCall.toString().equalsIgnoreCase("reporting.get_formal_salutation(m.id,'Y')"));
+        functionCall.getArgs().removeItem(1);
+        assertTrue(functionCall.toString().equalsIgnoreCase("reporting.get_formal_salutation(m.id)"));
+        functionCall.getArgs().removeItem(0);
+        assertTrue(functionCall.toString().equalsIgnoreCase("reporting.get_formal_salutation()"));
     }
 }

@@ -121,14 +121,8 @@ public class testExpression extends TestCase {
         TExpressionList resultList = expression.searchColumn("columnB");
 
         TExpression columnBExpr = resultList.getExpression(0);
-        if (columnBExpr.getParentExpr() != null){
-            TExpression parent  = columnBExpr.getParentExpr();
-            if (columnBExpr == parent.getLeftOperand()){
-                parent.setLeftOperand(null);
-            }else if (columnBExpr == parent.getRightOperand()){
-                parent.setRightOperand(null);
-            }
-        }
+        columnBExpr.removeMe();
+
         assertTrue(expression.toString().equalsIgnoreCase("columnA+(2)+columnC"));
 
         expression = parser.parseExpression("columnA+(columnB*2)>columnC and columnD=columnE-9");
@@ -139,14 +133,7 @@ public class testExpression extends TestCase {
         assertTrue(columnAExpr.toString().equalsIgnoreCase("columnA"));
 
 
-        if (columnAExpr.getParentExpr() != null){
-            TExpression parent  = columnAExpr.getParentExpr();
-            if (columnAExpr == parent.getLeftOperand()){
-                parent.setLeftOperand(null);
-            }else if (columnAExpr == parent.getRightOperand()){
-                parent.setRightOperand(null);
-            }
-        }
+        columnAExpr.removeMe();
 
        // System.out.println(expression.toString());
         assertTrue(expression.toString().equalsIgnoreCase("(columnB*2)>columnC and columnD=columnE-9"));
@@ -168,18 +155,7 @@ public class testExpression extends TestCase {
         TExpression expression1 = resultList.getExpression(0);
         assertTrue(expression1.getExpressionType() == EExpressionType.simple_object_name_t);
         assertTrue(expression1.toString().equalsIgnoreCase("pal.application_location_id"));
-
-        if (expression1.getParentExpr() != null){
-            TExpression parent  = expression1.getParentExpr();
-            TExpression parentParent = parent.getParentExpr();
-            if (parentParent != null){
-                if (parent == parentParent.getLeftOperand()){
-                    parentParent.setLeftOperand(null);
-                }else if (parent == parentParent.getRightOperand()){
-                    parentParent.setRightOperand(null);
-                }
-            }
-        }
+        expression1.removeMe();
 
        // System.out.println(expression.toString());
        assertTrue(expression.toString().equalsIgnoreCase("(pu.jbp_uid = pualr.jbp_uid \n" +
@@ -203,11 +179,13 @@ public class testExpression extends TestCase {
         assertTrue(selectSqlStatement.toString().equalsIgnoreCase("select *\n" +
                 "from table1 pal, table2 pualr, table3 pu\n" +
                 "WHERE  pal.application_location_id in (2,3,4)"));
-        expression.setRightOperand(null);
+        expression.getRightOperand().removeMe();
+        if (expression.getNodeStatus() == ENodeStatus.nsRemoved){
+            selectSqlStatement.setWhereClause(null);
+        }
         //System.out.println(selectSqlStatement.toString());
-        assertTrue(selectSqlStatement.toString().equalsIgnoreCase("select *\n" +
-                "from table1 pal, table2 pualr, table3 pu\n" +
-                "WHERE  pal.application_location_id"));
+        assertTrue(selectSqlStatement.toString().trim().equalsIgnoreCase("select *\n" +
+                "from table1 pal, table2 pualr, table3 pu"));
     }
 
 }
