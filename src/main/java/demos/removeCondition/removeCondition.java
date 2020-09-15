@@ -1,12 +1,17 @@
 
 package demos.removeCondition;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.TSourceTokenList;
+import gudusoft.gsqlparser.nodes.ENodeStatus;
 import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TJoin;
@@ -17,12 +22,6 @@ import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.nodes.TTableList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Replace user defined variable in where clause with specified value,
@@ -54,16 +53,13 @@ public class removeCondition
 
 	public static void main( String[] args )
 	{
-		String sql = "SELECT SUM (d.amt) \r\n"
-				+ "FROM   summit.cntrb_detail d \r\n"
-				+ "WHERE"
-				+ " d.id = summit.mstr.id \r\n"
-				+ "AND d.system_gift_type IN ( 'OG', 'PLP', 'PGP' ) \r\n"
-				+ "AND d.fund_coll_attrb IN ( '$Institute$' ) \r\n"
-				+ "AND d.fund_acct IN ( '$Fund$' ) \r\n"
-				+ "AND d.cntrb_date >= '$From_Date$' \r\n"
-				+ "AND d.cntrb_date <= '$Thru_Date$' \r\n"
-				+ "GROUP  BY d.id; ";
+		String sql = "SELECT SUM (d.amt)\r\n"
+				+ "FROM summit.cntrb_detail d\r\n"
+				+ "WHERE d.fund_coll_attrb IN ( '$Institute$' )\r\n"
+				+ "AND d.fund_acct IN ( '$Fund$' )\r\n"
+				+ "AND d.cntrb_date >= '$From_Date$'\r\n"
+				+ "AND d.cntrb_date <= '$Thru_Date$'\r\n"
+				+ "GROUP BY d.id;";
 		Map<String, String> conditionMap = new HashMap<String, String>( );
 		conditionMap.put( "Institute", "ShanXi University" );
 		conditionMap.put( "Fund", "Eclipse.org" );
@@ -78,12 +74,7 @@ public class removeCondition
 
 	private String result;
 
-	private StringBuffer conditionBuffer = new StringBuffer( );
-	private StringBuffer trimBuffer = new StringBuffer( );
-	private StringBuffer suffixBuffer = new StringBuffer( );
-	private StringBuffer prefixBuffer = new StringBuffer( );
 	private StringBuffer replaceBuffer = new StringBuffer( );
-	private StringBuffer tokenBuffer = new StringBuffer( );
 
 	public removeCondition( File sqlFile, EDbVendor vendor,
 			Map<String, String> conditionMap )
@@ -148,92 +139,6 @@ public class removeCondition
 	public String getRemoveResult( )
 	{
 		return result;
-	}
-
-	private String getStmtPrefix( TCustomSqlStatement stat,
-			TSourceToken clauseToken )
-	{
-		TSourceToken startToken = stat.getStartToken( );
-		TSourceToken endToken = clauseToken;
-		TSourceTokenList tokenList = startToken.container;
-		prefixBuffer.delete( 0, prefixBuffer.length( ) );
-		boolean flag = false;
-		for ( int i = 0; i < tokenList.size( ); i++ )
-		{
-			TSourceToken token = tokenList.get( i );
-			if ( !flag )
-			{
-				if ( token == startToken )
-					flag = true;
-				else
-					continue;
-			}
-			if ( token == endToken || i > endToken.posinlist )
-				break;
-			prefixBuffer.append( token.toString( ) );
-		}
-		String prefix = prefixBuffer.toString( );
-		return prefix;
-	}
-
-	private String getStmtSuffix( TCustomSqlStatement stat,
-			TSourceToken clauseToken, boolean removeSpaces )
-	{
-		TSourceToken startToken = clauseToken;
-		TSourceToken endToken = stat.getEndToken( );
-		TSourceTokenList tokenList = startToken.container;
-		suffixBuffer.delete( 0, suffixBuffer.length( ) );
-		boolean flag = false;
-		for ( int i = 0; i < tokenList.size( ); i++ )
-		{
-			TSourceToken token = tokenList.get( i );
-			if ( !flag )
-			{
-				if ( token == startToken )
-				{
-					flag = true;
-					// Remove the white space token, replace the where token
-					// with the suffix token.
-					if ( removeSpaces )
-					{
-						while ( ++i < tokenList.size( ) )
-						{
-							token = tokenList.get( i );
-							String tokenText = token.toString( );
-							if ( tokenText.trim( ).length( ) == 0 )
-							{
-								if ( token == endToken )
-								{
-									return suffixBuffer.toString( );
-								}
-								continue;
-							}
-							else
-							{
-								if ( i <= endToken.posinlist )
-									suffixBuffer.append( tokenText );
-								if ( token == endToken )
-								{
-									return suffixBuffer.toString( );
-								}
-								break;
-							}
-						}
-					}
-				}
-				continue;
-			}
-
-			if ( token == endToken || i > endToken.posinlist )
-			{
-				if ( token == endToken )
-					suffixBuffer.append( token.toString( ) );
-				break;
-			}
-
-			suffixBuffer.append( token.toString( ) );
-		}
-		return suffixBuffer.toString( );
 	}
 
 	String remove( TCustomSqlStatement stat, Map<String, String> conditionMap )
@@ -350,7 +255,7 @@ public class removeCondition
 				if ( table.getFuncCall( ) != null )
 				{
 					ExpressionChecker w = new ExpressionChecker( this );
-					w.checkFunctionCall( table.getFuncCall( ), conditionMap );
+					w.checkFunctionCall( table, table.getFuncCall( ), conditionMap );
 				}
 			}
 		}
@@ -374,7 +279,7 @@ public class removeCondition
 						if ( joinItem.getTable( ).getFuncCall( ) != null )
 						{
 							ExpressionChecker w = new ExpressionChecker( this );
-							w.checkFunctionCall( joinItem.getTable( )
+							w.checkFunctionCall( joinItem.getTable( ), joinItem.getTable( )
 									.getFuncCall( ), conditionMap );
 						}
 						if ( joinItem.getOnCondition( ) != null )
@@ -401,13 +306,17 @@ public class removeCondition
 				{
 					getParserString( expr.getSubQuery( ), conditionMap );
 				}
+				else if(expr!=null){
+					ExpressionChecker w = new ExpressionChecker( this );
+					w.checkExpression( expr, conditionMap );
+				}
+				
 			}
 		}
 
 		if ( stat.getWhereClause( ) != null
 				&& stat.getWhereClause( ).getCondition( ) != null )
 		{
-
 			TExpression whereExpression = stat.getWhereClause( ).getCondition( );
 			if ( whereExpression.toString( ) == null )
 			{
@@ -418,40 +327,11 @@ public class removeCondition
 			}
 			else
 			{
-				String oldString = toString( stat );
-				conditionBuffer.delete( 0, conditionBuffer.length( ) );
 				ExpressionChecker w = new ExpressionChecker( this );
 				w.checkExpression( whereExpression, conditionMap );
-				String newString = toString( stat );
-				if ( !oldString.equals( newString ) )
-				{
-					if ( whereExpression != null )
-					{
-						if ( toString( whereExpression ) != null )
-						{
-							String prefix = getStmtPrefix( stat,
-									stat.getWhereClause( ).getStartToken( ) );
-							clauseCondition = trim( toString( whereExpression ).trim( ) );
-							whereExpression.remove2( );
-							String suffix = getStmtSuffix( stat,
-									stat.getWhereClause( ).getEndToken( ),
-									false );
-							conditionBuffer.append( prefix )
-									.append( toString( stat.getWhereClause( ) ) )
-									.append( clauseCondition )
-									.append( suffix );
-						}
-						else
-						{
-							String prefix = getStmtPrefix( stat,
-									stat.getWhereClause( ).getStartToken( ) );
-							String suffix = getStmtSuffix( stat,
-									stat.getWhereClause( ).getEndToken( ),
-									true );
-							conditionBuffer.append( prefix ).append( suffix );
-						}
-					}
-					stat.setString( conditionBuffer.toString( ) );
+				
+				if(whereExpression == null || whereExpression.getNodeStatus() == ENodeStatus.nsRemoved){
+					stat.setWhereClause(null);
 				}
 			}
 		}
@@ -473,65 +353,15 @@ public class removeCondition
 			}
 			else
 			{
-				String oldString = toString( stat );
-				conditionBuffer.delete( 0, conditionBuffer.length( ) );
 				ExpressionChecker w = new ExpressionChecker( this );
 				w.checkExpression( havingExpression, conditionMap );
-				String newString = toString( stat );
-				if ( !oldString.equals( newString ) )
-				{
-					if ( havingExpression != null )
-					{
-						if ( toString( havingExpression ) != null )
-						{
-							String prefix = getStmtPrefix( stat,
-									( (TSelectSqlStatement) stat ).getGroupByClause( )
-											.getHavingClause( )
-											.getStartToken( ) );
-							clauseCondition = trim( toString( havingExpression ).trim( ) );
-							havingExpression.remove2( );
-
-							if ( toString( havingExpression ) != null )
-							{
-								String suffix = getStmtSuffix( stat,
-										( (TSelectSqlStatement) stat ).getGroupByClause( )
-												.getHavingClause( )
-												.getEndToken( ),
-										false );
-								conditionBuffer.append( prefix )
-										.append( toString( ( (TSelectSqlStatement) stat ).getGroupByClause( )
-												.getHavingClause( ) ) )
-										.append( clauseCondition )
-										.append( suffix );
-							}
-							else
-							{
-								String suffix = getStmtSuffix( stat,
-										( (TSelectSqlStatement) stat ).getGroupByClause( )
-												.getHAVING( ),
-										false );
-								conditionBuffer.append( prefix )
-										.append( clauseCondition )
-										.append( suffix );
-							}
-						}
-						else
-						{
-							String prefix = getStmtPrefix( stat,
-									( (TSelectSqlStatement) stat ).getGroupByClause( )
-											.getHAVING( ) );
-							String suffix = getStmtSuffix( stat,
-									( (TSelectSqlStatement) stat ).getGroupByClause( )
-											.getHAVING( ),
-									true );
-							conditionBuffer.append( prefix ).append( suffix );
-						}
-					}
-					return conditionBuffer.toString( );
+				
+				if(havingExpression == null || havingExpression.getNodeStatus() == ENodeStatus.nsRemoved){
+					 ( (TSelectSqlStatement) stat ).getGroupByClause( ).setHavingClause(null);
 				}
 			}
 		}
-		return toString( stat );
+		return stat.toString();
 
 	}
 
@@ -542,7 +372,7 @@ public class removeCondition
 		{
 			TCustomSqlStatement stat = sqlparser.sqlstatements.get( 0 );
 			getParserString( stat, conditionMap );
-			result = toString( stat );
+			result = stat.toString();
 			if ( result != null )
 			{
 				result = replaceCondition( result, conditionMap );
@@ -583,38 +413,8 @@ public class removeCondition
 	}
 
 	protected String toString( TParseTreeNode node )
-	{
-		TSourceToken tsourcetoken = node.getStartToken( );
-		if ( tsourcetoken == null )
-			return null;
-		TSourceToken tsourcetoken1 = node.getEndToken( );
-		if ( tsourcetoken1 == null )
-			return null;
-		TSourceTokenList tsourcetokenlist = tsourcetoken.container;
-		if ( tsourcetokenlist == null )
-			return null;
-		int i = tsourcetoken.posinlist;
-		int j = tsourcetoken1.posinlist;
-		tokenBuffer.delete( 0, tokenBuffer.length( ) );
-		for ( int k = i; k <= j; k++ )
-			tokenBuffer.append( tsourcetokenlist.get( k ).toString( ) );
-		return tokenBuffer.toString( );
+	{	
+		return node.toString();
 	}
 
-	private String trim( String string )
-	{
-		Pattern pattern = Pattern.compile( "(\n|\r\n)\\s+(\n|\r\n)",
-				Pattern.CASE_INSENSITIVE );
-		Matcher matcher = pattern.matcher( string );
-		trimBuffer.delete( 0, trimBuffer.length( ) );
-		while ( matcher.find( ) )
-		{
-			if ( matcher.group( ).endsWith( "\r\n" ) )
-				matcher.appendReplacement( trimBuffer, "\r\n" );
-			else
-				matcher.appendReplacement( trimBuffer, "\n" );
-		}
-		matcher.appendTail( trimBuffer );
-		return trimBuffer.toString( );
-	}
 }

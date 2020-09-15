@@ -1,10 +1,12 @@
 
 package demos.removeCondition;
 
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.TSourceTokenList;
 import gudusoft.gsqlparser.TStatementList;
 import gudusoft.gsqlparser.nodes.IExpressionVisitor;
 import gudusoft.gsqlparser.nodes.TCaseExpression;
@@ -15,10 +17,6 @@ import gudusoft.gsqlparser.nodes.TOrderByItemList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
 import gudusoft.gsqlparser.nodes.TWhenClauseItem;
 import gudusoft.gsqlparser.nodes.TWhenClauseItemList;
-
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ExpressionChecker implements IExpressionVisitor
 {
@@ -42,7 +40,12 @@ public class ExpressionChecker implements IExpressionVisitor
 		{
 			conditions = conditionMap.keySet( ).toArray( new String[0] );
 		}
-		String expr = toString( expression );
+		
+		if(expression == null){
+			return false;
+		}
+		
+		String expr = expression.toString();
 		if ( expr == null )
 			return false;
 		Pattern pattern = Pattern.compile( "\\$[^$]+\\$",
@@ -68,7 +71,7 @@ public class ExpressionChecker implements IExpressionVisitor
 				return false;
 		}
 		matcher.appendTail( buffer );
-		if ( !toString( expression ).equals( buffer.toString( ) ) )
+		if ( !buffer.toString( ).equals( expression.toString()) )
 			expression.setString( buffer.toString( ) );
 		return true;
 	}
@@ -80,7 +83,7 @@ public class ExpressionChecker implements IExpressionVisitor
 		expr.postOrderTraverse( this );
 	}
 
-	public void checkFunctionCall( TFunctionCall func,
+	public void checkFunctionCall( TParseTreeNode parent, TFunctionCall func,
 			Map<String, String> conditionMap )
 	{
 		if ( func.getArgs( ) != null )
@@ -93,6 +96,11 @@ public class ExpressionChecker implements IExpressionVisitor
 					expr.getSubQuery( )
 							.setString( removeCondition.remove( expr.getSubQuery( ),
 									conditionMap ) );
+				}
+				else if ( !checkCondition( expr ) ){
+					if(parent instanceof TExpression){
+						func.getArgs( ).removeElementAt(k);
+					}
 				}
 			}
 		}
@@ -110,6 +118,12 @@ public class ExpressionChecker implements IExpressionVisitor
 						expr.getSubQuery( )
 								.setString( removeCondition.remove( expr.getSubQuery( ),
 										conditionMap ) );
+					}
+					else if ( !checkCondition( expr ) ){
+						if(parent instanceof TExpression){
+							((TExpression)parent).setFunctionCall(null);
+							list.removeElementAt(i);
+						}
 					}
 				}
 			}
@@ -130,6 +144,12 @@ public class ExpressionChecker implements IExpressionVisitor
 									.setString( removeCondition.remove( sortKey.getSubQuery( ),
 											conditionMap ) );
 						}
+						else if ( !checkCondition( sortKey ) ){
+							if(parent instanceof TExpression){
+								((TExpression)parent).setFunctionCall(null);
+								orderByItemList.removeElementAt(i);
+							}
+						}
 					}
 				}
 			}
@@ -145,37 +165,46 @@ public class ExpressionChecker implements IExpressionVisitor
 			TExpression rightExpr = (TExpression) expression.getRightOperand( );
 			if ( leftExpr != null && !checkCondition( leftExpr ) )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 			if ( rightExpr != null && !checkCondition( rightExpr ) )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
-			if ( ( leftExpr != null && toExprString( leftExpr.toString( ) ) == null )
-					|| ( rightExpr != null && toExprString( rightExpr.toString( ) ) == null ) )
+			if ( ( leftExpr == null || toExprString( leftExpr.toString( ) ) == null )
+					|| ( rightExpr == null || toExprString( rightExpr.toString( ) ) == null ) )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 		}
 		if ( expression.getExpressionType( ) == EExpressionType.between_t )
 		{
-			if ( !checkCondition( expression ) )
-				removeExpression( expression );
-			if ( expression.getOperatorToken( ) != null
+			TExpression leftExpr = (TExpression) expression.getLeftOperand( );
+			TExpression rightExpr = (TExpression) expression.getRightOperand( );
+			if ( ( leftExpr == null || toExprString( leftExpr.toString( ) ) == null )
+					|| ( rightExpr == null || toExprString( rightExpr.toString( ) ) == null ) )
+			{
+				expression.removeMe();
+			}
+			else if ( !checkCondition( expression ) )
+			{
+				expression.removeMe();
+			}
+			else if ( expression.getOperatorToken( ) != null
 					&& toExprString( expression.getOperatorToken( ).toString( ) ) == null )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 
 		}
 		if ( expression.getExpressionType( ) == EExpressionType.pattern_matching_t )
 		{
 			if ( !checkCondition( expression ) )
-				removeExpression( expression );
+				expression.removeMe();
 			if ( expression.getOperatorToken( ) != null
 					&& toExprString( expression.getOperatorToken( ).toString( ) ) == null )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 		}
 		if ( expression.getExpressionType( ) == EExpressionType.in_t )
@@ -183,12 +212,12 @@ public class ExpressionChecker implements IExpressionVisitor
 			TExpression left = expression.getLeftOperand( );
 			if ( !checkCondition( left ) )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 				return true;
 			}
 
 			TExpression right = expression.getRightOperand( );
-			if ( right.getSubQuery( ) != null )
+			if ( right!=null && right.getSubQuery( ) != null )
 			{
 				right.getSubQuery( )
 						.setString( removeCondition.remove( right.getSubQuery( ),
@@ -196,19 +225,19 @@ public class ExpressionChecker implements IExpressionVisitor
 			}
 			else if ( !checkCondition( right ) )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 
 			if ( expression.getOperatorToken( ) != null
 					&& toExprString( expression.getOperatorToken( ).toString( ) ) == null )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 		}
 		if ( expression.getFunctionCall( ) != null )
 		{
 			TFunctionCall func = (TFunctionCall) expression.getFunctionCall( );
-			checkFunctionCall( func, conditionMap );
+			checkFunctionCall( expression, func, conditionMap );
 		}
 		if ( expression.getSubQuery( ) instanceof TCustomSqlStatement )
 		{
@@ -293,7 +322,7 @@ public class ExpressionChecker implements IExpressionVisitor
 			if ( expression.getOperatorToken( ) != null
 					&& toExprString( expression.getOperatorToken( ).toString( ) ) == null )
 			{
-				removeExpression( expression );
+				expression.removeMe();
 			}
 		}
 
@@ -301,10 +330,18 @@ public class ExpressionChecker implements IExpressionVisitor
 		{
 			if ( !checkCondition( expression ) )
 			{
-				TExpression parentExpr = expression.getParentExpr( );
-				removeExpression( expression );
-				parentExpr.getOperatorToken( ).setString( "" );
-				trimExpr( parentExpr );
+				expression.removeMe();
+			}
+			
+			if(expression.getExpressionType() == EExpressionType.parenthesis_t){
+				expression.removeMe();
+			}
+		}
+		
+		if(expression.getExpressionType() == EExpressionType.logical_and_t 
+				|| expression.getExpressionType() == EExpressionType.logical_or_t ){
+			if(expression.getLeftOperand() == null && expression.getRightOperand() == null){
+				expression.removeMe();
 			}
 		}
 		return true;
@@ -323,46 +360,8 @@ public class ExpressionChecker implements IExpressionVisitor
 		return string;
 	}
 
-	private void trimExpr( TExpression expr )
-	{
-		if ( expr == null )
-			return;
-		if ( expr.toString( ) != null )
-		{
-			expr.setString( expr.toString( ).trim( ) );
-		}
-		else
-		{
-			trimExpr( expr.getParentExpr( ) );
-		}
-	}
-
 	boolean is_compare_condition( EExpressionType t )
 	{
 		return ( ( t == EExpressionType.simple_comparison_t ) || ( t == EExpressionType.group_comparison_t ) );
-	}
-
-	private void removeExpression( TExpression expression )
-	{
-		expression.remove2( );
-	}
-
-	protected String toString( TParseTreeNode node )
-	{
-		TSourceToken tsourcetoken = node.getStartToken( );
-		if ( tsourcetoken == null )
-			return null;
-		TSourceToken tsourcetoken1 = node.getEndToken( );
-		if ( tsourcetoken1 == null )
-			return null;
-		TSourceTokenList tsourcetokenlist = tsourcetoken.container;
-		if ( tsourcetokenlist == null )
-			return null;
-		int i = tsourcetoken.posinlist;
-		int j = tsourcetoken1.posinlist;
-		tokenBuffer.delete( 0, tokenBuffer.length( ) );
-		for ( int k = i; k <= j; k++ )
-			tokenBuffer.append( tsourcetokenlist.get( k ).toString( ) );
-		return tokenBuffer.toString( );
 	}
 }
