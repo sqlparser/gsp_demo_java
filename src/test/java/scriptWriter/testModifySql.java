@@ -588,7 +588,7 @@ public class testModifySql extends TestCase {
         parser.sqltext = "SELECT * FROM TABLE_X order by a";
         assertTrue(parser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)parser.sqlstatements.get(0);
-        select.getOrderbyClause().getItems().removeElementAt(0);
+        select.getOrderbyClause().getItems().removeElementWithoutSyncTokens(0);
         TOrderBy orderBy = select.getOrderbyClause();
 
         TOrderByItem orderByItem = new TOrderByItem();
@@ -665,7 +665,7 @@ public class testModifySql extends TestCase {
 
         TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)sqlParser.sqlstatements.get(0);
         TJoin join = selectSqlStatement.joins.getJoin(0);
-        join.getJoinItems().removeElementAt(0);
+        join.getJoinItems().removeElementWithoutSyncTokens(0);
 
 //        System.out.println(scriptGenerator.generateScript(selectSqlStatement, true));
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvoracle
