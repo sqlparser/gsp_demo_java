@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.ENodeStatus;
@@ -143,7 +144,6 @@ public class removeCondition
 
 	String remove( TCustomSqlStatement stat, Map<String, String> conditionMap )
 	{
-		String clauseCondition = null;
 		if ( stat.getResultColumnList( ) != null )
 		{
 			for ( int j = 0; j < stat.getResultColumnList( ).size( ); j++ )
@@ -188,7 +188,7 @@ public class removeCondition
 		}
 
 		if ( stat instanceof TSelectSqlStatement
-				&& ( (TSelectSqlStatement) stat ).getSetOperator( ) != TSelectSqlStatement.setOperator_none )
+				&& ( (TSelectSqlStatement) stat ).getSetOperatorType() != ESetOperatorType.none )
 		{
 			TSelectSqlStatement select = ( (TSelectSqlStatement) stat );
 			getParserString( select.getLeftStmt( ), conditionMap );
@@ -309,6 +309,12 @@ public class removeCondition
 				else if(expr!=null){
 					ExpressionChecker w = new ExpressionChecker( this );
 					w.checkExpression( expr, conditionMap );
+					
+					if(expr == null || expr.getNodeStatus() == ENodeStatus.nsRemoved){
+						field.setExpr(null);
+						select.getResultColumnList().removeElementAt(i);
+						i--;
+					}
 				}
 				
 			}

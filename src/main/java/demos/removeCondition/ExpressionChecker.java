@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TStatementList;
+import gudusoft.gsqlparser.nodes.ENodeStatus;
 import gudusoft.gsqlparser.nodes.IExpressionVisitor;
 import gudusoft.gsqlparser.nodes.TCaseExpression;
 import gudusoft.gsqlparser.nodes.TExpression;
@@ -99,7 +100,7 @@ public class ExpressionChecker implements IExpressionVisitor
 				}
 				else if ( !checkCondition( expr ) ){
 					if(parent instanceof TExpression){
-						func.getArgs( ).removeElementAt(k);
+						((TExpression)parent).removeMe();
 					}
 				}
 			}
@@ -120,10 +121,9 @@ public class ExpressionChecker implements IExpressionVisitor
 										conditionMap ) );
 					}
 					else if ( !checkCondition( expr ) ){
-						if(parent instanceof TExpression){
-							((TExpression)parent).setFunctionCall(null);
-							list.removeElementAt(i);
-						}
+						expr.removeMe();
+						list.removeElementAt(i);
+						i--;
 					}
 				}
 			}
@@ -145,10 +145,9 @@ public class ExpressionChecker implements IExpressionVisitor
 											conditionMap ) );
 						}
 						else if ( !checkCondition( sortKey ) ){
-							if(parent instanceof TExpression){
-								((TExpression)parent).setFunctionCall(null);
-								orderByItemList.removeElementAt(i);
-							}
+							sortKey.removeMe();
+							orderByItemList.removeElementAt(i);
+							i--;
 						}
 					}
 				}
@@ -159,6 +158,12 @@ public class ExpressionChecker implements IExpressionVisitor
 	public boolean exprVisit( TParseTreeNode pnode, boolean pIsLeafNode )
 	{
 		TExpression expression = (TExpression) pnode;
+		
+		if(expression.getParentExpr()!=null 
+				&& expression.getParentExpr().getNodeStatus() == ENodeStatus.nsRemoved){
+			return true;
+		}
+		
 		if ( is_compare_condition( expression.getExpressionType( ) ) )
 		{
 			TExpression leftExpr = (TExpression) expression.getLeftOperand( );
