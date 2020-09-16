@@ -366,5 +366,99 @@ public class testModifyExpr extends TestCase {
                 " GROUP  BY d.id"));
     }
 
+    public void testExprRemoveBetween() {
+
+        String sql = "SELECT SUM (d.amt)\r\n" + "FROM summit.cntrb_detail d\r\n"
+                + "WHERE d.cntrb_date BETWEEN '$start_date$' AND '$end_date$'\r\n" + "GROUP BY d.id;";
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.setSqltext(sql);
+        sqlparser.parse();
+        TSelectSqlStatement stmt = (TSelectSqlStatement) sqlparser.getSqlstatements().get(0);
+        TExpression whereExpression = stmt.getWhereClause().getCondition();
+        whereExpression.postOrderTraverse(new IExpressionVisitor() {
+            public boolean exprVisit(TParseTreeNode pnode, boolean pIsLeafNode) {
+                TExpression expression = (TExpression) pnode;
+                if (expression.getLeftOperand() == null && expression.getRightOperand() == null
+                        && expression.toString() != null && expression.toString().indexOf("$") != -1) {
+                    expression.removeMe();
+                } else {
+                    if (expression.getExpressionType() == EExpressionType.simple_comparison_t
+                            || expression.getExpressionType() == EExpressionType.in_t) {
+                        if (expression.getRightOperand() == null && expression.getLeftOperand() != null) {
+                            expression.getLeftOperand().removeMe();
+                        }
+                        if (expression.getRightOperand() != null && expression.getLeftOperand() == null) {
+                            expression.getRightOperand().removeMe();
+                        }
+                        if (expression.getLeftOperand() == null && expression.getRightOperand() == null) {
+                            expression.removeMe();
+                        }
+                    } else if (expression.getExpressionType() == EExpressionType.logical_and_t
+                            || expression.getExpressionType() == EExpressionType.logical_or_t) {
+                        if (expression.getLeftOperand() == null && expression.getRightOperand() == null) {
+                            expression.removeMe();
+                        }
+                    }
+                }
+                return true;
+            }
+        });
+
+        if (stmt.getWhereClause().getCondition() == null
+                || stmt.getWhereClause().getCondition().getNodeStatus() == ENodeStatus.nsRemoved) {
+            stmt.setWhereClause(null);
+        }
+
+        //System.out.println(stmt.toString());
+        assertTrue(stmt.toString().equalsIgnoreCase("SELECT SUM (d.amt)\r\n" +
+                "FROM summit.cntrb_detail d\r\n" +
+                "GROUP BY d.id;"));
+
+    }
+
+    public void testExprRemoveHaving() {
+        String sql = "select c.id as sms.id from summit.cntrb_detail c where c.cntrb_date >='2011-01-01' and c.cntrb_date<='2013-01-01' group by c.id having sum(c.amt) >= '$GivingFromAmount$' and  sum(c.amt) <= '$GivingThruAmount$'";
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.setSqltext(sql);
+        sqlparser.parse();
+        TSelectSqlStatement stmt = (TSelectSqlStatement) sqlparser.getSqlstatements().get(0);
+        TExpression havingExpression = stmt.getGroupByClause().getHavingClause();
+        havingExpression.postOrderTraverse(new IExpressionVisitor() {
+            public boolean exprVisit(TParseTreeNode pnode, boolean pIsLeafNode) {
+                TExpression expression = (TExpression) pnode;
+                if (expression.getLeftOperand() == null && expression.getRightOperand() == null
+                        && expression.toString() != null && expression.toString().indexOf("$") != -1) {
+                    expression.removeMe();
+                } else {
+                    if (expression.getExpressionType() == EExpressionType.simple_comparison_t
+                            || expression.getExpressionType() == EExpressionType.in_t) {
+                        if (expression.getRightOperand() == null && expression.getLeftOperand() != null) {
+                            expression.getLeftOperand().removeMe();
+                        }
+                        if (expression.getRightOperand() != null && expression.getLeftOperand() == null) {
+                            expression.getRightOperand().removeMe();
+                        }
+                        if (expression.getLeftOperand() == null && expression.getRightOperand() == null) {
+                            expression.removeMe();
+                        }
+                    } else if (expression.getExpressionType() == EExpressionType.logical_and_t
+                            || expression.getExpressionType() == EExpressionType.logical_or_t) {
+                        if (expression.getLeftOperand() == null && expression.getRightOperand() == null) {
+                            expression.removeMe();
+                        }
+                    }
+                }
+                return true;
+            }
+        });
+
+        if (havingExpression == null
+                || havingExpression.getNodeStatus() == ENodeStatus.nsRemoved) {
+            stmt.getGroupByClause().setHavingClause(null);
+        }
+
+        assertTrue(stmt.toString().trim().equalsIgnoreCase("select c.id as sms.id from summit.cntrb_detail c where c.cntrb_date >='2011-01-01' and c.cntrb_date<='2013-01-01' group by c.id"));
+    }
+
 
 }
