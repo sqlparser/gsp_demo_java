@@ -270,6 +270,23 @@ public class JoinConverter {
         return this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
     }
 
+    public static void main(String[] args) {
+        EDbVendor vendor = EDbVendor.dbvoracle;
+        String sql = "SELECT *\n"
+                + "FROM   smmtccon.ccn_menu menu,\n"
+                + "       smmtccon.ccn_page paget\n"
+                + "WHERE  ( menu.page_id = paget.page_id(+) )\n"
+                + "       AND ( NOT enabled = 'N' )\n"
+                + "       AND ( ( :parent_menu_id IS NULL\n"
+                + "               AND menu.parent_menu_id IS NULL )\n"
+                + "              OR ( menu.parent_menu_id = :parent_menu_id ) )\n"
+                + "ORDER  BY item_seq";
+        JoinConverter joinConverter = new JoinConverter(sql, vendor);
+        joinConverter.convert();
+        System.out.println(joinConverter.getQuery()
+                .trim());
+    }
+
     public int convert() {
 
         TGSqlParser sqlparser = new TGSqlParser(vendor);
@@ -778,8 +795,10 @@ public class JoinConverter {
                             .trim()
                             .length() == 0)) {
                         // no where condition, remove WHERE keyword
-                        select.getWhereClause().fastSetString(" ");
+//                        select.getWhereClause().fastSetString(" ");
 
+                        //TODO update
+                        select.getWhereClause().removeTokens();
                     } else {
                         select.getWhereClause().getCondition().fastSetString(select.getWhereClause()
                                 .getCondition()
@@ -853,195 +872,195 @@ public class JoinConverter {
         return null;
     }
 
-    public static void main(String args[]) {
-        // String sqltext = "SELECT e.employee_id,\n" +
-        // "       e.last_name,\n" +
-        // "       e.department_id\n" +
-        // "FROM   employees e,\n" +
-        // "       departments d\n" ;
-
-        // String sqltext = "SELECT e.employee_id,\n"
-        // + "       e.last_name,\n"
-        // + "       e.department_id\n"
-        // + "FROM   employees e,\n"
-        // + "       departments d\n"
-        // + "WHERE  e.department_id = d.department_id";
-        //
-        // sqltext = "SELECT m.*, \n"
-        // + "       altname.last_name  last_name_student, \n"
-        // + "       altname.first_name first_name_student, \n"
-        // + "       ccu.date_joined, \n"
-        // + "       ccu.last_login, \n"
-        // + "       ccu.photo_id, \n"
-        // + "       ccu.last_updated \n"
-        // + "FROM   summit.mstr m, \n"
-        // + "       summit.alt_name altname, \n"
-        // + "       smmtccon.ccn_user ccu \n"
-        // + "WHERE  m.id =?\n"
-        // + "       AND m.id = altname.id(+) \n"
-        // + "       AND m.id = ccu.id(+) \n"
-        // + "       AND altname.grad_name_ind(+) = '*'";
-
-        // sqltext = "SELECT * \n" +
-        // "FROM   summit.mstr m, \n" +
-        // "       summit.alt_name altname, \n" +
-        // "       smmtccon.ccn_user ccu \n" +
-        // //"       uhelp.deg_coll deg \n" +
-        // "WHERE  m.id = ? \n" +
-        // "       AND m.id = altname.id(+) \n" +
-        // "       AND m.id = ccu.id(+) \n" +
-        // "       AND 'N' = ccu.admin(+) \n" +
-        // "       AND altname.grad_name_ind(+) = '*'";
-
-        // sqltext = "SELECT ppp.project_name proj_name, \n" +
-        // "       pr.role_title    user_role \n" +
-        // "FROM   jboss_admin.portal_application_location pal, \n" +
-        // "       jboss_admin.portal_application pa, \n" +
-        // "       jboss_admin.portal_user_app_location_role pualr, \n" +
-        // "       jboss_admin.portal_location pl, \n" +
-        // "       jboss_admin.portal_role pr, \n" +
-        // "       jboss_admin.portal_pep_project ppp, \n" +
-        // "       jboss_admin.portal_user pu \n" +
-        // "WHERE  (pal.application_location_id = pualr.application_location_id \n"
-        // +
-        // "         AND pu.jbp_uid = pualr.jbp_uid \n" +
-        // "         AND pu.username = 'USERID') \n" +
-        // "       AND pal.uidr_uid = pl.uidr_uid \n" +
-        // "       AND pal.application_id = pa.application_id \n" +
-        // "       AND pal.application_id = pr.application_id \n" +
-        // "       AND pualr.role_id = pr.role_id \n" +
-        // "       AND pualr.project_id = ppp.project_id \n" +
-        // "       AND pa.application_id = 'APPID' ";
-
-        // sqltext = "SELECT * \n"
-        // + "FROM   smmtccon.ccn_menu menu, \n"
-        // + "       smmtccon.ccn_page paget \n"
-        // + "WHERE  ( menu.page_id = paget.page_id(+) ) \n"
-        // + "       AND ( NOT enabled = 'N' ) \n"
-        // + "       AND ( ( :parent_menu_id IS NULL \n"
-        // + "               AND menu.parent_menu_id IS NULL ) \n"
-        // + "              OR ( menu.parent_menu_id = :parent_menu_id ) ) \n"
-        // + "ORDER  BY item_seq;";
-        //
-        // sqltext = "select *\n"
-        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
-        // + "		, ods_stg_pnb_stuf_pers_adr pas\n"
-        // + "		, ods_stg_pnb_stuf_pers_nat nat\n"
-        // + "		, ods_stg_pnb_stuf_adr adr\n"
-        // + "		, ods_stg_pnb_stuf_np prs\n"
-        // + "where \n"
-        // + "		pas.soort_adres = lst.soort_adres\n"
-        // + "	and prs.id = nat.prs_id(+)\n"
-        // + "	and adr.id = pas.adr_id\n"
-        // + "	and prs.id = pas.prs_id\n"
-        // + "  and lst.persoonssoort = 'PERSOON'\n"
-        // + "  and pas.einddatumrelatie is null  ";
-        //
-        // sqltext = "select *\n"
-        // + "		from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
-        // + "				, ods_stg_pnb_stuf_np prs\n"
-        // + "				, ods_stg_pnb_stuf_pers_adr pas\n"
-        // + "				, ods_stg_pnb_stuf_pers_nat nat\n"
-        // + "		 		, ods_stg_pnb_stuf_adr adr\n"
-        // + "		 where \n"
-        // + "				pas.soort_adres = lst.soort_adres\n"
-        // + "			and prs.id(+) = nat.prs_id\n"
-        // + "			and adr.id = pas.adr_id\n"
-        // + "			and prs.id = pas.prs_id\n"
-        // + "		 and lst.persoonssoort = 'PERSOON'\n"
-        // + "		  and pas.einddatumrelatie is null";
-
-        // sqltext = "SELECT ppp.project_name proj_name, \n"
-        // + "       pr.role_title    user_role \n"
-        // + "FROM   jboss_admin.portal_application_location pal, \n"
-        // + "       jboss_admin.portal_application pa, \n"
-        // + "       jboss_admin.portal_user_app_location_role pualr, \n"
-        // + "       jboss_admin.portal_location pl, \n"
-        // + "       jboss_admin.portal_role pr, \n"
-        // + "       jboss_admin.portal_pep_project ppp, \n"
-        // + "       jboss_admin.portal_user pu \n"
-        // +
-        // "WHERE  (pal.application_location_id = pualr.application_location_id \n"
-        // + "         AND pu.jbp_uid = pualr.jbp_uid \n"
-        // + "         AND pu.username = 'USERID') \n"
-        // + "       AND pal.uidr_uid = pl.uidr_uid \n"
-        // + "       AND pal.application_id = pa.application_id \n"
-        // + "       AND pal.application_id = pr.application_id \n"
-        // + "       AND pualr.role_id = pr.role_id \n"
-        // + "       AND pualr.project_id = ppp.project_id \n"
-        // + "       AND pa.application_id = 'APPID'";
-        //
-        // sqltext = "select *\n"
-        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
-        // + "		, ods_stg_pnb_stuf_np prs\n"
-        // + "		, ods_stg_pnb_stuf_pers_adr pas\n"
-        // + "		, ods_stg_pnb_stuf_pers_nat nat\n"
-        // + "		, ods_stg_pnb_stuf_adr adr\n"
-        // + "where \n"
-        // + "		pas.soort_adres = lst.soort_adres\n"
-        // + "	and prs.id = nat.prs_id(+)\n"
-        // + "	and adr.id = pas.adr_id\n"
-        // + "	and prs.id = pas.prs_id\n"
-        // + "  and lst.persoonssoort = 'PERSOON'\n"
-        // + "   and pas.einddatumrelatie is null";
-
-        // sqltext = "select *\n"
-        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst,\n"
-        // + "       ods_stg_pnb_stuf_np prs,\n"
-        // + "       ods_stg_pnb_stuf_pers_adr pas,\n"
-        // + "       ods_stg_pnb_stuf_pers_nat nat,\n"
-        // + "       ods_stg_pnb_stuf_adr adr\n"
-        // + "where  pas.soort_adres = lst.soort_adres\n"
-        // + "       and prs.id(+) = nat.prs_id\n"
-        // + "       and adr.id = pas.adr_id\n"
-        // + "       and prs.id = pas.prs_id\n"
-        // + "       and lst.persoonssoort = 'PERSOON'\n"
-        // + "       and pas.einddatumrelatie is null\n";
-
-        // sqltext = "SELECT e.employee_id,\n"
-        // + "       e.last_name,\n"
-        // + "       e.department_id\n"
-        // + "FROM   employees e,\n"
-        // + "       departments d\n"
-        // + "WHERE  e.department_id = d.department_id(+)";
-        //
-        // sqltext = "SELECT e.employee_id,\n"
-        // + "       e.last_name,\n"
-        // + "       e.department_id\n"
-        // + "FROM   employees e,\n"
-        // + "       departments d\n"
-        // + "WHERE  e.department_id(+) = d.department_id";
-
-        if (args.length == 0) {
-            System.out.println("Usage: java JoinConverter scriptfile [/t <database type>]");
-            System.out.println("/t: Option, set the database type. Support oracle, mssql, the default type is oracle");
-            // Console.Read();
-            return;
-        }
-
-        List<String> argList = Arrays.asList(args);
-
-        EDbVendor vendor = EDbVendor.dbvoracle;
-
-        int index = argList.indexOf("/t");
-
-        if (index != -1 && args.length > index + 1) {
-            vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
-        }
-
-        String vendorString = EDbVendor.dbvmssql == vendor ? "SQL Server"
-                : "Oracle";
-        System.out.println("SQL with " + vendorString + " propriety joins");
-
-        String sqltext = getFileContent(new File(args[0]));
-        JoinConverter converter = new JoinConverter(sqltext, vendor);
-        if (converter.convert() != 0) {
-            System.out.println(converter.getErrorMessage());
-        } else {
-            System.out.println("\nSQL in ANSI joins");
-            System.out.println(converter.getQuery());
-        }
-    }
+//    public static void main(String args[]) {
+//        // String sqltext = "SELECT e.employee_id,\n" +
+//        // "       e.last_name,\n" +
+//        // "       e.department_id\n" +
+//        // "FROM   employees e,\n" +
+//        // "       departments d\n" ;
+//
+//        // String sqltext = "SELECT e.employee_id,\n"
+//        // + "       e.last_name,\n"
+//        // + "       e.department_id\n"
+//        // + "FROM   employees e,\n"
+//        // + "       departments d\n"
+//        // + "WHERE  e.department_id = d.department_id";
+//        //
+//        // sqltext = "SELECT m.*, \n"
+//        // + "       altname.last_name  last_name_student, \n"
+//        // + "       altname.first_name first_name_student, \n"
+//        // + "       ccu.date_joined, \n"
+//        // + "       ccu.last_login, \n"
+//        // + "       ccu.photo_id, \n"
+//        // + "       ccu.last_updated \n"
+//        // + "FROM   summit.mstr m, \n"
+//        // + "       summit.alt_name altname, \n"
+//        // + "       smmtccon.ccn_user ccu \n"
+//        // + "WHERE  m.id =?\n"
+//        // + "       AND m.id = altname.id(+) \n"
+//        // + "       AND m.id = ccu.id(+) \n"
+//        // + "       AND altname.grad_name_ind(+) = '*'";
+//
+//        // sqltext = "SELECT * \n" +
+//        // "FROM   summit.mstr m, \n" +
+//        // "       summit.alt_name altname, \n" +
+//        // "       smmtccon.ccn_user ccu \n" +
+//        // //"       uhelp.deg_coll deg \n" +
+//        // "WHERE  m.id = ? \n" +
+//        // "       AND m.id = altname.id(+) \n" +
+//        // "       AND m.id = ccu.id(+) \n" +
+//        // "       AND 'N' = ccu.admin(+) \n" +
+//        // "       AND altname.grad_name_ind(+) = '*'";
+//
+//        // sqltext = "SELECT ppp.project_name proj_name, \n" +
+//        // "       pr.role_title    user_role \n" +
+//        // "FROM   jboss_admin.portal_application_location pal, \n" +
+//        // "       jboss_admin.portal_application pa, \n" +
+//        // "       jboss_admin.portal_user_app_location_role pualr, \n" +
+//        // "       jboss_admin.portal_location pl, \n" +
+//        // "       jboss_admin.portal_role pr, \n" +
+//        // "       jboss_admin.portal_pep_project ppp, \n" +
+//        // "       jboss_admin.portal_user pu \n" +
+//        // "WHERE  (pal.application_location_id = pualr.application_location_id \n"
+//        // +
+//        // "         AND pu.jbp_uid = pualr.jbp_uid \n" +
+//        // "         AND pu.username = 'USERID') \n" +
+//        // "       AND pal.uidr_uid = pl.uidr_uid \n" +
+//        // "       AND pal.application_id = pa.application_id \n" +
+//        // "       AND pal.application_id = pr.application_id \n" +
+//        // "       AND pualr.role_id = pr.role_id \n" +
+//        // "       AND pualr.project_id = ppp.project_id \n" +
+//        // "       AND pa.application_id = 'APPID' ";
+//
+//        // sqltext = "SELECT * \n"
+//        // + "FROM   smmtccon.ccn_menu menu, \n"
+//        // + "       smmtccon.ccn_page paget \n"
+//        // + "WHERE  ( menu.page_id = paget.page_id(+) ) \n"
+//        // + "       AND ( NOT enabled = 'N' ) \n"
+//        // + "       AND ( ( :parent_menu_id IS NULL \n"
+//        // + "               AND menu.parent_menu_id IS NULL ) \n"
+//        // + "              OR ( menu.parent_menu_id = :parent_menu_id ) ) \n"
+//        // + "ORDER  BY item_seq;";
+//        //
+//        // sqltext = "select *\n"
+//        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
+//        // + "		, ods_stg_pnb_stuf_pers_adr pas\n"
+//        // + "		, ods_stg_pnb_stuf_pers_nat nat\n"
+//        // + "		, ods_stg_pnb_stuf_adr adr\n"
+//        // + "		, ods_stg_pnb_stuf_np prs\n"
+//        // + "where \n"
+//        // + "		pas.soort_adres = lst.soort_adres\n"
+//        // + "	and prs.id = nat.prs_id(+)\n"
+//        // + "	and adr.id = pas.adr_id\n"
+//        // + "	and prs.id = pas.prs_id\n"
+//        // + "  and lst.persoonssoort = 'PERSOON'\n"
+//        // + "  and pas.einddatumrelatie is null  ";
+//        //
+//        // sqltext = "select *\n"
+//        // + "		from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
+//        // + "				, ods_stg_pnb_stuf_np prs\n"
+//        // + "				, ods_stg_pnb_stuf_pers_adr pas\n"
+//        // + "				, ods_stg_pnb_stuf_pers_nat nat\n"
+//        // + "		 		, ods_stg_pnb_stuf_adr adr\n"
+//        // + "		 where \n"
+//        // + "				pas.soort_adres = lst.soort_adres\n"
+//        // + "			and prs.id(+) = nat.prs_id\n"
+//        // + "			and adr.id = pas.adr_id\n"
+//        // + "			and prs.id = pas.prs_id\n"
+//        // + "		 and lst.persoonssoort = 'PERSOON'\n"
+//        // + "		  and pas.einddatumrelatie is null";
+//
+//        // sqltext = "SELECT ppp.project_name proj_name, \n"
+//        // + "       pr.role_title    user_role \n"
+//        // + "FROM   jboss_admin.portal_application_location pal, \n"
+//        // + "       jboss_admin.portal_application pa, \n"
+//        // + "       jboss_admin.portal_user_app_location_role pualr, \n"
+//        // + "       jboss_admin.portal_location pl, \n"
+//        // + "       jboss_admin.portal_role pr, \n"
+//        // + "       jboss_admin.portal_pep_project ppp, \n"
+//        // + "       jboss_admin.portal_user pu \n"
+//        // +
+//        // "WHERE  (pal.application_location_id = pualr.application_location_id \n"
+//        // + "         AND pu.jbp_uid = pualr.jbp_uid \n"
+//        // + "         AND pu.username = 'USERID') \n"
+//        // + "       AND pal.uidr_uid = pl.uidr_uid \n"
+//        // + "       AND pal.application_id = pa.application_id \n"
+//        // + "       AND pal.application_id = pr.application_id \n"
+//        // + "       AND pualr.role_id = pr.role_id \n"
+//        // + "       AND pualr.project_id = ppp.project_id \n"
+//        // + "       AND pa.application_id = 'APPID'";
+//        //
+//        // sqltext = "select *\n"
+//        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst\n"
+//        // + "		, ods_stg_pnb_stuf_np prs\n"
+//        // + "		, ods_stg_pnb_stuf_pers_adr pas\n"
+//        // + "		, ods_stg_pnb_stuf_pers_nat nat\n"
+//        // + "		, ods_stg_pnb_stuf_adr adr\n"
+//        // + "where \n"
+//        // + "		pas.soort_adres = lst.soort_adres\n"
+//        // + "	and prs.id = nat.prs_id(+)\n"
+//        // + "	and adr.id = pas.adr_id\n"
+//        // + "	and prs.id = pas.prs_id\n"
+//        // + "  and lst.persoonssoort = 'PERSOON'\n"
+//        // + "   and pas.einddatumrelatie is null";
+//
+//        // sqltext = "select *\n"
+//        // + "from  ods_trf_pnb_stuf_lijst_adrsrt2 lst,\n"
+//        // + "       ods_stg_pnb_stuf_np prs,\n"
+//        // + "       ods_stg_pnb_stuf_pers_adr pas,\n"
+//        // + "       ods_stg_pnb_stuf_pers_nat nat,\n"
+//        // + "       ods_stg_pnb_stuf_adr adr\n"
+//        // + "where  pas.soort_adres = lst.soort_adres\n"
+//        // + "       and prs.id(+) = nat.prs_id\n"
+//        // + "       and adr.id = pas.adr_id\n"
+//        // + "       and prs.id = pas.prs_id\n"
+//        // + "       and lst.persoonssoort = 'PERSOON'\n"
+//        // + "       and pas.einddatumrelatie is null\n";
+//
+//        // sqltext = "SELECT e.employee_id,\n"
+//        // + "       e.last_name,\n"
+//        // + "       e.department_id\n"
+//        // + "FROM   employees e,\n"
+//        // + "       departments d\n"
+//        // + "WHERE  e.department_id = d.department_id(+)";
+//        //
+//        // sqltext = "SELECT e.employee_id,\n"
+//        // + "       e.last_name,\n"
+//        // + "       e.department_id\n"
+//        // + "FROM   employees e,\n"
+//        // + "       departments d\n"
+//        // + "WHERE  e.department_id(+) = d.department_id";
+//
+//        if (args.length == 0) {
+//            System.out.println("Usage: java JoinConverter scriptfile [/t <database type>]");
+//            System.out.println("/t: Option, set the database type. Support oracle, mssql, the default type is oracle");
+//            // Console.Read();
+//            return;
+//        }
+//
+//        List<String> argList = Arrays.asList(args);
+//
+//        EDbVendor vendor = EDbVendor.dbvoracle;
+//
+//        int index = argList.indexOf("/t");
+//
+//        if (index != -1 && args.length > index + 1) {
+//            vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+//        }
+//
+//        String vendorString = EDbVendor.dbvmssql == vendor ? "SQL Server"
+//                : "Oracle";
+//        System.out.println("SQL with " + vendorString + " propriety joins");
+//
+//        String sqltext = getFileContent(new File(args[0]));
+//        JoinConverter converter = new JoinConverter(sqltext, vendor);
+//        if (converter.convert() != 0) {
+//            System.out.println(converter.getErrorMessage());
+//        } else {
+//            System.out.println("\nSQL in ANSI joins");
+//            System.out.println(converter.getQuery());
+//        }
+//    }
 
     public static String getFileContent(File file) {
         try {
