@@ -47,7 +47,7 @@ public class JoinConverterTest extends TestCase {
                         "          FROM (SELECT T.ID PRODID, CD.ID CID\n" +
                         "                  FROM PRODUCT T\n" +
                         "inner join CD CD on T.ID=CD.ID                      \n" +
-                        "                 )\n" +
+                        "                  )\n" +
                         "         GROUP BY PRODID\n" +
                         "        HAVING COUNT(*) > 1);"));
     }
@@ -85,7 +85,7 @@ public class JoinConverterTest extends TestCase {
                         "   ai_course_dataset_relation b\n" +
                         "inner join ai_course a on b.course_id = a.id \n" +
                         "  WHERE\n" +
-                        "    a.id=?\n" +
+                        "   a.id=?\n" +
                         " )"));
     }
 
@@ -214,7 +214,7 @@ public class JoinConverterTest extends TestCase {
                         "FROM   summit.mstr m\n" +
                         "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = ?\n" +
                         "right outer join smmtccon.ccn_user ccu on m.id = ccu.id \n" +
-                        "WHERE  m.id =?"));
+                        "         WHERE  m.id =?"));
     }
 
     public void testSqlServerSql3() {
@@ -235,8 +235,6 @@ public class JoinConverterTest extends TestCase {
                 "end;\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
         assertTrue(joinConverter.convert() == 0);
-        System.out.println(joinConverter.getQuery()
-                .trim());
         assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("if (exists (select * from sys.objects where name = 'GetUser')) drop proc GetUser  \n" +
@@ -250,7 +248,7 @@ public class JoinConverterTest extends TestCase {
                         "\t       e.department_id\n" +
                         "\tFROM   employees e\n" +
                         "left outer join departments d on e.department_id = d.department_id\n" +
-                        "\tWHERE    e.Id=@Id;\n" +
+                        "\t       WHERE  e.Id=@Id;\n" +
                         "end;"));
     }
 
@@ -329,12 +327,11 @@ public class JoinConverterTest extends TestCase {
                         "SELECT  *\n" +
                         "FROM    TableA A\n" +
                         "left outer join TableB b on A.ColA = B.ColB \n" +
-                        "WHERE   \n" +
-                        " EXISTS(\n" +
+                        "WHERE   EXISTS(\n" +
                         "\tSELECT  *\n" +
                         "\tFROM    TableC C\n" +
                         "left outer join TableD D on C.ColC = D.ColD \n" +
-                        ");"));
+                        "\t);"));
     }
 
     public void testSqlServerSql7() {
@@ -444,7 +441,7 @@ public class JoinConverterTest extends TestCase {
                         "FROM   summit.mstr m\n" +
                         "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n" +
                         "left outer join smmtccon.ccn_user ccu on m.id = ccu.id and 'N' = ccu.admin \n" +
-                        "WHERE  m.id = ?"));
+                        "          WHERE  m.id = ?"));
     }
 
     public void testOutterJoin1() {
@@ -477,7 +474,7 @@ public class JoinConverterTest extends TestCase {
                         "FROM   summit.mstr m\n" +
                         "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n" +
                         "left outer join smmtccon.ccn_user ccu on m.id = ccu.id\n" +
-                        "WHERE  m.id =?"));
+                        "       WHERE  m.id =?"));
     }
 
     public void testOutterJoin2() {
@@ -498,8 +495,7 @@ public class JoinConverterTest extends TestCase {
                 .equalsIgnoreCase("SELECT *\n" +
                         "FROM   smmtccon.ccn_menu menu\n" +
                         "left outer join smmtccon.ccn_page paget on menu.page_id = paget.page_id\n" +
-                        "WHERE  \n" +
-                        "        ( NOT enabled = 'N' )\n" +
+                        "       WHERE  ( NOT enabled = 'N' )\n" +
                         "       AND ( ( :parent_menu_id IS NULL\n" +
                         "               AND menu.parent_menu_id IS NULL )\n" +
                         "              OR ( menu.parent_menu_id = :parent_menu_id ) )\n" +
@@ -560,8 +556,7 @@ public class JoinConverterTest extends TestCase {
                         "inner join jboss_admin.portal_pep_project ppp on pualr.project_id = ppp.project_id\n" +
                         "inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid\n" +
                         "inner join jboss_admin.portal_role pr on pal.application_id = pr.application_id and pualr.role_id = pr.role_id\n" +
-                        "WHERE  (\n" +
-                        "          pu.username = 'USERID')\n" +
+                        "       WHERE  (pu.username = 'USERID')\n" +
                         "       AND pa.application_id = 'APPID'"));
 
     }
@@ -590,8 +585,7 @@ public class JoinConverterTest extends TestCase {
                         "right outer join ods_stg_pnb_stuf_pers_nat nat on prs.id = nat.prs_id\n" +
                         "inner join ods_stg_pnb_stuf_adr adr on adr.id = pas.adr_id\n" +
                         "inner join ods_stg_pnb_stuf_np prs on prs.id = pas.prs_id\n" +
-                        "where  \n" +
-                        "        lst.persoonssoort = 'PERSOON'\n" +
+                        "       where  lst.persoonssoort = 'PERSOON'\n" +
                         "       and pas.einddatumrelatie is null").toLowerCase()));
 
     }
@@ -620,8 +614,7 @@ public class JoinConverterTest extends TestCase {
                         "inner join ods_stg_pnb_stuf_np prs on prs.id = pas.prs_id\n" +
                         "right outer join ods_stg_pnb_stuf_pers_nat nat on prs.id = nat.prs_id\n" +
                         "inner join ods_stg_pnb_stuf_adr adr on adr.id = pas.adr_id\n" +
-                        "where  \n" +
-                        "        lst.persoonssoort = 'PERSOON'\n" +
+                        "       where  lst.persoonssoort = 'PERSOON'\n" +
                         "       and pas.einddatumrelatie is null"));
 
 
@@ -670,5 +663,4 @@ public class JoinConverterTest extends TestCase {
 
 
     }
-
 }
