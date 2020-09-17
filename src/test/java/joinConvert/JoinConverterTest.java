@@ -16,13 +16,15 @@ public class JoinConverterTest extends TestCase {
                 "       departments d\n" +
                 "WHERE  e.department_id(+) = d.department_id\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("INSERT INTO T SELECT e.employee_id,\n" +
                         "       e.last_name,\n" +
                         "       e.department_id\n" +
                         "FROM   employees e\n" +
                         "right outer join departments d on e.department_id = d.department_id"));
+
     }
 
 
@@ -37,7 +39,8 @@ public class JoinConverterTest extends TestCase {
                 "         GROUP BY PRODID\n" +
                 "        HAVING COUNT(*) > 1);\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT COUNT(1)\n" +
                         "  FROM (SELECT PRODID\n" +
@@ -67,7 +70,8 @@ public class JoinConverterTest extends TestCase {
                 "   and a.id=?\n" +
                 " )";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT\n" +
                         " *\n" +
@@ -95,7 +99,8 @@ public class JoinConverterTest extends TestCase {
                 "       departments d\n" +
                 "WHERE  e.department_id = d.department_id \n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT e.employee_id,\n" +
                         "       e.last_name,\n" +
@@ -104,27 +109,7 @@ public class JoinConverterTest extends TestCase {
                         "inner join departments d on e.department_id = d.department_id"));
     }
 
-    public void testInnerSql() {
-        EDbVendor vendor = EDbVendor.dbvoracle;
-        String sql = "CREATE\n" +
-                "OR REPLACE PROCEDURE myDemo01 IS aa number (10);\n" +
-                "BEGIN\n" +
-                "\tSELECT e.employee_id INTO aa FROM employees e, departments d WHERE e.department_id = d.department_id;\n" +
-                "\tdbms_output.put_line (aa);\n" +
-                "END myDemo01;";
-        JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
-                .trim()
-                .equalsIgnoreCase("CREATE\n" +
-                        "OR REPLACE PROCEDURE myDemo01 IS aa number (10);\n" +
-                        "BEGIN\n" +
-                        "\tSELECT e.employee_id INTO aa FROM employees e\n" +
-                        "inner join departments d on e.department_id = d.department_id  ;\n" +
-                        "\tdbms_output.put_line (aa);\n" +
-                        "END myDemo01;"));
-    }
-
-    public void testOracleSql6() {
+    public void testOracleSql5() {
         EDbVendor vendor = EDbVendor.dbvoracle;
         String sql = "SELECT\n" +
                 " *\n" +
@@ -142,7 +127,8 @@ public class JoinConverterTest extends TestCase {
                 "   a.id=?\n" +
                 " )\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT\n" +
                         " *\n" +
@@ -160,13 +146,37 @@ public class JoinConverterTest extends TestCase {
                         " )"));
     }
 
+    public void testInnerSql() {
+        EDbVendor vendor = EDbVendor.dbvoracle;
+        String sql = "CREATE\n" +
+                "OR REPLACE PROCEDURE myDemo01 IS aa number (10);\n" +
+                "BEGIN\n" +
+                "\tSELECT e.employee_id INTO aa FROM employees e, departments d WHERE e.department_id = d.department_id;\n" +
+                "\tdbms_output.put_line (aa);\n" +
+                "END myDemo01;";
+        JoinConverter joinConverter = new JoinConverter(sql, vendor);
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
+                .trim()
+                .equalsIgnoreCase("CREATE\n" +
+                        "OR REPLACE PROCEDURE myDemo01 IS aa number (10);\n" +
+                        "BEGIN\n" +
+                        "\tSELECT e.employee_id INTO aa FROM employees e\n" +
+                        "inner join departments d on e.department_id = d.department_id  ;\n" +
+                        "\tdbms_output.put_line (aa);\n" +
+                        "END myDemo01;"));
+    }
+
+
+
     public void testSqlServerSql1() {
         EDbVendor vendor = EDbVendor.dbvmssql;
         String sql = "SELECT  *\n" +
                 "FROM    TableA AS A, TableB AS b\n" +
                 "WHERE   A.ColA *= B.ColB;";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT  *\n" +
                         "FROM    TableA A\n" +
@@ -191,7 +201,8 @@ public class JoinConverterTest extends TestCase {
                 "       AND m.id =* ccu.id \n" +
                 "       AND altname.grad_name_ind *= ?\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT m.*, \n" +
                         "       altname.last_name  last_name_student, \n" +
@@ -223,7 +234,10 @@ public class JoinConverterTest extends TestCase {
                 "\tWHERE  e.department_id *= d.department_id and e.Id=@Id;\n" +
                 "end;\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        System.out.println(joinConverter.getQuery()
+                .trim());
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("if (exists (select * from sys.objects where name = 'GetUser')) drop proc GetUser  \n" +
                         "gocreate proc GetUser  \n" +
@@ -285,7 +299,8 @@ public class JoinConverterTest extends TestCase {
                 "where \n" +
                 "    a.inv_no *= b.inv_no";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("INSERT INTO T select  \n" +
                         "    b.Amount\n" +
@@ -307,7 +322,8 @@ public class JoinConverterTest extends TestCase {
                 "\tWHERE   C.ColC *= D.ColD\n" +
                 ");";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("insert into tableF\n" +
                         "SELECT  *\n" +
@@ -333,7 +349,8 @@ public class JoinConverterTest extends TestCase {
                 "c.currency *= b.cash_ccy and\n" +
                 "d.tx_code *= b.cash_receipt;";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("select\n" +
                         "b.Amount\n" +
@@ -349,7 +366,8 @@ public class JoinConverterTest extends TestCase {
         EDbVendor vendor = EDbVendor.dbvoracle;
         String sql = "Select * from table_c as v  cross join table_b, table_c\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("Select * from table_c v\n" +
                         "cross join table_b\n" +
@@ -360,13 +378,13 @@ public class JoinConverterTest extends TestCase {
         EDbVendor vendor = EDbVendor.dbvoracle;
         String sql = "Select * from table_c  v ,table_a  a ,table_b  b where v.id=1 and b.id=2";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
-        assertTrue(joinConverter.convert() == 0 && joinConverter.getQuery()
+        assertTrue(joinConverter.convert() == 0);
+        assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("Select * from table_c v\n" +
                         "cross join table_a a\n" +
                         "cross join table_b b   where v.id=1 and b.id=2"));
     }
-
 
     public void testCrossJoin() {
         String sqltext = "SELECT e.employee_id,\n"
@@ -396,14 +414,13 @@ public class JoinConverterTest extends TestCase {
 
         JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
         assertTrue(converter.convert() == 0);
-
         assertTrue(converter.getQuery()
                 .trim()
-                .equalsIgnoreCase("SELECT e.employee_id,\n"
-                        + "       e.last_name,\n"
-                        + "       e.department_id\n"
-                        + "FROM   employees e\n"
-                        + "inner join departments d on e.department_id = d.department_id"));
+                .equalsIgnoreCase("SELECT e.employee_id,\n" +
+                        "       e.last_name,\n" +
+                        "       e.department_id\n" +
+                        "FROM   employees e\n" +
+                        "inner join departments d on e.department_id = d.department_id"));
 
     }
 
@@ -421,6 +438,13 @@ public class JoinConverterTest extends TestCase {
 
         JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
         assertTrue(converter.convert() == 1);
+        assertTrue(converter.getQuery()
+                .trim()
+                .equalsIgnoreCase("SELECT * \n" +
+                        "FROM   summit.mstr m\n" +
+                        "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n" +
+                        "left outer join smmtccon.ccn_user ccu on m.id = ccu.id and 'N' = ccu.admin \n" +
+                        "WHERE  m.id = ?"));
     }
 
     public void testOutterJoin1() {
@@ -443,17 +467,17 @@ public class JoinConverterTest extends TestCase {
         assertTrue(converter.convert() == 0);
         assertTrue(converter.getQuery()
                 .trim()
-                .equalsIgnoreCase("SELECT m.*,\n"
-                        + "       altname.last_name  last_name_student,\n"
-                        + "       altname.first_name first_name_student,\n"
-                        + "       ccu.date_joined,\n"
-                        + "       ccu.last_login,\n"
-                        + "       ccu.photo_id,\n"
-                        + "       ccu.last_updated\n"
-                        + "FROM   summit.mstr m\n"
-                        + "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n"
-                        + "left outer join smmtccon.ccn_user ccu on m.id = ccu.id\n"
-                        + "WHERE  m.id =?"));
+                .equalsIgnoreCase("SELECT m.*,\n" +
+                        "       altname.last_name  last_name_student,\n" +
+                        "       altname.first_name first_name_student,\n" +
+                        "       ccu.date_joined,\n" +
+                        "       ccu.last_login,\n" +
+                        "       ccu.photo_id,\n" +
+                        "       ccu.last_updated\n" +
+                        "FROM   summit.mstr m\n" +
+                        "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n" +
+                        "left outer join smmtccon.ccn_user ccu on m.id = ccu.id\n" +
+                        "WHERE  m.id =?"));
     }
 
     public void testOutterJoin2() {
@@ -469,7 +493,6 @@ public class JoinConverterTest extends TestCase {
 
         JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
         assertTrue(converter.convert() == 0);
-
         assertTrue(converter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT *\n" +
@@ -497,11 +520,11 @@ public class JoinConverterTest extends TestCase {
         assertTrue(converter.convert() == 0);
         assertTrue(converter.getQuery()
                 .trim()
-                .equalsIgnoreCase("SELECT ppp.project_name proj_name,\n"
-                        + "       pr.role_title    user_role\n"
-                        + "FROM   jboss_admin.portal_application_location pal\n"
-                        + "inner join jboss_admin.portal_user_app_location_role pualr on pal.application_location_id = pualr.application_location_id\n"
-                        + "inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid"));
+                .equalsIgnoreCase("SELECT ppp.project_name proj_name,\n" +
+                        "       pr.role_title    user_role\n" +
+                        "FROM   jboss_admin.portal_application_location pal\n" +
+                        "inner join jboss_admin.portal_user_app_location_role pualr on pal.application_location_id = pualr.application_location_id\n" +
+                        "inner join jboss_admin.portal_user pu on pu.jbp_uid = pualr.jbp_uid"));
     }
 
     public void testOutterJoin4() {
@@ -600,6 +623,8 @@ public class JoinConverterTest extends TestCase {
                         "where  \n" +
                         "        lst.persoonssoort = 'PERSOON'\n" +
                         "       and pas.einddatumrelatie is null"));
+
+
     }
 
     public void testLeftOutterJoin() {
