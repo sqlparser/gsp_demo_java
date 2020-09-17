@@ -267,7 +267,13 @@ public class JoinConverter {
 
     public String getQuery() {
         // remove blank line from query
-        return this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
+        String result = this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
+        String trim = result.trim();
+        char[] chars = trim.toCharArray();
+        if (chars[chars.length - 1] == ',') {
+            result = trim.substring(0, trim.length() - 1);
+        }
+        return result;
     }
 
     public static void main(String[] args) {
@@ -297,7 +303,6 @@ public class JoinConverter {
             return ErrorNo;
         }
         sqlparser.sqlstatements.forEach(it -> {
-        //sqlparser.sqlstatements.forEachRemaining(it -> {
             analyzeSelect(it);
             String convertedQuery = it.toString();
             if (!convertedQuery.equals(this.query)) {
@@ -1083,6 +1088,5 @@ public class JoinConverter {
         }
         return "";
     }
-
 
 }
