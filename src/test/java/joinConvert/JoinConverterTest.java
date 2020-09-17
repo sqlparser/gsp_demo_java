@@ -364,6 +364,7 @@ public class JoinConverterTest extends TestCase {
         String sql = "Select * from table_c as v  cross join table_b, table_c\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
         assertTrue(joinConverter.convert() == 0);
+
         assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("Select * from table_c v\n" +

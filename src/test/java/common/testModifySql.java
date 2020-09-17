@@ -943,4 +943,21 @@ public class testModifySql extends TestCase {
                 "AND a.POLICY_EFFECTIVE_DATE = b.POLICY_EFFECTIVE_DATE;"));
     }
 
+    public void testRemoveTableFromList(){
+        TGSqlParser parser = new TGSqlParser(EDbVendor.dbvoracle);
+        parser.sqltext = "select f1,f2,f3\n" +
+                "from table1 pal, table2 pualr, table3 pu\n" +
+                "WHERE  pal.application_location_id in (1,2,3,4)";
+        int ret = parser.parse();
+
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)parser.sqlstatements.get(0);
+        selectSqlStatement.getResultColumnList().removeItem(0);
+        selectSqlStatement.getJoins().removeItem(2);
+        selectSqlStatement.getJoins().removeItem(0);
+        selectSqlStatement.getWhereClause().getCondition().getRightOperand().getExprList().removeItem(1);
+        assertTrue(selectSqlStatement.toString().trim().equalsIgnoreCase("select f2,f3\n" +
+                "from  table2 pualr \n" +
+                "WHERE  pal.application_location_id in (1,3,4)"));
+    }
+
 }
