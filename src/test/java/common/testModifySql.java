@@ -404,7 +404,7 @@ public class testModifySql extends TestCase {
             select.addWhereClause("c>1");
         }
 
-        System.out.println(select.toString());
+        //System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere c>1 group by a"));
     }
 

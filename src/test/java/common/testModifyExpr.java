@@ -460,5 +460,64 @@ public class testModifyExpr extends TestCase {
         assertTrue(stmt.toString().trim().equalsIgnoreCase("select c.id as sms.id from summit.cntrb_detail c where c.cntrb_date >='2011-01-01' and c.cntrb_date<='2013-01-01' group by c.id"));
     }
 
+    public void testExprRemoveAndSetInBetween() {
+        String sql = "SELECT * FROM lookup.recognition_master_table crg WHERE crg.datedb BETWEEN '$start_date$' AND '$end_date$' GROUP BY crg.id";
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.setSqltext(sql);
+        sqlparser.parse();
+        TSelectSqlStatement stmt = (TSelectSqlStatement) sqlparser.getSqlstatements().get(0);
+        TExpression whereExpression = stmt.getWhereClause().getCondition();
+        whereExpression.postOrderTraverse(new IExpressionVisitor() {
+            public boolean exprVisit(TParseTreeNode pnode, boolean pIsLeafNode) {
+                TExpression expression = (TExpression) pnode;
+                if (expression.getLeftOperand() == null && expression.getRightOperand() == null
+                        && expression.toString() != null && expression.toString().indexOf("$") != -1) {
+                    if (expression.toString().indexOf("'$start_date$'") != -1) {
+                        expression.removeMe();
+                    } else {
+                        expression.setString("2010-01-01");
+                    }
+                }
+                return true;
+            }
+        });
+
+        if (stmt.getWhereClause().getCondition() == null
+                || stmt.getWhereClause().getCondition().getNodeStatus() == ENodeStatus.nsRemoved)
+        {
+            stmt.setWhereClause(null);
+        }
+
+        //stmt.setWhereClause(null);
+        assertTrue(stmt.toString().equalsIgnoreCase("SELECT * FROM lookup.recognition_master_table crg  GROUP BY crg.id"));
+    }
+
+    public void testExprRemoveComaInList() {
+        String sql = "SELECT name, $start_date$ as startDate, $end_date$ as endDate, sex FROM lookup.recognition_master_table";
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.setSqltext(sql);
+        sqlparser.parse();
+        TSelectSqlStatement stmt = (TSelectSqlStatement) sqlparser.getSqlstatements().get(0);
+        for (int i = 0; i < stmt.getResultColumnList().size(); i++) {
+            TExpression expression = stmt.getResultColumnList().getResultColumn(i).getExpr();
+            expression.postOrderTraverse(new IExpressionVisitor() {
+                public boolean exprVisit(TParseTreeNode pnode, boolean pIsLeafNode) {
+                    TExpression expression = (TExpression) pnode;
+                    if (expression.getLeftOperand() == null && expression.getRightOperand() == null
+                            && expression.toString() != null && expression.toString().indexOf("$") != -1) {
+                        expression.removeMe();
+                    }
+                    return true;
+                }
+            });
+
+            if(expression.getNodeStatus() == ENodeStatus.nsRemoved){
+                stmt.getResultColumnList().removeElementAt(i);
+                i--;
+            }
+        }
+
+        assertTrue(stmt.toString().equalsIgnoreCase("SELECT name,   sex FROM lookup.recognition_master_table"));
+    }
 
 }
