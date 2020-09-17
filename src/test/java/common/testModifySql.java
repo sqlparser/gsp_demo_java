@@ -404,7 +404,7 @@ public class testModifySql extends TestCase {
             select.addWhereClause("c>1");
         }
 
-        System.out.println(select.toString());
+        //System.out.println(select.toString());
         assertTrue(select.toString().equalsIgnoreCase("SELECT * FROM TABLE_X\nwhere c>1 group by a"));
     }
 
@@ -941,6 +941,23 @@ public class testModifySql extends TestCase {
                 "USING (remotesource 'odbc' delimiter ' ' ignorezero false ctrlchars true escapechar '\\' logDir 'c:/temp' boolStyle 'T_F' encoding 'internal' nullValue 'N' ) \n" +
                 "AS select count(*)::integer ROWCOUNT, 1::integer as sKey FROM SV_POLICY a JOIN SV_AUTO_OPERATORS b ON a.POLICY_SYMBOL = b.POLICY_SYMBOL AND a.POLICY_NUMBER = b.POLICY_NUMBER \n" +
                 "AND a.POLICY_EFFECTIVE_DATE = b.POLICY_EFFECTIVE_DATE;"));
+    }
+
+    public void testRemoveTableFromList(){
+        TGSqlParser parser = new TGSqlParser(EDbVendor.dbvoracle);
+        parser.sqltext = "select f1,f2,f3\n" +
+                "from table1 pal, table2 pualr, table3 pu\n" +
+                "WHERE  pal.application_location_id in (1,2,3,4)";
+        int ret = parser.parse();
+
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)parser.sqlstatements.get(0);
+        selectSqlStatement.getResultColumnList().removeItem(0);
+        selectSqlStatement.getJoins().removeItem(2);
+        selectSqlStatement.getJoins().removeItem(0);
+        selectSqlStatement.getWhereClause().getCondition().getRightOperand().getExprList().removeItem(1);
+        assertTrue(selectSqlStatement.toString().trim().equalsIgnoreCase("select f2,f3\n" +
+                "from  table2 pualr \n" +
+                "WHERE  pal.application_location_id in (1,3,4)"));
     }
 
 }
