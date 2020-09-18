@@ -268,11 +268,11 @@ public class JoinConverter {
     public String getQuery() {
         // remove blank line from query
         String result = this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
-        String trim = result.trim();
-        char[] chars = trim.toCharArray();
-        if (chars[chars.length - 1] == ',') {
-            result = trim.substring(0, trim.length() - 1);
-        }
+//        String trim = result.trim();
+//        char[] chars = trim.toCharArray();
+//        if (chars[chars.length - 1] == ',') {
+//            result = trim.substring(0, trim.length() - 1);
+//        }
         return result;
     }
 
@@ -293,8 +293,8 @@ public class JoinConverter {
                 .trim());
     }
 
-    public int convert() {
 
+    public int convert() {
         TGSqlParser sqlparser = new TGSqlParser(vendor);
         sqlparser.sqltext = this.query;
         ErrorNo = sqlparser.parse();
@@ -475,6 +475,11 @@ public class JoinConverter {
                             }
 
                             for (int k = select.joins.size() - 1; k > 0; k--) {
+                                //TODO update
+                                TSourceToken st = select.joins.getJoin(k).getStartToken().searchToken(",", -1);
+                                if (st != null) {
+                                    st.removeFromChain();
+                                }
                                 select.joins.removeJoin(k);
                             }
                             select.joins.getJoin(0).setString(str);
