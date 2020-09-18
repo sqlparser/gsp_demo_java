@@ -476,9 +476,18 @@ public class JoinConverter {
 
                             for (int k = select.joins.size() - 1; k > 0; k--) {
                                 //TODO update
-                                TSourceToken st = select.joins.getJoin(k).getStartToken().searchToken(",", -1);
-                                if (st != null) {
-                                    st.removeFromChain();
+                                if (k == 0) {
+                                    if (select.joins.size() > 1) {
+                                        TSourceToken st = select.joins.getJoin(k).getEndToken().searchToken(",", 1);
+                                        if (st != null) {
+                                            st.removeFromChain();
+                                        }
+                                    }
+                                } else {
+                                    TSourceToken st = select.joins.getJoin(k).getStartToken().searchToken(",", -1);
+                                    if (st != null) {
+                                        st.removeFromChain();
+                                    }
                                 }
                                 select.joins.removeJoin(k);
                             }
@@ -1093,5 +1102,6 @@ public class JoinConverter {
         }
         return "";
     }
+
 
 }
