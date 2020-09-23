@@ -7057,7 +7057,7 @@ public class DataFlowAnalyzer {
 			Map<table, Set<table>> viewTableMap = new LinkedHashMap<>();
 			for(table view: traceViewMap.keySet()){
 				Set<table> tables = new LinkedHashSet<>();
-				traverseViewTables(tables, view, traceViewMap);
+				traverseViewSourceTables(tables, view, traceViewMap);
 				viewTableMap.put(view, tables);
 			}
 			
@@ -7072,14 +7072,14 @@ public class DataFlowAnalyzer {
 		return buffer.toString().trim();
 	}
 
-	private void traverseViewTables(Set<table> tables, table view, Map<table, Set<table>> traceViewMap) {
+	private void traverseViewSourceTables(Set<table> tables, table view, Map<table, Set<table>> traceViewMap) {
 		Set<table> sourceTables = traceViewMap.get(view);
-		for(table table: sourceTables){
-			if(table.isTable()){
-				tables.add(table);
+		for(table sourceTable: sourceTables){
+			if(sourceTable.isTable()){
+				tables.add(sourceTable);
 			}
-			else if(table.isView()){
-				traverseViewTables(tables, table, traceViewMap);
+			else if(sourceTable.isView()){
+				traverseViewSourceTables(tables, sourceTable, traceViewMap);
 			}
 		}
 	}
