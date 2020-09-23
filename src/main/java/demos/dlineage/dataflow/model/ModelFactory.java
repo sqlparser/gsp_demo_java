@@ -250,17 +250,6 @@ public class ModelFactory {
             tableModel = new QueryTable(table);
 
             modelManager.bindModel(table.getCTE(), tableModel);
-        } else if (table.getSubquery() != null
-                && !table.getSubquery().isCombinedQuery()) {
-            if (modelManager.getModel(table.getSubquery()
-                    .getResultColumnList()) instanceof QueryTable) {
-                return (QueryTable) modelManager.getModel(table.getSubquery()
-                        .getResultColumnList());
-            }
-
-            tableModel = new QueryTable(table);
-            modelManager.bindModel(table.getSubquery()
-                    .getResultColumnList(), tableModel);
         } else if (table.getAliasClause() != null
                 && table.getAliasClause().getColumns() != null) {
             if (modelManager.getModel(table.getAliasClause()
@@ -277,7 +266,18 @@ public class ModelFactory {
                         columns.getObjectName(i));
             }
             modelManager.bindModel(table, tableModel);
-        }else {
+        } else if (table.getSubquery() != null
+                && !table.getSubquery().isCombinedQuery()) {
+            if (modelManager.getModel(table.getSubquery()
+                    .getResultColumnList()) instanceof QueryTable) {
+                return (QueryTable) modelManager.getModel(table.getSubquery()
+                        .getResultColumnList());
+            }
+
+            tableModel = new QueryTable(table);
+            modelManager.bindModel(table.getSubquery()
+                    .getResultColumnList(), tableModel);
+        } else {
             if (modelManager.getModel(table) instanceof QueryTable) {
                 return (QueryTable) modelManager.getModel(table);
             }

@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.javafx.css.Declaration;
 
 import demos.dlineage.dataflow.listener.DataFlowHandleListener;
 import demos.dlineage.dataflow.model.AbstractRelation;
@@ -76,7 +74,6 @@ import demos.dlineage.dataflow.model.xml.sourceColumn;
 import demos.dlineage.dataflow.model.xml.table;
 import demos.dlineage.dataflow.model.xml.targetColumn;
 import demos.dlineage.sqlenv.SQLEnvParser;
-import demos.dlineage.sqlenv.sqldep.SQLDepSQLEnv;
 import demos.dlineage.util.Pair;
 import demos.dlineage.util.SHA256;
 import demos.dlineage.util.SQLUtil;
@@ -122,7 +119,6 @@ import gudusoft.gsqlparser.nodes.TOrderByItemList;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
-import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.nodes.TTable;
@@ -2399,7 +2395,7 @@ public class DataFlowAnalyzer {
 			} else if (stmt.getColumnList() != null && stmt.getColumnList().size() > 0) {
 				TObjectNameList items = stmt.getColumnList();
 				TMultiTargetList values = stmt.getValues();
-				for (int k = 0; k < values.size(); k++) {
+				for (int k = 0; values!=null && k < values.size(); k++) {
 					int j = 0;
 					for (int i = 0; i < items.size(); i++) {
 						TObjectName column = items.getObjectName(i);
@@ -3925,6 +3921,7 @@ public class DataFlowAnalyzer {
 
 	private void appendResultSets(dataflow dataflow) {
 		List<TResultColumnList> selectResultSets = modelManager.getSelectResultSets();
+		List<TObjectNameList> queryAliasTables = modelManager.getQueryAliasTables();
 		List<TTable> tableWithSelectSetResultSets = modelManager.getTableWithSelectSetResultSets();
 		List<TSelectSqlStatement> selectSetResultSets = modelManager.getSelectSetResultSets();
 		List<TCTE> ctes = modelManager.getCTEs();
@@ -3935,6 +3932,7 @@ public class DataFlowAnalyzer {
 
 		List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
 		resultSets.addAll(selectResultSets);
+		resultSets.addAll(queryAliasTables);
 		resultSets.addAll(tableWithSelectSetResultSets);
 		resultSets.addAll(selectSetResultSets);
 		resultSets.addAll(ctes);
@@ -4577,6 +4575,8 @@ public class DataFlowAnalyzer {
 					analyzeSelectStmt(subquery);
 
 					ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
+					
+					
 					if (resultSetModel != null && resultSetModel != queryTable
 							&& !resultSetModel.getPseudoRows().getHoldRelations().isEmpty()) {
 						ImpactRelation impactRelation = modelFactory.createImpactRelation();
@@ -4587,7 +4587,20 @@ public class DataFlowAnalyzer {
 								new PseudoRowsRelationElement<ResultSetPseudoRows>(queryTable.getPseudoRows()));
 					}
 
-					if (subquery.getSetOperatorType() != ESetOperatorType.none) {
+					if(resultSetModel != null && resultSetModel != queryTable 
+							&& queryTable.getTableObject().getAliasClause()!=null
+							&& queryTable.getTableObject().getAliasClause().getColumns()!=null){
+						for (int j = 0; j < queryTable.getColumns().size() && j < resultSetModel.getColumns().size(); j++) {
+							ResultColumn sourceColumn = resultSetModel.getColumns().get(j);
+							ResultColumn targetColumn = queryTable.getColumns().get(j);
+							
+							DataFlowRelation queryRalation = modelFactory.createDataFlowRelation();
+							queryRalation.setEffectType(EffectType.select);
+							queryRalation.setTarget(new ResultColumnRelationElement(targetColumn));
+							queryRalation.addSource(new ResultColumnRelationElement(sourceColumn));
+						}
+					}
+					else if (subquery.getSetOperatorType() != ESetOperatorType.none) {
 						SelectSetResultSet selectSetResultSetModel = (SelectSetResultSet) modelManager
 								.getModel(subquery);
 						for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
@@ -5974,7 +5987,9 @@ public class DataFlowAnalyzer {
 						if (queryTable.getTableObject().getCTE() != null) {
 							subquery = queryTable.getTableObject().getCTE().getSubquery();
 							cteColumns = queryTable.getTableObject().getCTE().getColumnList();
-						} else {
+						} else if (queryTable.getTableObject().getAliasClause()!=null && queryTable.getTableObject().getAliasClause().getColumns()!=null){
+							
+						}else {
 							subquery = queryTable.getTableObject().getSubquery();
 						}
 
@@ -6115,6 +6130,22 @@ public class DataFlowAnalyzer {
 								}
 							} else {
 								if (table.getCTE() != null) {
+									for (k = 0; k < columns.size(); k++) {
+										ResultColumn column = columns.get(k);
+										if ("*".equals(column.getName())) {
+											if (!containsStarColumn(column, columnName)) {
+												column.bindStarLinkColumn(columnName);
+											}
+											relation.addSource(new ResultColumnRelationElement(column, columnName));
+										} else if (SQLUtil.compareIdentifier(getColumnName(columnName),
+												SQLUtil.getIdentifierNormalName(column.getName()))) {
+											if (!column.equals(modelObject)) {
+												relation.addSource(new ResultColumnRelationElement(column, columnName));
+											}
+											break;
+										}
+									}
+								} else if (table.getAliasClause() != null && table.getAliasClause().getColumns()!=null) {
 									for (k = 0; k < columns.size(); k++) {
 										ResultColumn column = columns.get(k);
 										if ("*".equals(column.getName())) {
@@ -6837,22 +6868,23 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.7";
+		return "1.3.9";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-09-07";
+		return "2020-09-23";
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/t <database type>] [/o <output file path>][/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/traceView] [/t <database type>] [/o <output file path>][/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
 			System.out.println("/i: Option, ignore all result sets.");
+			System.out.println("/traceView: Option, analyze the source tables of views.");
 			System.out.println("/text: Option, print the plain text format output.");
 			System.out.println(
 					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
@@ -6921,6 +6953,11 @@ public class DataFlowAnalyzer {
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
+		
+		boolean traceView = argList.indexOf("/traceView") != -1;
+		if(traceView){
+			simple = true;
+		}
 
 		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlFiles, vendor, simple);
 
@@ -6933,6 +6970,10 @@ public class DataFlowAnalyzer {
 
 		StringBuffer errorBuffer = new StringBuffer();
 		String result = dlineage.generateDataFlow(errorBuffer);
+		
+		if(traceView){
+			result = dlineage.traceView();
+		}
 
 		if (result != null) {
 			System.out.println(result);
@@ -6985,6 +7026,45 @@ public class DataFlowAnalyzer {
 		}
 	}
 	
+	private String traceView() {
+		StringBuilder buffer = new StringBuilder();
+		dataflow dataflow = this.getDataFlow();
+		Map<String, Set<String>> traceViewMap = new LinkedHashMap<>();
+		if (dataflow != null && dataflow.getViews()!=null) {
+			List<relation> relations = dataflow.getRelations();
+			Map<String, String> viewMap = new HashMap<>();
+			Map<String, String> tableMap = new HashMap<>();
+			for (table view : dataflow.getViews()) {
+				viewMap.put(view.getId(), view.getFullName());
+				tableMap.put(view.getId(), view.getFullName());
+			}
+			for (table table : dataflow.getTables()) {
+				tableMap.put(table.getId(), table.getFullName());
+			}
+			for (relation relation : relations) {
+				if(!"fdd".equals(relation.getType())){
+					continue;
+				}
+				String parentId = relation.getTarget().getParent_id();
+				if(viewMap.containsKey(parentId)){
+					traceViewMap.putIfAbsent(viewMap.get(parentId), new LinkedHashSet<>());
+					for(sourceColumn sourceColumn:relation.getSources()){
+						traceViewMap.get(viewMap.get(parentId)).add(tableMap.get(sourceColumn.getParent_id()));
+					}
+				}
+			}
+			
+			for(String view:  traceViewMap.keySet()){
+				buffer.append(view);
+				for(String table: traceViewMap.get(view)){
+					buffer.append(",").append(table);
+				}
+				buffer.append(System.getProperty("line.separator"));
+			}
+		}
+		return buffer.toString().trim();
+	}
+
 	protected static List<SqlInfo> convertSQL(String json) {
         List<SqlInfo> sqlInfos = new ArrayList<>();
         JSONArray sqlContents = JSONArray.parseArray(json);

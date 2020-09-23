@@ -186,6 +186,10 @@ public class ModelBindingManager {
             if (table.getCTE() != null) {
                 return modelBindingMap.get(table.getCTE());
             }
+            if (table.getAliasClause()!=null && table.getAliasClause().getColumns()!=null){
+            	 return modelBindingMap
+                         .get(table.getAliasClause().getColumns());
+            }
             if (table.getSubquery() != null
                     && !table.getSubquery().isCombinedQuery()) {
                 return modelBindingMap
@@ -622,6 +626,21 @@ public class ModelBindingManager {
                 continue;
             }
             TResultColumnList resultset = (TResultColumnList) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
+    
+    public List<TObjectNameList> getQueryAliasTables() {
+        List<TObjectNameList> resultSets = new ArrayList<TObjectNameList>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TObjectNameList)) {
+                continue;
+            }
+            TObjectNameList resultset = (TObjectNameList) key;
             resultSets.add(resultset);
         }
         return resultSets;
