@@ -7042,7 +7042,7 @@ public class DataFlowAnalyzer {
 				tableMap.put(table.getId(), table);
 			}
 			for (relation relation : relations) {
-				if(!"fdd".equals(relation.getType())){
+				if(!RelationType.fdd.name().equals(relation.getType())){
 					continue;
 				}
 				String parentId = relation.getTarget().getParent_id();
