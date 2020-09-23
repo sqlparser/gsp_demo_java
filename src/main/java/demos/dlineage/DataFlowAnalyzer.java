@@ -7026,20 +7026,20 @@ public class DataFlowAnalyzer {
 		}
 	}
 	
-	private String traceView() {
+	public String traceView() {
 		StringBuilder buffer = new StringBuilder();
 		dataflow dataflow = this.getDataFlow();
-		Map<String, Set<String>> traceViewMap = new LinkedHashMap<>();
+		Map<table, Set<table>> traceViewMap = new LinkedHashMap<>();
 		if (dataflow != null && dataflow.getViews()!=null) {
 			List<relation> relations = dataflow.getRelations();
-			Map<String, String> viewMap = new HashMap<>();
-			Map<String, String> tableMap = new HashMap<>();
+			Map<String, table> viewMap = new HashMap<>();
+			Map<String, table> tableMap = new HashMap<>();
 			for (table view : dataflow.getViews()) {
-				viewMap.put(view.getId(), view.getFullName());
-				tableMap.put(view.getId(), view.getFullName());
+				viewMap.put(view.getId(), view);
+				tableMap.put(view.getId(), view);
 			}
 			for (table table : dataflow.getTables()) {
-				tableMap.put(table.getId(), table.getFullName());
+				tableMap.put(table.getId(), table);
 			}
 			for (relation relation : relations) {
 				if(!"fdd".equals(relation.getType())){
@@ -7054,15 +7054,34 @@ public class DataFlowAnalyzer {
 				}
 			}
 			
-			for(String view:  traceViewMap.keySet()){
-				buffer.append(view);
-				for(String table: traceViewMap.get(view)){
-					buffer.append(",").append(table);
+			Map<table, Set<table>> viewTableMap = new LinkedHashMap<>();
+			for(table view: traceViewMap.keySet()){
+				Set<table> tables = new LinkedHashSet<>();
+				traverseViewTables(tables, view, traceViewMap);
+				viewTableMap.put(view, tables);
+			}
+			
+			for(table view: viewTableMap.keySet()){
+				buffer.append(view.getFullName());
+				for(table table: viewTableMap.get(view)){
+					buffer.append(",").append(table.getFullName());
 				}
 				buffer.append(System.getProperty("line.separator"));
 			}
 		}
 		return buffer.toString().trim();
+	}
+
+	private void traverseViewTables(Set<table> tables, table view, Map<table, Set<table>> traceViewMap) {
+		Set<table> sourceTables = traceViewMap.get(view);
+		for(table table: sourceTables){
+			if(table.isTable()){
+				tables.add(table);
+			}
+			else if(table.isView()){
+				traverseViewTables(tables, table, traceViewMap);
+			}
+		}
 	}
 
 	protected static List<SqlInfo> convertSQL(String json) {
