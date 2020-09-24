@@ -116,6 +116,7 @@ import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TObjectNameList;
 import gudusoft.gsqlparser.nodes.TOrderByItem;
 import gudusoft.gsqlparser.nodes.TOrderByItemList;
+import gudusoft.gsqlparser.nodes.TOutputClause;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
@@ -2780,6 +2781,46 @@ public class DataFlowAnalyzer {
 		if (stmt.getWhereClause() != null && stmt.getWhereClause().getCondition() != null) {
 			analyzeFilterCondtion(stmt.getWhereClause().getCondition(), null, JoinClauseType.where, EffectType.update);
 		}
+		
+		if (stmt.getOutputClause()!=null){
+			TOutputClause outputClause = stmt.getOutputClause();
+			if(outputClause.getSelectItemList()!=null){
+				ResultSet resultSet = modelFactory.createResultSet(outputClause, false);
+				for (int j = 0; j < outputClause.getSelectItemList().size(); j++) {
+					TResultColumn sourceColumn = outputClause.getSelectItemList().getResultColumn(j);
+					ResultColumn sourceColumnModel = modelFactory.createResultColumn(resultSet, sourceColumn);
+					analyzeResultColumn(sourceColumn, EffectType.select);
+					
+					if(outputClause.getIntoTable()!=null){
+						Table intoTableModel = modelFactory.createTableByName(outputClause.getIntoTable());
+						if(outputClause.getIntoColumnList()!=null){
+							TableColumn intoTableColumn = modelFactory.createInsertTableColumn(intoTableModel,
+									outputClause.getIntoColumnList().getObjectName(j));
+							
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.insert);
+							relation.setTarget(new TableColumnRelationElement(intoTableColumn));
+							relation.addSource(new ResultColumnRelationElement(sourceColumnModel));
+						}
+						else if(sourceColumn.getAliasClause()!=null || sourceColumn.getExpr().getObjectOperand()!=null){
+							TObjectName tableColumnObject = null;
+							if(sourceColumn.getAliasClause()!=null){
+								tableColumnObject = sourceColumn.getAliasClause().getAliasName();
+							}else{
+								tableColumnObject = sourceColumn.getExpr().getObjectOperand();
+							}
+							
+							TableColumn intoTableColumn = modelFactory.createInsertTableColumn(intoTableModel,
+									tableColumnObject);
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.insert);
+							relation.setTarget(new TableColumnRelationElement(intoTableColumn));
+							relation.addSource(new ResultColumnRelationElement(sourceColumnModel));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void analyzeConstantDataFlowRelation(Object modelObject, List<TConstant> constants, EffectType effectType,
@@ -3926,6 +3967,7 @@ public class DataFlowAnalyzer {
 		List<TSelectSqlStatement> selectSetResultSets = modelManager.getSelectSetResultSets();
 		List<TCTE> ctes = modelManager.getCTEs();
 		List<TParseTreeNode> mergeResultSets = modelManager.getMergeResultSets();
+		List<TParseTreeNode> outputResultSets = modelManager.getOutputResultSets();
 		List<TParseTreeNode> updateResultSets = modelManager.getUpdateResultSets();
 		List<TParseTreeNode> functionCalls = modelManager.getFunctoinCalls();
 		List<TParseTreeNode> cursors = modelManager.getCursors();
@@ -3937,6 +3979,7 @@ public class DataFlowAnalyzer {
 		resultSets.addAll(selectSetResultSets);
 		resultSets.addAll(ctes);
 		resultSets.addAll(mergeResultSets);
+		resultSets.addAll(outputResultSets);
 		resultSets.addAll(updateResultSets);
 		resultSets.addAll(functionCalls);
 		resultSets.addAll(cursors);
@@ -4125,6 +4168,10 @@ public class DataFlowAnalyzer {
 		if (resultSetModel.getGspObject() instanceof TMergeUpdateClause) {
 			return "merge-update";
 		}
+		
+		if (resultSetModel.getGspObject() instanceof TOutputClause) {
+			return "output";
+		}
 
 		if (resultSetModel.getGspObject() instanceof TMergeInsertClause) {
 			return "merge-insert";
@@ -4209,6 +4256,12 @@ public class DataFlowAnalyzer {
 
 		if (resultSetModel.getGspObject() instanceof TMergeUpdateClause) {
 			String name = getResultSetDisplayId("MERGE-UPDATE");
+			modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
+			return name;
+		}
+		
+		if (resultSetModel.getGspObject() instanceof TOutputClause) {
+			String name = getResultSetDisplayId("OUTPUT");
 			modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
 			return name;
 		}
@@ -5449,6 +5502,14 @@ public class DataFlowAnalyzer {
 			}
 			if (functionCall.getWindowDef() != null && functionCall.getWindowDef().getOrderBy() != null) {
 				TOrderByItemList orderByList = functionCall.getWindowDef().getOrderBy().getItems();
+				for (int i = 0; i < orderByList.size(); i++) {
+					TOrderByItem element = orderByList.getOrderByItem(i);
+					TExpression expression = element.getSortKey();
+					expressions.add(expression);
+				}
+			}
+			if(functionCall.getWithinGroup() !=null && functionCall.getWithinGroup().getOrderBy()!=null){
+				TOrderByItemList orderByList = functionCall.getWithinGroup().getOrderBy().getItems();
 				for (int i = 0; i < orderByList.size(); i++) {
 					TOrderByItem element = orderByList.getOrderByItem(i);
 					TExpression expression = element.getSortKey();

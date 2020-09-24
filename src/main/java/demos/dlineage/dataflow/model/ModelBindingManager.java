@@ -717,6 +717,21 @@ public class ModelBindingManager {
         }
         return resultSets;
     }
+    
+    public List<TParseTreeNode> getOutputResultSets() {
+        List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TOutputClause)) {
+                continue;
+            }
+            TParseTreeNode resultset = (TParseTreeNode) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
 
     public List<TParseTreeNode> getUpdateResultSets() {
         List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
