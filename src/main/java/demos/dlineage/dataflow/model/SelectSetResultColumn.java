@@ -15,11 +15,13 @@ import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 public class SelectSetResultColumn extends ResultColumn {
+	
+	private Set<String> aliasSet = new HashSet<String>();
 
     public SelectSetResultColumn(ResultSet resultSet,
                                  TResultColumn resultColumnObject, int index) {
         super(resultSet, resultColumnObject);
-
+        aliasSet.clear();
         if (isNotSameAlias(resultSet, index)) {
             if (resultSet instanceof SelectResultSet) {
                 this.name = "UNNAMED"
@@ -100,7 +102,6 @@ public class SelectSetResultColumn extends ResultColumn {
     }
 
     private boolean isNotSameAlias(TSelectSqlStatement select, int index) {
-        Set<String> aliasSet = new HashSet<String>();
         collectSelectAlias(select, index, aliasSet);
         return aliasSet.size() > 1;
     }
@@ -241,4 +242,8 @@ public class SelectSetResultColumn extends ResultColumn {
         }
         return -1;
     }
+
+	public Set<String> getAliasSet() {
+		return aliasSet;
+	}
 }

@@ -56,6 +56,7 @@ import demos.dlineage.dataflow.model.ResultColumnRelationElement;
 import demos.dlineage.dataflow.model.ResultSet;
 import demos.dlineage.dataflow.model.ResultSetPseudoRows;
 import demos.dlineage.dataflow.model.SelectResultSet;
+import demos.dlineage.dataflow.model.SelectSetResultColumn;
 import demos.dlineage.dataflow.model.SelectSetResultSet;
 import demos.dlineage.dataflow.model.SqlInfo;
 import demos.dlineage.dataflow.model.Table;
@@ -1126,7 +1127,7 @@ public class DataFlowAnalyzer {
 			}
 		}
 		simple.setProcedures(instance.getProcedures());
-		simple.setTables(instance.getTables());
+		simple.setTables(instance.getTables().stream().filter(t->!isMemoryTempTable(t.getName())).collect(Collectors.toList()));
 		simple.setViews(instance.getViews());
 		if (instance.getResultsets() != null) {
 			List<table> resultSets = new ArrayList<table>();
@@ -1237,6 +1238,16 @@ public class DataFlowAnalyzer {
 
 	private boolean isTable(dataflow instance, String targetParent) {
 		if (tableMap.containsKey(targetParent.toLowerCase())) {
+			if(isMemoryTempTable(tableMap.get(targetParent).getName())){
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isMemoryTempTable(String tableName) {	
+		if(tableName.startsWith("@") || getColumnName(tableName).startsWith("@")){
 			return true;
 		}
 		return false;
@@ -2074,9 +2085,12 @@ public class DataFlowAnalyzer {
 
 					ResultSet resultSetModel = null;
 
-					if (stmt.getSubQuery().getResultColumnList() == null) {
+					if (stmt.getSubQuery() != null) {
 						resultSetModel = (ResultSet) modelManager.getModel(stmt.getSubQuery());
-					} else {
+					} 
+					
+					if(resultSetModel == null && stmt.getSubQuery().getResultColumnList()!=null)
+					{
 						resultSetModel = (ResultSet) modelManager.getModel(stmt.getSubQuery().getResultColumnList());
 					}
 
@@ -3802,6 +3816,17 @@ public class DataFlowAnalyzer {
 		} else
 			return SQLUtil.getIdentifierNormalName(name.trim());
 	}
+	
+	private String getColumnName(String column) {
+		if (column == null) {
+			return null;
+		}
+		String name = column.substring(column.lastIndexOf(".") + 1);
+		if (name == null || "".equals(name.trim())) {
+			return SQLUtil.getIdentifierNormalName(column.toString().trim());
+		} else
+			return SQLUtil.getIdentifierNormalName(name.trim());
+	}
 
 	private void appendRecordSetRelation(dataflow dataflow, Relation[] relations) {
 		for (int i = 0; i < relations.length; i++) {
@@ -5516,6 +5541,9 @@ public class DataFlowAnalyzer {
 					expressions.add(expression);
 				}
 			}
+			if(functionCall.getCallTarget()!=null){
+				expressions.add(functionCall.getCallTarget().getExpr());
+			}
 		} else if (gspObject instanceof TCaseExpression) {
 			TCaseExpression expr = (TCaseExpression) gspObject;
 			TExpression inputExpr = expr.getInput_expr();
@@ -6074,39 +6102,7 @@ public class DataFlowAnalyzer {
 										new PseudoRowsRelationElement<ResultSetPseudoRows>(queryTable.getPseudoRows()));
 							}
 
-							if (cteColumns != null) {
-								if (getColumnName(columnName).equals("*")) {
-									for (int j = 0; j < cteColumns.size(); j++) {
-										ResultColumn targetColumn = queryTable.getColumns().get(j);
-
-										relation.addSource(new ResultColumnRelationElement(targetColumn));
-									}
-									break;
-								} else {
-									boolean flag = false;
-
-									for (int j = 0; j < cteColumns.size(); j++) {
-										TObjectName sourceColumn = cteColumns.getObjectName(j);
-
-										if (getColumnName(sourceColumn).equalsIgnoreCase(getColumnName(columnName))) {
-											ResultColumn targetColumn = queryTable.getColumns().get(j);
-
-											relation.addSource(new ResultColumnRelationElement(targetColumn));
-											flag = true;
-											break;
-										}
-									}
-
-									if (flag) {
-										break;
-									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
-											&& columnIndex != -1) {
-										ResultColumn targetColumn = queryTable.getColumns().get(columnIndex);
-										relation.addSource(new ResultColumnRelationElement(targetColumn));
-										break;
-									}
-								}
-							} else if (selectSetResultSetModel != null) {
+							if (selectSetResultSetModel != null) {
 								if (getColumnName(columnName).equals("*")) {
 									for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
 										ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
@@ -6121,16 +6117,29 @@ public class DataFlowAnalyzer {
 									boolean flag = false;
 
 									for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
-										ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
+										SelectSetResultColumn sourceColumn = (SelectSetResultColumn)selectSetResultSetModel.getColumns().get(j);
 
-										if (sourceColumn.getName().equalsIgnoreCase(getColumnName(columnName))) {
+										if (getColumnName(sourceColumn.getName()).equalsIgnoreCase(getColumnName(columnName))) {
 											ResultColumn targetColumn = modelFactory
 													.createSelectSetResultColumn(queryTable, sourceColumn, j);
 
 											relation.addSource(new ResultColumnRelationElement(targetColumn));
 											flag = true;
 											break;
-										}
+										} else if(sourceColumn.getAliasSet().size()>1){
+											for(String alias: sourceColumn.getAliasSet()){
+												if (getColumnName(alias).equalsIgnoreCase(getColumnName(columnName))) {
+													ResultColumn targetColumn = modelFactory
+															.createSelectSetResultColumn(queryTable, sourceColumn, j);
+													relation.addSource(new ResultColumnRelationElement(targetColumn));
+													flag = true;
+													break;
+												} 
+											}
+											if(flag){
+												break;
+											}
+										}	
 									}
 
 									if (flag) {
@@ -6165,7 +6174,39 @@ public class DataFlowAnalyzer {
 										break;
 									}
 								}
-							}
+							} else if (cteColumns != null) {
+								if (getColumnName(columnName).equals("*")) {
+									for (int j = 0; j < cteColumns.size(); j++) {
+										ResultColumn targetColumn = queryTable.getColumns().get(j);
+
+										relation.addSource(new ResultColumnRelationElement(targetColumn));
+									}
+									break;
+								} else {
+									boolean flag = false;
+
+									for (int j = 0; j < cteColumns.size(); j++) {
+										TObjectName sourceColumn = cteColumns.getObjectName(j);
+
+										if (getColumnName(sourceColumn).equalsIgnoreCase(getColumnName(columnName))) {
+											ResultColumn targetColumn = queryTable.getColumns().get(j);
+
+											relation.addSource(new ResultColumnRelationElement(targetColumn));
+											flag = true;
+											break;
+										}
+									}
+
+									if (flag) {
+										break;
+									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
+											&& columnIndex != -1) {
+										ResultColumn targetColumn = queryTable.getColumns().get(columnIndex);
+										relation.addSource(new ResultColumnRelationElement(targetColumn));
+										break;
+									}
+								}
+							} 
 
 							if (columnName.getSourceColumn() != null) {
 								Object model = modelManager.getModel(columnName.getSourceColumn());
