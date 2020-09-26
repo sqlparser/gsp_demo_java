@@ -31,15 +31,25 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 	private EDbVendor vendor;
 
 	@Override
-	public dataflow analyzeMetadata(EDbVendor vendor, String metadata) {
+	public synchronized dataflow analyzeMetadata(EDbVendor vendor, String metadata) {
+		init(vendor);
 		List<MetadataRelation> relations = MetadataReader.read(metadata);
-		this.vendor = vendor;
 		dataflow dataflow = new dataflow();
 		appendProcedures(dataflow, relations);
 		appendTables(dataflow, relations);
 		sortTableColumns(dataflow);
 		appendRelations(dataflow, relations);
 		return dataflow;
+	}
+
+	private void init(EDbVendor vendor) {
+		this.vendor = vendor;
+		globalTableId.set(0);
+		globalColumnId.set(0);
+		globalRelationId.set(0);
+		procedureMap.clear();
+		tableMap.clear();
+		columnMap.clear();
 	}
 
 	private void sortTableColumns(dataflow dataflow) {
