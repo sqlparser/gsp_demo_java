@@ -8,7 +8,7 @@ import demos.dlineage.dataflow.metadata.model.MetadataRelation;
 public class MetadataReader {
 	public static List<MetadataRelation> read(String metadata) {
 		List<MetadataRelation> relations = new ArrayList<MetadataRelation>();
-		String[] lines = metadata.replace("\r", "").split("(\n)+");
+		String[] lines = metadata.replace("\r", "").trim().split("(\n)+");
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
 			String[] columns = line.trim().split("\\s*;\\s*");
@@ -32,5 +32,23 @@ public class MetadataReader {
 		}
 		
 		return relations;
+	}
+	
+	public static boolean isMetadata(String metadata) {
+		String[] lines = metadata.replace("\r", "").trim().split("(\n)+");
+		for (int i = 0; i < lines.length;) {
+			String line = lines[i];
+			String[] columns = line.trim().split("\\s*;\\s*");
+			if (i == 0) {
+				if(columns[0].toLowerCase().indexOf("source_db") != -1){
+					return true;
+				}
+				return false;
+			}
+			else{
+				return false;
+			}
+		}
+		return false;
 	}
 }

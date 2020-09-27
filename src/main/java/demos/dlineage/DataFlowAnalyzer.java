@@ -29,6 +29,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import demos.dlineage.dataflow.listener.DataFlowHandleListener;
+import demos.dlineage.dataflow.metadata.MetadataReader;
+import demos.dlineage.dataflow.metadata.sqldep.SQLDepMetadataAnalyzer;
 import demos.dlineage.dataflow.model.AbstractRelation;
 import demos.dlineage.dataflow.model.Argument;
 import demos.dlineage.dataflow.model.Constant;
@@ -256,6 +258,9 @@ public class DataFlowAnalyzer {
 						content = queryObject.getString("sourceCode");
 
 					}
+					if(MetadataReader.isMetadata(content)){
+						continue;
+					}
 					TGSqlParser sqlparser = new TGSqlParser(vendor);
 					sqlparser.sqltext = content;
 					int result = sqlparser.parse();
@@ -270,6 +275,9 @@ public class DataFlowAnalyzer {
 			if (sqlContent != null && sqlContent.trim().startsWith("{")) {
 				JSONObject queryObject = JSON.parseObject(sqlContent);
 				sqlContent = queryObject.getString("sourceCode");
+			}
+			if(MetadataReader.isMetadata(sqlContent)){
+				return builder.toString();
 			}
 			TGSqlParser sqlparser = new TGSqlParser(vendor);
 			sqlparser.sqltext = sqlContent;
@@ -290,6 +298,9 @@ public class DataFlowAnalyzer {
 					continue;
 				}
 
+				if(MetadataReader.isMetadata(content)){
+					continue;
+				}
 				TGSqlParser sqlparser = new TGSqlParser(vendor);
 				sqlparser.sqltext = content;
 				int result = sqlparser.parse();
@@ -306,6 +317,9 @@ public class DataFlowAnalyzer {
 					JSONObject queryObject = JSON.parseObject(content);
 					content = queryObject.getString("sourceCode");
 
+				}
+				if(MetadataReader.isMetadata(content)){
+					continue;
 				}
 				TGSqlParser sqlparser = new TGSqlParser(vendor);
 				sqlparser.sqltext = content;
@@ -933,17 +947,36 @@ public class DataFlowAnalyzer {
 						if (handleListener != null) {
 							handleListener.startParse(null, content.length(), 0);
 						}
-
-						TGSqlParser sqlparser = new TGSqlParser(vendor);
-						sqlparser.sqltext = content;
-						String hash = SHA256.getMd5(sqlparser.sqltext);
-						ModelBindingManager.setGlobalHash(hash);
-						sqlInfo.setHash(hash);
-						sqlInfo.setLineEnd(sqlparser.sqltext.split("\n").length-1);
-						sqlInfo.setOriginLineEnd(sqlparser.sqltext.split("\n").length-1);
-						sqlInfoMap.putIfAbsent(hash, new ArrayList<>());
-						sqlInfoMap.get(hash).add(sqlInfo);
-						analyzeAndOutputResult(sqlparser);
+						
+						if(MetadataReader.isMetadata(content)){
+							dataflow temp = new SQLDepMetadataAnalyzer().analyzeMetadata(vendor, content);
+							if (temp.getProcedures() != null) {
+								dataflow.getProcedures().addAll(temp.getProcedures());
+							}
+							if (temp.getTables() != null) {
+								dataflow.getTables().addAll(temp.getTables());
+							}
+							if (temp.getViews() != null) {
+								dataflow.getViews().addAll(temp.getViews());
+							}
+							if (temp.getResultsets() != null) {
+								dataflow.getResultsets().addAll(temp.getResultsets());
+							}
+							if (temp.getRelations() != null) {
+								dataflow.getRelations().addAll(temp.getRelations());
+							}
+						}else{
+							TGSqlParser sqlparser = new TGSqlParser(vendor);
+							sqlparser.sqltext = content;
+							String hash = SHA256.getMd5(sqlparser.sqltext);
+							ModelBindingManager.setGlobalHash(hash);
+							sqlInfo.setHash(hash);
+							sqlInfo.setLineEnd(sqlparser.sqltext.split("\n").length-1);
+							sqlInfo.setOriginLineEnd(sqlparser.sqltext.split("\n").length-1);
+							sqlInfoMap.putIfAbsent(hash, new ArrayList<>());
+							sqlInfoMap.get(hash).add(sqlInfo);
+							analyzeAndOutputResult(sqlparser);
+						}
 					}
 				}
 

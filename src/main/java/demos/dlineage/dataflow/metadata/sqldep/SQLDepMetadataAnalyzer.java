@@ -3,11 +3,11 @@ package demos.dlineage.dataflow.metadata.sqldep;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import demos.dlineage.dataflow.metadata.MetadataAnalyzer;
 import demos.dlineage.dataflow.metadata.MetadataReader;
 import demos.dlineage.dataflow.metadata.model.MetadataRelation;
+import demos.dlineage.dataflow.model.ModelBindingManager;
 import demos.dlineage.dataflow.model.RelationType;
 import demos.dlineage.dataflow.model.xml.column;
 import demos.dlineage.dataflow.model.xml.dataflow;
@@ -22,9 +22,6 @@ import gudusoft.gsqlparser.EDbVendor;
 
 public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 
-	private AtomicInteger globalTableId = new AtomicInteger();
-	private AtomicInteger globalColumnId = new AtomicInteger();
-	private AtomicInteger globalRelationId = new AtomicInteger();
 	private Map<String, procedure> procedureMap = new LinkedHashMap<>();
 	private Map<String, table> tableMap = new LinkedHashMap<>();
 	private Map<String, column> columnMap = new LinkedHashMap<>();
@@ -44,12 +41,12 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 
 	private void init(EDbVendor vendor) {
 		this.vendor = vendor;
-		globalTableId.set(0);
-		globalColumnId.set(0);
-		globalRelationId.set(0);
 		procedureMap.clear();
 		tableMap.clear();
 		columnMap.clear();
+		if(ModelBindingManager.get() == null){
+			ModelBindingManager.set(new ModelBindingManager());
+		}
 	}
 
 	private void sortTableColumns(dataflow dataflow) {
@@ -81,7 +78,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 	private void appendRelations(dataflow dataflow, List<MetadataRelation> relations) {
 		for (MetadataRelation metadataRelation : relations) {
 			relation relation = new relation();
-			relation.setId(String.valueOf(globalRelationId.incrementAndGet()));
+			relation.setId(String.valueOf(++ModelBindingManager.get().RELATION_ID));
 			if ("SQLDEP-INDIRECT".equalsIgnoreCase(metadataRelation.getSourceColumn())
 					|| "SQLDEP-INDIRECT".equalsIgnoreCase(metadataRelation.getTargetColumn())) {
 				relation.setType(RelationType.frd.name());
@@ -107,7 +104,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 
 			if ("SQLDEP-CONSTANT".equalsIgnoreCase(metadataRelation.getSourceColumn())) {
 				sourceColumn.setColumn_type("constant");
-				sourceColumn.setId(String.valueOf(globalColumnId.incrementAndGet()));
+				sourceColumn.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
 			} else {
 				sourceColumn.setId(columnMap.get(sourceColumnKey).getId());
 				sourceColumn.setParent_name(sourceParentFullName);
@@ -132,7 +129,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			String targetParentKey = SQLUtil.getIdentifierNormalName(vendor, targetParentFullName);
 
 			if ("SQLDEP-CONSTANT".equalsIgnoreCase(metadataRelation.getTargetColumn())) {
-				targetColumn.setId(String.valueOf(globalColumnId.incrementAndGet()));
+				targetColumn.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
 			} else {
 				targetColumn.setId(columnMap.get(targetColumnKey).getId());
 				targetColumn.setParent_name(targetParentFullName);
@@ -159,7 +156,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 	}
 
 	private String getTableName(String tableName) {
-		return tableName.replaceAll("\\s*\\(.+\\)", "");
+		return tableName.replaceAll("//s*//(.+//)", "");
 	}
 
 	private void appendTable(dataflow dataflow, String databaseName, String schemaName, String tableName,
@@ -170,8 +167,8 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			table.setDatabase(databaseName);
 			table.setSchema(schemaName);
 			table.setName(tableName);
-			table.setId(String.valueOf(globalTableId.incrementAndGet()));
-			if (tableName.toUpperCase().indexOf("-RES") != -1) {
+			table.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
+			if (tableName.toUpperCase().indexOf("-RES") == -1) {
 				table.setType("table");
 				dataflow.getTables().add(table);
 			} else {
@@ -190,7 +187,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 				getFullName(databaseName, schemaName, tableName, columnName));
 		if (!columnMap.containsKey(sourceColumnKey)) {
 			column column = new column();
-			column.setId(String.valueOf(globalColumnId.incrementAndGet()));
+			column.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
 			column.setName(columnName);
 			if ("PseudoRows".equalsIgnoreCase(columnName)) {
 				column.setSource("system");
@@ -217,7 +214,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 				if (!procedureMap.containsKey(produceName)) {
 					procedure procedure = new procedure();
 					procedure.setName(relation.getProcedureName());
-					procedure.setId(String.valueOf(globalTableId.incrementAndGet()));
+					procedure.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
 					procedureMap.put(produceName, procedure);
 					dataflow.getProcedures().add(procedure);
 				}
@@ -227,7 +224,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 
 	public static void main(String[] args) {
 		dataflow dataflow = new SQLDepMetadataAnalyzer().analyzeMetadata(EDbVendor.dbvmssql,
-				SQLUtil.getFileContent("C:/Users/z/Desktop/full_batch_column_lineage.csv"));
+				SQLUtil.getFileContent("D:/develop/git/sqlflow/backend/sqlservice/src/test/resources/DBexport20191119/full_batch_column_lineage.csv"));
 		System.out.println(XML2Model.saveXML(dataflow));
 	}
 
