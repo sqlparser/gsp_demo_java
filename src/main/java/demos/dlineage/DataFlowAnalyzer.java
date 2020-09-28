@@ -949,6 +949,8 @@ public class DataFlowAnalyzer {
 						}
 						
 						if(MetadataReader.isMetadata(content)){
+							String hash = SHA256.getMd5(content);
+							ModelBindingManager.setGlobalHash(hash);
 							dataflow temp = new SQLDepMetadataAnalyzer().analyzeMetadata(vendor, content);
 							if (temp.getProcedures() != null) {
 								dataflow.getProcedures().addAll(temp.getProcedures());

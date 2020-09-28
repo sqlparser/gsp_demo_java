@@ -16,6 +16,7 @@ import demos.dlineage.dataflow.model.xml.relation;
 import demos.dlineage.dataflow.model.xml.sourceColumn;
 import demos.dlineage.dataflow.model.xml.table;
 import demos.dlineage.dataflow.model.xml.targetColumn;
+import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import demos.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.EDbVendor;
@@ -44,7 +45,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 		procedureMap.clear();
 		tableMap.clear();
 		columnMap.clear();
-		if(ModelBindingManager.get() == null){
+		if (ModelBindingManager.get() == null) {
 			ModelBindingManager.set(new ModelBindingManager());
 		}
 	}
@@ -92,7 +93,8 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			if ("SQLDEP-INDIRECT".equalsIgnoreCase(sourceColumnName)) {
 				sourceColumnName = "PseudoRows";
 			}
-
+			sourceColumn.setCoordinate(new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash())
+					+ "," + new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()));
 			sourceColumn.setColumn(sourceColumnName);
 			String sourceParentFullName = getFullName(checkDefault(metadataRelation.getSourceDb()),
 					checkDefault(metadataRelation.getSourceSchema()), getTableName(metadataRelation.getSourceTable()));
@@ -120,6 +122,8 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			}
 
 			targetColumn.setColumn(targetColumnName);
+			targetColumn.setCoordinate(new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash())
+					+ "," + new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()));
 			String targetParentFullName = getFullName(checkDefault(metadataRelation.getTargetDb()),
 					checkDefault(metadataRelation.getTargetSchema()), getTableName(metadataRelation.getTargetTable()));
 			String targetColumnFullName = getFullName(checkDefault(metadataRelation.getTargetDb()),
@@ -168,6 +172,8 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			table.setSchema(schemaName);
 			table.setName(tableName);
 			table.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
+			table.setCoordinate(new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()) + ","
+					+ new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()));
 			if (tableName.toUpperCase().indexOf("-RES") == -1) {
 				table.setType("table");
 				dataflow.getTables().add(table);
@@ -192,13 +198,18 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 			if ("PseudoRows".equalsIgnoreCase(columnName)) {
 				column.setSource("system");
 			}
+			column.setCoordinate(new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()) + ","
+					+ new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()));
 			table.getColumns().add(column);
 			columnMap.put(sourceColumnKey, column);
 		}
 	}
 
 	private String checkDefault(String value) {
-		if ("DEFAULT".equalsIgnoreCase(value))
+		if (value.toUpperCase().indexOf("DEFAULT") != -1) {
+			value = value.replaceAll("(?i)DEFAULT\\.", "").replaceAll("(?i)DEFAULT", "");
+		}
+		if (SQLUtil.isEmpty(value))
 			return null;
 		return value;
 	}
@@ -215,6 +226,8 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 					procedure procedure = new procedure();
 					procedure.setName(relation.getProcedureName());
 					procedure.setId(String.valueOf(++ModelBindingManager.get().TABLE_COLUMN_ID));
+					procedure.setCoordinate(new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash())
+							+ "," + new Pair3<Long, Long, String>(-1L, -1L, ModelBindingManager.getGlobalHash()));
 					procedureMap.put(produceName, procedure);
 					dataflow.getProcedures().add(procedure);
 				}
@@ -224,7 +237,7 @@ public class SQLDepMetadataAnalyzer implements MetadataAnalyzer {
 
 	public static void main(String[] args) {
 		dataflow dataflow = new SQLDepMetadataAnalyzer().analyzeMetadata(EDbVendor.dbvmssql,
-				SQLUtil.getFileContent("D:/develop/git/sqlflow/backend/sqlservice/src/test/resources/DBexport20191119/full_batch_column_lineage.csv"));
+				SQLUtil.getFileContent("D:\\5.txt"));
 		System.out.println(XML2Model.saveXML(dataflow));
 	}
 
