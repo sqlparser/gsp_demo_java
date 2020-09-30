@@ -158,12 +158,7 @@ public class ExpressionChecker implements IExpressionVisitor
 	public boolean exprVisit( TParseTreeNode pnode, boolean pIsLeafNode )
 	{
 		TExpression expression = (TExpression) pnode;
-		
-		if(expression.getParentExpr()!=null 
-				&& expression.getParentExpr().getNodeStatus() == ENodeStatus.nsRemoved){
-			return true;
-		}
-		
+
 		if ( is_compare_condition( expression.getExpressionType( ) ) )
 		{
 			TExpression leftExpr = (TExpression) expression.getLeftOperand( );

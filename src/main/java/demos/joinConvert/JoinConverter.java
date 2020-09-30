@@ -267,7 +267,13 @@ public class JoinConverter {
 
     public String getQuery() {
         // remove blank line from query
-        return this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
+        String result = this.totalQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
+//        String trim = result.trim();
+//        char[] chars = trim.toCharArray();
+//        if (chars[chars.length - 1] == ',') {
+//            result = trim.substring(0, trim.length() - 1);
+//        }
+        return result;
     }
 
     public static void main(String[] args) {
@@ -287,8 +293,8 @@ public class JoinConverter {
                 .trim());
     }
 
-    public int convert() {
 
+    public int convert() {
         TGSqlParser sqlparser = new TGSqlParser(vendor);
         sqlparser.sqltext = this.query;
         ErrorNo = sqlparser.parse();
@@ -297,7 +303,6 @@ public class JoinConverter {
             return ErrorNo;
         }
         sqlparser.sqlstatements.forEach(it -> {
-        //sqlparser.sqlstatements.forEachRemaining(it -> {
             analyzeSelect(it);
             String convertedQuery = it.toString();
             if (!convertedQuery.equals(this.query)) {
@@ -470,6 +475,20 @@ public class JoinConverter {
                             }
 
                             for (int k = select.joins.size() - 1; k > 0; k--) {
+                                //TODO update
+                                if (k == 0) {
+                                    if (select.joins.size() > 1) {
+                                        TSourceToken st = select.joins.getJoin(k).getEndToken().searchToken(",", 1);
+                                        if (st != null) {
+                                            st.removeFromChain();
+                                        }
+                                    }
+                                } else {
+                                    TSourceToken st = select.joins.getJoin(k).getStartToken().searchToken(",", -1);
+                                    if (st != null) {
+                                        st.removeFromChain();
+                                    }
+                                }
                                 select.joins.removeJoin(k);
                             }
                             select.joins.getJoin(0).setString(str);

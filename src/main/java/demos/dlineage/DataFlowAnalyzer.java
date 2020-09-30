@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,9 +27,10 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.javafx.css.Declaration;
 
 import demos.dlineage.dataflow.listener.DataFlowHandleListener;
+import demos.dlineage.dataflow.metadata.MetadataReader;
+import demos.dlineage.dataflow.metadata.sqldep.SQLDepMetadataAnalyzer;
 import demos.dlineage.dataflow.model.AbstractRelation;
 import demos.dlineage.dataflow.model.Argument;
 import demos.dlineage.dataflow.model.Constant;
@@ -58,6 +58,7 @@ import demos.dlineage.dataflow.model.ResultColumnRelationElement;
 import demos.dlineage.dataflow.model.ResultSet;
 import demos.dlineage.dataflow.model.ResultSetPseudoRows;
 import demos.dlineage.dataflow.model.SelectResultSet;
+import demos.dlineage.dataflow.model.SelectSetResultColumn;
 import demos.dlineage.dataflow.model.SelectSetResultSet;
 import demos.dlineage.dataflow.model.SqlInfo;
 import demos.dlineage.dataflow.model.Table;
@@ -76,7 +77,6 @@ import demos.dlineage.dataflow.model.xml.sourceColumn;
 import demos.dlineage.dataflow.model.xml.table;
 import demos.dlineage.dataflow.model.xml.targetColumn;
 import demos.dlineage.sqlenv.SQLEnvParser;
-import demos.dlineage.sqlenv.sqldep.SQLDepSQLEnv;
 import demos.dlineage.util.Pair;
 import demos.dlineage.util.SHA256;
 import demos.dlineage.util.SQLUtil;
@@ -119,10 +119,10 @@ import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TObjectNameList;
 import gudusoft.gsqlparser.nodes.TOrderByItem;
 import gudusoft.gsqlparser.nodes.TOrderByItemList;
+import gudusoft.gsqlparser.nodes.TOutputClause;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TParameterDeclarationList;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
-import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.nodes.TTable;
@@ -258,6 +258,9 @@ public class DataFlowAnalyzer {
 						content = queryObject.getString("sourceCode");
 
 					}
+					if(MetadataReader.isMetadata(content)){
+						continue;
+					}
 					TGSqlParser sqlparser = new TGSqlParser(vendor);
 					sqlparser.sqltext = content;
 					int result = sqlparser.parse();
@@ -272,6 +275,9 @@ public class DataFlowAnalyzer {
 			if (sqlContent != null && sqlContent.trim().startsWith("{")) {
 				JSONObject queryObject = JSON.parseObject(sqlContent);
 				sqlContent = queryObject.getString("sourceCode");
+			}
+			if(MetadataReader.isMetadata(sqlContent)){
+				return builder.toString();
 			}
 			TGSqlParser sqlparser = new TGSqlParser(vendor);
 			sqlparser.sqltext = sqlContent;
@@ -292,6 +298,9 @@ public class DataFlowAnalyzer {
 					continue;
 				}
 
+				if(MetadataReader.isMetadata(content)){
+					continue;
+				}
 				TGSqlParser sqlparser = new TGSqlParser(vendor);
 				sqlparser.sqltext = content;
 				int result = sqlparser.parse();
@@ -308,6 +317,9 @@ public class DataFlowAnalyzer {
 					JSONObject queryObject = JSON.parseObject(content);
 					content = queryObject.getString("sourceCode");
 
+				}
+				if(MetadataReader.isMetadata(content)){
+					continue;
 				}
 				TGSqlParser sqlparser = new TGSqlParser(vendor);
 				sqlparser.sqltext = content;
@@ -935,17 +947,38 @@ public class DataFlowAnalyzer {
 						if (handleListener != null) {
 							handleListener.startParse(null, content.length(), 0);
 						}
-
-						TGSqlParser sqlparser = new TGSqlParser(vendor);
-						sqlparser.sqltext = content;
-						String hash = SHA256.getMd5(sqlparser.sqltext);
-						ModelBindingManager.setGlobalHash(hash);
-						sqlInfo.setHash(hash);
-						sqlInfo.setLineEnd(sqlparser.sqltext.split("\n").length-1);
-						sqlInfo.setOriginLineEnd(sqlparser.sqltext.split("\n").length-1);
-						sqlInfoMap.putIfAbsent(hash, new ArrayList<>());
-						sqlInfoMap.get(hash).add(sqlInfo);
-						analyzeAndOutputResult(sqlparser);
+						
+						if(MetadataReader.isMetadata(content)){
+							String hash = SHA256.getMd5(content);
+							ModelBindingManager.setGlobalHash(hash);
+							dataflow temp = new SQLDepMetadataAnalyzer().analyzeMetadata(vendor, content);
+							if (temp.getProcedures() != null) {
+								dataflow.getProcedures().addAll(temp.getProcedures());
+							}
+							if (temp.getTables() != null) {
+								dataflow.getTables().addAll(temp.getTables());
+							}
+							if (temp.getViews() != null) {
+								dataflow.getViews().addAll(temp.getViews());
+							}
+							if (temp.getResultsets() != null) {
+								dataflow.getResultsets().addAll(temp.getResultsets());
+							}
+							if (temp.getRelations() != null) {
+								dataflow.getRelations().addAll(temp.getRelations());
+							}
+						}else{
+							TGSqlParser sqlparser = new TGSqlParser(vendor);
+							sqlparser.sqltext = content;
+							String hash = SHA256.getMd5(sqlparser.sqltext);
+							ModelBindingManager.setGlobalHash(hash);
+							sqlInfo.setHash(hash);
+							sqlInfo.setLineEnd(sqlparser.sqltext.split("\n").length-1);
+							sqlInfo.setOriginLineEnd(sqlparser.sqltext.split("\n").length-1);
+							sqlInfoMap.putIfAbsent(hash, new ArrayList<>());
+							sqlInfoMap.get(hash).add(sqlInfo);
+							analyzeAndOutputResult(sqlparser);
+						}
 					}
 				}
 
@@ -1129,7 +1162,7 @@ public class DataFlowAnalyzer {
 			}
 		}
 		simple.setProcedures(instance.getProcedures());
-		simple.setTables(instance.getTables());
+		simple.setTables(instance.getTables().stream().filter(t->!isMemoryTempTable(t.getName())).collect(Collectors.toList()));
 		simple.setViews(instance.getViews());
 		if (instance.getResultsets() != null) {
 			List<table> resultSets = new ArrayList<table>();
@@ -1240,6 +1273,16 @@ public class DataFlowAnalyzer {
 
 	private boolean isTable(dataflow instance, String targetParent) {
 		if (tableMap.containsKey(targetParent.toLowerCase())) {
+			if(isMemoryTempTable(tableMap.get(targetParent).getName())){
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isMemoryTempTable(String tableName) {	
+		if(tableName.startsWith("@") || getColumnName(tableName).startsWith("@")){
 			return true;
 		}
 		return false;
@@ -2077,9 +2120,12 @@ public class DataFlowAnalyzer {
 
 					ResultSet resultSetModel = null;
 
-					if (stmt.getSubQuery().getResultColumnList() == null) {
+					if (stmt.getSubQuery() != null) {
 						resultSetModel = (ResultSet) modelManager.getModel(stmt.getSubQuery());
-					} else {
+					} 
+					
+					if(resultSetModel == null && stmt.getSubQuery().getResultColumnList()!=null)
+					{
 						resultSetModel = (ResultSet) modelManager.getModel(stmt.getSubQuery().getResultColumnList());
 					}
 
@@ -2399,7 +2445,7 @@ public class DataFlowAnalyzer {
 			} else if (stmt.getColumnList() != null && stmt.getColumnList().size() > 0) {
 				TObjectNameList items = stmt.getColumnList();
 				TMultiTargetList values = stmt.getValues();
-				for (int k = 0; k < values.size(); k++) {
+				for (int k = 0; values!=null && k < values.size(); k++) {
 					int j = 0;
 					for (int i = 0; i < items.size(); i++) {
 						TObjectName column = items.getObjectName(i);
@@ -2783,6 +2829,46 @@ public class DataFlowAnalyzer {
 
 		if (stmt.getWhereClause() != null && stmt.getWhereClause().getCondition() != null) {
 			analyzeFilterCondtion(stmt.getWhereClause().getCondition(), null, JoinClauseType.where, EffectType.update);
+		}
+		
+		if (stmt.getOutputClause()!=null){
+			TOutputClause outputClause = stmt.getOutputClause();
+			if(outputClause.getSelectItemList()!=null){
+				ResultSet resultSet = modelFactory.createResultSet(outputClause, false);
+				for (int j = 0; j < outputClause.getSelectItemList().size(); j++) {
+					TResultColumn sourceColumn = outputClause.getSelectItemList().getResultColumn(j);
+					ResultColumn sourceColumnModel = modelFactory.createResultColumn(resultSet, sourceColumn);
+					analyzeResultColumn(sourceColumn, EffectType.select);
+					
+					if(outputClause.getIntoTable()!=null){
+						Table intoTableModel = modelFactory.createTableByName(outputClause.getIntoTable());
+						if(outputClause.getIntoColumnList()!=null){
+							TableColumn intoTableColumn = modelFactory.createInsertTableColumn(intoTableModel,
+									outputClause.getIntoColumnList().getObjectName(j));
+							
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.insert);
+							relation.setTarget(new TableColumnRelationElement(intoTableColumn));
+							relation.addSource(new ResultColumnRelationElement(sourceColumnModel));
+						}
+						else if(sourceColumn.getAliasClause()!=null || sourceColumn.getExpr().getObjectOperand()!=null){
+							TObjectName tableColumnObject = null;
+							if(sourceColumn.getAliasClause()!=null){
+								tableColumnObject = sourceColumn.getAliasClause().getAliasName();
+							}else{
+								tableColumnObject = sourceColumn.getExpr().getObjectOperand();
+							}
+							
+							TableColumn intoTableColumn = modelFactory.createInsertTableColumn(intoTableModel,
+									tableColumnObject);
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.insert);
+							relation.setTarget(new TableColumnRelationElement(intoTableColumn));
+							relation.addSource(new ResultColumnRelationElement(sourceColumnModel));
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -3765,6 +3851,17 @@ public class DataFlowAnalyzer {
 		} else
 			return SQLUtil.getIdentifierNormalName(name.trim());
 	}
+	
+	private String getColumnName(String column) {
+		if (column == null) {
+			return null;
+		}
+		String name = column.substring(column.lastIndexOf(".") + 1);
+		if (name == null || "".equals(name.trim())) {
+			return SQLUtil.getIdentifierNormalName(column.toString().trim());
+		} else
+			return SQLUtil.getIdentifierNormalName(name.trim());
+	}
 
 	private void appendRecordSetRelation(dataflow dataflow, Relation[] relations) {
 		for (int i = 0; i < relations.length; i++) {
@@ -3925,20 +4022,24 @@ public class DataFlowAnalyzer {
 
 	private void appendResultSets(dataflow dataflow) {
 		List<TResultColumnList> selectResultSets = modelManager.getSelectResultSets();
+		List<TObjectNameList> queryAliasTables = modelManager.getQueryAliasTables();
 		List<TTable> tableWithSelectSetResultSets = modelManager.getTableWithSelectSetResultSets();
 		List<TSelectSqlStatement> selectSetResultSets = modelManager.getSelectSetResultSets();
 		List<TCTE> ctes = modelManager.getCTEs();
 		List<TParseTreeNode> mergeResultSets = modelManager.getMergeResultSets();
+		List<TParseTreeNode> outputResultSets = modelManager.getOutputResultSets();
 		List<TParseTreeNode> updateResultSets = modelManager.getUpdateResultSets();
 		List<TParseTreeNode> functionCalls = modelManager.getFunctoinCalls();
 		List<TParseTreeNode> cursors = modelManager.getCursors();
 
 		List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
 		resultSets.addAll(selectResultSets);
+		resultSets.addAll(queryAliasTables);
 		resultSets.addAll(tableWithSelectSetResultSets);
 		resultSets.addAll(selectSetResultSets);
 		resultSets.addAll(ctes);
 		resultSets.addAll(mergeResultSets);
+		resultSets.addAll(outputResultSets);
 		resultSets.addAll(updateResultSets);
 		resultSets.addAll(functionCalls);
 		resultSets.addAll(cursors);
@@ -4127,6 +4228,10 @@ public class DataFlowAnalyzer {
 		if (resultSetModel.getGspObject() instanceof TMergeUpdateClause) {
 			return "merge-update";
 		}
+		
+		if (resultSetModel.getGspObject() instanceof TOutputClause) {
+			return "output";
+		}
 
 		if (resultSetModel.getGspObject() instanceof TMergeInsertClause) {
 			return "merge-insert";
@@ -4211,6 +4316,12 @@ public class DataFlowAnalyzer {
 
 		if (resultSetModel.getGspObject() instanceof TMergeUpdateClause) {
 			String name = getResultSetDisplayId("MERGE-UPDATE");
+			modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
+			return name;
+		}
+		
+		if (resultSetModel.getGspObject() instanceof TOutputClause) {
+			String name = getResultSetDisplayId("OUTPUT");
 			modelManager.DISPLAY_NAME.put(resultSetModel.getId(), name);
 			return name;
 		}
@@ -4577,6 +4688,8 @@ public class DataFlowAnalyzer {
 					analyzeSelectStmt(subquery);
 
 					ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
+					
+					
 					if (resultSetModel != null && resultSetModel != queryTable
 							&& !resultSetModel.getPseudoRows().getHoldRelations().isEmpty()) {
 						ImpactRelation impactRelation = modelFactory.createImpactRelation();
@@ -4587,7 +4700,20 @@ public class DataFlowAnalyzer {
 								new PseudoRowsRelationElement<ResultSetPseudoRows>(queryTable.getPseudoRows()));
 					}
 
-					if (subquery.getSetOperatorType() != ESetOperatorType.none) {
+					if(resultSetModel != null && resultSetModel != queryTable 
+							&& queryTable.getTableObject().getAliasClause()!=null
+							&& queryTable.getTableObject().getAliasClause().getColumns()!=null){
+						for (int j = 0; j < queryTable.getColumns().size() && j < resultSetModel.getColumns().size(); j++) {
+							ResultColumn sourceColumn = resultSetModel.getColumns().get(j);
+							ResultColumn targetColumn = queryTable.getColumns().get(j);
+							
+							DataFlowRelation queryRalation = modelFactory.createDataFlowRelation();
+							queryRalation.setEffectType(EffectType.select);
+							queryRalation.setTarget(new ResultColumnRelationElement(targetColumn));
+							queryRalation.addSource(new ResultColumnRelationElement(sourceColumn));
+						}
+					}
+					else if (subquery.getSetOperatorType() != ESetOperatorType.none) {
 						SelectSetResultSet selectSetResultSetModel = (SelectSetResultSet) modelManager
 								.getModel(subquery);
 						for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
@@ -5442,6 +5568,17 @@ public class DataFlowAnalyzer {
 					expressions.add(expression);
 				}
 			}
+			if(functionCall.getWithinGroup() !=null && functionCall.getWithinGroup().getOrderBy()!=null){
+				TOrderByItemList orderByList = functionCall.getWithinGroup().getOrderBy().getItems();
+				for (int i = 0; i < orderByList.size(); i++) {
+					TOrderByItem element = orderByList.getOrderByItem(i);
+					TExpression expression = element.getSortKey();
+					expressions.add(expression);
+				}
+			}
+			if(functionCall.getCallTarget()!=null){
+				expressions.add(functionCall.getCallTarget().getExpr());
+			}
 		} else if (gspObject instanceof TCaseExpression) {
 			TCaseExpression expr = (TCaseExpression) gspObject;
 			TExpression inputExpr = expr.getInput_expr();
@@ -5974,7 +6111,9 @@ public class DataFlowAnalyzer {
 						if (queryTable.getTableObject().getCTE() != null) {
 							subquery = queryTable.getTableObject().getCTE().getSubquery();
 							cteColumns = queryTable.getTableObject().getCTE().getColumnList();
-						} else {
+						} else if (queryTable.getTableObject().getAliasClause()!=null && queryTable.getTableObject().getAliasClause().getColumns()!=null){
+							
+						}else {
 							subquery = queryTable.getTableObject().getSubquery();
 						}
 
@@ -5998,39 +6137,7 @@ public class DataFlowAnalyzer {
 										new PseudoRowsRelationElement<ResultSetPseudoRows>(queryTable.getPseudoRows()));
 							}
 
-							if (cteColumns != null) {
-								if (getColumnName(columnName).equals("*")) {
-									for (int j = 0; j < cteColumns.size(); j++) {
-										ResultColumn targetColumn = queryTable.getColumns().get(j);
-
-										relation.addSource(new ResultColumnRelationElement(targetColumn));
-									}
-									break;
-								} else {
-									boolean flag = false;
-
-									for (int j = 0; j < cteColumns.size(); j++) {
-										TObjectName sourceColumn = cteColumns.getObjectName(j);
-
-										if (getColumnName(sourceColumn).equalsIgnoreCase(getColumnName(columnName))) {
-											ResultColumn targetColumn = queryTable.getColumns().get(j);
-
-											relation.addSource(new ResultColumnRelationElement(targetColumn));
-											flag = true;
-											break;
-										}
-									}
-
-									if (flag) {
-										break;
-									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
-											&& columnIndex != -1) {
-										ResultColumn targetColumn = queryTable.getColumns().get(columnIndex);
-										relation.addSource(new ResultColumnRelationElement(targetColumn));
-										break;
-									}
-								}
-							} else if (selectSetResultSetModel != null) {
+							if (selectSetResultSetModel != null) {
 								if (getColumnName(columnName).equals("*")) {
 									for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
 										ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
@@ -6045,16 +6152,29 @@ public class DataFlowAnalyzer {
 									boolean flag = false;
 
 									for (int j = 0; j < selectSetResultSetModel.getColumns().size(); j++) {
-										ResultColumn sourceColumn = selectSetResultSetModel.getColumns().get(j);
+										SelectSetResultColumn sourceColumn = (SelectSetResultColumn)selectSetResultSetModel.getColumns().get(j);
 
-										if (sourceColumn.getName().equalsIgnoreCase(getColumnName(columnName))) {
+										if (getColumnName(sourceColumn.getName()).equalsIgnoreCase(getColumnName(columnName))) {
 											ResultColumn targetColumn = modelFactory
 													.createSelectSetResultColumn(queryTable, sourceColumn, j);
 
 											relation.addSource(new ResultColumnRelationElement(targetColumn));
 											flag = true;
 											break;
-										}
+										} else if(sourceColumn.getAliasSet().size()>1){
+											for(String alias: sourceColumn.getAliasSet()){
+												if (getColumnName(alias).equalsIgnoreCase(getColumnName(columnName))) {
+													ResultColumn targetColumn = modelFactory
+															.createSelectSetResultColumn(queryTable, sourceColumn, j);
+													relation.addSource(new ResultColumnRelationElement(targetColumn));
+													flag = true;
+													break;
+												} 
+											}
+											if(flag){
+												break;
+											}
+										}	
 									}
 
 									if (flag) {
@@ -6089,7 +6209,39 @@ public class DataFlowAnalyzer {
 										break;
 									}
 								}
-							}
+							} else if (cteColumns != null) {
+								if (getColumnName(columnName).equals("*")) {
+									for (int j = 0; j < cteColumns.size(); j++) {
+										ResultColumn targetColumn = queryTable.getColumns().get(j);
+
+										relation.addSource(new ResultColumnRelationElement(targetColumn));
+									}
+									break;
+								} else {
+									boolean flag = false;
+
+									for (int j = 0; j < cteColumns.size(); j++) {
+										TObjectName sourceColumn = cteColumns.getObjectName(j);
+
+										if (getColumnName(sourceColumn).equalsIgnoreCase(getColumnName(columnName))) {
+											ResultColumn targetColumn = queryTable.getColumns().get(j);
+
+											relation.addSource(new ResultColumnRelationElement(targetColumn));
+											flag = true;
+											break;
+										}
+									}
+
+									if (flag) {
+										break;
+									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
+											&& columnIndex != -1) {
+										ResultColumn targetColumn = queryTable.getColumns().get(columnIndex);
+										relation.addSource(new ResultColumnRelationElement(targetColumn));
+										break;
+									}
+								}
+							} 
 
 							if (columnName.getSourceColumn() != null) {
 								Object model = modelManager.getModel(columnName.getSourceColumn());
@@ -6115,6 +6267,22 @@ public class DataFlowAnalyzer {
 								}
 							} else {
 								if (table.getCTE() != null) {
+									for (k = 0; k < columns.size(); k++) {
+										ResultColumn column = columns.get(k);
+										if ("*".equals(column.getName())) {
+											if (!containsStarColumn(column, columnName)) {
+												column.bindStarLinkColumn(columnName);
+											}
+											relation.addSource(new ResultColumnRelationElement(column, columnName));
+										} else if (SQLUtil.compareIdentifier(getColumnName(columnName),
+												SQLUtil.getIdentifierNormalName(column.getName()))) {
+											if (!column.equals(modelObject)) {
+												relation.addSource(new ResultColumnRelationElement(column, columnName));
+											}
+											break;
+										}
+									}
+								} else if (table.getAliasClause() != null && table.getAliasClause().getColumns()!=null) {
 									for (k = 0; k < columns.size(); k++) {
 										ResultColumn column = columns.get(k);
 										if ("*".equals(column.getName())) {
@@ -6837,22 +7005,23 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.7";
+		return "1.3.9";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-09-07";
+		return "2020-09-23";
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/t <database type>] [/o <output file path>][/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/traceView] [/t <database type>] [/o <output file path>][/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
 			System.out.println("/i: Option, ignore all result sets.");
+			System.out.println("/traceView: Option, analyze the source tables of views.");
 			System.out.println("/text: Option, print the plain text format output.");
 			System.out.println(
 					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
@@ -6921,6 +7090,11 @@ public class DataFlowAnalyzer {
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
+		
+		boolean traceView = argList.indexOf("/traceView") != -1;
+		if(traceView){
+			simple = true;
+		}
 
 		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlFiles, vendor, simple);
 
@@ -6933,6 +7107,10 @@ public class DataFlowAnalyzer {
 
 		StringBuffer errorBuffer = new StringBuffer();
 		String result = dlineage.generateDataFlow(errorBuffer);
+		
+		if(traceView){
+			result = dlineage.traceView();
+		}
 
 		if (result != null) {
 			System.out.println(result);
@@ -6985,6 +7163,64 @@ public class DataFlowAnalyzer {
 		}
 	}
 	
+	public String traceView() {
+		StringBuilder buffer = new StringBuilder();
+		dataflow dataflow = this.getDataFlow();
+		Map<table, Set<table>> traceViewMap = new LinkedHashMap<>();
+		if (dataflow != null && dataflow.getViews()!=null) {
+			List<relation> relations = dataflow.getRelations();
+			Map<String, table> viewMap = new HashMap<>();
+			Map<String, table> tableMap = new HashMap<>();
+			for (table view : dataflow.getViews()) {
+				viewMap.put(view.getId(), view);
+				tableMap.put(view.getId(), view);
+			}
+			for (table table : dataflow.getTables()) {
+				tableMap.put(table.getId(), table);
+			}
+			for (relation relation : relations) {
+				if(!RelationType.fdd.name().equals(relation.getType())){
+					continue;
+				}
+				String parentId = relation.getTarget().getParent_id();
+				if(viewMap.containsKey(parentId)){
+					traceViewMap.putIfAbsent(viewMap.get(parentId), new LinkedHashSet<>());
+					for(sourceColumn sourceColumn:relation.getSources()){
+						traceViewMap.get(viewMap.get(parentId)).add(tableMap.get(sourceColumn.getParent_id()));
+					}
+				}
+			}
+			
+			Map<table, Set<table>> viewTableMap = new LinkedHashMap<>();
+			for(table view: traceViewMap.keySet()){
+				Set<table> tables = new LinkedHashSet<>();
+				traverseViewSourceTables(tables, view, traceViewMap);
+				viewTableMap.put(view, tables);
+			}
+			
+			for(table view: viewTableMap.keySet()){
+				buffer.append(view.getFullName());
+				for(table table: viewTableMap.get(view)){
+					buffer.append(",").append(table.getFullName());
+				}
+				buffer.append(System.getProperty("line.separator"));
+			}
+		}
+		return buffer.toString().trim();
+	}
+
+	private void traverseViewSourceTables(Set<table> tables, table view, Map<table, Set<table>> traceViewMap) {
+		Set<table> sourceTables = traceViewMap.get(view);
+		for(table sourceTable: sourceTables){
+			if(sourceTable.isTable()){
+				tables.add(sourceTable);
+			}
+			else if(sourceTable.isView()){
+				traverseViewSourceTables(tables, sourceTable, traceViewMap);
+			}
+		}
+	}
+
 	protected static List<SqlInfo> convertSQL(String json) {
         List<SqlInfo> sqlInfos = new ArrayList<>();
         JSONArray sqlContents = JSONArray.parseArray(json);

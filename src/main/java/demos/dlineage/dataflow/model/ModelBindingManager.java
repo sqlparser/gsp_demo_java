@@ -1,17 +1,43 @@
 
 package demos.dlineage.dataflow.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import demos.dlineage.util.Pair;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.TAliasClause;
+import gudusoft.gsqlparser.nodes.TCTE;
+import gudusoft.gsqlparser.nodes.TCaseExpression;
+import gudusoft.gsqlparser.nodes.TFunctionCall;
+import gudusoft.gsqlparser.nodes.TMergeInsertClause;
+import gudusoft.gsqlparser.nodes.TMergeUpdateClause;
+import gudusoft.gsqlparser.nodes.TObjectName;
+import gudusoft.gsqlparser.nodes.TObjectNameList;
+import gudusoft.gsqlparser.nodes.TOutputClause;
+import gudusoft.gsqlparser.nodes.TParseTreeNode;
+import gudusoft.gsqlparser.nodes.TResultColumn;
+import gudusoft.gsqlparser.nodes.TResultColumnList;
+import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.TTableList;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
-import gudusoft.gsqlparser.stmt.*;
-
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import gudusoft.gsqlparser.stmt.TCreateMaterializedSqlStatement;
+import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
+import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
+import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 
 @SuppressWarnings({
         "unchecked", "rawtypes"
@@ -185,6 +211,10 @@ public class ModelBindingManager {
             TTable table = (TTable) gspModel;
             if (table.getCTE() != null) {
                 return modelBindingMap.get(table.getCTE());
+            }
+            if (table.getAliasClause()!=null && table.getAliasClause().getColumns()!=null){
+            	 return modelBindingMap
+                         .get(table.getAliasClause().getColumns());
             }
             if (table.getSubquery() != null
                     && !table.getSubquery().isCombinedQuery()) {
@@ -626,6 +656,21 @@ public class ModelBindingManager {
         }
         return resultSets;
     }
+    
+    public List<TObjectNameList> getQueryAliasTables() {
+        List<TObjectNameList> resultSets = new ArrayList<TObjectNameList>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TObjectNameList)) {
+                continue;
+            }
+            TObjectNameList resultset = (TObjectNameList) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
 
     public List<TSelectSqlStatement> getSelectSetResultSets() {
         List<TSelectSqlStatement> resultSets = new ArrayList<TSelectSqlStatement>();
@@ -691,6 +736,21 @@ public class ModelBindingManager {
             Object key = iter.next();
             if (!(key instanceof TMergeUpdateClause)
                     && !(key instanceof TMergeInsertClause)) {
+                continue;
+            }
+            TParseTreeNode resultset = (TParseTreeNode) key;
+            resultSets.add(resultset);
+        }
+        return resultSets;
+    }
+    
+    public List<TParseTreeNode> getOutputResultSets() {
+        List<TParseTreeNode> resultSets = new ArrayList<TParseTreeNode>();
+
+        Iterator iter = modelBindingMap.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key = iter.next();
+            if (!(key instanceof TOutputClause)) {
                 continue;
             }
             TParseTreeNode resultset = (TParseTreeNode) key;
