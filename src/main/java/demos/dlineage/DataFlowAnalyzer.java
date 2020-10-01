@@ -189,6 +189,7 @@ public class DataFlowAnalyzer {
 
 	{
 		ModelBindingManager.set(modelManager);
+		ModelBindingManager.setGlobalStmtStack(stmtStack);
 	}
 
 	public DataFlowAnalyzer(String sqlContent, EDbVendor dbVendor, boolean simpleOutput) {
@@ -1859,6 +1860,11 @@ public class DataFlowAnalyzer {
 								if (functions != null && !functions.isEmpty()) {
 									analyzeFunctionDataFlowRelation(updateColumn, functions, EffectType.merge_update);
 								}
+								
+								List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+								if (subquerys!=null && !subquerys.isEmpty()) {
+									analyzeSubqueryDataFlowRelation(updateColumn, subquerys, EffectType.merge_update);
+								}
 
 								analyzeDataFlowRelation(updateColumn, objectNames, EffectType.merge_update, functions);
 
@@ -1914,6 +1920,11 @@ public class DataFlowAnalyzer {
 										analyzeFunctionDataFlowRelation(insertColumn, functions,
 												EffectType.merge_insert);
 									}
+									
+									List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+									if (subquerys!=null && !subquerys.isEmpty()) {
+										analyzeSubqueryDataFlowRelation(insertColumn, subquerys, EffectType.merge_insert);
+									}
 
 									analyzeDataFlowRelation(insertColumn, objectNames, EffectType.merge_insert,
 											functions);
@@ -1958,6 +1969,11 @@ public class DataFlowAnalyzer {
 
 								if (functions != null && !functions.isEmpty()) {
 									analyzeFunctionDataFlowRelation(insertColumn, functions, EffectType.merge_insert);
+								}
+								
+								List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+								if (subquerys!=null && !subquerys.isEmpty()) {
+									analyzeSubqueryDataFlowRelation(insertColumn, subquerys, EffectType.merge_insert);
 								}
 
 								analyzeDataFlowRelation(insertColumn, objectNames, EffectType.merge_insert, functions);
@@ -2794,9 +2810,14 @@ public class DataFlowAnalyzer {
 
 					List<TObjectName> objectNames = visitor.getObjectNames();
 					List<TParseTreeNode> functions = visitor.getFunctions();
+					List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
 
 					if (functions != null && !functions.isEmpty()) {
 						analyzeFunctionDataFlowRelation(updateColumn, functions, EffectType.update);
+					}
+					
+					if (subquerys!=null && !subquerys.isEmpty()) {
+						analyzeSubqueryDataFlowRelation(updateColumn, subquerys, EffectType.update);
 					}
 
 					analyzeDataFlowRelation(updateColumn, objectNames, EffectType.update, functions);
@@ -2994,6 +3015,11 @@ public class DataFlowAnalyzer {
 						if (functions != null && !functions.isEmpty()) {
 							analyzeFunctionDataFlowRelation(viewColumn, functions, EffectType.select);
 
+						}
+						
+						List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+						if (subquerys!=null && !subquerys.isEmpty()) {
+							analyzeSubqueryDataFlowRelation(viewColumn, subquerys, EffectType.select);
 						}
 
 						analyzeDataFlowRelation(viewColumn, objectNames, EffectType.select, functions);
@@ -4856,6 +4882,11 @@ public class DataFlowAnalyzer {
 									analyzeFunctionDataFlowRelation(resultColumn, functions, EffectType.select);
 
 								}
+								
+								List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+								if (subquerys!=null && !subquerys.isEmpty()) {
+									analyzeSubqueryDataFlowRelation(resultColumn, subquerys, EffectType.select);
+								}
 
 								analyzeDataFlowRelation(resultColumn, objectNames, EffectType.select, functions);
 
@@ -5490,10 +5521,48 @@ public class DataFlowAnalyzer {
 		}
 
 	}
+	
+	private void analyzeSubqueryDataFlowRelation(Object gspObject, List<TSelectSqlStatement> subquerys,
+			EffectType effectType) {
+
+		Object modelObject = modelManager.getModel(gspObject);
+		if (modelObject == null) {
+			if (gspObject instanceof ResultColumn || gspObject instanceof TableColumn
+					|| gspObject instanceof ViewColumn) {
+				modelObject = gspObject;
+			}
+		}
+
+		DataFlowRelation relation = modelFactory.createDataFlowRelation();
+		relation.setEffectType(effectType);
+
+		if (modelObject instanceof ResultColumn) {
+			relation.setTarget(new ResultColumnRelationElement((ResultColumn) modelObject));
+
+		} else if (modelObject instanceof TableColumn) {
+			relation.setTarget(new TableColumnRelationElement((TableColumn) modelObject));
+
+		} else if (modelObject instanceof ViewColumn) {
+			relation.setTarget(new ViewColumnRelationElement((ViewColumn) modelObject));
+
+		} else {
+			throw new UnsupportedOperationException();
+		}
+
+		for (int i = 0; i < subquerys.size(); i++) {
+			TSelectSqlStatement subquery = subquerys.get(i);
+			ResultSet resultSetModel = (ResultSet) modelManager.getModel(subquery);
+			if(resultSetModel!=null && resultSetModel.getColumns()!=null){
+				for(ResultColumn column: resultSetModel.getColumns()){
+					relation.addSource(new ResultColumnRelationElement(column));
+				}
+			}
+		}
+
+	}
 
 	private void createFunction(TParseTreeNode functionCall) {
 		if (functionCall instanceof TFunctionCall) {
-			TFunctionCall call = (TFunctionCall) functionCall;
 			Function function = modelFactory.createFunction((TFunctionCall) functionCall);
 			ResultColumn column = modelFactory.createFunctionResultColumn(function,
 					((TFunctionCall) functionCall).getFunctionName());
@@ -5600,17 +5669,25 @@ public class DataFlowAnalyzer {
 		for (int j = 0; j < expressions.size(); j++) {
 			columnsInExpr visitor = new columnsInExpr();
 			expressions.get(j).inOrderTraverse(visitor);
-			List<TObjectName> objectNames = visitor.getObjectNames();
-			List<TParseTreeNode> functions = visitor.getFunctions();
-
-			if (functions != null && !functions.isEmpty()) {
-				analyzeFunctionDataFlowRelation(resultColumn, functions, EffectType.function);
-			}
-
-			analyzeDataFlowRelation(resultColumn, objectNames, EffectType.function, functions);
-
-			List<TConstant> constants = visitor.getConstants();
-			analyzeConstantDataFlowRelation(resultColumn, constants, EffectType.function, functions);
+			
+		
+				List<TObjectName> objectNames = visitor.getObjectNames();
+				List<TParseTreeNode> functions = visitor.getFunctions();
+				
+				if (functions != null && !functions.isEmpty()) {
+					analyzeFunctionDataFlowRelation(resultColumn, functions, EffectType.function);
+				}
+				
+				List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+				if (subquerys!=null && !subquerys.isEmpty()) {
+					analyzeSubqueryDataFlowRelation(resultColumn, subquerys, EffectType.function);
+				}
+	
+				analyzeDataFlowRelation(resultColumn, objectNames, EffectType.function, functions);
+	
+				List<TConstant> constants = visitor.getConstants();
+				analyzeConstantDataFlowRelation(resultColumn, constants, EffectType.function, functions);
+			
 		}
 	}
 
@@ -5777,6 +5854,11 @@ public class DataFlowAnalyzer {
 
 		if (functions != null && !functions.isEmpty()) {
 			analyzeFunctionDataFlowRelation(column, functions, effectType);
+		}
+		
+		List<TSelectSqlStatement> subquerys = visitor.getSubquerys();
+		if (subquerys!=null && !subquerys.isEmpty()) {
+			analyzeSubqueryDataFlowRelation(column, subquerys, effectType);
 		}
 
 		analyzeDataFlowRelation(column, objectNames, effectType, functions);
@@ -6233,11 +6315,6 @@ public class DataFlowAnalyzer {
 									}
 
 									if (flag) {
-										break;
-									} else if (columnIndex < selectSetResultSetModel.getColumns().size()
-											&& columnIndex != -1) {
-										ResultColumn targetColumn = queryTable.getColumns().get(columnIndex);
-										relation.addSource(new ResultColumnRelationElement(targetColumn));
 										break;
 									}
 								}
@@ -6743,6 +6820,7 @@ public class DataFlowAnalyzer {
 		private List<TConstant> constants = new ArrayList<TConstant>();
 		private List<TObjectName> objectNames = new ArrayList<TObjectName>();
 		private List<TParseTreeNode> functions = new ArrayList<TParseTreeNode>();
+		private List<TSelectSqlStatement> subquerys = new ArrayList<TSelectSqlStatement>();
 		private boolean skipFunction = false;
 
 		public void setSkipFunction(boolean skipFunction) {
@@ -6751,6 +6829,10 @@ public class DataFlowAnalyzer {
 
 		public List<TParseTreeNode> getFunctions() {
 			return functions;
+		}
+		
+		public List<TSelectSqlStatement> getSubquerys() {
+			return subquerys;
 		}
 
 		public List<TConstant> getConstants() {
@@ -6841,20 +6923,11 @@ public class DataFlowAnalyzer {
 			} else if (lcexpr.getSubQuery() != null) {
 				TSelectSqlStatement select = lcexpr.getSubQuery();
 				analyzeSelectStmt(select);
-				inOrderTraverse(select, this);
+				subquerys.add(select);
+				//inOrderTraverse(select, this);
+				return false;
 			}
 			return true;
-		}
-
-		private void inOrderTraverse(TSelectSqlStatement select, columnsInExpr columnsInExpr) {
-			if (!select.isCombinedQuery()) {
-				for (int i = 0; i < select.getResultColumnList().size(); i++) {
-					select.getResultColumnList().getResultColumn(i).getExpr().inOrderTraverse(columnsInExpr);
-				}
-			} else {
-				inOrderTraverse(select.getLeftStmt(), columnsInExpr);
-				inOrderTraverse(select.getRightStmt(), columnsInExpr);
-			}
 		}
 	}
 
