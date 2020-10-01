@@ -20,6 +20,7 @@ public class testLateralView extends TestCase {
         sqlparser.sqltext = "SELECT * FROM exampleTable\n" +
                 "        LATERAL VIEW explode(col1) myTable1 AS myCol1\n" +
                 "        LATERAL VIEW explode(myCol1) myTable2 AS myCol2;";
+        //System.out.println(sqlparser.sqltext);
           assertTrue(sqlparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
@@ -29,7 +30,7 @@ public class testLateralView extends TestCase {
         assertTrue(table.getTableName().toString().equalsIgnoreCase("exampleTable"));
         assertTrue(table.getLateralViewList().size() == 2);
 
-        THiveLateralView view = table.getLateralViewList().getElement(0);
+        THiveLateralView view = table.getLateralViewList().get(0);
         TFunctionCall call = view.getUdtf();
         assertTrue(call.getFunctionName().toString().equalsIgnoreCase("explode"));
         assertTrue(call.getArgs().getExpression(0).toString().equalsIgnoreCase("col1"));
@@ -37,7 +38,7 @@ public class testLateralView extends TestCase {
         assertTrue(view.getColumnAliasList().size() == 1);
         assertTrue(view.getColumnAliasList().getObjectName(0).toString().equalsIgnoreCase("myCol1"));
 
-        view = table.getLateralViewList().getElement(1);
+        view = table.getLateralViewList().get(1);
         call = view.getUdtf();
         assertTrue(call.getFunctionName().toString().equalsIgnoreCase("explode"));
         assertTrue(call.getArgs().getExpression(0).toString().equalsIgnoreCase("myCol1"));
