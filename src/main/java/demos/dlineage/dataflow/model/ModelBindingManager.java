@@ -11,8 +11,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import demos.dlineage.util.Pair;
+import demos.dlineage.util.SHA256;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESetOperatorType;
@@ -71,6 +73,7 @@ public class ModelBindingManager {
     private final static ThreadLocal globalVendor = new ThreadLocal();
     private final static ThreadLocal globalSQLEnv = new ThreadLocal();
     private final static ThreadLocal globalHash = new ThreadLocal();
+    private final static ThreadLocal globalStmtStack = new ThreadLocal();
 
     
     public static void set(ModelBindingManager modelManager) {
@@ -152,6 +155,20 @@ public class ModelBindingManager {
     public static TSQLEnv getGlobalSQLEnv() {
         return (TSQLEnv) globalSQLEnv.get();
     }
+    
+    public static void setGlobalStmtStack(Stack<TCustomSqlStatement> stack) {
+        if (stack!=null) {
+        	globalStmtStack.set(stack);
+        }
+    }
+    
+    public static void removeGlobalStmtStack() {
+    	globalStmtStack.remove();
+    }
+
+    public static Stack<TCustomSqlStatement> getGlobalStmtStack() {
+        return (Stack<TCustomSqlStatement>) globalStmtStack.get();
+    }
 
     
     public static void remove() {
@@ -159,6 +176,7 @@ public class ModelBindingManager {
         globalDatabase.remove();
         globalSchema.remove();
         globalVendor.remove();
+        globalStmtStack.remove();
     }
 
     public void bindModel(Object gspModel, Object relationModel) {
@@ -176,8 +194,8 @@ public class ModelBindingManager {
             for (int j = 0; j < tables.size(); j++) {
                 TTable item = tables.getTable(j);
                 if (item != null && item.getAliasName() != null) {
-                    tableAliasMap.put(SQLUtil.getIdentifierNormalName(item.getAliasName()),
-                            item);
+					tableAliasMap.put(SHA256.getMd5(ModelBindingManager.getGlobalStmtStack().peek().toString()) + ":"
+							+ SQLUtil.getIdentifierNormalName(item.getAliasName()), item);
                 }
 
                 if (item != null) {
@@ -194,8 +212,9 @@ public class ModelBindingManager {
         }
 
         if (table != null && table.getAliasName() != null) {
-            tableAliasMap.put(SQLUtil.getIdentifierNormalName(table.getAliasName()), table);
-        }
+			tableAliasMap.put(SHA256.getMd5(ModelBindingManager.getGlobalStmtStack().peek().toString()) + ":"
+					+ SQLUtil.getIdentifierNormalName(table.getAliasName()), table);
+		}
 
         if (table != null) {
             tableSet.add(table);
@@ -449,8 +468,8 @@ public class ModelBindingManager {
     	
         if (column.getTableString() != null
                 && column.getTableString().trim().length() > 0) {
-            TTable table = tableAliasMap
-                    .get(SQLUtil.getIdentifierNormalName(column.getTableString()));
+			TTable table = tableAliasMap.get(SHA256.getMd5(ModelBindingManager.getGlobalStmtStack().peek().toString())
+					+ ":" + SQLUtil.getIdentifierNormalName(column.getTableString()));
 
             if (table != null && table.getSubquery() != stmt)
                 return table;
@@ -526,7 +545,8 @@ public class ModelBindingManager {
         if ( column.getTableString( ) != null
                 && column.getTableString( ).trim( ).length( ) > 0 )
         {
-            TTable table = tableAliasMap.get(SQLUtil.getIdentifierNormalName(column.getTableString( )));
+			TTable table = tableAliasMap.get(SHA256.getMd5(ModelBindingManager.getGlobalStmtStack().peek().toString())
+					+ ":" + SQLUtil.getIdentifierNormalName(column.getTableString()));
 
             if ( table != null && table.getSubquery( ) != stmt )
                 return table;
