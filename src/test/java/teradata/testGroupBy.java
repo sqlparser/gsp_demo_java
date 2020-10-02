@@ -62,4 +62,30 @@ public class testGroupBy extends TestCase {
 
     }
 
+
+    public void testHavingOnly(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "SELECT Count(*) \n" +
+                "FROM   ( \n" +
+                "              SELECT Count(DISTINCT location)(decimal(18,4)) AS rbp_cnt \n" +
+                "              FROM   vwv0rbp_reclass_bgt_pp_changes) AS rbp, \n" +
+                "       ( \n" +
+                "              SELECT count(DISTINCT location)(decimal(18,4)) AS locs_cnt \n" +
+                "              FROM   vwv0locs_location_snapshot) AS locs, \n" +
+                "       ( \n" +
+                "              SELECT min(reclassify_all_pct) AS reclassify_all_pct \n" +
+                "              FROM   vwv0rcm_reclass_ref \n" +
+                "              WHERE  reclassification_type_code = 'LOC') AS rcm \n" +
+                "WHERE  ( \n" +
+                "              rbp_cnt / locs_cnt * 100) < rcm.reclassify_all_pct \n" +
+                "HAVING count(*) > 0;";
+
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+
+        TGroupBy groupBy = select.getGroupByClause();
+        assertTrue(groupBy.getHavingClause().toString().equalsIgnoreCase("count(*) > 0"));
+    }
+
 }

@@ -20,8 +20,8 @@ public class testExplain extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         THiveExplain explain = (THiveExplain)sqlparser.sqlstatements.get(0);
-        assertTrue(explain.getStmt().sqlstatementtype == ESqlStatementType.ssthiveFromQuery);
-        THiveFromQuery fromQuery = (THiveFromQuery)explain.getStmt();
+        assertTrue(explain.getStmt().sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement fromQuery = (TSelectSqlStatement)explain.getStmt();
         assertTrue(fromQuery.tables.getTable(0).getTableName().toString().equalsIgnoreCase("src"));
         assertTrue(fromQuery.getHiveBodyList().size() == 1);
         TInsertSqlStatement insert = (TInsertSqlStatement)fromQuery.getHiveBodyList().get(0);

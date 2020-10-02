@@ -4,11 +4,7 @@ package demos.joinConvert;
  * Date: 11-12-1
  */
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.EExpressionType;
-import gudusoft.gsqlparser.EJoinType;
-import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 

@@ -153,6 +153,7 @@ public class testCreateTable extends TestCase {
         THiveTableFileFormat tff = createTable.getHiveTableFileFormat();
         assertTrue(tff.getFileFormat() == EHiveStoredFileFormat.sffTBLSEQUENCEFILE);
 
+
     }
 
 }

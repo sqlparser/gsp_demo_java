@@ -35,8 +35,8 @@ public class testCTE  extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
-        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.ssthiveFromQuery);
-        THiveFromQuery fromQuery = (THiveFromQuery)sqlStatement;
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement fromQuery = (TSelectSqlStatement)sqlStatement;
 
 
         assertTrue(fromQuery.tables.getTable(0).toString().equalsIgnoreCase("q1"));

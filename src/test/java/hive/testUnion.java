@@ -120,16 +120,18 @@ public class testUnion extends TestCase {
                 "     ) union_actions\n" +
                 "     SELECT union_actions.uid, union_actions.id, union_actions.date\n" +
                 "     CLUSTER BY union_actions.uid)  map;";
+      //  System.out.println(sqlparser.sqltext);
           assertTrue(sqlparser.parse() == 0);
 
-          assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.ssthiveFromQuery);
-          THiveFromQuery fromQuery = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+          assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstselect);
+            TSelectSqlStatement fromQuery = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
           TTable table = fromQuery.tables.getTable(0);
-          assertTrue(table.getTableType() == ETableSource.hiveFromQuery);
+          assertTrue(table.getTableType() == ETableSource.subquery);
+
           assertTrue(table.getAliasClause().getAliasName().toString().equalsIgnoreCase("map"));
           assertTrue(fromQuery.getHiveBodyList().size() == 0);
 
-          fromQuery = table.getHiveFromQuery();
+          fromQuery = table.getSubquery();
           TSelectSqlStatement select = (TSelectSqlStatement)fromQuery.getHiveBodyList().get(0);
           assertTrue(select.getResultColumnList().size() == 3);
           THiveClusterBy clusterBy = select.getHiveClusterBy();

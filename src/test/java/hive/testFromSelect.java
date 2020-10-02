@@ -23,9 +23,9 @@ public class testFromSelect extends TestCase {
                 "  ";
         assertTrue(sqlparser.parse() == 0);
 
-         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.ssthiveFromQuery);
+         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstselect);
 
-         THiveFromQuery select  = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+         TSelectSqlStatement select  = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
          TJoin join = select.joins.getJoin(0);
          assertTrue(join.getKind() == TBaseType.join_source_fake);
          assertTrue(join.getTable().getFullName().equalsIgnoreCase("pv_users"));
@@ -67,7 +67,7 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-       THiveFromQuery select = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
 
        assertTrue(select.getHiveBodyList().size() == 1);
         TCustomSqlStatement sql = select.getHiveBodyList().get(0);
@@ -93,8 +93,8 @@ public class testFromSelect extends TestCase {
 
 
         TTable table = select.tables.getTable(0);
-        assertTrue(table.getTableType() == ETableSource.hiveFromQuery);
-        THiveFromQuery subquery = table.getHiveFromQuery();
+        assertTrue(table.getTableType() == ETableSource.subquery);
+        TSelectSqlStatement subquery = table.getSubquery();
         assertTrue(subquery.getHiveBodyList().size() == 1);
         assertTrue(table.getAliasClause().toString().equalsIgnoreCase("map_output"));
 
@@ -151,7 +151,7 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-       THiveFromQuery select = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
        TTable table = select.tables.getTable(0);
        assertTrue(table.getAliasClause().toString().equalsIgnoreCase("map_output"));
 
@@ -192,7 +192,7 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-       THiveFromQuery select = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
 
        TTable table = select.tables.getTable(0);
       assertTrue(table.getAliasClause().toString().equalsIgnoreCase("tmap"));
@@ -204,8 +204,8 @@ public class testFromSelect extends TestCase {
       assertTrue(subquery.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("tkey"));
       assertTrue(subquery.getResultColumnList().getResultColumn(1).toString().equalsIgnoreCase("tvalue"));
 
-      assertTrue(table.getTableType() == ETableSource.hiveFromQuery);
-      THiveFromQuery subquery1 = table.getHiveFromQuery();
+      assertTrue(table.getTableType() == ETableSource.subquery);
+      TSelectSqlStatement subquery1 = table.getSubquery();
       assertTrue(subquery1.tables.getTable(0).toString().equalsIgnoreCase("src"));
       assertTrue(subquery1.getHiveBodyList().size() == 1);
 
@@ -244,7 +244,7 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-       THiveFromQuery select = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
        assertTrue(select.tables.getTable(0).getTableName().toString().equalsIgnoreCase("page_view_stg"));
 
        TInsertSqlStatement  insert = (TInsertSqlStatement)select.getHiveBodyList().get(0);
@@ -268,7 +268,7 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-       THiveFromQuery select = (THiveFromQuery)sqlparser.sqlstatements.get(0);
+         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
        assertTrue(select.tables.getTable(0).getTableName().toString().equalsIgnoreCase("pv_users"));
        TSelectSqlStatement map = (TSelectSqlStatement)select.getHiveBodyList().get(0);
        assertTrue(map.getTransformClause() != null);
