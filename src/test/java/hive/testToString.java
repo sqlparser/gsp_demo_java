@@ -15,7 +15,8 @@ public class testToString extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-        assertTrue(select.getGroupByClause().toString().equalsIgnoreCase("group by c1"));
+        assertTrue(select.getGroupByClause().toString().equalsIgnoreCase("group by c1 with rollup"));
+       // System.out.println(select.getGroupByClause().toString());
 
     }
 
