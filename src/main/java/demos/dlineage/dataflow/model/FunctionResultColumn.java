@@ -8,8 +8,10 @@ public class FunctionResultColumn extends ResultColumn {
 
 	public FunctionResultColumn(ResultSet resultSet, TObjectName columnObject) {
 		super(resultSet, columnObject);
+		this.name = columnObject.toString();
+		this.fullName = name;
 	}
-	
+
 	public FunctionResultColumn(ResultSet resultSet, TParseTreeNode columnObject) {
 		super(resultSet, columnObject);
 		this.name = "case-when";
