@@ -354,7 +354,7 @@ public class DataFlowAnalyzer {
 			ModelBindingManager.removeGlobalVendor();
 		}
 		
-		if(!withExtraInfo){
+		if(dataflow!=null && !withExtraInfo){
 			dataflow.getResultsets().forEach( t -> t.setIsTarget(null));
 			dataflow.getResultsets().forEach(t->{
 				t.getColumns().forEach(t1->t1.setIsFunction(null));
@@ -668,9 +668,7 @@ public class DataFlowAnalyzer {
 						handleListener.startAnalyze(sqlFile, sqlFile.length(), false);
 					}
 				}
-
-				modelManager.reset();
-
+				
 				for (int i = 0; i < children.length; i++) {
 					if (handleListener != null && handleListener.isCanceled()) {
 						break;
@@ -1052,6 +1050,7 @@ public class DataFlowAnalyzer {
 			e.printStackTrace();
 		}
 
+		modelManager.reset();
 		return null;
 	}
 
@@ -1305,6 +1304,7 @@ public class DataFlowAnalyzer {
 		modelManager.DISPLAY_NAME.clear();
 		tableIds.clear();
 		ModelBindingManager.setGlobalVendor(vendor);
+		modelManager.reset();
 	}
 
 	private void analyzeAndOutputResult(TGSqlParser sqlparser) {
@@ -3196,9 +3196,6 @@ public class DataFlowAnalyzer {
 
 	private void appendRelations(dataflow dataflow) {
 		Relation[] relations = modelManager.getRelations();
-
-		// 此时可以清空分析的cache，节约内存
-		ModelBindingManager.get().reset();
 
 		appendRelation(dataflow, relations, DataFlowRelation.class);
 		appendRelation(dataflow, relations, IndirectImpactRelation.class);
@@ -7078,11 +7075,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.3.9";
+		return "1.4.0";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-09-23";
+		return "2020-10-08";
 	}
 
 	public static void main(String[] args) {
