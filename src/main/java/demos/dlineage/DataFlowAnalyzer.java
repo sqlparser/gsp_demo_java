@@ -1773,6 +1773,14 @@ public class DataFlowAnalyzer {
 						relation.addSource(new ResultColumnRelationElement(resultColumn));
 					}
 				}
+			} else if(stmt.getLikeTableName()!=null){
+				Table likeTableModel = modelFactory.createTableByName(stmt.getLikeTableName());
+				DataFlowRelation realtion = modelFactory.createDataFlowRelation();
+				realtion.setEffectType(EffectType.like_table);
+				realtion.setTarget(
+						new PseudoRowsRelationElement<TablePseudoRows>(tableModel.getPseudoRows()));
+				realtion.addSource(
+						new PseudoRowsRelationElement<TablePseudoRows>(likeTableModel.getPseudoRows()));
 			}
 		} else {
 			System.err.println();
@@ -7075,11 +7083,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.0";
+		return "1.4.1";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-08";
+		return "2020-10-09";
 	}
 
 	public static void main(String[] args) {
