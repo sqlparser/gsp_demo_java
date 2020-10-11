@@ -552,7 +552,7 @@ public class SQLUtil {
 			} else {
 				normalName = name;
 			}
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 
 		case dbvmysql:
 			if (name.indexOf('`') >= 0) {
@@ -561,7 +561,7 @@ public class SQLUtil {
 				normalName = name;
 			}
 
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		case dbvdax:
 			if (name.indexOf('\'') >= 0) {
 				normalName = name.replaceAll("[']", "");
@@ -569,7 +569,7 @@ public class SQLUtil {
 				normalName = name;
 			}
 
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		case dbvdb2:
 		case dbvhana:
 		case dbvinformix:
@@ -585,14 +585,14 @@ public class SQLUtil {
 			} else {
 				normalName = name.toUpperCase();
 			}
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		case dbvpostgresql:
 			if (name.indexOf('"') >= 0) {
 				normalName = name.replaceAll("\"", "");
 			} else {
 				normalName = name.toLowerCase();
 			}
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		case dbvmssql:
 			normalName = name;
 			if (normalName.indexOf('\'') >= 0) {
@@ -604,7 +604,7 @@ public class SQLUtil {
 			if (normalName.indexOf("[") >= 0) {
 				normalName = normalName.replaceAll("\\[", "").replaceAll("]", "");
 			}
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		default:
 			if (name.indexOf('"') >= 0) {
 				normalName = name.replaceAll("\"", "");
@@ -612,7 +612,7 @@ public class SQLUtil {
 				normalName = name.toUpperCase();
 			}
 
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		}
 	}
 	

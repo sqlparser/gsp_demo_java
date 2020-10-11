@@ -89,6 +89,7 @@ import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.EJoinType;
 import gudusoft.gsqlparser.ESetOperatorType;
 import gudusoft.gsqlparser.ESqlClause;
+import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
@@ -110,6 +111,7 @@ import gudusoft.gsqlparser.nodes.TInsertCondition;
 import gudusoft.gsqlparser.nodes.TInsertIntoValue;
 import gudusoft.gsqlparser.nodes.TJoin;
 import gudusoft.gsqlparser.nodes.TJoinItem;
+import gudusoft.gsqlparser.nodes.TJoinItemList;
 import gudusoft.gsqlparser.nodes.TMergeInsertClause;
 import gudusoft.gsqlparser.nodes.TMergeUpdateClause;
 import gudusoft.gsqlparser.nodes.TMergeWhenClause;
@@ -5851,6 +5853,9 @@ public class DataFlowAnalyzer {
 
 	private void analyzeResultColumn(TResultColumn column, EffectType effectType) {
 		TExpression expression = column.getExpr();
+		if(expression.getExpressionType() == EExpressionType.sqlserver_proprietary_column_alias_t){
+			expression = expression.getRightOperand();
+		}
 		columnsInExpr visitor = new columnsInExpr();
 		expression.inOrderTraverse(visitor);
 		List<TObjectName> objectNames = visitor.getObjectNames();
@@ -5872,8 +5877,19 @@ public class DataFlowAnalyzer {
 		Object columnObject = modelManager.getModel(column);
 		analyzeConstantDataFlowRelation(columnObject, constants, effectType, functions);
 
-		analyzeRecordSetRelation(column, functions, effectType);
+		analyzeRecordSetRelation(functions, effectType);
 		// analyzeResultColumnImpact( column, effectType, functions);
+	}
+	
+	private void analyzeTableColumn(TableColumn tableColumn, TFunctionCall functionCall, EffectType effectType) {
+		List<TParseTreeNode> functions = new ArrayList<>();
+		functions.add(functionCall);
+
+		if (functions != null && !functions.isEmpty()) {
+			analyzeFunctionDataFlowRelation(tableColumn, functions, effectType);
+		}
+
+		analyzeRecordSetRelation(functions, effectType);
 	}
 
 	/**
@@ -5932,7 +5948,7 @@ public class DataFlowAnalyzer {
 	 * } } } }
 	 **/
 
-	private void analyzeRecordSetRelation(TResultColumn column, List<TParseTreeNode> functions, EffectType effectType) {
+	private void analyzeRecordSetRelation(List<TParseTreeNode> functions, EffectType effectType) {
 		if (functions == null || functions.size() == 0)
 			return;
 
@@ -6142,6 +6158,16 @@ public class DataFlowAnalyzer {
 
 				// 此处特殊处理，多表关联无法找到 column 所属的 Table, tTable.getLinkedColumns
 				// 也找不到，退而求其次采用第一个表
+				
+				if(stmt.getParentStmt()!=null && isApplyJoin(stmt.getParentStmt())){
+					stmt = stmt.getParentStmt();
+					TTable applyTable = stmt.tables.getTable(0);
+					Table tableModel = (Table) modelManager.getModel(table);
+					if (tableModel == null) {
+						modelFactory.createTable(applyTable);
+					}
+				}
+				
 				if (stmt.tables != null && stmt.tables.size() != 0 && tables.size() == 0
 						&& (stmt.getGsqlparser().getSqlEnv() == null
 								|| SQLUtil.isTempTable(stmt.tables.getTable(0), vendor))
@@ -6187,6 +6213,10 @@ public class DataFlowAnalyzer {
 									TableColumn columnModel = modelFactory.createTableColumn(tableModel, columnName,
 											false);
 									relation.addSource(new TableColumnRelationElement(columnModel));
+									
+									if(columnName.getSourceTable()!=null && columnName.getSourceTable().getTableType() == ETableSource.function){
+										analyzeTableColumn(columnModel, columnName.getSourceTable().getFuncCall(), effectType);
+									}
 								}
 							}
 						}
@@ -6478,6 +6508,19 @@ public class DataFlowAnalyzer {
 				}
 			}
 		}
+	}
+
+	private boolean isApplyJoin(TCustomSqlStatement stmt) {
+		if(stmt.getJoins() == null || stmt.getJoins().size() == 0)
+			return false;
+		TJoinItemList joinItems = stmt.getJoins().getJoin(0).getJoinItems();
+		if(joinItems == null || joinItems.size() == 0){
+			return false;
+		}
+		if(joinItems.getJoinItem(0).getJoinType() == EJoinType.crossapply 
+				|| joinItems.getJoinItem(0).getJoinType() == EJoinType.outerapply)
+			return true;
+		return false;
 	}
 
 	private boolean containsStarColumn(ResultColumn resultColumn, TObjectName columnName) {
