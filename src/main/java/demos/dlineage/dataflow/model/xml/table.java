@@ -7,6 +7,7 @@ import java.util.List;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 
+import demos.dlineage.util.Pair;
 import demos.dlineage.util.SQLUtil;
 
 public class table
@@ -186,6 +187,21 @@ public class table
 
 	public void setIsTarget(String isTarget) {
 		this.isTarget = isTarget;
+	}
+	
+	public int getOccurrencesNumber( )
+	{
+		return PositionUtil.getOccurrencesNumber( coordinate );
+	}
+
+	public Pair<Integer, Integer> getStartPos( int index )
+	{
+		return PositionUtil.getStartPos( coordinate, index );
+	}
+
+	public Pair<Integer, Integer> getEndPos( int index )
+	{
+		return PositionUtil.getEndPos( coordinate, index );
 	}
 	
 }

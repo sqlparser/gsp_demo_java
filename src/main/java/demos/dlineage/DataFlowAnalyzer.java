@@ -254,12 +254,12 @@ public class DataFlowAnalyzer {
 			File[] children = listFiles(sqlFile);
 			for (int i = 0; i < children.length; i++) {
 				String text = SQLUtil.getFileContent(children[i].getAbsolutePath());
-				String[] contents = SQLUtil.convertSQL(text);
-				for (String content : contents) {
+				SqlInfo[] contents = SQLUtil.convertSQL(children[i], text);
+				for (SqlInfo sqlInfo : contents) {
+					String content = sqlInfo.getSql();
 					if (content != null && content.trim().startsWith("{")) {
 						JSONObject queryObject = JSON.parseObject(content);
 						content = queryObject.getString("sourceCode");
-
 					}
 					if(MetadataReader.isMetadata(content)){
 						continue;
@@ -275,32 +275,13 @@ public class DataFlowAnalyzer {
 			}
 
 		} else if (sqlContent != null) {
-			if (sqlContent != null && sqlContent.trim().startsWith("{")) {
-				JSONObject queryObject = JSON.parseObject(sqlContent);
-				sqlContent = queryObject.getString("sourceCode");
-			}
-			if(MetadataReader.isMetadata(sqlContent)){
-				return builder.toString();
-			}
-			TGSqlParser sqlparser = new TGSqlParser(vendor);
-			sqlparser.sqltext = sqlContent;
-			int result = sqlparser.parse();
-			if (result != 0) {
-				builder.append(sqlparser.getErrormessage()).append("\n");
-			}
-
-		} else if (sqlContents != null) {
-			for (int i = 0; i < sqlContents.length; i++) {
-				String content = sqlContents[i];
+			SqlInfo[] contents = SQLUtil.convertSQL(null, sqlContent);
+			for (SqlInfo sqlInfo : contents) {
+				String content = sqlInfo.getSql();
 				if (content != null && content.trim().startsWith("{")) {
 					JSONObject queryObject = JSON.parseObject(content);
 					content = queryObject.getString("sourceCode");
 				}
-
-				if (content == null) {
-					continue;
-				}
-
 				if(MetadataReader.isMetadata(content)){
 					continue;
 				}
@@ -308,28 +289,55 @@ public class DataFlowAnalyzer {
 				sqlparser.sqltext = content;
 				int result = sqlparser.parse();
 				if (result != 0) {
-					builder.append(sqlparser.getErrormessage()).append("\n");
+					builder.append("Parsing sql ").append("occurs errors.\n")
+							.append(sqlparser.getErrormessage()).append("\n");
+				}
+			}
+
+		} else if (sqlContents != null) {
+			for (int i = 0; i < sqlContents.length; i++) {
+				String sqlContent = sqlContents[i];
+				SqlInfo[] contents = SQLUtil.convertSQL(null, sqlContent);
+				for (SqlInfo sqlInfo : contents) {
+					String content = sqlInfo.getSql();
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+					}
+					if(MetadataReader.isMetadata(content)){
+						continue;
+					}
+					TGSqlParser sqlparser = new TGSqlParser(vendor);
+					sqlparser.sqltext = content;
+					int result = sqlparser.parse();
+					if (result != 0) {
+						builder.append("Parsing sql ").append("occurs errors.\n")
+								.append(sqlparser.getErrormessage()).append("\n");
+					}
 				}
 			}
 
 		} else if (sqlFiles != null) {
 			File[] children = sqlFiles;
 			for (int i = 0; i < children.length; i++) {
-				String content = SQLUtil.getFileContent(children[i].getAbsolutePath());
-				if (content != null && content.trim().startsWith("{")) {
-					JSONObject queryObject = JSON.parseObject(content);
-					content = queryObject.getString("sourceCode");
-
-				}
-				if(MetadataReader.isMetadata(content)){
-					continue;
-				}
-				TGSqlParser sqlparser = new TGSqlParser(vendor);
-				sqlparser.sqltext = content;
-				int result = sqlparser.parse();
-				if (result != 0) {
-					builder.append("Parsing " + children[i].getName()).append("occurs errors.\n")
-							.append(sqlparser.getErrormessage()).append("\n");
+				String sqlContent = SQLUtil.getFileContent(children[i].getAbsolutePath());
+				SqlInfo[] contents = SQLUtil.convertSQL(children[i], sqlContent);
+				for (SqlInfo sqlInfo : contents) {
+					String content = sqlInfo.getSql();
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+					}
+					if(MetadataReader.isMetadata(content)){
+						continue;
+					}
+					TGSqlParser sqlparser = new TGSqlParser(vendor);
+					sqlparser.sqltext = content;
+					int result = sqlparser.parse();
+					if (result != 0) {
+						builder.append("Parsing sql ").append("occurs errors.\n")
+								.append(sqlparser.getErrormessage()).append("\n");
+					}
 				}
 			}
 		}
@@ -681,13 +689,14 @@ public class DataFlowAnalyzer {
 					if (fileSQLEnv == null) {
 						fileSQLEnv = SQLEnvParser.getSQLEnv(vendor, text);
 					}
-					String[] contents = SQLUtil.convertSQL(text);
-					for (String content : contents) {
+					SqlInfo[] sqlInfos = SQLUtil.convertSQL(children[i], text);
+					for (SqlInfo sqlInfo : sqlInfos) {
 						ModelBindingManager.removeGlobalHash();
 						ModelBindingManager.removeGlobalDatabase();
 						ModelBindingManager.removeGlobalSchema();
 						ModelBindingManager.removeGlobalSQLEnv();
 
+						String content = sqlInfo.getSql();
 						if (content != null && content.trim().startsWith("{")) {
 							JSONObject queryObject = JSON.parseObject(content);
 							content = queryObject.getString("sourceCode");
@@ -727,23 +736,36 @@ public class DataFlowAnalyzer {
 					handleListener.startParse(null, sqlContent.length(), 0);
 				}
 
-				ModelBindingManager.removeGlobalDatabase();
-				ModelBindingManager.removeGlobalSchema();
-
-				if (sqlContent != null && sqlContent.trim().startsWith("{")) {
-					JSONObject queryObject = JSON.parseObject(sqlContent);
-					sqlContent = queryObject.getString("sourceCode");
-					ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
-					ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+				TSQLEnv fileSQLEnv = sqlenv;
+				if (fileSQLEnv == null) {
+					fileSQLEnv = SQLEnvParser.getSQLEnv(vendor, sqlContent);
 				}
+				SqlInfo[] sqlInfos = SQLUtil.convertSQL(null, sqlContent);
+				for (SqlInfo sqlInfo : sqlInfos) {
+					ModelBindingManager.removeGlobalHash();
+					ModelBindingManager.removeGlobalDatabase();
+					ModelBindingManager.removeGlobalSchema();
+					ModelBindingManager.removeGlobalSQLEnv();
 
-				TGSqlParser sqlparser = new TGSqlParser(vendor);
-				if (sqlenv != null) {
-					sqlparser.setSqlEnv(sqlenv);
-					ModelBindingManager.setGlobalSQLEnv(sqlenv);
+					String content = sqlInfo.getSql();
+					if (content != null && content.trim().startsWith("{")) {
+						JSONObject queryObject = JSON.parseObject(content);
+						content = queryObject.getString("sourceCode");
+						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+					}
+
+					TGSqlParser sqlparser = new TGSqlParser(vendor);
+					sqlparser.setSqlEnv(fileSQLEnv);
+					if (sqlenv != null) {
+						sqlparser.setSqlEnv(sqlenv);
+						ModelBindingManager.setGlobalSQLEnv(sqlenv);
+					}
+					sqlparser.sqltext = content;
+					// SQLUtil.writeToFile(new File("D:\\null.txt"),
+					// content);
+					analyzeAndOutputResult(sqlparser);
 				}
-				sqlparser.sqltext = sqlContent;
-				analyzeAndOutputResult(sqlparser);
 
 				appendProcedures(dataflow);
 				appendTables(dataflow);
@@ -1004,29 +1026,38 @@ public class DataFlowAnalyzer {
 						break;
 					}
 
-					String content = SQLUtil.getFileContent(children[i].getAbsolutePath());
+					String sqlContent = SQLUtil.getFileContent(children[i].getAbsolutePath());
 
-					ModelBindingManager.removeGlobalDatabase();
-					ModelBindingManager.removeGlobalSchema();
-
-					if (content != null && content.trim().startsWith("{")) {
-						JSONObject queryObject = JSON.parseObject(content);
-						content = queryObject.getString("sourceCode");
-						ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
-						ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+					TSQLEnv fileSQLEnv = sqlenv;
+					if (fileSQLEnv == null) {
+						fileSQLEnv = SQLEnvParser.getSQLEnv(vendor, sqlContent);
 					}
+					SqlInfo[] sqlInfos = SQLUtil.convertSQL(children[i], sqlContent);
+					for (SqlInfo sqlInfo : sqlInfos) {
+						ModelBindingManager.removeGlobalHash();
+						ModelBindingManager.removeGlobalDatabase();
+						ModelBindingManager.removeGlobalSchema();
+						ModelBindingManager.removeGlobalSQLEnv();
 
-					if (handleListener != null) {
-						handleListener.startParse(children[i], content.length(), i);
-					}
+						String content = sqlInfo.getSql();
+						if (content != null && content.trim().startsWith("{")) {
+							JSONObject queryObject = JSON.parseObject(content);
+							content = queryObject.getString("sourceCode");
+							ModelBindingManager.setGlobalDatabase(queryObject.getString("database"));
+							ModelBindingManager.setGlobalSchema(queryObject.getString("schema"));
+						}
 
-					TGSqlParser sqlparser = new TGSqlParser(vendor);
-					if (sqlenv != null) {
-						sqlparser.setSqlEnv(sqlenv);
-						ModelBindingManager.setGlobalSQLEnv(sqlenv);
+						TGSqlParser sqlparser = new TGSqlParser(vendor);
+						sqlparser.setSqlEnv(fileSQLEnv);
+						if (sqlenv != null) {
+							sqlparser.setSqlEnv(sqlenv);
+							ModelBindingManager.setGlobalSQLEnv(sqlenv);
+						}
+						sqlparser.sqltext = content;
+						// SQLUtil.writeToFile(new File("D:\\null.txt"),
+						// content);
+						analyzeAndOutputResult(sqlparser);
 					}
-					sqlparser.sqltext = content;
-					analyzeAndOutputResult(sqlparser);
 				}
 
 				appendProcedures(dataflow);
@@ -7126,11 +7157,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.1";
+		return "1.4.2";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-09";
+		return "2020-10-13";
 	}
 
 	public static void main(String[] args) {
