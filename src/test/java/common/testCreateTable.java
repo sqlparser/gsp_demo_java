@@ -10,6 +10,15 @@ import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
 
+    public void testCreateTableLike(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE TABLE new_table LIKE old_table;";
+        assertTrue(sqlparser.parse() == 0);
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createTable.getTableName().toString().equalsIgnoreCase("new_table"));
+        assertTrue(createTable.getLikeTableName().toString().equalsIgnoreCase("old_table"));
+    }
+
     public void testTableTransient(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlparser.sqltext = "CREATE OR REPLACE TRANSIENT TABLE \"TestTable4\" CLUSTER BY LINEAR(CR_RETURNED_DATE_SK, CR_ITEM_SK)\n" +

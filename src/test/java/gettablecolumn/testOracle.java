@@ -39,4 +39,28 @@ public class testOracle extends TestCase {
                         "source_tab.description3\n" +
                         "source_tab.id");
     }
+
+    public static void testColumnInUnionSelect(){
+        doTest("Select\n" +
+                        "(select phone_num as ephone1 from emp_phone p where p.emp_num=e.emp_num and primary_flag='Y' \n" +
+                        "\tunion select phone_num as ephone1 from emp_phone1 p where p.emp_num=e.emp_num and primary_flag='Y') ephone,\n" +
+                        "e.emp_attr_no_alias\n" +
+                        "From\n" +
+                        "Department d, employee e",
+                "Tables:\n" +
+                        "Department\n" +
+                        "emp_phone\n" +
+                        "emp_phone1\n" +
+                        "employee\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "emp_phone.emp_num\n" +
+                        "emp_phone.phone_num\n" +
+                        "emp_phone.primary_flag\n" +
+                        "emp_phone1.emp_num\n" +
+                        "emp_phone1.phone_num\n" +
+                        "emp_phone1.primary_flag\n" +
+                        "employee.emp_attr_no_alias\n" +
+                        "employee.emp_num");
+    }
 }

@@ -18,10 +18,12 @@ public class testTraceColumn extends TestCase {
                 "(SELECT COUNT(*) total_count, SUM(sal) total_sal\n" +
                 "    FROM scott.emp) b";
 
+        //System.out.println(sqltext);
         TTraceColumn traceColumn = new TTraceColumn(EDbVendor.dbvoracle);
         traceColumn.runText(sqltext);
         //System.out.print(traceColumn.getInfos().toString().trim());
-        assertTrue(traceColumn.getInfos().toString().trim().equalsIgnoreCase("\"Department\"\n" +
+        String actualStr = traceColumn.getInfos().toString().trim();
+        String requireStr =  "\"Department\"\n" +
                 " -->a.deptno(expr)\n" +
                 "  -->a.deptno\n" +
                 "   -->deptno(expr)\n" +
@@ -41,7 +43,9 @@ public class testTraceColumn extends TestCase {
                 "      -->scott.emp.SAL\n" +
                 "    -->b.total_sal\n" +
                 "     -->SUM(sal)(expr)\n" +
-                "      -->scott.emp.sal"));
+                "      -->scott.emp.sal";
+       // System.out.println ("required:\n"+requireStr+"\n\nActual:\n"+actualStr);
+        assertTrue(actualStr.equalsIgnoreCase(requireStr));
     }
 
     public static void test2(){

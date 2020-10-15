@@ -215,7 +215,7 @@ public class runGetTableColumn
 		getTableColumn.showTreeStructure = false;
 		getTableColumn.showBySQLClause = false;
 		getTableColumn.showJoin = false;
-		getTableColumn.showColumnLocation = true;
+		getTableColumn.showColumnLocation = false;
 		getTableColumn.linkOrphanColumnToFirstTable = false;
 		getTableColumn.showIndex = false;
 		getTableColumn.showDatatype = true;

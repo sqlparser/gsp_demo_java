@@ -15,9 +15,9 @@ public class testSQLServer extends TestCase {
         getTableColumn.showTreeStructure = false;
         getTableColumn.runText(inputQuery);
         //System.out.println(inputQuery);
-        //System.out.println(getTableColumn.outList.toString().trim());
+       // System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
-        //System.out.println(desireResult);
+       // System.out.println(desireResult);
     }
 
     public static void testColumnInSubquery() {
@@ -174,6 +174,7 @@ public class testSQLServer extends TestCase {
                         "dbo.Tealeaf\n" +
                         "dbo.TealeafPerformance\n" +
                         "\nFields:\n" +
+                        "dbo.Tealeaf.Application\n" +
                         "dbo.Tealeaf.Calendar_Month\n" +
                         "dbo.Tealeaf.Calendar_Month_Name\n" +
                         "dbo.Tealeaf.Calendar_Quarter\n" +
@@ -182,6 +183,7 @@ public class testSQLServer extends TestCase {
                         "dbo.Tealeaf.Date\n" +
                         "dbo.Tealeaf.ErrorCount\n" +
                         "dbo.Tealeaf.ErrorType\n" +
+                        "dbo.TealeafPerformance.Application\n" +
                         "dbo.TealeafPerformance.Calendar_Month\n" +
                         "dbo.TealeafPerformance.Calendar_Month_Name\n" +
                         "dbo.TealeafPerformance.Calendar_Quarter\n" +
@@ -189,6 +191,55 @@ public class testSQLServer extends TestCase {
                         "dbo.TealeafPerformance.Calendar_Year\n" +
                         "dbo.TealeafPerformance.Date\n" +
                         "dbo.TealeafPerformance.PerformanceType");
+    }
+
+
+    public static void testTableFunction() {
+        doTest("CREATE VIEW [dbo].[ERRORS]\n" +
+                        "AS\n" +
+                        "WITH DESC_CTE\n" +
+                        "AS\n" +
+                        "    (\n" +
+                        "        SELECT  rid\n" +
+                        "               ,POS       = ID\n" +
+                        "               ,c_desc = LTRIM( RTRIM( value ))\n" +
+                        "          FROM  [dbo].[reasons]\n" +
+                        "          CROSS APPLY\n" +
+                        "                (\n" +
+                        "                    SELECT  ID = ROW_NUMBER() OVER (PARTITION BY reasons_ID1\n" +
+                        "                                                        ORDER BY\n" +
+                        "                                                   reasons_ID2\n" +
+                        "                                                   )\n" +
+                        "                           ,value\n" +
+                        "                      FROM  STRING_SPLIT(REPLACE(c_desc ,'|~|',CHAR(7)),CHAR(7)) PM\n" +
+                        "                ) CR\n" +
+                        "                                            WHERE [IsDeleted] ='0'\n" +
+                        "                                            )\n" +
+                        "SELECT [derid],\n" +
+                        "       POS =ISNULL(CR.[POS],1) ,\n" +
+                        "       [errorcode],\n" +
+                        "       [c_desc]= CAST(NULLIF(CR.c_desc,'') AS VARCHAR(300))\n" +
+                        "FROM dbo.d_errors CE\n" +
+                        "LEFT JOIN DESC_CTE CR\n" +
+                        "ON CR.reasons_ID =CE.errorcode\n" +
+                        "WHERE 1 = 1\n" +
+                        "      AND CE.IsDeleted = 0;",
+                "Tables:\n" +
+                        "[dbo].[reasons]\n" +
+                        "dbo.d_errors\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(table-valued function:STRING_SPLIT).value\n" +
+                        "[dbo].[reasons].[IsDeleted]\n" +
+                        "[dbo].[reasons].c_desc\n" +
+                        "[dbo].[reasons].reasons_ID\n" +
+                        "[dbo].[reasons].reasons_ID1\n" +
+                        "[dbo].[reasons].reasons_ID2\n" +
+                        "[dbo].[reasons].rid\n" +
+                        "dbo.d_errors.[derid]\n" +
+                        "dbo.d_errors.[errorcode]\n" +
+                        "dbo.d_errors.errorcode\n" +
+                        "dbo.d_errors.IsDeleted");
     }
 
 }

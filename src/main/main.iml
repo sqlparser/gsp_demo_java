@@ -11,11 +11,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/../../../gsp_java_maven/external_lib" />
+          <root url="file://$MODULE_DIR$/../../../gsp_java_core/external_lib" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/../../../gsp_java_maven/external_lib" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../gsp_java_core/external_lib" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">

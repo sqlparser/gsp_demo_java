@@ -155,7 +155,8 @@ class getObject{
             foundColumnsCount = 0;
             foundTableCount = 0;
             if (pmode == showMode){
-                sqlparser.sqlfilename = showModeFile;
+                //sqlparser.sqlfilename = showModeFile;
+                sqlparser.sqlfilename = sqldir+"berger_sqltest_01.sql";
             }else{
                 sqlparser.sqlfilename = sqldir+sqlfiles[k]+".sql";
             }

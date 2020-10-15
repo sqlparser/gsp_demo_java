@@ -190,7 +190,7 @@ public class testNewTableColumn extends TestCase {
        SqlFileList sqlfiles = new SqlFileList(pDir,true);
        String strDesired,strActual;
        for(int k=0;k < sqlfiles.sqlfiles.size();k++){
-           //System.out.println(sqlfiles.sqlfiles.get(k).toString());
+          // System.out.println(sqlfiles.sqlfiles.get(k).toString());
            getTableColumn.runFile(sqlfiles.sqlfiles.get(k).toString());
            File f = new File(sqlfiles.sqlfiles.get(k).toString().replace(".sql",".outj"));
            if(f.exists() && !f.isDirectory()) {
@@ -444,7 +444,7 @@ public class testNewTableColumn extends TestCase {
                 "\t    OUTPUT deleted.*, $action, inserted.* INTO #MyTempTable;");
 
         String strActual = getTableColumn.getInfos().toString();
-      //   System.out.println(strActual);
+        // System.out.println(strActual);
         assertTrue(strActual.trim().equalsIgnoreCase("sstmerge\n" +
                 " Production.UnitMeasure(tetMerge)\n" +
                 "   UnitMeasureCode\n" +
@@ -452,6 +452,7 @@ public class testNewTableColumn extends TestCase {
                 "   UnitMeasureCode\n" +
                 "   Name\n" +
                 "   *\n" +
+                "   $action\n" +
                 "   *\n" +
                 " (subquery, alias:source)\n" +
                 "   UnitMeasureCode\n" +
@@ -459,8 +460,6 @@ public class testNewTableColumn extends TestCase {
                 "   UnitMeasureCode\n" +
                 "   Name\n" +
                 " #MyTempTable(tetOutput)\n" +
-                "  orphan columns:\n" +
-                "   $action\n" +
                 " sstselect"));
     }
 
@@ -481,14 +480,15 @@ public class testNewTableColumn extends TestCase {
                 "\t    OUTPUT deleted.*, $action, inserted.* INTO #MyTempTable;");
 
         String strActual = getTableColumn.getInfos().toString();
-       //  System.out.println(strActual);
-        assertTrue(strActual.trim().equalsIgnoreCase("sstmerge\n" +
+        //System.out.println(strActual);
+        String requiredStr = "sstmerge\n" +
                 " Production.UnitMeasure(tetMerge)\n" +
                 "   UnitMeasureCode(joinCondition)\n" +
                 "   Name(set)\n" +
                 "   UnitMeasureCode(insertColumn)\n" +
                 "   Name(insertColumn)\n" +
                 "   *(output)\n" +
+                "   $action(output)\n" +
                 "   *(output)\n" +
                 " (subquery, alias:source)\n" +
                 "   UnitMeasureCode(joinCondition)\n" +
@@ -496,9 +496,9 @@ public class testNewTableColumn extends TestCase {
                 "   UnitMeasureCode(insertValues)\n" +
                 "   Name(insertValues)\n" +
                 " #MyTempTable(tetOutput)\n" +
-                "  orphan columns:\n" +
-                "   $action(output)\n" +
-                " sstselect"));
+                " sstselect";
+        //System.out.println("Required:\n"+requiredStr+"\n\nActual:\n"+strActual);
+        assertTrue(strActual.trim().equalsIgnoreCase(requiredStr));
     }
 
     public static void testTableEffectCreateTable1(){
@@ -649,5 +649,6 @@ public class testNewTableColumn extends TestCase {
                 "   salary(having)\n" +
                 "   salary(orderby)"));
     }
+
 
 }
