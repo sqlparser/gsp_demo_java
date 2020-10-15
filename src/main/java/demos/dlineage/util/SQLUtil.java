@@ -20,10 +20,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import demos.dlineage.dataflow.model.ModelBindingManager;
+import demos.dlineage.dataflow.model.SqlInfo;
 import demos.dlineage.dataflow.model.Table;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
@@ -502,7 +504,7 @@ public class SQLUtil {
 			} else {
 				normalSource = source;
 			}
-			
+
 			if (target.indexOf('\'') >= 0) {
 				normalTarget = target.replaceAll("[']", "");
 			} else {
@@ -552,7 +554,7 @@ public class SQLUtil {
 			} else {
 				normalName = name;
 			}
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 
 		case dbvmysql:
 			if (name.indexOf('`') >= 0) {
@@ -561,7 +563,7 @@ public class SQLUtil {
 				normalName = name;
 			}
 
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		case dbvdax:
 			if (name.indexOf('\'') >= 0) {
 				normalName = name.replaceAll("[']", "");
@@ -569,7 +571,7 @@ public class SQLUtil {
 				normalName = name;
 			}
 
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		case dbvdb2:
 		case dbvhana:
 		case dbvinformix:
@@ -585,26 +587,26 @@ public class SQLUtil {
 			} else {
 				normalName = name.toUpperCase();
 			}
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		case dbvpostgresql:
 			if (name.indexOf('"') >= 0) {
 				normalName = name.replaceAll("\"", "");
 			} else {
 				normalName = name.toLowerCase();
 			}
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		case dbvmssql:
 			normalName = name;
 			if (normalName.indexOf('\'') >= 0) {
 				normalName = normalName.replaceAll("[']", "");
-			} 
+			}
 			if (normalName.indexOf('"') >= 0) {
 				normalName = normalName.replaceAll("\"", "");
 			}
 			if (normalName.indexOf("[") >= 0) {
 				normalName = normalName.replaceAll("\\[", "").replaceAll("]", "");
 			}
-			return normalName.toUpperCase();
+			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
 		default:
 			if (name.indexOf('"') >= 0) {
 				normalName = name.replaceAll("\"", "");
@@ -612,10 +614,10 @@ public class SQLUtil {
 				normalName = name.toUpperCase();
 			}
 
-			return normalName;
+			return normalName.replaceAll("\\.\\s+", ".");
 		}
 	}
-	
+
 	public static String getIdentifierNormalName(String name) {
 		return getIdentifierNormalName(ModelBindingManager.getGlobalVendor(), name);
 	}
@@ -628,7 +630,7 @@ public class SQLUtil {
 			return false;
 		}
 	}
-	
+
 	public static boolean isTempTable(TTable table, EDbVendor vendor) {
 		switch (vendor) {
 		case dbvmssql:
@@ -642,42 +644,93 @@ public class SQLUtil {
 		if (tableName.split("\\.").length == 1) {
 			StringBuffer buffer = new StringBuffer();
 			if (ModelBindingManager.getGlobalDatabase() != null) {
-				buffer.append(ModelBindingManager.getGlobalDatabase() ).append(".");
+				buffer.append(ModelBindingManager.getGlobalDatabase()).append(".");
 			}
 			if (ModelBindingManager.getGlobalSchema() != null) {
-				buffer.append(ModelBindingManager.getGlobalSchema() ).append(".");
+				buffer.append(ModelBindingManager.getGlobalSchema()).append(".");
 			}
 			buffer.append(tableName);
-			return SQLUtil.getIdentifierNormalName(buffer.toString());		
+			return SQLUtil.getIdentifierNormalName(buffer.toString());
 		} else if (tableName.split("\\.").length == 2) {
 			if (ModelBindingManager.getGlobalDatabase() != null) {
 				return SQLUtil.getIdentifierNormalName(ModelBindingManager.getGlobalDatabase() + "." + tableName);
-			}
-			else{
+			} else {
 				return SQLUtil.getIdentifierNormalName(tableName);
 			}
 		} else {
 			return SQLUtil.getIdentifierNormalName(tableName);
 		}
 	}
-	
-	public static String[] convertSQL(String json) {
-        List<String> sqls = new ArrayList<String>();
-        if (json != null && json.trim().startsWith("{")) {
-            StringBuilder buffer = new StringBuilder();
-            JSONObject queryObject = JSONObject.parseObject(json);
-            JSONArray querys = queryObject.getJSONArray("queries");
-            if (querys != null) {
-                for (int i = 0; i < querys.size(); i++) {
-                    JSONObject object = querys.getJSONObject(i);
-                    sqls.add(object.toJSONString());
-                }
-            } else {
-                sqls.add(queryObject.toJSONString());
-            }
-        } else {
-            sqls.add(json == null ? "" : json);
-        }
-        return sqls.toArray(new String[0]);
-    }
+
+	public static SqlInfo[] convertSQL(File file, String json) {
+		List<SqlInfo> sqlInfos = new ArrayList<>();
+		try {
+			JSONArray sqlContents = JSONArray.parseArray(json);
+			for (int j = 0; j < sqlContents.size(); j++) {
+				JSONObject sqlContent = sqlContents.getJSONObject(j);
+				String sql = sqlContent.getString("sql");
+				String fileName = sqlContent.getString("fileName");
+				if (sql != null && sql.trim().startsWith("{")) {
+					JSONObject queryObject = JSON.parseObject(sql);
+					JSONArray querys = queryObject.getJSONArray("queries");
+					if (querys != null) {
+						for (int i = 0; i < querys.size(); i++) {
+							JSONObject object = querys.getJSONObject(i);
+							SqlInfo info = new SqlInfo();
+							info.setSql(object.toJSONString());
+							info.setFileName(fileName);
+							info.setOriginIndex(i);
+							sqlInfos.add(info);
+						}
+					} else {
+						SqlInfo info = new SqlInfo();
+						info.setSql(queryObject.toJSONString());
+						info.setFileName(fileName);
+						info.setOriginIndex(0);
+						sqlInfos.add(info);
+					}
+				} else if (sql != null) {
+					SqlInfo info = new SqlInfo();
+					info.setSql(sql);
+					info.setFileName(fileName);
+					info.setOriginIndex(0);
+					sqlInfos.add(info);
+				}
+			}
+		} catch (Exception e) {
+			try {
+				JSONObject queryObject = JSON.parseObject(json);
+				JSONArray querys = queryObject.getJSONArray("queries");
+				if (querys != null) {
+					for (int i = 0; i < querys.size(); i++) {
+						JSONObject object = querys.getJSONObject(i);
+						SqlInfo info = new SqlInfo();
+						info.setSql(object.toJSONString());
+						if (file != null) {
+							info.setFileName(file.getName());
+						}
+						info.setOriginIndex(i);
+						sqlInfos.add(info);
+					}
+				} else {
+					SqlInfo info = new SqlInfo();
+					info.setSql(queryObject.toJSONString());
+					if (file != null) {
+						info.setFileName(file.getName());
+					}
+					info.setOriginIndex(0);
+					sqlInfos.add(info);
+				}
+			} catch (Exception e1) {
+				SqlInfo info = new SqlInfo();
+				info.setSql(json);
+				if (file != null) {
+					info.setFileName(file.getName());
+				}
+				info.setOriginIndex(0);
+				sqlInfos.add(info);
+			}
+		}
+		return sqlInfos.toArray(new SqlInfo[0]);
+	}
 }
