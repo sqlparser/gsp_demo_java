@@ -155,6 +155,7 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.TUseDatabase;
+import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateFunction;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
 import gudusoft.gsqlparser.util.functionChecker;
@@ -1342,6 +1343,14 @@ public class DataFlowAnalyzer {
 
 	private void analyzeAndOutputResult(TGSqlParser sqlparser) {
 		try {
+			sqlparser.setSqlEnv(new TSQLEnv(vendor) {
+				
+				@Override
+				public void initSQLEnv() {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 			accessedStatements.clear();
 			stmtStack.clear();
 
@@ -1381,7 +1390,8 @@ public class DataFlowAnalyzer {
 					if (stmt.getParentStmt() == null) {
 						if (stmt instanceof TUseDatabase 
 								|| stmt instanceof TCreateTableSqlStatement
-								|| stmt instanceof TMssqlDeclare) {
+								|| stmt instanceof TMssqlDeclare
+								|| (stmt instanceof TMssqlCreateFunction && ((TMssqlCreateFunction)stmt).getReturnTableDefinitions()!=null)) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1428,7 +1438,10 @@ public class DataFlowAnalyzer {
 				TCustomSqlStatement stmt = sqlparser.getSqlstatements().get(i);
 				if (stmt.getErrorCount() == 0) {
 					if (stmt.getParentStmt() == null) {
-						if (!(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TCreateViewSqlStatement) && !(stmt instanceof TMssqlDeclare)) {
+						if (!(stmt instanceof TCreateViewSqlStatement) 
+								&& !(stmt instanceof TCreateViewSqlStatement) 
+								&& !(stmt instanceof TMssqlDeclare)
+								&& !(stmt instanceof TMssqlCreateFunction && ((TMssqlCreateFunction)stmt).getReturnTableDefinitions()!=null)) {
 							analyzeCustomSqlStmt(stmt);
 						}
 					}
@@ -1615,6 +1628,25 @@ public class DataFlowAnalyzer {
 			}
 		}
 
+		if(stmt instanceof TMssqlCreateFunction){
+			TMssqlCreateFunction createFunction = (TMssqlCreateFunction)stmt;
+			if(createFunction.getReturnTableVaraible()!=null && createFunction.getReturnTableDefinitions()!=null){
+				Table tableModel = this.modelFactory.createTableByName(createFunction.getReturnTableVaraible(), true);
+				tableModel.setCreateTable(true);
+				String procedureParent = createFunction.getFunctionName().toString();
+				if (procedureParent != null) {
+					tableModel.setParent(procedureParent);
+				}
+				modelManager.bindTableFunction(SQLUtil.getIdentifierNormalName(procedureParent), tableModel);
+				
+				for(int j=0;j<createFunction.getReturnTableDefinitions().size();j++){
+					TTableElement tableElement = createFunction.getReturnTableDefinitions().getTableElement(j);
+					TColumnDefinition column = tableElement.getColumnDefinition();
+					modelFactory.createTableColumn(tableModel, column.getColumnName(), true);
+				}
+			}
+		}
+		
 		if (stmt.getStatements().size() > 0) {
 			for (int i = 0; i < stmt.getStatements().size(); ++i) {
 				this.analyzeCustomSqlStmt(stmt.getStatements().get(i));
@@ -1679,6 +1711,7 @@ public class DataFlowAnalyzer {
 			if (procedureParent != null) {
 				tableModel.setParent(procedureParent);
 			}
+			modelManager.bindTableFunction(SQLUtil.getIdentifierNormalName(procedureParent), tableModel);
 			
 			for(int j=0;j<columns.size();j++){
 				TTableElement tableElement = columns.getTableElement(j);
@@ -4745,7 +4778,24 @@ public class DataFlowAnalyzer {
 			TTableList fromTables = stmt.tables;
 			for (int i = 0; i < fromTables.size(); i++) {
 				TTable table = fromTables.getTable(i);
-
+				
+				if (table.getFuncCall() != null) {
+					Table functionTableModel = modelManager.getFunctionTable(
+							SQLUtil.getIdentifierNormalName(table.getFuncCall().getFunctionName().toString()));
+					if (functionTableModel != null && functionTableModel.getColumns() != null) {
+						Table functionTable = modelFactory.createTableFromCreateDDL(table);
+						for (int j = 0; j < functionTableModel.getColumns().size(); j++) {
+							TableColumn column = modelFactory.createTableColumn(functionTable,
+									functionTableModel.getColumns().get(j).getColumnObject(), true);
+							DataFlowRelation relation = modelFactory.createDataFlowRelation();
+							relation.setEffectType(EffectType.select);
+							relation.setTarget(new TableColumnRelationElement(column));
+							relation.addSource(
+									new TableColumnRelationElement(functionTableModel.getColumns().get(j)));
+						}
+					}
+				}
+				
 				if (table.getSubquery() != null) {
 					QueryTable queryTable = modelFactory.createQueryTable(table);
 					TSelectSqlStatement subquery = table.getSubquery();
@@ -4865,7 +4915,7 @@ public class DataFlowAnalyzer {
 					}
 				} else if (table.getTableType().name().startsWith("open")) {
 					continue;
-				} else if (table.getLinkedColumns() != null && table.getLinkedColumns().size() > 0) {
+				} else if (table.getLinkedColumns() != null && table.getLinkedColumns().size() > 0) {			 
 					Table tableModel = modelFactory.createTable(table);
 					for (int j = 0; j < table.getLinkedColumns().size(); j++) {
 						TObjectName object = table.getLinkedColumns().getObjectName(j);
@@ -4884,7 +4934,6 @@ public class DataFlowAnalyzer {
 								modelFactory.createTableColumn(tableModel, object, false);
 							}
 						}
-
 					}
 				}
 			}
@@ -7157,11 +7206,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.2";
+		return "1.4.3";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-13";
+		return "2020-10-16";
 	}
 
 	public static void main(String[] args) {

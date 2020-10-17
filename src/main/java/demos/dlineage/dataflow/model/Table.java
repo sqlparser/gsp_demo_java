@@ -218,5 +218,9 @@ public class Table {
 	public String getTableType() {
 		return tableType;
 	}
+
+	public void setTableType(String tableType) {
+		this.tableType = tableType;
+	}
 	
 }

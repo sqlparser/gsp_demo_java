@@ -40,6 +40,7 @@ import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
+import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateFunction;
 
 @SuppressWarnings({
         "unchecked", "rawtypes"
@@ -54,6 +55,7 @@ public class ModelBindingManager {
     private final Map mergeModelBindingMap = new LinkedHashMap();
     private final Map updateModelBindingMap = new LinkedHashMap();
     private final Map cursorModelBindingMap = new LinkedHashMap();
+    private final Map functionTableMap = new LinkedHashMap();
     private final Map tableNamesMap = new LinkedHashMap();
     private final Set<Relation> relationHolder = Collections.synchronizedSet(new LinkedHashSet<Relation>());
 
@@ -319,6 +321,15 @@ public class ModelBindingManager {
     public Object getInsertModel(Object gspModel) {
         return insertModelBindingMap.get(gspModel);
     }
+    
+    public void bindTableFunction(Object gspModel, Table functionTable) {
+        functionTableMap.put(gspModel, functionTable);
+    }
+    
+    public Table getFunctionTable(Object gspModel) {
+        return (Table)functionTableMap.get(gspModel);
+    }
+    
 
     public Table getCreateTable(TTable table) {
         if (table != null && table.getFullName() != null) {
