@@ -44,6 +44,10 @@ import demos.dlineage.dataflow.model.ImpactRelation;
 import demos.dlineage.dataflow.model.IndirectImpactRelation;
 import demos.dlineage.dataflow.model.JoinRelation;
 import demos.dlineage.dataflow.model.JoinRelation.JoinClauseType;
+import demos.dlineage.dataflow.model.json.Column;
+import demos.dlineage.dataflow.model.json.Coordinate;
+import demos.dlineage.dataflow.model.json.DBObject;
+import demos.dlineage.dataflow.model.json.DataFlow;
 import demos.dlineage.dataflow.model.ModelBindingManager;
 import demos.dlineage.dataflow.model.ModelFactory;
 import demos.dlineage.dataflow.model.Procedure;
@@ -7204,19 +7208,153 @@ public class DataFlowAnalyzer {
 			return true;
 		}
 	}
+	
+	public static DataFlow getSqlflowJSONModel(dataflow dataflow) {
+		DataFlow model = new DataFlow();
+
+		List<DBObject> list = new ArrayList<DBObject>();
+
+		List<procedure> procedures = new ArrayList<procedure>();
+		if (dataflow.getProcedures() != null) {
+			procedures.addAll(dataflow.getProcedures());
+		}
+
+		List<table> tables = new ArrayList<table>();
+		if (dataflow.getTables() != null) {
+			tables.addAll(dataflow.getTables());
+		}
+		if (dataflow.getViews() != null) {
+			tables.addAll(dataflow.getViews());
+		}
+		if (dataflow.getResultsets() != null) {
+			tables.addAll(dataflow.getResultsets());
+		}
+
+		if (!procedures.isEmpty()) {
+			for (procedure procedure : procedures) {
+				DBObject item = new DBObject();
+				item.setId(procedure.getId());
+				item.setDatabase(procedure.getDatabase());
+				item.setSchema(procedure.getSchema());
+				item.setName(procedure.getName());
+				item.setType("procedure");
+				item.setCoordinates(Coordinate.parse(procedure.getCoordinate()));
+
+				List<argument> arguments = procedure.getArguments();
+				List<demos.dlineage.dataflow.model.json.Argument> argumentModels = new ArrayList<demos.dlineage.dataflow.model.json.Argument>();
+				if (arguments != null) {
+					for (argument argument : arguments) {
+						demos.dlineage.dataflow.model.json.Argument argumentModel = new demos.dlineage.dataflow.model.json.Argument();
+						argumentModel.setId(argument.getId());
+						argumentModel.setName(argument.getName());
+						argumentModel.setInout(argument.getInout());
+						argumentModel.setDatatype(argument.getDatatype());
+						argumentModel.setCoordinates(Coordinate.parse(argument.getCoordinate()));
+						argumentModels.add(argumentModel);
+					}
+				}
+				item.setArguments(argumentModels.toArray(new demos.dlineage.dataflow.model.json.Argument[0]));
+				list.add(item);
+			}
+		}
+
+		if (!tables.isEmpty()) {
+			for (table table : tables) {
+				DBObject item = new DBObject();
+				item.setId(table.getId());
+				item.setDatabase(table.getDatabase());
+				item.setSchema(table.getSchema());
+				item.setAlias(table.getAlias());
+				item.setName(table.getName());
+				item.setType(table.getType());
+				item.setCoordinates(Coordinate.parse(table.getCoordinate()));
+
+				List<column> columns = table.getColumns();
+				List<Column> columnModels = new ArrayList<Column>();
+				if (columns != null) {
+					for (column column : columns) {
+						Column columnModel = new Column();
+						columnModel.setId(column.getId());
+						columnModel.setName(column.getName());
+						columnModel.setCoordinates(Coordinate.parse(column.getCoordinate()));
+						columnModel.setSource(column.getSource());
+						columnModel.setQualifiedTable(column.getQualifiedTable());
+						columnModels.add(columnModel);
+					}
+				}
+				item.setColumns(columnModels.toArray(new Column[0]));
+				list.add(item);
+			}
+		}
+
+		model.setDbobjs(list.toArray(new DBObject[0]));
+
+		List<demos.dlineage.dataflow.model.json.Relation> relations = new ArrayList<demos.dlineage.dataflow.model.json.Relation>();
+		if (dataflow.getRelations() != null) {
+			for (demos.dlineage.dataflow.model.xml.relation relation : dataflow.getRelations()) {
+				demos.dlineage.dataflow.model.json.Relation relationModel;
+				if (relation.getType().equals("join")) {
+					relationModel = new demos.dlineage.dataflow.model.json.JoinRelation();
+					((demos.dlineage.dataflow.model.json.JoinRelation) relationModel).setCondition(relation.getCondition());
+					((demos.dlineage.dataflow.model.json.JoinRelation) relationModel).setJoinType(relation.getJoinType());
+					((demos.dlineage.dataflow.model.json.JoinRelation) relationModel).setClause(relation.getClause());
+				} else {
+					relationModel = new demos.dlineage.dataflow.model.json.Relation();
+				}
+
+				relationModel.setId(relation.getId());
+				relationModel.setType(relation.getType());
+				relationModel.setEffectType(relation.getEffectType());
+				relationModel.setFunction(relation.getFunction());
+
+				if (relation.getTarget() != null && relation.getSources() != null && !relation.getSources().isEmpty()) {
+					{
+						demos.dlineage.dataflow.model.json.RelationElement targetModel = new demos.dlineage.dataflow.model.json.RelationElement();
+						targetColumn target = relation.getTarget();
+						targetModel.setColumn(target.getColumn());
+						targetModel.setId(target.getId());
+						targetModel.setParentId(target.getParent_id());
+						targetModel.setParentName(target.getParent_name());
+						targetModel.setCoordinates(Coordinate.parse(target.getCoordinate()));
+						targetModel.setFunction(target.getFunction());
+						relationModel.setTarget(targetModel);
+					}
+
+					List<demos.dlineage.dataflow.model.json.RelationElement> sourceModels = new ArrayList<demos.dlineage.dataflow.model.json.RelationElement>();
+					for (sourceColumn source : relation.getSources()) {
+						demos.dlineage.dataflow.model.json.RelationElement sourceModel = new demos.dlineage.dataflow.model.json.RelationElement();
+						sourceModel.setColumn(source.getColumn());
+						sourceModel.setColumnType(source.getColumn_type());
+						sourceModel.setId(source.getId());
+						sourceModel.setParentId(source.getParent_id());
+						sourceModel.setParentName(source.getParent_name());
+						sourceModel.setSourceId(source.getSource_id());
+						sourceModel.setSourceName(source.getSource_name());
+						sourceModel.setCoordinates(Coordinate.parse(source.getCoordinate()));
+						sourceModel.setClauseType(source.getClauseType());
+						sourceModels.add(sourceModel);
+					}
+					relationModel.setSources(sourceModels.toArray(new demos.dlineage.dataflow.model.json.RelationElement[0]));
+					relations.add(relationModel);
+				}
+			}
+		}
+		model.setRelations(relations.toArray(new demos.dlineage.dataflow.model.json.Relation[0]));
+		return model;
+	}
 
 	public static String getVersion() {
-		return "1.4.3";
+		return "1.4.4";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-16";
+		return "2020-10-20";
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/traceView] [/t <database type>] [/o <output file path>][/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/json] [/traceView] [/t <database type>] [/o <output file path>][/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
@@ -7224,6 +7362,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/i: Option, ignore all result sets.");
 			System.out.println("/traceView: Option, analyze the source tables of views.");
 			System.out.println("/text: Option, print the plain text format output.");
+			System.out.println("/json: Option, print the json format output.");
 			System.out.println(
 					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
 			System.out.println("/o: Option, write the output stream to the specified file.");
@@ -7288,6 +7427,7 @@ public class DataFlowAnalyzer {
 		boolean ignoreResultSets = argList.indexOf("/i") != -1;
 		boolean showJoin = argList.indexOf("/j") != -1;
 		boolean textFormat = false;
+		boolean jsonFormat = false;
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
@@ -7296,23 +7436,31 @@ public class DataFlowAnalyzer {
 		if(traceView){
 			simple = true;
 		}
+		
+		jsonFormat = argList.indexOf("/json") != -1;
 
 		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlFiles, vendor, simple);
 
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
 
-		if (simple) {
+		if (simple && !jsonFormat) {
 			dlineage.setTextFormat(textFormat);
 		}
 
 		StringBuffer errorBuffer = new StringBuffer();
 		String result = dlineage.generateDataFlow(errorBuffer);
 		
-		if(traceView){
+		if (jsonFormat) {
+			JSONObject jsonResult = new JSONObject();
+			DataFlow model = getSqlflowJSONModel(dlineage.getDataFlow());
+			model.setDbvendor(vendor.name());
+			jsonResult.put("data", model);
+			result = JSON.toJSONString(jsonResult, true);
+		} else if (traceView) {
 			result = dlineage.traceView();
 		}
-
+		
 		if (result != null) {
 			System.out.println(result);
 
