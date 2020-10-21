@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import demos.dlineage.sqlenv.grabit.GrabitSQLEnv;
+import demos.dlineage.sqlenv.grabit.MultipleGrabitSQLEnv;
 import demos.dlineage.sqlenv.sqldep.MultipleSQLDepSQLEnv;
 import demos.dlineage.sqlenv.sqldep.SQLDepSQLEnv;
 import demos.dlineage.util.SQLUtil;
@@ -38,6 +40,9 @@ public class SQLEnvParser {
 				if (trimSQL.toLowerCase().indexOf("sqldep") != -1) {
 					return new MultipleSQLDepSQLEnv(vendor, json);
 				}
+				if (trimSQL.toLowerCase().indexOf("grabit") != -1) {
+					return new MultipleGrabitSQLEnv(vendor, json);
+				}
 			}
 		} catch (Exception e) {
 			Logger.getLogger(SQLEnvParser.class.getName()).log(Level.WARNING, "Parse json failed.", e);
@@ -52,6 +57,9 @@ public class SQLEnvParser {
 				String createdBy = json.getString("createdBy");
 				if (createdBy.toLowerCase().indexOf("sqldep") != -1) {
 					return new SQLDepSQLEnv(vendor, json);
+				}
+				if (createdBy.toLowerCase().indexOf("grabit") != -1) {
+					return new GrabitSQLEnv(vendor, json);
 				}
 			}
 		} catch (Exception e) {
