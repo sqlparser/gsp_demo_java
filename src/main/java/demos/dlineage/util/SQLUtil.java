@@ -543,6 +543,11 @@ public class SQLUtil {
 	}
 
 	public static String getIdentifierNormalName(EDbVendor vendor, String name) {
+		if (isEmpty(name)) {
+			return null;
+		}
+        name = name.replaceAll("(?i)null\\.", "");
+		
 		String normalName = null;
 		switch (vendor) {
 		case dbvbigquery:
