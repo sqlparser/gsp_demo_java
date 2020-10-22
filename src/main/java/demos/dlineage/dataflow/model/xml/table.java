@@ -184,6 +184,16 @@ public class table
 		}
 		return fullName.toString();
 	}
+	
+	public String getTableNameOnly(){
+		int index = name.lastIndexOf(".");
+		if(index!=-1){
+			return name.substring(index+1);
+		}
+		else{
+			return name;
+		}
+	}
 
 	public void setIsTarget(String isTarget) {
 		this.isTarget = isTarget;

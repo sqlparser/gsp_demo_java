@@ -440,35 +440,50 @@ public class DataFlowAnalyzer {
 		tables.addAll(dataflow.getTables());
 		tables.addAll(dataflow.getViews());
 		tables.addAll(dataflow.getResultsets());
+		
+		Map<String, Map<String, table>> tableSchemaMap = new HashMap<>();
+		for (table table : tables) {
+			String tableName = SQLUtil.getIdentifierNormalName(table.getTableNameOnly());
+			String qualifiedTableName = SQLUtil.getIdentifierNormalName(table.getFullName());
+			tableSchemaMap.putIfAbsent(tableName, new HashMap<>());
+			if(!qualifiedTableName.equals(tableName)){
+				tableSchemaMap.get(tableName).put(qualifiedTableName, table);
+			}
+		}
 
 		for (table table : tables) {
-			String tableName = SQLUtil.getIdentifierNormalName(table.getFullName());
-			if (!tableMap.containsKey(tableName)) {
-				tableMap.put(tableName, new ArrayList<table>());
+			String tableFullName = SQLUtil.getIdentifierNormalName(table.getFullName());
+			String tableName = SQLUtil.getIdentifierNormalName(table.getTableNameOnly());
+			if(tableName.equals(tableFullName) && tableSchemaMap.get(tableName).size() == 1){
+				tableFullName = SQLUtil.getIdentifierNormalName(tableSchemaMap.get(tableName).values().iterator().next().getFullName());
+			}
+			
+			if (!tableMap.containsKey(tableFullName)) {
+				tableMap.put(tableFullName, new ArrayList<table>());
 			}
 
-			tableMap.get(tableName).add(table);
+			tableMap.get(tableFullName).add(table);
 
-			if (!tableTypeMap.containsKey(tableName)) {
-				tableTypeMap.put(tableName, table.getType());
+			if (!tableTypeMap.containsKey(tableFullName)) {
+				tableTypeMap.put(tableFullName, table.getType());
 			} else if ("view".equals(table.getTableType())) {
-				tableTypeMap.put(tableName, table.getType());
-			} else if ("table".equals(tableTypeMap.get(tableName))) {
-				tableTypeMap.put(tableName, table.getType());
+				tableTypeMap.put(tableFullName, table.getType());
+			} else if ("table".equals(tableTypeMap.get(tableFullName))) {
+				tableTypeMap.put(tableFullName, table.getType());
 			}
 
 			if (table.getColumns() != null) {
-				tableColumnMap.putIfAbsent(tableName, new LinkedHashSet<>());
+				tableColumnMap.putIfAbsent(tableFullName, new LinkedHashSet<>());
 				for (column column : table.getColumns()) {
-					String columnName = SQLUtil.getIdentifierNormalName(table.getFullName() + "." + column.getName());
+					String columnName = SQLUtil.getIdentifierNormalName(tableFullName+ "." + column.getName());
 					if (!SQLUtil.isEmpty(column.getQualifiedTable())) {
 						columnName = SQLUtil.getIdentifierNormalName(
-								table.getFullName() + "." + column.getQualifiedTable() + "." + column.getName());
+								tableFullName + "." + column.getQualifiedTable() + "." + column.getName());
 					}
 
 					if (!columnMap.containsKey(columnName)) {
 						columnMap.put(columnName, new LinkedList<column>());
-						tableColumnMap.get(tableName).add(columnName);
+						tableColumnMap.get(tableFullName).add(columnName);
 					}
 
 					columnMap.get(columnName).add(column);
@@ -482,14 +497,22 @@ public class DataFlowAnalyzer {
 			List<table> tableList = tableMap.get(tableName);
 			table table;
 			if (tableList.size() > 1) {
-				table firstTable = tableList.get(0);
+				table standardTable = tableList.get(0);
+				String tableFullName = SQLUtil.getIdentifierNormalName(standardTable.getFullName());
+				String tableNameOnley = SQLUtil.getIdentifierNormalName(standardTable.getTableNameOnly());
+				
+				//if the first table is not the standard table, then switch to standard table from table schema map.
+				if (!tableFullName.equals(tableName) && tableSchemaMap.get(tableNameOnley)!=null && tableSchemaMap.get(tableNameOnley).size() > 0) {
+					standardTable = tableSchemaMap.get(tableNameOnley).values().iterator().next();
+				}
+				
 				String type = tableTypeMap.get(tableName);
 				table = new table();
 				table.setId(String.valueOf(++modelManager.TABLE_COLUMN_ID));
-				table.setDatabase(firstTable.getDatabase());
-				table.setSchema(firstTable.getSchema());
-				table.setName(firstTable.getName());
-				table.setParent(firstTable.getParent());
+				table.setDatabase(standardTable.getDatabase());
+				table.setSchema(standardTable.getSchema());
+				table.setName(standardTable.getName());
+				table.setParent(standardTable.getParent());
 				table.setColumns(new ArrayList<column>());
 				table.setType(type);
 				for (table item : tableList) {
@@ -7383,11 +7406,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.4";
+		return "1.4.5";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-20";
+		return "2020-10-23";
 	}
 
 	public static void main(String[] args) {
