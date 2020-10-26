@@ -6771,6 +6771,9 @@ public class DataFlowAnalyzer {
 		List<TParseTreeNode> functions = visitor.getFunctions();
 
 		ResultSet resultSet = (ResultSet) modelManager.getModel(stmt.getResultColumnList());
+		if(resultSet == null && stmt instanceof TUpdateSqlStatement){
+			resultSet = (ResultSet) modelManager.getModel(stmt);
+		}
 		if (resultSet != null) {
 			ImpactRelation relation = modelFactory.createImpactRelation();
 			relation.setEffectType(effectType);
@@ -7406,7 +7409,7 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.5";
+		return "1.4.6";
 	}
 
 	public static String getReleaseDate() {
