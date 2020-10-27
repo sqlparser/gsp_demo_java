@@ -156,7 +156,8 @@ public class sourceColumn
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((column == null) ? 0 : getColumnName(column).hashCode());
+		String columnName = getColumnName(column);
+		result = prime * result + ((columnName == null) ? 0 : columnName.hashCode());
 		result = prime * result + ((coordinate == null) ? 0 : coordinate.hashCode());
 		result = prime * result + ((parent_id == null) ? 0 : parent_id.hashCode());
 		return result;

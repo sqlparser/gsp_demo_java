@@ -1,16 +1,16 @@
 
 package demos.dlineage.dataflow.model;
 
-public class ViewColumnRelationElement implements RelationElement<ViewColumn> {
+public class ViewColumnRelationElement implements RelationElement<TableColumn> {
 
-    private ViewColumn column;
+    private TableColumn column;
 
-    public ViewColumnRelationElement(ViewColumn column) {
+    public ViewColumnRelationElement(TableColumn column) {
         this.column = column;
     }
 
     @Override
-    public ViewColumn getElement() {
+    public TableColumn getElement() {
         return column;
     }
 

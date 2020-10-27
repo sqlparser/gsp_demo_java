@@ -503,7 +503,7 @@ public class ModelBindingManager {
 	                        return table;
 	                    }
 	                }
-	                if (columnName.getColumnNameOnly()!=null && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
+	                if (!SQLUtil.isEmpty(columnName.getColumnNameOnly()) && SQLUtil.getIdentifierNormalName(columnName.getColumnNameOnly()).equals(SQLUtil.getIdentifierNormalName(column.getColumnNameOnly()))) {
 	                    if (columnName.getSourceTable() == null
 	                            || columnName.getSourceTable() == table) {
 	                        return table;

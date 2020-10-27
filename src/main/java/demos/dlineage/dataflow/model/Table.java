@@ -7,6 +7,7 @@ import java.util.List;
 import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.ETableSource;
+import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TObjectName;
@@ -31,10 +32,22 @@ public class Table {
     private TObjectName tableName;
     private boolean isCreateTable;
     private String tableType;
+    private boolean isView;
     
     
     private TablePseudoRows pseudoRows = new TablePseudoRows(this);
     
+	private TCustomSqlStatement viewObject;
+
+	public Table(TCustomSqlStatement view, TObjectName viewName) {
+		this(viewName);
+		this.viewObject = view;
+		setView(true);
+	}
+
+	public TCustomSqlStatement getViewObject() {
+		return viewObject;
+	}
 
     public Table(TTable table) {
         if (table == null) {
@@ -222,5 +235,12 @@ public class Table {
 	public void setTableType(String tableType) {
 		this.tableType = tableType;
 	}
-	
+
+	public boolean isView() {
+		return isView;
+	}
+
+	public void setView(boolean isView) {
+		this.isView = isView;
+	}
 }

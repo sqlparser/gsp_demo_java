@@ -2,7 +2,11 @@
 package demos.dlineage.dataflow.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import demos.dlineage.util.Pair3;
 import demos.dlineage.util.SQLUtil;
@@ -22,10 +26,17 @@ public class TableColumn {
     private Pair3<Long, Long, String> endPosition;
 
     private TObjectName columnObject;
-    private List<TObjectName> starLinkColumns = new ArrayList<TObjectName>();
+    private Map<String, Set<TObjectName>> starLinkColumns = new LinkedHashMap<String, Set<TObjectName>>();
     
     private boolean showStar;
+    
+	private int columnIndex;
 
+	public TableColumn(Table view, TObjectName columnObject, int index) {
+		this(view, columnObject);
+		this.columnIndex = index;
+	}
+	
     public TableColumn(Table table, TObjectName columnObject) {
         if (table == null || columnObject == null)
             throw new IllegalArgumentException("TableColumn arguments can't be null.");
@@ -52,6 +63,10 @@ public class TableColumn {
 
         this.table = table;
         table.addColumn(this);
+        
+        if("*".equals(this.name) && !table.isCreateTable()){
+        	showStar = true;
+        }
     }
 
     public TableColumn(Table table, TConstant columnObject, int columnIndex) {
@@ -99,15 +114,54 @@ public class TableColumn {
         return columnObject;
     }
 
-    public void bindStarLinkColumns(List<TObjectName> starLinkColumns) {
+    public void bindStarLinkColumns(Map<String, Set<TObjectName>> starLinkColumns) {
         if (starLinkColumns != null && !starLinkColumns.isEmpty()) {
             this.starLinkColumns = starLinkColumns;
         }
     }
 
-    public List<TObjectName> getStarLinkColumns() {
+    public Map<String, Set<TObjectName>> getStarLinkColumns() {
         return starLinkColumns;
     }
+    
+	public boolean hasStarLinkColumn(){
+		return starLinkColumns!=null && !starLinkColumns.isEmpty();
+	}
+    
+    public void bindStarLinkColumn(TObjectName objectName) {
+    	if(objectName == null){
+    		return;
+    	}
+    	
+    	String columnName = SQLUtil.getColumnName(objectName);
+    	
+    	if("*".equals(columnName)){
+    		return;
+    	}
+        if (!starLinkColumns.containsKey(columnName)) {
+        	starLinkColumns.putIfAbsent(columnName, new LinkedHashSet<>());
+        }
+        
+        starLinkColumns.get(columnName).add(objectName);
+    }
+    
+	public List<TObjectName> getStarLinkColumnList() {
+		List<TObjectName> columns = new ArrayList<>();
+		if (starLinkColumns != null) {
+			for (Set<TObjectName> columnSet : starLinkColumns.values()) {
+				columns.addAll(columnSet);
+			}
+		}
+		return columns;
+	}
+	
+	public List<String> getStarLinkColumnNames() {
+		List<String> columns = new ArrayList<>();
+		if (starLinkColumns != null) {
+			columns.addAll(starLinkColumns.keySet());
+		}
+		return columns;
+	}
 
 	public boolean isShowStar() {
 		return showStar;
@@ -116,5 +170,15 @@ public class TableColumn {
 	public void setShowStar(boolean showStar) {
 		this.showStar = showStar;
 	}
+	
+	public Table getView() {
+		return getTable();
+	}
+
+	public int getColumnIndex() {
+		return columnIndex;
+	}
+
+
 
 }

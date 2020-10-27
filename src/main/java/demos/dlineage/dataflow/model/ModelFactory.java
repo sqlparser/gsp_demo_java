@@ -1,7 +1,6 @@
 
 package demos.dlineage.dataflow.model;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -330,7 +329,7 @@ public class ModelFactory {
         			columnMap.putIfAbsent(SQLUtil.getIdentifierNormalName(columnName), item);
         		}
         	}
-        	columnModel.bindStarLinkColumns(new ArrayList<>(columnMap.values()));
+        	columnModel.bindStarLinkColumns(new LinkedHashMap<>());
         }
         
         return columnModel;
@@ -377,25 +376,50 @@ public class ModelFactory {
         modelManager.addRelation(relation);
         return relation;
     }
+    
+    public Table createView(TCustomSqlStatement viewStmt, TObjectName viewName) {
+        return createView(viewStmt, viewName, false);
+    }
 
-    public View createView(TCustomSqlStatement viewStmt, TObjectName viewName) {
-        if (modelManager.getViewModel(viewStmt) instanceof View) {
-            return (View) modelManager.getViewModel(viewStmt);
+    public Table createView(TCustomSqlStatement viewStmt, TObjectName viewName, boolean fromCreateView) {
+        if (modelManager.getViewModel(viewStmt) instanceof Table) {
+        	Table table = (Table) modelManager.getViewModel(viewStmt);
+        	table.setView(true);
+            return table;
         }
-        View viewModel = new View(viewStmt, viewName);
+        
+        if(modelManager.getTableByName(SQLUtil.getTableFullName(viewName.toString()))!=null){
+        	Table table = modelManager.getTableByName(SQLUtil.getTableFullName(viewName.toString()));
+        	table.setView(true);
+        	return table;
+        }
+        
+        Table viewModel = new Table(viewStmt, viewName);
+        viewModel.setCreateTable(fromCreateView);
+        viewModel.setView(true);
         modelManager.bindViewModel(viewStmt, viewModel);
         modelManager.bindTableByName(SQLUtil.getTableFullName(viewName.toString()), viewModel);
         return viewModel;
     }
 
-    public ViewColumn createViewColumn(View viewModel,
-                                       TObjectName column, int index) {
-        Pair<View, TObjectName> bindingModel = new Pair<View, TObjectName>(
+    public TableColumn createViewColumn(Table viewModel,
+                                       TObjectName column, int index, boolean fromCreateView) {
+        Pair<Table, TObjectName> bindingModel = new Pair<Table, TObjectName>(
                 viewModel, column);
-        if (modelManager.getViewModel(bindingModel) instanceof ViewColumn) {
-            return (ViewColumn) modelManager.getViewModel(bindingModel);
+        if (modelManager.getViewModel(bindingModel) instanceof TableColumn) {
+            return (TableColumn) modelManager.getViewModel(bindingModel);
         }
-        ViewColumn columnModel = new ViewColumn(viewModel, column, index);
+        
+		if (viewModel.isCreateTable() && !fromCreateView) {
+			if(index < viewModel.getColumns().size()){
+				return (TableColumn) viewModel.getColumns().get(index);
+			}
+			else{
+				return null;
+			}
+		}
+		
+		TableColumn columnModel = new TableColumn(viewModel, column, index);
         modelManager.bindViewModel(bindingModel, columnModel);
         return columnModel;
     }

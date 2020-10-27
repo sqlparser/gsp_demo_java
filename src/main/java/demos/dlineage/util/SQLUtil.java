@@ -29,6 +29,7 @@ import demos.dlineage.dataflow.model.SqlInfo;
 import demos.dlineage.dataflow.model.Table;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 
 public class SQLUtil {
@@ -623,6 +624,17 @@ public class SQLUtil {
 		}
 	}
 
+	public static String getColumnName(TObjectName column) {
+		if (column == null) {
+			return null;
+		}
+		String name = column.getColumnNameOnly();
+		if (name == null || "".equals(name.trim())) {
+			return SQLUtil.getIdentifierNormalName(column.toString().trim());
+		} else
+			return SQLUtil.getIdentifierNormalName(name.trim());
+	}
+	
 	public static String getIdentifierNormalName(String name) {
 		return getIdentifierNormalName(ModelBindingManager.getGlobalVendor(), name);
 	}
