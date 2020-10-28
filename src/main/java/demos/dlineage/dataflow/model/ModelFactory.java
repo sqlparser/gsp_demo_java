@@ -9,6 +9,7 @@ import demos.dlineage.util.SQLUtil;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.nodes.TCaseExpression;
 import gudusoft.gsqlparser.nodes.TConstant;
+import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TObjectNameList;
@@ -438,6 +439,23 @@ public class ModelFactory {
         return columnModel;
     }
 
+    public TableColumn createInsertTableColumn(Table tableModel,
+            TExpression column, int columnIndex) {
+		Pair<Table, TExpression> bindingModel = new Pair<Table, TExpression>(
+			tableModel, column);
+			
+		if (modelManager
+			.getInsertModel(bindingModel) instanceof TableColumn) {
+			return (TableColumn) modelManager
+					.getInsertModel(bindingModel);
+		}
+		TableColumn columnModel = new TableColumn(tableModel,
+				column,
+				columnIndex);
+		modelManager.bindInsertModel(bindingModel, columnModel);
+		return columnModel;
+    }
+    
     public TableColumn createInsertTableColumn(Table tableModel,
                                                TConstant column, int columnIndex) {
         Pair<Table, TConstant> bindingModel = new Pair<Table, TConstant>(

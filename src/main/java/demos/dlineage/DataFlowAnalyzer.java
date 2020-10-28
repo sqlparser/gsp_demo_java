@@ -2529,6 +2529,30 @@ public class DataFlowAnalyzer {
 									relation.setTarget(new TableColumnRelationElement(tableModel.getColumns().get(i)));
 									relation.addSource(new ResultColumnRelationElement(resultColumn));
 								}
+							} else {
+								if (!initColumn) {
+									TableColumn tableColumn = modelFactory.createInsertTableColumn(tableModel,
+											((TResultColumn) resultColumn.getColumnObject()).getExpr(),
+											i);
+									if (SQLUtil.isTempTable(tableModel, vendor) && sqlenv != null
+											&& tableModel.getDatabase() != null && tableModel.getSchema() != null) {
+										TSQLSchema schema = sqlenv.getSQLSchema(
+												tableModel.getDatabase() + "." + tableModel.getSchema(), true);
+										if (schema != null) {
+											TSQLTable tempTable = schema.createTable(tableModel.getName());
+											tempTable.addColumn(tableColumn.getName());
+										}
+									}
+									DataFlowRelation relation = modelFactory.createDataFlowRelation();
+									relation.setEffectType(EffectType.insert);
+									relation.setTarget(new TableColumnRelationElement(tableColumn));
+									relation.addSource(new ResultColumnRelationElement(resultColumn));
+								} else {
+									DataFlowRelation relation = modelFactory.createDataFlowRelation();
+									relation.setEffectType(EffectType.insert);
+									relation.setTarget(new TableColumnRelationElement(tableModel.getColumns().get(i)));
+									relation.addSource(new ResultColumnRelationElement(resultColumn));
+								}
 							}
 						}
 					}
@@ -7198,11 +7222,11 @@ public class DataFlowAnalyzer {
 	}
 
 	public static String getVersion() {
-		return "1.4.6";
+		return "1.4.7";
 	}
 
 	public static String getReleaseDate() {
-		return "2020-10-23";
+		return "2020-10-27";
 	}
 
 	public static void main(String[] args) {

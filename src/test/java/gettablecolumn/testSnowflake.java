@@ -34,4 +34,21 @@ public class testSnowflake extends TestCase {
                         "purchases.retail_price\n" +
                         "purchases.wholesale_price");
     }
+
+    public static void testUpdate() {
+        doTest("update t1\n" +
+                        "set t1.number_column = t1.number_column + t2.number_column, t1.text_column = 'ASDF'\n" +
+                        "from t2\n" +
+                        "where t1.key_column = t2.t1_key and t1.number_column < 10;",
+                "Tables:\n" +
+                        "t1\n" +
+                        "t2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "t1.key_column\n" +
+                        "t1.number_column\n" +
+                        "t1.text_column\n" +
+                        "t2.number_column\n" +
+                        "t2.t1_key");
+    }
 }
