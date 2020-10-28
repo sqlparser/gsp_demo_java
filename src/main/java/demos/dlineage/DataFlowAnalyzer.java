@@ -3543,15 +3543,16 @@ public class DataFlowAnalyzer {
 					}
 					if (sourceElement instanceof ResultColumn) {
 						ResultColumn sourceColumn = (ResultColumn) sourceElement;
-						if (!sourceColumn.getStarLinkColumns().isEmpty() && !relation.isShowStarRelation()) {
+						if (sourceColumn.hasStarLinkColumn() && !relation.isShowStarRelation()) {
+							List<String> sourceStarColumnNames = sourceColumn.getStarLinkColumnNames();
 							sourceColumn source = new sourceColumn();
-
 							if (targetObjectNames != null && !targetObjectNames.isEmpty()) {
+								
 								for (int k = 0; k < targetObjectNames.size(); k++) {
 									String targetObjectName = getColumnName(targetObjectNames.get(k));
 									if (sourceColumn.getStarLinkColumns().containsKey(targetObjectName)) {
 										source = new sourceColumn();
-										source.setId(String.valueOf(sourceColumn.getId()) + "_" + String.valueOf(++modelManager.TABLE_COLUMN_ID));
+										source.setId(String.valueOf(sourceColumn.getId()) + "_" + sourceStarColumnNames.indexOf(targetObjectName));
 										source.setColumn(targetObjectName);
 										source.setParent_id(String.valueOf(sourceColumn.getResultSet().getId()));
 										source.setParent_name(getResultSetName(sourceColumn.getResultSet()));
@@ -3592,7 +3593,7 @@ public class DataFlowAnalyzer {
 											String objectName = getColumnName(objectNames.get(x));
 											if (sourceColumn.getStarLinkColumns().containsKey(objectName))
 											{
-												source.setId(String.valueOf(sourceColumn.getId()) + "_" + String.valueOf(++modelManager.TABLE_COLUMN_ID));
+												source.setId(String.valueOf(sourceColumn.getId()) + "_" + sourceStarColumnNames.indexOf(objectName));
 												source.setColumn(objectName);
 											} else {
 												source.setId(String.valueOf(sourceColumn.getId()));
@@ -3614,7 +3615,7 @@ public class DataFlowAnalyzer {
 									String objectName = getColumnName(targetName);
 									boolean find = false;
 									if (sourceColumn.getStarLinkColumns().containsKey(objectName)) {
-										source.setId(String.valueOf(sourceColumn.getId()) + "_" + String.valueOf(++modelManager.TABLE_COLUMN_ID));
+										source.setId(String.valueOf(sourceColumn.getId()) + "_" + sourceStarColumnNames.indexOf(objectName));
 										source.setColumn(objectName);
 										find = true;
 									}
@@ -3622,7 +3623,7 @@ public class DataFlowAnalyzer {
 									if (!find && sourceColumnName != null) {
 										objectName = getColumnName(sourceColumnName);
 										if (sourceColumn.getStarLinkColumns().containsKey(objectName)) {
-											source.setId(String.valueOf(sourceColumn.getId()) + "_" + String.valueOf(++modelManager.TABLE_COLUMN_ID));
+											source.setId(String.valueOf(sourceColumn.getId()) + "_" + sourceStarColumnNames.indexOf(objectName));
 											source.setColumn(objectName);
 											find = true;
 										}
@@ -5073,28 +5074,28 @@ public class DataFlowAnalyzer {
 							continue;
 						}
 
-						if (object.getSourceTable() == null || object.getSourceTable() == table) {
-							if (!"*".equals(getColumnName(object))) {
-								modelFactory.createTableColumn(tableModel, object, false);
-							}
-							else{
-								boolean flag = false;
-								for(TObjectName column: table.getLinkedColumns()){
-									if ("*".equals(getColumnName(column))) {
-										continue;
-									}
-									if(column.getLocation() != ESqlClause.where && column.getLocation() != ESqlClause.joinCondition){
-										flag = true;
-									}
+						
+						if (!"*".equals(getColumnName(object))) {
+							modelFactory.createTableColumn(tableModel, object, false);
+						}
+						else{
+							boolean flag = false;
+							for(TObjectName column: table.getLinkedColumns()){
+								if ("*".equals(getColumnName(column))) {
+									continue;
 								}
-								if(!flag){
-									TableColumn tableColumn = modelFactory.createTableColumn(tableModel, object, false);
-									if(tableColumn!=null){
-										tableColumn.setShowStar(true);
-									}
+								if(column.getLocation() != ESqlClause.where && column.getLocation() != ESqlClause.joinCondition){
+									flag = true;
+								}
+							}
+							if(!flag){
+								TableColumn tableColumn = modelFactory.createTableColumn(tableModel, object, false);
+								if(tableColumn!=null){
+									tableColumn.setShowStar(true);
 								}
 							}
 						}
+						
 					}
 				}
 			}
@@ -6151,7 +6152,7 @@ public class DataFlowAnalyzer {
 									TObjectName refer = tTable.getLinkedColumns().getObjectName(z);
 									if ("*".equals(getColumnName(refer)))
 										continue;
-									if (SQLUtil.getIdentifierNormalName(getColumnName(refer)).equals(SQLUtil.getIdentifierNormalName(getColumnName(columnName)))) {
+									if (getColumnName(refer).equals(getColumnName(columnName))) {
 										table = tTable;
 										break;
 									}
@@ -6176,7 +6177,7 @@ public class DataFlowAnalyzer {
 								Table tableModel = (Table)model;
 								for (int z = 0; tableModel.getColumns()!=null && z < tableModel.getColumns().size(); z++) {
 									TableColumn refer = tableModel.getColumns().get(z);
-									if (SQLUtil.getIdentifierNormalName(refer.getName()).equals(SQLUtil.getIdentifierNormalName(getColumnName(columnName)))) {
+									if (getColumnName(refer.getName()).equals(getColumnName(columnName))) {
 										table = tTable;
 										break;
 									}
