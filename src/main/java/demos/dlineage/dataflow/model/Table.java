@@ -226,6 +226,11 @@ public class Table {
 
 	public void setCreateTable(boolean isCreateTable) {
 		this.isCreateTable = isCreateTable;
+		if (isCreateTable) {
+			for (TableColumn column : columns) {
+				column.setShowStar(false);
+			}
+		}
 	}
 
 	public String getTableType() {

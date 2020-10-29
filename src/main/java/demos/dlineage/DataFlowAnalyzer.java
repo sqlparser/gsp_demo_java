@@ -3403,7 +3403,8 @@ public class DataFlowAnalyzer {
 						for (int j = 0; j < targetColumn.getStarLinkColumnNames().size(); j++) {
 							appendStarRelation(dataflow, relation, j);
 						}
-						if (!relation.isShowStarRelation()) {
+						
+						if (!containsStar(relation.getSources())) {
 							continue;
 						}
 					}
@@ -3735,6 +3736,25 @@ public class DataFlowAnalyzer {
 		}
 	}
 
+
+	private boolean containsStar(RelationElement<?>[] elements) {
+		if(elements == null || elements.length == 0)
+			return false;
+		
+		for(RelationElement<?> element : elements){
+			if(element.getElement() instanceof ResultColumn){
+				ResultColumn object = (ResultColumn)element.getElement();
+				if(object.getName().endsWith("*"))
+					return true;
+			}
+			else if(element.getElement() instanceof TableColumn){
+				TableColumn object = (TableColumn)element.getElement();
+				if(object.getName().endsWith("*") && object.isShowStar())
+					return true;
+			}
+		}
+		return false;
+	}
 
 	private void updateResultColumnStarLinks(dataflow dataflow, AbstractRelation relation) {
 		ResultColumn targetColumn = (ResultColumn)relation.getTarget().getElement();
@@ -6250,7 +6270,6 @@ public class DataFlowAnalyzer {
 								if ("*".equals(getColumnName(columnName)) && !tableModel.getColumns().isEmpty()) {
 
 									for (int j = 0; j < tableModel.getColumns().size(); j++) {
-										;
 										TableColumn columnModel = tableModel.getColumns().get(j);
 										relation.addSource(new TableColumnRelationElement(columnModel));
 									}
