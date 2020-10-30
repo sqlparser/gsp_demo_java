@@ -302,7 +302,7 @@ public class ModelFactory {
 					return columnModel;
 				}
 			}
-			return null;
+			//return null;
 		}
         
 //        if(!table.getColumns().isEmpty() && "*".equals(column.getColumnNameOnly())){
