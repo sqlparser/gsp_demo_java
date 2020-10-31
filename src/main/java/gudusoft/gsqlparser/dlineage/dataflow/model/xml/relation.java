@@ -1,121 +1,104 @@
-
 package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
-public class relation implements Cloneable
-{
+@XmlType(propOrder = { "id", "type", "function", "effectType", "clause", "joinType", "target", "sources", "condition" })
+public class relation implements Cloneable {
 
-	@Attribute(required = false)
 	private String id;
 
-	@Attribute(required = false)
 	private String type;
 
-	@Attribute(required = false)
 	private String function;
 
-	@Attribute(required = false)
 	private String effectType;
 
-	@Attribute(required = false)
 	private String clause;
 
-	@Attribute(required = false)
 	private String joinType;
 
-	@Element(name = "target", required = false)
 	private targetColumn target;
 
-	@ElementList(entry = "source", inline = true, required = false)
 	private List<sourceColumn> sources;
 
-	@Attribute(required = false)
 	private String condition;
 
-	public String getId( )
-	{
+	@XmlAttribute(required = false)
+	public String getId() {
 		return id;
 	}
 
-	public void setId( String id )
-	{
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public String getType( )
-	{
+	@XmlAttribute(required = false)
+	public String getType() {
 		return type;
 	}
 
-	public void setType( String type )
-	{
+	public void setType(String type) {
 		this.type = type;
 	}
 
-	public targetColumn getTarget( )
-	{
+	@XmlElement(name = "target", required = false)
+	public targetColumn getTarget() {
 		return target;
 	}
 
-	public void setTarget( targetColumn target )
-	{
+	public void setTarget(targetColumn target) {
 		this.target = target;
 	}
 
-	public List<sourceColumn> getSources( )
-	{
-		if(this.sources == null){
+	@XmlElement(name = "source", required = false)
+	public List<sourceColumn> getSources() {
+		if (this.sources == null) {
 			this.sources = new LinkedList<sourceColumn>();
 		}
 		return sources;
 	}
 
-	public void setSources( List<sourceColumn> sources )
-	{
+	public void setSources(List<sourceColumn> sources) {
 		this.sources = sources;
 	}
 
-	public String getClause( )
-	{
+	@XmlAttribute(required = false)
+	public String getClause() {
 		return clause;
 	}
 
-	public void setClause( String clause )
-	{
+	public void setClause(String clause) {
 		this.clause = clause;
 	}
 
-	public String getCondition( )
-	{
+	@XmlAttribute(required = false)
+	public String getCondition() {
 		return condition;
 	}
 
-	public void setCondition( String condition )
-	{
+	public void setCondition(String condition) {
 		this.condition = condition;
 	}
 
-	public String getJoinType( )
-	{
+	@XmlAttribute(required = false)
+	public String getJoinType() {
 		return joinType;
 	}
 
-	public void setJoinType( String joinType )
-	{
+	public void setJoinType(String joinType) {
 		this.joinType = joinType;
 	}
 
-	public boolean isDataFlow( )
-	{
-		return "fdd".equals( type );
+	public boolean isDataFlow() {
+		return "fdd".equals(type);
 	}
-	
+
+	@XmlAttribute(required = false)
 	public String getFunction() {
 		return function;
 	}
@@ -124,6 +107,7 @@ public class relation implements Cloneable
 		this.function = function;
 	}
 
+	@XmlAttribute(required = false)
 	public String getEffectType() {
 		return effectType;
 	}
@@ -133,10 +117,8 @@ public class relation implements Cloneable
 	}
 
 	@Override
-	public Object clone( ) throws CloneNotSupportedException
-	{
-		return super.clone( );
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
-	
-	
+
 }

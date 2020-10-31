@@ -1,149 +1,128 @@
-
 package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 import gudusoft.gsqlparser.dlineage.dataflow.model.ModelBindingManager;
 import gudusoft.gsqlparser.dlineage.util.SQLUtil;
 
-@Element(name = "source")
-public class sourceColumn
-{
+@XmlType(propOrder = { "id", "column", "value", "source_id", "source_name", "column_type", "parent_id", "parent_name",
+		"coordinate", "clauseType", "source" })
+public class sourceColumn {
 
-	@Attribute(required = false)
 	private String id;
 
-	@Attribute(required = false)
 	private String column;
 
-	@Attribute(required = false)
 	private String value;
 
-	@Attribute(required = false)
 	private String source_id;
 
-	@Attribute(required = false)
 	private String source_name;
 
-	@Attribute(required = false)
 	private String column_type;
 
-	@Attribute(required = false)
 	private String parent_id;
 
-	@Attribute(required = false)
 	private String parent_name;
 
-	@Attribute(required = false)
 	private String coordinate;
 
-	@Attribute(required = false)
 	private String clauseType;
-	
-	@Attribute(required = false)
+
 	private String source;
 
-	public String getCoordinate( )
-	{
+	@XmlAttribute(required = false)
+	public String getCoordinate() {
 		return coordinate;
 	}
 
-	public void setCoordinate( String coordinate )
-	{
+	public void setCoordinate(String coordinate) {
 		this.coordinate = coordinate;
 	}
 
-	public String getColumn( )
-	{
+	@XmlAttribute(required = false)
+	public String getColumn() {
 		return column;
 	}
 
-	public void setColumn( String column )
-	{
+	public void setColumn(String column) {
 		this.column = column;
 	}
 
-	public String getId( )
-	{
+	@XmlAttribute(required = false)
+	public String getId() {
 		return id;
 	}
 
-	public void setId( String id )
-	{
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public String getParent_id( )
-	{
+	@XmlAttribute(name = "parent_id", required = false)
+	public String getParent_id() {
 		return parent_id;
 	}
 
-	public void setParent_id( String parent_id )
-	{
+	public void setParent_id(String parent_id) {
 		this.parent_id = parent_id;
 	}
 
-	public String getParent_name( )
-	{
+	@XmlAttribute(name = "parent_name", required = false)
+	public String getParent_name() {
 		return parent_name;
 	}
 
-	public void setParent_name( String parent_name )
-	{
+	public void setParent_name(String parent_name) {
 		this.parent_name = parent_name;
 	}
 
-	public String getValue( )
-	{
+	@XmlAttribute(required = false)
+	public String getValue() {
 		return value;
 	}
 
-	public void setValue( String value )
-	{
+	public void setValue(String value) {
 		this.value = value;
 	}
 
-	public String getSource_name( )
-	{
+	@XmlAttribute(name = "source_name", required = false)
+	public String getSource_name() {
 		return source_name;
 	}
 
-	public void setSource_name( String source_name )
-	{
+	public void setSource_name(String source_name) {
 		this.source_name = source_name;
 	}
 
-	public String getSource_id( )
-	{
+	@XmlAttribute(name = "source_id", required = false)
+	public String getSource_id() {
 		return source_id;
 	}
 
-	public void setSource_id( String source_id )
-	{
+	public void setSource_id(String source_id) {
 		this.source_id = source_id;
 	}
 
-	public String getClauseType( )
-	{
+	@XmlAttribute(required = false)
+	public String getClauseType() {
 		return clauseType;
 	}
 
-	public void setClauseType( String clauseType )
-	{
+	public void setClauseType(String clauseType) {
 		this.clauseType = clauseType;
 	}
 
-	public String getColumn_type( )
-	{
+	@XmlAttribute(name = "column_type", required = false)
+	public String getColumn_type() {
 		return column_type;
 	}
 
-	public void setColumn_type( String column_type )
-	{
+	public void setColumn_type(String column_type) {
 		this.column_type = column_type;
 	}
 
+	@XmlAttribute(required = false)
 	public String getSource() {
 		return source;
 	}
@@ -167,7 +146,7 @@ public class sourceColumn
 		if (ModelBindingManager.getGlobalVendor() != null) {
 			return SQLUtil.getIdentifierNormalName(columnName);
 		}
-		
+
 		return columnName;
 	}
 
@@ -198,7 +177,4 @@ public class sourceColumn
 		return true;
 	}
 
-	
-
-	
 }

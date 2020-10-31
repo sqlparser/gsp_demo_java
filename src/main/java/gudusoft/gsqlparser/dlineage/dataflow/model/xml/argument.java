@@ -1,30 +1,34 @@
 package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
-import org.simpleframework.xml.Attribute;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(propOrder = { "id", "name", "coordinate", "datatype", "inout" })
 public class argument {
-	@Attribute(required = false)
+
 	private String id;
-	@Attribute(required = false)
+
 	private String name;
-	@Attribute(required = false)
+
 	private String coordinate;
-	@Attribute(required = false)
+
 	private String datatype;
-	@Attribute(required = false)
+
 	private String inout;
 
 	public argument() {
 	}
 
+	@XmlAttribute(required = false)
 	public String getCoordinate() {
 		return this.coordinate;
 	}
-	
+
 	public void setCoordinate(String coordinate) {
 		this.coordinate = coordinate;
 	}
 
+	@XmlAttribute(required = false)
 	public String getName() {
 		return this.name;
 	}
@@ -33,6 +37,7 @@ public class argument {
 		this.name = name;
 	}
 
+	@XmlAttribute(required = false)
 	public String getId() {
 		return this.id;
 	}
@@ -41,6 +46,7 @@ public class argument {
 		this.id = id;
 	}
 
+	@XmlAttribute(required = false)
 	public String getDatatype() {
 		return this.datatype;
 	}
@@ -49,6 +55,7 @@ public class argument {
 		this.datatype = datatype;
 	}
 
+	@XmlAttribute(required = false)
 	public String getInout() {
 		return this.inout;
 	}

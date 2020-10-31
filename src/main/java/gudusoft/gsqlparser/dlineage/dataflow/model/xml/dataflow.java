@@ -2,27 +2,63 @@ package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
 
-@Root(name = "dlineage")
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlRootElement(name = "dlineage")
+@XmlType(propOrder = { "procedures", "tables", "views", "resultsets", "relations" })
 public class dataflow {
-	@ElementList(entry = "procedure", inline = true, required = false)
+
 	private List<procedure> procedures;
-	@ElementList(entry = "table", inline = true, required = false)
+
 	private List<table> tables;
-	@ElementList(entry = "view", inline = true, required = false)
+
 	private List<table> views;
-	@ElementList(entry = "resultset", inline = true, required = false)
+
 	private List<table> resultsets;
-	@ElementList(entry = "relation", inline = true, required = false)
+
 	private List<relation> relations;
 
 	public dataflow() {
 	}
 
+	@XmlElement(name = "procedure", required = false)
+	public List<procedure> getProcedures() {
+		if (this.procedures == null) {
+			this.procedures = new LinkedList<procedure>();
+		}
+		return this.procedures;
+	}
+
+	@XmlElement(name = "table", required = false)
+	public List<table> getTables() {
+		if (this.tables == null) {
+			this.tables = new LinkedList<table>();
+		}
+		return this.tables;
+	}
+
+	@XmlElement(name = "view", required = false)
+	public List<table> getViews() {
+		if (this.views == null) {
+			this.views = new LinkedList<table>();
+		}
+		return this.views;
+	}
+
+	@XmlElement(name = "resultset", required = false)
+	public List<table> getResultsets() {
+		if (this.resultsets == null) {
+			this.resultsets = new LinkedList<table>();
+		}
+		return this.resultsets;
+	}
+
+	@XmlElement(name = "relation", required = false)
 	public List<relation> getRelations() {
-		if(this.relations == null){
+		if (this.relations == null) {
 			this.relations = new LinkedList<relation>();
 		}
 		return this.relations;
@@ -32,44 +68,16 @@ public class dataflow {
 		this.relations = relations;
 	}
 
-	public List<table> getTables() {
-		if(this.tables == null){
-			this.tables = new LinkedList<table>();
-		}
-		return this.tables;
-	}
-
 	public void setTables(List<table> tables) {
 		this.tables = tables;
-	}
-
-	public List<table> getViews() {
-		if(this.views == null){
-			this.views = new LinkedList<table>();
-		}
-		return this.views;
 	}
 
 	public void setViews(List<table> views) {
 		this.views = views;
 	}
 
-	public List<table> getResultsets() {
-		if(this.resultsets == null){
-			this.resultsets = new LinkedList<table>();
-		}
-		return this.resultsets;
-	}
-
 	public void setResultsets(List<table> resultsets) {
 		this.resultsets = resultsets;
-	}
-
-	public List<procedure> getProcedures() {
-		if(this.procedures == null){
-			this.procedures = new LinkedList<procedure>();
-		}
-		return this.procedures;
 	}
 
 	public void setProcedures(List<procedure> procedures) {

@@ -3,28 +3,31 @@ package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementList;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(propOrder = { "id", "database", "schema", "name", "type", "coordinate", "arguments" })
 public class procedure {
-	@Attribute(required = false)
+
 	private String id;
-	@Attribute(required = false)
+
 	private String database;
-	@Attribute(required = false)
+
 	private String schema;
-	@Attribute(required = false)
+
 	private String name;
-	@Attribute(required = false)
+
 	private String type;
-	@Attribute(required = false)
+
 	private String coordinate;
-	@ElementList(entry = "argument", inline = true, required = false)
+
 	private List<argument> arguments;
 
 	public procedure() {
 	}
 
+	@XmlAttribute(required = false)
 	public String getCoordinate() {
 		return this.coordinate;
 	}
@@ -33,6 +36,7 @@ public class procedure {
 		this.coordinate = coordinate;
 	}
 
+	@XmlAttribute(required = false)
 	public String getName() {
 		return this.name;
 	}
@@ -41,6 +45,7 @@ public class procedure {
 		this.name = name;
 	}
 
+	@XmlAttribute(required = false)
 	public String getId() {
 		return this.id;
 	}
@@ -49,6 +54,7 @@ public class procedure {
 		this.id = id;
 	}
 
+	@XmlAttribute(required = false)
 	public String getType() {
 		return this.type;
 	}
@@ -57,8 +63,9 @@ public class procedure {
 		this.type = type;
 	}
 
+	@XmlElement(name = "argument", required = false)
 	public List<argument> getArguments() {
-		if(this.arguments == null){
+		if (this.arguments == null) {
 			this.arguments = new LinkedList<argument>();
 		}
 		return this.arguments;
@@ -68,6 +75,7 @@ public class procedure {
 		this.arguments = arguments;
 	}
 
+	@XmlAttribute(required = false)
 	public String getDatabase() {
 		return database;
 	}
@@ -76,6 +84,7 @@ public class procedure {
 		this.database = database;
 	}
 
+	@XmlAttribute(required = false)
 	public String getSchema() {
 		return schema;
 	}
@@ -83,5 +92,5 @@ public class procedure {
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
-	
+
 }

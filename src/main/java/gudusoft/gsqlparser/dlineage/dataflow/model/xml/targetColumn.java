@@ -1,100 +1,85 @@
-
 package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
-@Element(name = "target")
-public class targetColumn
-{
+@XmlType(propOrder = { "id", "column", "function", "target_id", "target_name", "parent_id", "parent_name", "coordinate",
+		"source" })
+public class targetColumn {
 
-	@Attribute(required = false)
 	private String id;
 
-	@Attribute(required = false)
 	private String column;
 
-	@Attribute(required = false)
 	private String function;
 
-	@Attribute(required = false)
 	private String target_id;
 
-	@Attribute(required = false)
 	private String target_name;
-	
-	@Attribute(required = false)
+
 	private String parent_id;
 
-	@Attribute(required = false)
 	private String parent_name;
 
-	@Attribute(required = false)
 	private String coordinate;
 
-	@Attribute(required = false)
 	private String source;
-	
-	public String getCoordinate( )
-	{
+
+	@XmlAttribute(required = false)
+	public String getCoordinate() {
 		return coordinate;
 	}
 
-	public void setCoordinate( String coordinate )
-	{
+	public void setCoordinate(String coordinate) {
 		this.coordinate = coordinate;
 	}
 
-	public String getColumn( )
-	{
+	@XmlAttribute(required = false)
+	public String getColumn() {
 		return column;
 	}
 
-	public void setColumn( String column )
-	{
+	public void setColumn(String column) {
 		this.column = column;
 	}
 
-	public String getId( )
-	{
+	@XmlAttribute(required = false)
+	public String getId() {
 		return id;
 	}
 
-	public void setId( String id )
-	{
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public String getParent_id( )
-	{
+	@XmlAttribute(name="parent_id", required = false)
+	public String getParent_id() {
 		return parent_id;
 	}
 
-	public void setParent_id( String parent_id )
-	{
+	public void setParent_id(String parent_id) {
 		this.parent_id = parent_id;
 	}
 
-	public String getParent_name( )
-	{
+	@XmlAttribute(name="parent_name", required = false)
+	public String getParent_name() {
 		return parent_name;
 	}
 
-	public void setParent_name( String parent_name )
-	{
+	public void setParent_name(String parent_name) {
 		this.parent_name = parent_name;
 	}
 
-	public String getFunction( )
-	{
+	@XmlAttribute(required = false)
+	public String getFunction() {
 		return function;
 	}
 
-	public void setFunction( String function )
-	{
+	public void setFunction(String function) {
 		this.function = function;
 	}
 
+	@XmlAttribute(name="target_id", required = false)
 	public String getTarget_id() {
 		return target_id;
 	}
@@ -103,6 +88,7 @@ public class targetColumn
 		this.target_id = target_id;
 	}
 
+	@XmlAttribute(name="target_name", required = false)
 	public String getTarget_name() {
 		return target_name;
 	}
@@ -111,6 +97,7 @@ public class targetColumn
 		this.target_name = target_name;
 	}
 
+	@XmlAttribute(required = false)
 	public String getSource() {
 		return source;
 	}

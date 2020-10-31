@@ -9,35 +9,46 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
+@SuppressWarnings("unchecked")
 public class XML2Model {
 
 	public static <T> T loadXML(Class<T> t, String xml) {
-		Serializer serializer = new Persister();
+		StringReader reader = null;
 		try {
-			return serializer.read(t, xml);
+			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			Unmarshaller unmarshaller = context.createUnmarshaller();
+			reader = new StringReader(xml);
+			return (T) unmarshaller.unmarshal(reader);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
 		}
 	}
 
 	public static <T> T loadXML(Class<T> t, File file) {
-		Serializer serializer = new Persister();
 		ZipInputStream zis = null;
 		BufferedReader reader = null;
 		try {
+			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			Unmarshaller unmarshaller = context.createUnmarshaller();
 			zis = new ZipInputStream(new FileInputStream(file));
 			zis.getNextEntry();
 			reader = new BufferedReader(new InputStreamReader(zis, "UTF-8"));
-			return serializer.read(t, reader);
+			return (T) unmarshaller.unmarshal(reader);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -60,10 +71,13 @@ public class XML2Model {
 	}
 
 	public static <T> String saveXML(T t) {
-		Serializer serializer = new Persister();
 		try {
+			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 			StringWriter writer = new StringWriter();
-			serializer.write(t, writer);
+			marshaller.marshal(t, writer);
 			writer.close();
 			return writer.toString();
 		} catch (Exception e) {
@@ -73,15 +87,18 @@ public class XML2Model {
 	}
 
 	public static <T> void saveXML(T t, File file) {
-		Serializer serializer = new Persister();
 		BufferedWriter writer = null;
 		ZipOutputStream zos = null;
 		try {
+			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 			zos = new ZipOutputStream(new FileOutputStream(file));
 			zos.setLevel(2);
 			zos.putNextEntry(new ZipEntry("data"));
 			writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"));
-			serializer.write(t, writer);
+			marshaller.marshal(t, writer);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

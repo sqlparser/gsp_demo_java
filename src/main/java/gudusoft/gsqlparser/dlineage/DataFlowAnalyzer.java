@@ -18,11 +18,9 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import gudusoft.gsqlparser.EAlterTableOptionType;
 import gudusoft.gsqlparser.EComparisonType;
@@ -565,8 +563,12 @@ public class DataFlowAnalyzer {
 			while (columnIter.hasNext()) {
 				String columnName = columnIter.next();
 				List<column> columnList = columnMap.get(columnName);
-				List<column> functions = columnList.stream()
-						.filter(t -> Boolean.TRUE.toString().equals(t.getIsFunction())).collect(Collectors.toList());
+				List<column> functions = new ArrayList<column>();
+				for(column t: columnList){
+					if(Boolean.TRUE.toString().equals(t.getIsFunction())){
+						functions.add(t);
+					}
+				}
 				if (functions != null && !functions.isEmpty()) {
 					for (column function : functions) {
 						mergeColumns.add(function);
@@ -1199,9 +1201,24 @@ public class DataFlowAnalyzer {
 		dataflow simple = new dataflow();
 		List<relation> simpleRelations = new ArrayList<relation>();
 		List<relation> relations = instance.getRelations();
-		instance.getResultsets().forEach(t -> resultSetMap.put(t.getId().toLowerCase(), t));
-		instance.getTables().forEach(t -> tableMap.put(t.getId().toLowerCase(), t));
-		instance.getViews().forEach(t -> viewMap.put(t.getId().toLowerCase(), t));
+		if(instance.getResultsets()!=null){
+			for(table t :instance.getResultsets()){
+				resultSetMap.put(t.getId().toLowerCase(), t);
+			}
+		}
+		
+		if(instance.getTables()!=null){
+			for(table t :instance.getTables()){
+				tableMap.put(t.getId().toLowerCase(), t);
+			}
+		}
+		
+		if(instance.getViews()!=null){
+			for(table t :instance.getViews()){
+				viewMap.put(t.getId().toLowerCase(), t);
+			}
+		}
+		
 		if (relations != null) {
 			// if (relations.size() > 1000) {
 			// relations = relations.stream().filter(t ->
@@ -1227,8 +1244,14 @@ public class DataFlowAnalyzer {
 					findSourceRaltions(instance, targetIdRelationMap, relationElem, relationSources,
 							new String[] { relationElem.getType() });
 					if (relationSources.size() > 0) {
-						Map<sourceColumn, List<Pair<sourceColumn, List<String>>>> columnMap = relationSources.stream()
-								.collect(Collectors.groupingBy(t -> ((Pair<sourceColumn, List<String>>) t).first));
+						Map<sourceColumn, List<Pair<sourceColumn, List<String>>>> columnMap = new LinkedHashMap<sourceColumn, List<Pair<sourceColumn,List<String>>>>();
+						for(Pair<sourceColumn, List<String>> t: relationSources){
+							sourceColumn key = ((Pair<sourceColumn, List<String>>) t).first;
+							if(!columnMap.containsKey(key)){
+								columnMap.put(key, new ArrayList<Pair<sourceColumn,List<String>>>());
+							}
+							columnMap.get(key).add(t);
+						}
 						Iterator<sourceColumn> iter = columnMap.keySet().iterator();
 						while (iter.hasNext()) {
 							sourceColumn column = iter.next();
@@ -1243,14 +1266,19 @@ public class DataFlowAnalyzer {
 			}
 		}
 		simple.setProcedures(instance.getProcedures());
-		simple.setTables(instance.getTables().stream().filter(t -> !isMemoryTempTable(t.getName()))
-				.collect(Collectors.toList()));
+		List<table> tables = new ArrayList<table>();
+		for(table t: instance.getTables()){
+			if(!isMemoryTempTable(t.getName())){
+				tables.add(t);
+			}
+		}
+		simple.setTables(tables);
 		simple.setViews(instance.getViews());
 		if (instance.getResultsets() != null) {
 			List<table> resultSets = new ArrayList<table>();
 			for (int i = 0; i < instance.getResultsets().size(); i++) {
 				table resultSet = instance.getResultsets().get(i);
-				if (resultSet.isTarget()) {
+				if (resultSet.getIsTarget()) {
 					resultSets.add(resultSet);
 				}
 			}
@@ -1341,7 +1369,7 @@ public class DataFlowAnalyzer {
 
 	private boolean isTargetResultSet(dataflow instance, String targetParent) {
 		if (resultSetMap.containsKey(targetParent.toLowerCase())) {
-			return resultSetMap.get(targetParent.toLowerCase()).isTarget();
+			return resultSetMap.get(targetParent.toLowerCase()).getIsTarget();
 		}
 		return false;
 	}
@@ -3825,22 +3853,28 @@ public class DataFlowAnalyzer {
 		}
 
 		if (targetColumn.hasStarLinkColumn()) {
-			table resultSetElement = dataflow.getResultsets().stream()
-					.filter(t -> t.getId().equals(String.valueOf(targetColumn.getResultSet().getId()))).findFirst()
-					.get();
-			List<String> columns = targetColumn.getStarLinkColumnNames();
-			for (int k = 0; k < columns.size(); k++) {
-				column columnElement = new column();
-				columnElement.setId(String.valueOf(targetColumn.getId()) + "_" + k);
-				String columnName = columns.get(k);
-				columnElement.setName(columnName);
-				if (targetColumn.isFunction()) {
-					columnElement.setIsFunction(String.valueOf(targetColumn.isFunction()));
+			table resultSetElement = null;
+			for(table t: dataflow.getResultsets()){
+				if(t.getId().equals(String.valueOf(targetColumn.getResultSet().getId()))){
+					resultSetElement = t;
+					break;
 				}
-				if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
-					columnElement.setCoordinate(targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+			}
+			if(resultSetElement!=null){
+				List<String> columns = targetColumn.getStarLinkColumnNames();
+				for (int k = 0; k < columns.size(); k++) {
+					column columnElement = new column();
+					columnElement.setId(String.valueOf(targetColumn.getId()) + "_" + k);
+					String columnName = columns.get(k);
+					columnElement.setName(columnName);
+					if (targetColumn.isFunction()) {
+						columnElement.setIsFunction(String.valueOf(targetColumn.isFunction()));
+					}
+					if (targetColumn.getStartPosition() != null && targetColumn.getEndPosition() != null) {
+						columnElement.setCoordinate(targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
+					}
+					resultSetElement.getColumns().add(columnElement);
 				}
-				resultSetElement.getColumns().add(columnElement);
 			}
 		}
 	}
@@ -3858,7 +3892,7 @@ public class DataFlowAnalyzer {
 				if (source.hasStarLinkColumn()) {
 					for (Map.Entry<String, Set<TObjectName>> item : source.getStarLinkColumns().entrySet()) {
 						if (!targetColumn.getStarLinkColumns().containsKey(item.getKey())) {
-							targetColumn.getStarLinkColumns().put(item.getKey(), new LinkedHashSet<>());
+							targetColumn.getStarLinkColumns().put(item.getKey(), new LinkedHashSet<TObjectName>());
 						}
 						targetColumn.getStarLinkColumns().get(item.getKey()).addAll(item.getValue());
 					}
@@ -3881,7 +3915,7 @@ public class DataFlowAnalyzer {
 				if (source.hasStarLinkColumn()) {
 					for (Map.Entry<String, Set<TObjectName>> item : source.getStarLinkColumns().entrySet()) {
 						if (!targetColumn.getStarLinkColumns().containsKey(item.getKey())) {
-							targetColumn.getStarLinkColumns().put(item.getKey(), new LinkedHashSet<>());
+							targetColumn.getStarLinkColumns().put(item.getKey(), new LinkedHashSet<TObjectName>());
 						}
 						targetColumn.getStarLinkColumns().get(item.getKey()).addAll(item.getValue());
 					}
@@ -3896,13 +3930,25 @@ public class DataFlowAnalyzer {
 		}
 
 		if (targetColumn.hasStarLinkColumn()) {
-			Optional<table> tableElement = dataflow.getTables().stream()
-					.filter(t -> t.getId().equals(String.valueOf(targetColumn.getTable().getId()))).findFirst();
-			if (!tableElement.isPresent()) {
-				tableElement = dataflow.getViews().stream()
-						.filter(t -> t.getId().equals(String.valueOf(targetColumn.getTable().getId()))).findFirst();
+			table tableElement = null;
+			if(dataflow.getTables()!=null){
+				for(table t:dataflow.getTables()){
+					if(t.getId().equals(String.valueOf(targetColumn.getTable().getId()))){
+						tableElement = t;
+						break;
+					}
+				}
 			}
-			if (tableElement.isPresent()) {
+			if(tableElement == null && dataflow.getViews()!=null){
+				for(table t:dataflow.getViews()){
+					if(t.getId().equals(String.valueOf(targetColumn.getTable().getId()))){
+						tableElement = t;
+						break;
+					}
+				}
+			}
+			
+			if (tableElement!=null) {
 				List<String> columns = new ArrayList<String>(targetColumn.getStarLinkColumns().keySet());
 				for (int k = 0; k < columns.size(); k++) {
 					column columnElement = new column();
@@ -3913,7 +3959,7 @@ public class DataFlowAnalyzer {
 						columnElement
 								.setCoordinate(targetColumn.getStartPosition() + "," + targetColumn.getEndPosition());
 					}
-					tableElement.get().getColumns().add(columnElement);
+					tableElement.getColumns().add(columnElement);
 				}
 			}
 		}

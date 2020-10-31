@@ -1,61 +1,54 @@
 
 package gudusoft.gsqlparser.dlineage.dataflow.model.xml;
 
-import org.simpleframework.xml.Attribute;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 import gudusoft.gsqlparser.dlineage.util.Pair;
 
-public class column
-{
-	@Attribute(required = false)
+@XmlType(propOrder = { "id", "name", "coordinate", "source", "qualifiedTable", "isFunction" })
+public class column {
+
 	private String id;
-	
-	@Attribute(required = false)
+
 	private String name;
 
-	@Attribute(required = false)
 	private String coordinate;
-	
-	@Attribute(required = false)
-	private String source;
-	
-	@Attribute(required = false)
-	private String qualifiedTable;
-	
-	@Attribute(required = false)
-	private String isFunction;
-	
 
-	public String getCoordinate( )
-	{
+	private String source;
+
+	private String qualifiedTable;
+
+	private String isFunction;
+
+	@XmlAttribute(required = false)
+	public String getCoordinate() {
 		return coordinate;
 	}
 
-	public void setCoordinate( String coordinate )
-	{
+	public void setCoordinate(String coordinate) {
 		this.coordinate = coordinate;
 	}
 
-	public String getName( )
-	{
+	@XmlAttribute(required = false)
+	public String getName() {
 		return name;
 	}
 
-	public void setName( String name )
-	{
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	public String getId( )
-	{
+	@XmlAttribute(required = false)
+	public String getId() {
 		return id;
 	}
 
-	public void setId( String id )
-	{
+	public void setId(String id) {
 		this.id = id;
 	}
 
+	@XmlAttribute(required = false)
 	public String getSource() {
 		return source;
 	}
@@ -64,6 +57,7 @@ public class column
 		this.source = source;
 	}
 
+	@XmlAttribute(required = false)
 	public String getQualifiedTable() {
 		return qualifiedTable;
 	}
@@ -121,6 +115,7 @@ public class column
 		return true;
 	}
 
+	@XmlAttribute(name = "isFunction", required = false)
 	public String getIsFunction() {
 		return isFunction;
 	}
@@ -128,19 +123,16 @@ public class column
 	public void setIsFunction(String isFunction) {
 		this.isFunction = isFunction;
 	}
-	
-	public int getOccurrencesNumber( )
-	{
-		return PositionUtil.getOccurrencesNumber( coordinate );
+
+	public int getOccurrencesNumber() {
+		return PositionUtil.getOccurrencesNumber(coordinate);
 	}
 
-	public Pair<Integer, Integer> getStartPos( int index )
-	{
-		return PositionUtil.getStartPos( coordinate, index );
+	public Pair<Integer, Integer> getStartPos(int index) {
+		return PositionUtil.getStartPos(coordinate, index);
 	}
 
-	public Pair<Integer, Integer> getEndPos( int index )
-	{
-		return PositionUtil.getEndPos( coordinate, index );
+	public Pair<Integer, Integer> getEndPos(int index) {
+		return PositionUtil.getEndPos(coordinate, index);
 	}
 }
