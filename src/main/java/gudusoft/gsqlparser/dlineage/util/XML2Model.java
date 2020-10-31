@@ -25,7 +25,7 @@ public class XML2Model {
 	public static <T> T loadXML(Class<T> t, String xml) {
 		StringReader reader = null;
 		try {
-			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			JAXBContext context = JAXBContext.newInstance(t);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			reader = new StringReader(xml);
 			return (T) unmarshaller.unmarshal(reader);
@@ -43,7 +43,7 @@ public class XML2Model {
 		ZipInputStream zis = null;
 		BufferedReader reader = null;
 		try {
-			JAXBContext context = JAXBContext.newInstance(t.getClass());
+			JAXBContext context = JAXBContext.newInstance(t);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			zis = new ZipInputStream(new FileInputStream(file));
 			zis.getNextEntry();

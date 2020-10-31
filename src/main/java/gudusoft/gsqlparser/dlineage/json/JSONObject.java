@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("rawtypes")
 class JSONObject implements Serializable {
 
 	private static final Map<Character, Character> TRANSEFER_CHAR_MAP = new HashMap<Character, Character>() {
@@ -221,7 +220,6 @@ class JSONObject implements Serializable {
 	}
 
 	public Object getJsonObj() {
-		return (jsonObj instanceof ArrayList && ((ArrayList) jsonObj).size() > 0) ? ((ArrayList) jsonObj).get(0)
-				: jsonObj;
+		return jsonObj;
 	}
 }
