@@ -63,6 +63,7 @@ public class Dlineage
 		this.sqlFiles = null;
 		this.sqlContent = sqlContent;
 		tableColumns.clear( );
+		SQLUtil.resetVirtualTableNames();
 		procedures = new Pair<procedureImpactResult, List<ProcedureMetaData>>( new procedureImpactResult( ),
 				new ArrayList<ProcedureMetaData>( ) );
 
@@ -117,6 +118,7 @@ public class Dlineage
 		this.vendor = vendor;
 		this.sqlFiles = null;
 		tableColumns.clear( );
+		SQLUtil.resetVirtualTableNames();
 		procedures = new Pair<procedureImpactResult, List<ProcedureMetaData>>( new procedureImpactResult( ),
 				new ArrayList<ProcedureMetaData>( ) );
 
@@ -179,6 +181,7 @@ public class Dlineage
 		this.vendor = vendor;
 		this.sqlFiles = sqlFiles;
 		tableColumns.clear( );
+		SQLUtil.resetVirtualTableNames();
 		procedures = new Pair<procedureImpactResult, List<ProcedureMetaData>>( new procedureImpactResult( ),
 				new ArrayList<ProcedureMetaData>( ) );
 		File[] children = sqlFiles;
@@ -245,6 +248,7 @@ public class Dlineage
 		this.sqlDir = sqlDir;
 		this.vendor = vendor;
 		tableColumns.clear( );
+		SQLUtil.resetVirtualTableNames();
 		procedures = new Pair<procedureImpactResult, List<ProcedureMetaData>>( new procedureImpactResult( ),
 				new ArrayList<ProcedureMetaData>( ) );
 		File[] children = listFiles( sqlDir );

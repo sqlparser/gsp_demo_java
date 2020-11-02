@@ -26,7 +26,7 @@ call setenv\setenv.bat
     )
 
 REM # Run the gsp demo
-%JAVA_CMD% -cp %CLASSPATH% demos.dlineage.DataFlowAnalyzer  %1 %2 %3 %4 %5 %6 %7 %8 %9
+%JAVA_CMD% -cp %CLASSPATH% demos.dlineage.DataFlowAnalyzerDemo  %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 REM # Change back to the original directory
 cd src\main\java\demos\dlineage
