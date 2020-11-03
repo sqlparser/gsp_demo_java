@@ -15,15 +15,14 @@ import com.alibaba.fastjson.JSONObject;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
 
-public class DataFlowAnalyzerDemo {
+public class DataFlowAnalyzer {
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzerDemo [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/json] [/traceView] [/t <database type>] [/o <output file path>][/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/s [/text]] [/json] [/traceView] [/t <database type>] [/o <output file path>][/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
@@ -44,8 +43,8 @@ public class DataFlowAnalyzerDemo {
 		List<String> argList = Arrays.asList(args);
 		
 		if(argList.indexOf("/version")!=-1){
-			System.out.println("Version: "+DataFlowAnalyzer.getVersion());
-			System.out.println("Release Date: "+DataFlowAnalyzer.getReleaseDate());
+			System.out.println("Version: "+gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getVersion());
+			System.out.println("Release Date: "+gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getReleaseDate());
 			return;
 		}
 
@@ -108,7 +107,7 @@ public class DataFlowAnalyzerDemo {
 		
 		jsonFormat = argList.indexOf("/json") != -1;
 
-		DataFlowAnalyzer dlineage = new DataFlowAnalyzer(sqlFiles, vendor, simple);
+		gudusoft.gsqlparser.dlineage.DataFlowAnalyzer dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(sqlFiles, vendor, simple);
 
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
@@ -122,7 +121,7 @@ public class DataFlowAnalyzerDemo {
 		
 		if (jsonFormat) {
 			JSONObject jsonResult = new JSONObject();
-			DataFlow model = DataFlowAnalyzer.getSqlflowJSONModel(dlineage.getDataFlow());
+			DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dlineage.getDataFlow());
 			model.setDbvendor(vendor.name());
 			jsonResult.put("data", model);
 			result = JSON.toJSONString(jsonResult, true);
