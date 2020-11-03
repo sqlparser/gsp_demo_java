@@ -16,24 +16,19 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import demos.dlineage.dataflow.model.ModelBindingManager;
-import demos.dlineage.dataflow.model.SqlInfo;
-import demos.dlineage.dataflow.model.Table;
-import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.nodes.TObjectName;
-import gudusoft.gsqlparser.nodes.TTable;
 
 public class SQLUtil {
 
+    private static int virtualTableIndex = -1;
+    private static Map<String, String> virtualTableNames = new LinkedHashMap<String, String>();
+    
 	public static final String TABLE_CONSTANT = "CONSTANT";
 
 	public static boolean isEmpty(String value) {
@@ -273,24 +268,24 @@ public class SQLUtil {
 	}
 
 	public synchronized static String generateVirtualTableName(TCustomSqlStatement stmt) {
-		if (ModelBindingManager.get().virtualTableNames.containsKey(stmt.toString()))
-			return ModelBindingManager.get().virtualTableNames.get(stmt.toString());
+		if (virtualTableNames.containsKey(stmt.toString()))
+			return virtualTableNames.get(stmt.toString());
 		else {
 			String tableName = null;
-			ModelBindingManager.get().virtualTableIndex++;
-			if (ModelBindingManager.get().virtualTableIndex == 0) {
+			virtualTableIndex++;
+			if (virtualTableIndex == 0) {
 				tableName = "RESULT SET COLUMNS";
 			} else {
-				tableName = "RESULT SET COLUMNS " + ModelBindingManager.get().virtualTableIndex;
+				tableName = "RESULT SET COLUMNS " + virtualTableIndex;
 			}
-			ModelBindingManager.get().virtualTableNames.put(stmt.toString(), tableName);
+			virtualTableNames.put(stmt.toString(), tableName);
 			return tableName;
 		}
 	}
 
 	public synchronized static void resetVirtualTableNames() {
-		ModelBindingManager.get().virtualTableIndex = -1;
-		ModelBindingManager.get().virtualTableNames.clear();
+		virtualTableIndex = -1;
+		virtualTableNames.clear();
 	}
 
 	/**
@@ -395,359 +390,5 @@ public class SQLUtil {
 		public int read() throws IOException {
 			return internalIn.read();
 		}
-	}
-
-	public static boolean compareIdentifier(String source, String target) {
-		boolean ret = false;
-		String normalTarget, normalSource;
-
-		switch (ModelBindingManager.getGlobalVendor()) {
-		case dbvbigquery:
-		case dbvcouchbase:
-		case dbvhive:
-		case dbvimpala:
-			if (target.indexOf('`') >= 0) {
-				normalTarget = target.replaceAll("[`]", "");
-			} else {
-				normalTarget = target;
-			}
-
-			if (source.indexOf('`') >= 0) {
-				normalSource = source.replaceAll("[`]", "");
-			} else {
-				normalSource = source;
-			}
-
-			ret = normalTarget.equalsIgnoreCase(normalSource);
-			break;
-		case dbvmysql:
-			if (target.indexOf('`') >= 0) {
-				normalTarget = target.replaceAll("[`]", "");
-			} else {
-				normalTarget = target;
-			}
-
-			if (source.indexOf('`') >= 0) {
-				normalSource = source.replaceAll("[`]", "");
-			} else {
-				normalSource = source;
-			}
-
-			ret = normalTarget.equalsIgnoreCase(normalSource);
-			break;
-		case dbvdax:
-			if (target.indexOf('\'') >= 0) {
-				normalTarget = target.replaceAll("[']", "");
-			} else {
-				normalTarget = target;
-			}
-
-			if (source.indexOf('\'') >= 0) {
-				normalSource = source.replaceAll("[']", "");
-			} else {
-				normalSource = source;
-			}
-
-			ret = normalTarget.equalsIgnoreCase(normalSource);
-			break;
-		case dbvdb2:
-		case dbvhana:
-		case dbvinformix:
-		case dbvnetezza:
-		case dbvoracle:
-		case dbvredshift:
-		case dbvsnowflake:
-		case dbvsybase:
-		case dbvteradata:
-		case dbvvertica:
-			if (target.indexOf('"') >= 0) {
-				normalTarget = target.replaceAll("\"", "");
-			} else {
-				normalTarget = target.toUpperCase();
-			}
-
-			if (source.indexOf('"') >= 0) {
-				normalSource = source.replaceAll("\"", "");
-			} else {
-				normalSource = source.toUpperCase();
-			}
-			ret = normalTarget.compareTo(normalSource) == 0;
-
-			break;
-		case dbvpostgresql:
-			if (target.indexOf('"') >= 0) {
-				normalTarget = target.replaceAll("\"", "");
-			} else {
-				normalTarget = target.toLowerCase();
-			}
-
-			if (source.indexOf('"') >= 0) {
-				normalSource = source.replaceAll("\"", "");
-			} else {
-				normalSource = source.toLowerCase();
-			}
-			ret = normalTarget.compareTo(normalSource) == 0;
-
-			break;
-		case dbvmssql:
-			if (target.indexOf('"') >= 0) {
-				normalTarget = target.replaceAll("\"", "");
-			} else if (target.indexOf("[") >= 0) {
-				normalTarget = target.replaceAll("\\[", "").replaceAll("]", "");
-			} else {
-				normalTarget = target;
-			}
-
-			if (source.indexOf('"') >= 0) {
-				normalSource = source.replaceAll("\"", "");
-			} else if (source.indexOf("[") >= 0) {
-				normalSource = source.replaceAll("\\[", "").replaceAll("]", "");
-			} else {
-				normalSource = source;
-			}
-
-			if (target.indexOf('\'') >= 0) {
-				normalTarget = target.replaceAll("[']", "");
-			} else {
-				normalTarget = target;
-			}
-
-			if (source.indexOf('\'') >= 0) {
-				normalSource = source.replaceAll("[']", "");
-			} else {
-				normalSource = source;
-			}
-
-			// depends on the sql server case sensitive setting, need to add an
-			// option to control the comparision
-			ret = normalTarget.equalsIgnoreCase(normalSource);
-
-			break;
-		default:
-			if (target.indexOf('"') >= 0) {
-				normalTarget = target.replaceAll("\"", "");
-			} else {
-				normalTarget = target.toUpperCase();
-			}
-
-			if (source.indexOf('"') >= 0) {
-				normalSource = source.replaceAll("\"", "");
-			} else {
-				normalSource = source.toUpperCase();
-			}
-			ret = normalTarget.compareTo(normalSource) == 0;
-
-			break;
-		}
-
-		return ret;
-	}
-
-	public static String getIdentifierNormalName(EDbVendor vendor, String name) {
-		if (isEmpty(name)) {
-			return null;
-		}
-        name = name.replaceAll("(?i)null\\.", "");
-		
-		String normalName = null;
-		switch (vendor) {
-		case dbvbigquery:
-		case dbvcouchbase:
-		case dbvhive:
-		case dbvimpala:
-			if (name.indexOf('`') >= 0) {
-				normalName = name.replaceAll("[`]", "");
-			} else {
-				normalName = name;
-			}
-			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
-
-		case dbvmysql:
-			if (name.indexOf('`') >= 0) {
-				normalName = name.replaceAll("[`]", "");
-			} else {
-				normalName = name;
-			}
-
-			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
-		case dbvdax:
-			if (name.indexOf('\'') >= 0) {
-				normalName = name.replaceAll("[']", "");
-			} else {
-				normalName = name;
-			}
-
-			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
-		case dbvdb2:
-		case dbvhana:
-		case dbvinformix:
-		case dbvnetezza:
-		case dbvoracle:
-		case dbvredshift:
-		case dbvsnowflake:
-		case dbvsybase:
-		case dbvteradata:
-		case dbvvertica:
-			if (name.indexOf('"') >= 0) {
-				normalName = name.replaceAll("\"", "");
-			} else {
-				normalName = name.toUpperCase();
-			}
-			return normalName.replaceAll("\\.\\s+", ".");
-		case dbvpostgresql:
-			if (name.indexOf('"') >= 0) {
-				normalName = name.replaceAll("\"", "");
-			} else {
-				normalName = name.toLowerCase();
-			}
-			return normalName.replaceAll("\\.\\s+", ".");
-		case dbvmssql:
-			normalName = name;
-			if (normalName.indexOf('\'') >= 0) {
-				normalName = normalName.replaceAll("[']", "");
-			}
-			if (normalName.indexOf('"') >= 0) {
-				normalName = normalName.replaceAll("\"", "");
-			}
-			if (normalName.indexOf("[") >= 0) {
-				normalName = normalName.replaceAll("\\[", "").replaceAll("]", "");
-			}
-			return normalName.toUpperCase().replaceAll("\\.\\s+", ".");
-		default:
-			if (name.indexOf('"') >= 0) {
-				normalName = name.replaceAll("\"", "");
-			} else {
-				normalName = name.toUpperCase();
-			}
-
-			return normalName.replaceAll("\\.\\s+", ".");
-		}
-	}
-
-	public static String getColumnName(TObjectName column) {
-		if (column == null) {
-			return null;
-		}
-		String name = column.getColumnNameOnly();
-		if (name == null || "".equals(name.trim())) {
-			return SQLUtil.getIdentifierNormalName(column.toString().trim());
-		} else
-			return SQLUtil.getIdentifierNormalName(name.trim());
-	}
-	
-	public static String getIdentifierNormalName(String name) {
-		return getIdentifierNormalName(ModelBindingManager.getGlobalVendor(), name);
-	}
-
-	public static boolean isTempTable(Table tableModel, EDbVendor vendor) {
-		switch (vendor) {
-		case dbvmssql:
-			return tableModel.getName().startsWith("#");
-		default:
-			return false;
-		}
-	}
-
-	public static boolean isTempTable(TTable table, EDbVendor vendor) {
-		switch (vendor) {
-		case dbvmssql:
-			return table.getName().startsWith("#");
-		default:
-			return false;
-		}
-	}
-
-	public static String getTableFullName(String tableName) {
-		if (tableName.split("\\.").length == 1) {
-			StringBuffer buffer = new StringBuffer();
-			if (ModelBindingManager.getGlobalDatabase() != null) {
-				buffer.append(ModelBindingManager.getGlobalDatabase()).append(".");
-			}
-			if (ModelBindingManager.getGlobalSchema() != null) {
-				buffer.append(ModelBindingManager.getGlobalSchema()).append(".");
-			}
-			buffer.append(tableName);
-			return SQLUtil.getIdentifierNormalName(buffer.toString());
-		} else if (tableName.split("\\.").length == 2) {
-			if (ModelBindingManager.getGlobalDatabase() != null) {
-				return SQLUtil.getIdentifierNormalName(ModelBindingManager.getGlobalDatabase() + "." + tableName);
-			} else {
-				return SQLUtil.getIdentifierNormalName(tableName);
-			}
-		} else {
-			return SQLUtil.getIdentifierNormalName(tableName);
-		}
-	}
-
-	public static SqlInfo[] convertSQL(File file, String json) {
-		List<SqlInfo> sqlInfos = new ArrayList<>();
-		try {
-			JSONArray sqlContents = JSONArray.parseArray(json);
-			for (int j = 0; j < sqlContents.size(); j++) {
-				JSONObject sqlContent = sqlContents.getJSONObject(j);
-				String sql = sqlContent.getString("sql");
-				String fileName = sqlContent.getString("fileName");
-				if (sql != null && sql.trim().startsWith("{")) {
-					JSONObject queryObject = JSON.parseObject(sql);
-					JSONArray querys = queryObject.getJSONArray("queries");
-					if (querys != null) {
-						for (int i = 0; i < querys.size(); i++) {
-							JSONObject object = querys.getJSONObject(i);
-							SqlInfo info = new SqlInfo();
-							info.setSql(object.toJSONString());
-							info.setFileName(fileName);
-							info.setOriginIndex(i);
-							sqlInfos.add(info);
-						}
-					} else {
-						SqlInfo info = new SqlInfo();
-						info.setSql(queryObject.toJSONString());
-						info.setFileName(fileName);
-						info.setOriginIndex(0);
-						sqlInfos.add(info);
-					}
-				} else if (sql != null) {
-					SqlInfo info = new SqlInfo();
-					info.setSql(sql);
-					info.setFileName(fileName);
-					info.setOriginIndex(0);
-					sqlInfos.add(info);
-				}
-			}
-		} catch (Exception e) {
-			try {
-				JSONObject queryObject = JSON.parseObject(json);
-				JSONArray querys = queryObject.getJSONArray("queries");
-				if (querys != null) {
-					for (int i = 0; i < querys.size(); i++) {
-						JSONObject object = querys.getJSONObject(i);
-						SqlInfo info = new SqlInfo();
-						info.setSql(object.toJSONString());
-						if (file != null) {
-							info.setFileName(file.getName());
-						}
-						info.setOriginIndex(i);
-						sqlInfos.add(info);
-					}
-				} else {
-					SqlInfo info = new SqlInfo();
-					info.setSql(queryObject.toJSONString());
-					if (file != null) {
-						info.setFileName(file.getName());
-					}
-					info.setOriginIndex(0);
-					sqlInfos.add(info);
-				}
-			} catch (Exception e1) {
-				SqlInfo info = new SqlInfo();
-				info.setSql(json);
-				if (file != null) {
-					info.setFileName(file.getName());
-				}
-				info.setOriginIndex(0);
-				sqlInfos.add(info);
-			}
-		}
-		return sqlInfos.toArray(new SqlInfo[0]);
 	}
 }
