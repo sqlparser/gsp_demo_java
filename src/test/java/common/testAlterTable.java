@@ -12,6 +12,19 @@ import junit.framework.TestCase;
 
 public class testAlterTable extends TestCase {
 
+    public void testMySQLAfterColumn(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
+        sqlparser.sqltext = "alter table qatest.movies ADD COLUMN viewCount SMALLINT AFTER description;";
+        assertTrue(sqlparser.parse() == 0);
+        TAlterTableStatement alterTable = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(alterTable.getTableName().toString().equalsIgnoreCase("qatest.movies"));
+
+        TAlterTableOption ato = alterTable.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(ato.getOptionType() == EAlterTableOptionType.AddColumn);
+        assertTrue(ato.getColumnPosition() == TAlterTableOption.COLUMN_POSITION_AFTER);
+        assertTrue(ato.getAfterColumnName().toString().equalsIgnoreCase("description"));
+    }
+
     public void testNetezzaSetPrivileges(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvnetezza);
         sqlparser.sqltext = "ALTER TABLE distributors SET PRIVILEGES TO suppliers";
