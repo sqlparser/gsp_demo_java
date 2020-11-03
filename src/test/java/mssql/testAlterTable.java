@@ -3,7 +3,7 @@ package test.mssql;
  * Date: 12-3-20
  */
 
-import demos.dlineage.dataflow.model.EffectType;
+
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TAlterTableStatement;
