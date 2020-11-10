@@ -11,7 +11,7 @@ import gudusoft.gsqlparser.sqlenv.metadata.DDL;
 public class OracleDataSourceConnector {
 
 	public static void main(String[] args) {
-		TOracleSQLDataSource datasource = new TOracleSQLDataSource("106.54.134.160", "1521", "bigking", "Cat_12345",
+		TOracleSQLDataSource datasource = new TOracleSQLDataSource("IP", "1521", "username", "password",
 				"orcl");
 
 		// Only extract schema BIGKING
