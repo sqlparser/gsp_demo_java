@@ -21,9 +21,9 @@
 		<dependency>
 			<groupId>com.sqlparser</groupId>
 			<artifactId>gsp</artifactId>
-			<version>2.1.2.1</version>
+			<version>2.1.2.2</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/../../lib/gudusoft.gsqlparser-2.1.2.1.jar</systemPath>
+			<systemPath>${project.basedir}/../../lib/gudusoft.gsqlparser-2.1.2.2.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com</groupId>
