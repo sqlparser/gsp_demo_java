@@ -4,6 +4,9 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
+import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
+import gudusoft.gsqlparser.stmt.sybase.TSybaseDeleteStatistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +19,7 @@ public class searchNode {
         t = System.currentTimeMillis();
 
         if (args.length != 1){
-            System.out.println("Usage: java searchDatatype sqlfile.sql");
+            System.out.println("Usage: java searchNode sqlfile.sql");
             return;
         }
         File file=new File(args[0]);
@@ -25,7 +28,7 @@ public class searchNode {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvoracle;
+        EDbVendor dbVendor = EDbVendor.dbvhive;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -69,5 +72,31 @@ class nodeVisitor extends TParseTreeVisitor {
     public void preVisit(TSequenceOption sequenceOption){
         System.out.println("\t\tsequenceOption:"+sequenceOption.getSequenceOptionType().toString()+" ,value:"+sequenceOption.getOptionValue().toString());
     }
+
+    public void preVisit(THiveLateralView node){
+
+        if (node.getUdtf() != null){
+            System.out.println(node.getUdtf().toString());
+        }
+
+        if (node.getTableAlias() != null){
+            System.out.println(node.getTableAlias().toString());
+        }
+
+        if (node.getColumnAliasList() != null){
+            for(TObjectName columnAlais:node.getColumnAliasList()){
+                System.out.println(columnAlais.toString());
+            }
+        }
+    }
+
+    public void preVisit(THiveTablePartition node) {
+        for(TColumnDefinition columnDefinition : node.getColumnDefList()){
+            System.out.println("Columns in partition:");
+            System.out.print("\tname:"+columnDefinition.getColumnName().toString());
+            System.out.println(",type:"+columnDefinition.getDatatype().toString());
+        }
+    }
+
 
 }
