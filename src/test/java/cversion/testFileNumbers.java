@@ -1,10 +1,10 @@
-package test.cversion;
+package cversion;
 /*
  * Date: 12-2-20
  */
 
+import common.SqlFileList;
 import junit.framework.TestCase;
-import test.*;
 
 public class testFileNumbers extends TestCase {
 

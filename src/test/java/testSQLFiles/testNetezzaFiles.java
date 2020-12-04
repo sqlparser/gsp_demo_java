@@ -9,8 +9,8 @@ public class testNetezzaFiles extends TestCase {
 
 
     public  void testNetezza(){
-        parsefiles(EDbVendor.dbvnetezza,test.gspCommon.BASE_SQL_DIR+"netezza");
-        parsefiles(EDbVendor.dbvnetezza,test.gspCommon.BASE_SQL_DIR+"java/netezza");
+        parsefiles(EDbVendor.dbvnetezza,common.gspCommon.BASE_SQL_DIR+"netezza");
+        parsefiles(EDbVendor.dbvnetezza,common.gspCommon.BASE_SQL_DIR+"java/netezza");
     }
 
 

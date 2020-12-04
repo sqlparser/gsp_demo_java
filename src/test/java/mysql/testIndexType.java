@@ -1,4 +1,4 @@
-package test.mysql;
+package mysql;
 /*
  * Date: 12-2-6
  */

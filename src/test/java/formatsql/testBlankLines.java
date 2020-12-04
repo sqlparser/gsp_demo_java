@@ -1,4 +1,4 @@
-package test.formatsql;
+package formatsql;
 /*
  * Date: 11-3-23
  */

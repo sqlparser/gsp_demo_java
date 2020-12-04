@@ -1,4 +1,4 @@
-package test.scriptWriter;
+package scriptWriter;
 
 import gudusoft.gsqlparser.EDataType;
 import gudusoft.gsqlparser.EDbVendor;

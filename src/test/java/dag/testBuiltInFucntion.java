@@ -1,4 +1,4 @@
-package test.dag;
+package dag;
 /*
  * Date: 11-4-6
  */

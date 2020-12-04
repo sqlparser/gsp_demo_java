@@ -1,5 +1,5 @@
 
-package test.scriptWriter;
+package scriptWriter;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETokenType;

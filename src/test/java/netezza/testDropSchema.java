@@ -1,4 +1,4 @@
-package test.netezza;
+package netezza;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

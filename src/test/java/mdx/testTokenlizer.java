@@ -1,4 +1,4 @@
-package test.mdx;
+package mdx;
 /*
  * Date: 11-12-26
  */

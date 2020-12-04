@@ -1,4 +1,4 @@
-package test.couchbase;
+package couchbase;
 
 
 import gudusoft.gsqlparser.EDbVendor;

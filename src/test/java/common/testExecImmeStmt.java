@@ -1,4 +1,4 @@
-package test;
+package common;
 
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;

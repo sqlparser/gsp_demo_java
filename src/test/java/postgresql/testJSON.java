@@ -1,4 +1,4 @@
-package test.postgresql;
+package postgresql;
 
 
 import gudusoft.gsqlparser.EDataType;

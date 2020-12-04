@@ -7,8 +7,8 @@ import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
-import test.gspCommon;
-import test.metaDB;
+import common.gspCommon;
+import common.metaDB;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

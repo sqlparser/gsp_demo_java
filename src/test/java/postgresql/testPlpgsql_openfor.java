@@ -1,4 +1,4 @@
-package test.postgresql;
+package postgresql;
 /*
  * Date: 13-12-5
  */

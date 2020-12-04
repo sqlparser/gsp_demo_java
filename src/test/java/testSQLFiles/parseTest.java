@@ -7,11 +7,11 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 
 import java.io.File;
-
+import common.SqlFileList;
 
 public class parseTest extends TestCase {
     String xsdfile = "file:/C:/prg/gsp_java/library/doc/xml/sqlquery.xsd";
-   // public static String test.gspCommon.BASE_SQL_DIR = "c:/prg/gsp_sqlfiles/TestCases/";
+   // public static String gspCommon.BASE_SQL_DIR = "c:/prg/gsp_sqlfiles/TestCases/";
 
 static void parsefiles(EDbVendor db,String dir)  {
 
@@ -22,7 +22,7 @@ static void parsefiles(EDbVendor db,String dir)  {
     }
 
     TGSqlParser sqlparser = new TGSqlParser(db);
-    test.SqlFileList sqlfiles = new test.SqlFileList(dir,true);
+    SqlFileList sqlfiles = new SqlFileList(dir,true);
     for(int k=0;k < sqlfiles.sqlfiles.size();k++){
         sqlparser.sqlfilename = sqlfiles.sqlfiles.get(k).toString();
         // System.out.printf("%s\n",sqlparser.sqlfilename);
@@ -40,7 +40,7 @@ static void parsefiles(EDbVendor db,String dir)  {
             }
         }catch (Exception e){
             System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
-            throw e;
+            e.printStackTrace();
         }
     }
 
@@ -48,11 +48,11 @@ static void parsefiles(EDbVendor db,String dir)  {
 
 
     public  void testDax(){
-        parsefiles(EDbVendor.dbvdax,test.gspCommon.BASE_SQL_DIR+"dax");
+        parsefiles(EDbVendor.dbvdax, common.gspCommon.BASE_SQL_DIR+"dax");
     }
 
 //    public  void testSnowflake(){
-//        parsefiles(EDbVendor.dbvsnowflake,test.gspCommon.BASE_SQL_DIR+"snowflake");
+//        parsefiles(EDbVendor.dbvsnowflake,common.gspCommon.BASE_SQL_DIR+"snowflake");
 //    }
 
 

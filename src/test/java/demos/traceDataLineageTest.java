@@ -1,5 +1,5 @@
 
-package test.demos;
+package demos;
 
 import java.io.InputStream;
 import java.util.ArrayList;

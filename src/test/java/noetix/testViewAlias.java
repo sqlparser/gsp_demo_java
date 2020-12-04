@@ -1,4 +1,4 @@
-package test.noetix;
+package noetix;
 /*
  * Date: 11-4-6
  */

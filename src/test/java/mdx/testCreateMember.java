@@ -1,4 +1,4 @@
-package test.mdx;
+package mdx;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;

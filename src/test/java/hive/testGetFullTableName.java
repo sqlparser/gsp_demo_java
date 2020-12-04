@@ -1,4 +1,4 @@
-package test.hive;
+package hive;
 /*
  * Date: 14-1-29
  */

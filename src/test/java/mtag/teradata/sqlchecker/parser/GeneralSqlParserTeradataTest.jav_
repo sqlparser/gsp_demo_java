@@ -1,4 +1,4 @@
-package test.mtag.teradata.sqlchecker.parser;
+package mtag.teradata.sqlchecker.parser;
 
 import java.util.Arrays;
 import java.util.List;

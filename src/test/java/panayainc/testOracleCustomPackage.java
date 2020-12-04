@@ -1,4 +1,4 @@
-package test.panayainc;
+package panayainc;
 /*
  * Date: 2010-11-2
  * Time: 14:20:26
@@ -13,7 +13,7 @@ public class testOracleCustomPackage extends TestCase {
     // custom package syntax.
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
-        sqlparser.sqlfilename = test.gspCommon.BASE_SQL_DIR+"java\\oracle\\panayainc\\custompackage.sql";
+        sqlparser.sqlfilename = common.gspCommon.BASE_SQL_DIR+"java\\oracle\\panayainc\\custompackage.sql";
         assertTrue(sqlparser.parse() == 0);
     }
 

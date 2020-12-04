@@ -1,4 +1,4 @@
-package gudusoft.gsqlparser.test.joinConvert;
+package joinConvert;
 
 import demos.joinConvert.JoinConverter;
 import gudusoft.gsqlparser.EDbVendor;

@@ -1,4 +1,4 @@
-package test.gettablecolumn;
+package gettablecolumn;
 /*
  * Date: 15-4-30
  */

@@ -48,7 +48,7 @@ public class testQualifiedVariable extends TestCase {
     }
 
     public void testDo1(){
-        sqlfile =test.gspCommon.BASE_SQL_DIR+ "java/oracle/scope_visibility_plsql_identifier/block_label.sql";
+        sqlfile = gspCommon.BASE_SQL_DIR+ "java/oracle/scope_visibility_plsql_identifier/block_label.sql";
         parser.sqlfilename = sqlfile;
         assertTrue(parser.parse() == 0);
         assertTrue(parser.sqlstatements.get(0) instanceof TCommonBlock);

@@ -1,4 +1,4 @@
-package test.hive;
+package hive;
 
 import gudusoft.gsqlparser.EAlterTableOptionType;
 import gudusoft.gsqlparser.EDbVendor;

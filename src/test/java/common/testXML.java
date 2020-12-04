@@ -1,4 +1,4 @@
-package test;
+package common;
 
 
 import demos.visitors.xmlVisitor;
@@ -11,7 +11,7 @@ public class testXML extends TestCase  {
 
      void toXmlFiles(EDbVendor db, String dir) throws Exception {
         TGSqlParser sqlparser = new TGSqlParser(db);
-        test.SqlFileList sqlfiles = new test.SqlFileList(dir,true);
+        SqlFileList sqlfiles = new SqlFileList(dir,true);
         for(int k=0;k < sqlfiles.sqlfiles.size();k++){
             sqlparser.sqlfilename = sqlfiles.sqlfiles.get(k).toString();
             //System.out.println(sqlparser.sqlfilename);

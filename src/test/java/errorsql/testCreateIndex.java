@@ -1,4 +1,4 @@
-package test.errorsql;
+package errorsql;
 /*
  * Date: 13-3-25
  */

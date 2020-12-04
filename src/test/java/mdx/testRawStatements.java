@@ -1,4 +1,4 @@
-package test.mdx;
+package mdx;
 /*
  * Date: 11-12-31
  */
@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 public class testRawStatements extends TestCase {
 
-    String rootdir = test.gspCommon.BASE_SQL_DIR+"mdx\\";
+    String rootdir = common.gspCommon.BASE_SQL_DIR+"mdx\\";
 
     public void testMdx1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmdx);

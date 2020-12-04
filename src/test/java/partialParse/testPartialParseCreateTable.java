@@ -1,4 +1,4 @@
-package test.partialParse;
+package partialParse;
 /*
  * Date: 12-11-2
  */

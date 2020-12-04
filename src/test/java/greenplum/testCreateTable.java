@@ -1,4 +1,4 @@
-package test.greenplum;
+package greenplum;
 /*
  * Date: 13-12-26
  */

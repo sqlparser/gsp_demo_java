@@ -1,4 +1,4 @@
-package test.antiSQLInjection;
+package antiSQLInjection;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;

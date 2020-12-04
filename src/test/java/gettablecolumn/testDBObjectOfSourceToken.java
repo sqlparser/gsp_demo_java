@@ -1,4 +1,4 @@
-package test.gettablecolumn;
+package gettablecolumn;
 
 
 import gudusoft.gsqlparser.EDbVendor;

@@ -1,4 +1,4 @@
-package test;
+package common;
 
 import gudusoft.gsqlparser.nodes.TExceptionHandler;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
@@ -19,7 +19,7 @@ public class testExceptionClause extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        sqlfile = test.gspCommon.BASE_SQL_DIR+"java/oracle/exception_handler.sql";
+        sqlfile = gspCommon.BASE_SQL_DIR+"java/oracle/exception_handler.sql";
         parser = new TGSqlParser(EDbVendor.dbvoracle);
     }
 

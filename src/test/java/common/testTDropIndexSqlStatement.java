@@ -1,4 +1,4 @@
-package test;
+package common;
 /*
  * Date: 2011-1-13
  * Time: 18:14:43
