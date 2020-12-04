@@ -1,4 +1,4 @@
-package test.formatsql;
+package formatsql;
 /*
  * Date: 2010-11-9
  * Time: 9:57:07
@@ -12,7 +12,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.pp.para.GFmtOpt;
 import gudusoft.gsqlparser.pp.para.GFmtOptFactory;
 import gudusoft.gsqlparser.pp.stmtformatter.FormatterFactory;
-import test.SqlFileList;
+import common.SqlFileList;
 
 public class formatsqlTest extends TestCase {
 

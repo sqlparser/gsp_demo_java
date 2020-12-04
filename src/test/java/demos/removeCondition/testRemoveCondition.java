@@ -1,5 +1,5 @@
 
-package test.demos.removeCondition;
+package demos.removeCondition;
 
 import gudusoft.gsqlparser.EDbVendor;
 
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import test.SqlFileList;
+import common.*;
 import demos.removeCondition.removeCondition;
 
 public class testRemoveCondition extends TestCase

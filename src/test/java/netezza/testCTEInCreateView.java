@@ -1,4 +1,4 @@
-package test.netezza;
+package netezza;
 /*
  * Date: 14-10-23
  */

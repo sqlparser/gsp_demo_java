@@ -1,4 +1,4 @@
-package test;
+package common;
 
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;

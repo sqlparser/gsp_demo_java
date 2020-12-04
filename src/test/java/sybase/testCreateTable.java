@@ -1,4 +1,4 @@
-package test.sybase;
+package sybase;
 /*
  * Date: 13-8-30
  */

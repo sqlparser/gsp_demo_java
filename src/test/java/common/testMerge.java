@@ -1,4 +1,4 @@
-package test;
+package common;
 /*
  * Date: 11-7-28
  */

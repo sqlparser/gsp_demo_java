@@ -1,12 +1,11 @@
 
-package test.demos;
+package demos;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
-import test.gspCommon;
 import demos.analyzesp.Analyze_SP;
 
 public class analyzespTest extends TestCase
@@ -16,7 +15,7 @@ public class analyzespTest extends TestCase
 
 	protected void setUp( )
 	{
-		basedir = gspCommon.BASE_SQL_DIR+"sqlscripts/analyze_sp";
+		basedir = common.gspCommon.BASE_SQL_DIR+"sqlscripts/analyze_sp";
 	}
 
 	public void testSample1( )

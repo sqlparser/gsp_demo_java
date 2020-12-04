@@ -1,4 +1,4 @@
-package test.vertica;
+package vertica;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;

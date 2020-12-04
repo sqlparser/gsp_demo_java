@@ -1,4 +1,4 @@
-package test.interfaceDemo;
+package interfaceDemo;
 
 import gudusoft.gsqlparser.*;
 import junit.framework.TestCase;

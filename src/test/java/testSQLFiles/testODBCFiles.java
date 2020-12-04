@@ -7,7 +7,7 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testODBCFiles extends TestCase {
     public  void testODBC(){
-        parsefiles(EDbVendor.dbvodbc,test.gspCommon.BASE_SQL_DIR+"odbc");
+        parsefiles(EDbVendor.dbvodbc,common.gspCommon.BASE_SQL_DIR+"odbc");
     }
 
 }

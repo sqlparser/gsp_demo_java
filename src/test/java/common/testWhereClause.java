@@ -1,4 +1,4 @@
-package test;/**
+package common;/**
  * Created by tako on 2014/11/21.
  */
 

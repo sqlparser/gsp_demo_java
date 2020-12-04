@@ -298,7 +298,7 @@ public class JoinConverter {
             ErrorMessage = sqlparser.getErrormessage();
             return ErrorNo;
         }
-        sqlparser.sqlstatements.forEach(it -> {
+        for(TCustomSqlStatement it:sqlparser.sqlstatements){
             analyzeSelect(it);
             String convertedQuery = it.toString();
             if (!convertedQuery.equals(this.query)) {
@@ -306,7 +306,7 @@ public class JoinConverter {
                 this.totalQuery += convertedQuery;
             }
             this.query = convertedQuery;
-        });
+        }
         return ErrorNo;
     }
 
@@ -753,7 +753,7 @@ public class JoinConverter {
                         TTable leftTable = fc.table;
                         TTable joinTable = fc.joinTable;
                         String condition = fc.condition;
-                        fc.joinTableOthers = new HashSet<>();
+                        fc.joinTableOthers = new HashSet<TTable>();
                         String[] conditionArray = condition.replace(".", ".,_,").replace(" ", ",_,").split(",_,");
                         for (String conditionStr : conditionArray) {
                             if (conditionStr.endsWith(".") && conditionStr.length() > 1) {

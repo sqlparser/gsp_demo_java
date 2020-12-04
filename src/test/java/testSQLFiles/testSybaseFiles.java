@@ -7,7 +7,7 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testSybaseFiles extends TestCase {
     public  void testSybase(){
-        parsefiles(EDbVendor.dbvsybase,test.gspCommon.BASE_SQL_DIR+"sybase");
-        parsefiles(EDbVendor.dbvsybase,test.gspCommon.BASE_SQL_DIR+"java/sybase");
+        parsefiles(EDbVendor.dbvsybase,common.gspCommon.BASE_SQL_DIR+"sybase");
+        parsefiles(EDbVendor.dbvsybase,common.gspCommon.BASE_SQL_DIR+"java/sybase");
     }
 }

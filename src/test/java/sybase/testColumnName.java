@@ -1,4 +1,4 @@
-package test.sybase;
+package sybase;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

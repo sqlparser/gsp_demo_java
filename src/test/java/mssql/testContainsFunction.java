@@ -1,4 +1,4 @@
-package test.mssql;
+package mssql;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EFunctionType;

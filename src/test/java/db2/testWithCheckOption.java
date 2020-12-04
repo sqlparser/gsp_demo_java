@@ -1,4 +1,4 @@
-package test.db2;
+package db2;
 /*
  * Date: 11-6-7
  */

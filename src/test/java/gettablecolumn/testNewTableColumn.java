@@ -12,8 +12,8 @@ import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
 import org.junit.Test;
-import test.SqlFileList;
-import test.gspCommon;
+import common.SqlFileList;
+import common.gspCommon;
 
 import java.io.*;
 

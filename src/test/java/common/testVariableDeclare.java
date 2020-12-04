@@ -1,4 +1,4 @@
-package test;
+package common;
 /*
  * Date: 2010-5-13
  * Time: 17:17:50
@@ -17,7 +17,7 @@ public class testVariableDeclare extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        sqlfile = test.gspCommon.BASE_SQL_DIR+"java/oracle/exception_handler.sql";
+        sqlfile = gspCommon.BASE_SQL_DIR+"java/oracle/exception_handler.sql";
         parser = new TGSqlParser(EDbVendor.dbvoracle);
     }
 

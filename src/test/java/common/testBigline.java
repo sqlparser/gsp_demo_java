@@ -1,4 +1,4 @@
-package test;
+package common;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;

@@ -1,4 +1,4 @@
-package test.informix;
+package informix;
 /*
  * Date: 13-1-25
  */

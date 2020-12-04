@@ -1,4 +1,4 @@
-package test.mysql;
+package mysql;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

@@ -1,4 +1,4 @@
-package test.oracle;
+package oracle;
 /*
  * Date: 12-11-1
  */

@@ -1,5 +1,5 @@
 
-package test.test;
+package test;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import test.SqlFileList;
+import common.SqlFileList;
 import demos.columnImpact.ColumnImpact;
 
 public class ColumnImpactTest extends TestCase

@@ -1,4 +1,4 @@
-package test.hive;
+package hive;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TCTE;

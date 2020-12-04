@@ -7,6 +7,6 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testGreenplumFiles extends TestCase {
     public  void testGreenplum(){
-        parsefiles(EDbVendor.dbvgreenplum,test.gspCommon.BASE_SQL_DIR+"greenplum");
+        parsefiles(EDbVendor.dbvgreenplum,common.gspCommon.BASE_SQL_DIR+"greenplum");
     }
 }

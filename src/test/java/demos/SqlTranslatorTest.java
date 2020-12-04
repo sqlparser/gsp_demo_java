@@ -1,5 +1,5 @@
 
-package test.demos;
+package demos;
 
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;

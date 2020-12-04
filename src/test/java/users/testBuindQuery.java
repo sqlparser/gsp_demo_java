@@ -1,4 +1,4 @@
-package test.users;
+package users;
 /*
  * Date: 11-11-23
  */

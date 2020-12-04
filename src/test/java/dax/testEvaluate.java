@@ -1,4 +1,4 @@
-package test.dax;
+package dax;
 
 
 import gudusoft.gsqlparser.*;

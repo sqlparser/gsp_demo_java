@@ -1,4 +1,4 @@
-package test.snowflake;
+package snowflake;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;

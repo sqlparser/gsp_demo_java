@@ -1,4 +1,4 @@
-package test.db2;
+package db2;
 
 
 import gudusoft.gsqlparser.EDataType;

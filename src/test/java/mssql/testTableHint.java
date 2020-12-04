@@ -1,4 +1,4 @@
-package test.mssql;
+package mssql;
 /*
  * Date: 12-4-13
  */

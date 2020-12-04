@@ -1,4 +1,4 @@
-package test.redshift;
+package redshift;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;

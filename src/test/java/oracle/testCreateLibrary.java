@@ -1,4 +1,4 @@
-package test.oracle;
+package oracle;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

@@ -1,5 +1,5 @@
 
-package test;
+package common;
 
 import java.io.File;
 import java.io.FileFilter;

@@ -1,4 +1,4 @@
-package test.formatsql;
+package formatsql;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -10,8 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import junit.framework.TestCase;
-import test.FileUtil;
-import test.SqlFileList;
+import common.FileUtil;
+import common.SqlFileList;
 
 public class formatsqlVerifyTest extends TestCase
 {

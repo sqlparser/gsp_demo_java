@@ -1,4 +1,4 @@
-package test.panayainc;
+package panayainc;
 /*
  * Date: 12-2-8
  */

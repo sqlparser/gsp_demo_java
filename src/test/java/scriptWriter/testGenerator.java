@@ -1,12 +1,12 @@
 
-package test.scriptWriter;
+package scriptWriter;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import junit.framework.TestCase;
-import test.SqlFileList;
+import common.SqlFileList;
 
 public class testGenerator extends TestCase
 {

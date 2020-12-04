@@ -14,7 +14,7 @@ import demos.removeCondition.removeCondition;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import test.SqlFileList;
+import common.SqlFileList;
 
 public class testRemoveCondition extends TestCase
 {
