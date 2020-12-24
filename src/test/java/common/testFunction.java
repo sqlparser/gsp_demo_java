@@ -13,6 +13,19 @@ import junit.framework.TestCase;
 
 public class testFunction extends TestCase {
 
+    public void testOracleListagg(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "SELECT LISTAGG(columnName1, ',') WITHIN GROUP (ORDER BY columnName2 ASC NULLS LAST) AS col1withCol2 FROM tableName";
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TExpression expr = selectSqlStatement.getResultColumnList().getResultColumn(0).getExpr();
+        TFunctionCall functionCall = expr.getFunctionCall();
+        assertTrue(functionCall.getFunctionType() == EFunctionType.listagg_t);
+        assertTrue(functionCall.getArgs().size() == 2);
+        assertTrue(functionCall.getArgs().getExpression(0).toString().equalsIgnoreCase("columnName1"));
+        assertTrue(functionCall.getArgs().getExpression(1).toString().equalsIgnoreCase("','"));
+    }
+
     public void test0(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
         sqlparser.sqltext = " SELECT DISTINCT CONVERT(VARCHAR(16), sd.COBDate, 103) AS SubmissionTypeName FROM [bc].[SystemDate] sd";

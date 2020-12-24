@@ -17,6 +17,5 @@ public class testFunctionCall  extends TestCase {
         TTable table  = selectSqlStatement.tables.getTable(0);
         assertTrue(table.getTableType() == ETableSource.function);
         assertTrue(table.getFuncCall().toString().equalsIgnoreCase("employee()"));
-
     }
 }
