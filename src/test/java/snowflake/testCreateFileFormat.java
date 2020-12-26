@@ -18,6 +18,7 @@ public class testCreateFileFormat extends TestCase {
         assertTrue(createFileFormatStmt.getFileFormatName().toString().equalsIgnoreCase("TestFormat11"));
          assertTrue(createFileFormatStmt.getFormatOptions().toString().trim().equalsIgnoreCase("TYPE = CSV\n" +
                  "FIELD_DELIMITER = 'c'"));
+         assertTrue(createFileFormatStmt.getTypeName().equalsIgnoreCase("CSV"));
     }
 
     public void test2(){

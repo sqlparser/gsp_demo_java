@@ -58,4 +58,18 @@ public class testCreateStage extends TestCase {
     }
 
 
+    public void testAmazonS3FileFormat(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create or replace stage my_csv_stage\n" +
+                "  file_format = mycsvformat\n" +
+                "  url = 's3://snowflake-docs';";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateStageStmt createStageStmt = (TCreateStageStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("my_csv_stage"));
+        assertTrue(createStageStmt.getExternalStageURL().equalsIgnoreCase("'s3://snowflake-docs'"));
+        assertTrue(createStageStmt.getFileFormatName().equalsIgnoreCase("mycsvformat"));
+        // System.out.println(stageLocation.getStageName().toString());
+    }
+
 }
