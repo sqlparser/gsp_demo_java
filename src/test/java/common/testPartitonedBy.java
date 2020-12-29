@@ -21,7 +21,7 @@ public class testPartitonedBy extends TestCase {
 
         TFunctionCall functionCall = expr.getFunctionCall();
         TWindowDef windowDef = functionCall.getWindowDef();
-        assertTrue(windowDef.toString().equalsIgnoreCase("over(partition by day_id,mac_id order by day_id)"));
+        assertTrue(windowDef.toString().equalsIgnoreCase("(partition by day_id,mac_id order by day_id)"));
 
         TPartitionClause partitionClause = windowDef.getPartitionClause();
         assertTrue(partitionClause.toString().equalsIgnoreCase("partition by day_id,mac_id"));
@@ -44,7 +44,7 @@ public class testPartitonedBy extends TestCase {
 
         TFunctionCall functionCall = expr.getFunctionCall();
         TWindowDef windowDef = functionCall.getWindowDef();
-        assertTrue(windowDef.toString().equalsIgnoreCase("over(partition by day_id,mac_id order by day_id)"));
+        assertTrue(windowDef.toString().equalsIgnoreCase("(partition by day_id,mac_id order by day_id)"));
 
         TPartitionClause partitionClause = windowDef.getPartitionClause();
         TExpressionList expressionList = partitionClause.getExpressionList();
