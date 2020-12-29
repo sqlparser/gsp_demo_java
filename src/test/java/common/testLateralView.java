@@ -4,6 +4,7 @@ import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
+import java.util.ArrayList;
 
 
 public class testLateralView extends TestCase {
