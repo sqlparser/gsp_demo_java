@@ -51,4 +51,21 @@ public class testSnowflake extends TestCase {
                         "t2.number_column\n" +
                         "t2.t1_key");
     }
+
+    public static void testLateralColumnAlias() {
+        doTest(" select \n" +
+                        "   account_id\n" +
+                        "  , arr_change as x\n" +
+                        "  , start_arr as y\n" +
+                        "  , avg(x/y) as avg_upgrade\n" +
+                        "  from account_product_month\n" +
+                        "  group by 1",
+                "Tables:\n" +
+                        "account_product_month\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "account_product_month.account_id\n" +
+                        "account_product_month.arr_change\n" +
+                        "account_product_month.start_arr");
+    }
 }

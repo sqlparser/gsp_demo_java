@@ -3,6 +3,7 @@ package demos.search;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 import java.io.File;
@@ -66,7 +67,8 @@ class searchVisitor extends TParseTreeVisitor {
         this.parseTreeNodeName = c;
 
     }
-    
+
+
     public void preVisit(THierarchical node){
 
         if (node.getClass().getSimpleName().compareToIgnoreCase(this.parseTreeNodeName) == 0){

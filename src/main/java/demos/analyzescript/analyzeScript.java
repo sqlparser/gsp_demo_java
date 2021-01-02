@@ -3,6 +3,7 @@ package demos.analyzescript;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TQueryHint;
+import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlSetRowCount;
 import gudusoft.gsqlparser.stmt.mysql.*;
@@ -13,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 
 /*
 * original name of this demo was Parsing DDL,
@@ -23,7 +26,7 @@ public class analyzeScript {
     public static void main(String args[])
      {
 
-        if (args.length != 1){
+        if (args.length == 0){
             System.out.println("Usage: java analyzeScript sqlfile.sql /t dbvendor");
             return;
         }
@@ -34,28 +37,39 @@ public class analyzeScript {
         }
 
          EDbVendor dbVendor = EDbVendor.dbvoracle;
+         List<String> argList = Arrays.asList(args);
+
+         int index = argList.indexOf( "/t" );
+
+         if ( index != -1 && args.length > index + 1 )
+         {
+
+             dbVendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+
+         }
+
          String msg = "Please select SQL dialect: 1: SQL Server, 2: Oralce, 3: MySQL, 4: DB2, 5: PostGRESQL, 6: Teradata, default is 2: Oracle";
          System.out.println(msg);
 
-         BufferedReader br=new   BufferedReader(new InputStreamReader(System.in));
-         try{
-             int db = Integer.parseInt(br.readLine());
-             if (db == 1){
-                 dbVendor = EDbVendor.dbvmssql;
-             }else if(db == 2){
-                 dbVendor = EDbVendor.dbvoracle;
-             }else if(db == 3){
-                 dbVendor = EDbVendor.dbvmysql;
-             }else if(db == 4){
-                 dbVendor = EDbVendor.dbvdb2;
-             }else if(db == 5){
-                 dbVendor = EDbVendor.dbvpostgresql;
-             }else if(db == 6){
-                 dbVendor = EDbVendor.dbvteradata;
-             }
-         }catch(IOException i) {
-         }catch (NumberFormatException numberFormatException){
-         }
+//         BufferedReader br=new   BufferedReader(new InputStreamReader(System.in));
+//         try{
+//             int db = Integer.parseInt(br.readLine());
+//             if (db == 1){
+//                 dbVendor = EDbVendor.dbvmssql;
+//             }else if(db == 2){
+//                 dbVendor = EDbVendor.dbvoracle;
+//             }else if(db == 3){
+//                 dbVendor = EDbVendor.dbvmysql;
+//             }else if(db == 4){
+//                 dbVendor = EDbVendor.dbvdb2;
+//             }else if(db == 5){
+//                 dbVendor = EDbVendor.dbvpostgresql;
+//             }else if(db == 6){
+//                 dbVendor = EDbVendor.dbvteradata;
+//             }
+//         }catch(IOException i) {
+//         }catch (NumberFormatException numberFormatException){
+//         }
 
          System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
@@ -708,6 +722,14 @@ public class analyzeScript {
             for(int i=0;i<pStmt.getTableConstraints().size();i++){
               printConstraint(pStmt.getTableConstraints().getConstraint(i), true);
               System.out.println("");
+            }
+        }
+
+        if (pStmt.getHiveTablePartition() != null){
+            THiveTablePartition hiveTablePartition = pStmt.getHiveTablePartition();
+            for(TColumnDefinition cd: hiveTablePartition.getColumnDefList()){
+                System.out.println("columName:"+cd.getColumnName().toString());
+                System.out.println("columType:"+cd.getDatatype().getDataType());
             }
         }
     }

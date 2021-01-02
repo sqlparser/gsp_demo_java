@@ -112,6 +112,7 @@ public class DataFlowAnalyzer {
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
 
+
 		if (simple && !jsonFormat) {
 			dlineage.setTextFormat(textFormat);
 		}
