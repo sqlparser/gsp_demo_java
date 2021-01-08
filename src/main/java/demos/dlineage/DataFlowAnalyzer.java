@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,26 +16,6 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
 import gudusoft.gsqlparser.util.json.JSON;
 
 public class DataFlowAnalyzer {
-
-	private static File[] listFiles(File sqlFiles) {
-		List<File> children = new ArrayList<File>();
-		if (sqlFiles != null)
-			listFiles(sqlFiles, children);
-		return children.toArray(new File[0]);
-	}
-
-	private static void listFiles(File rootFile, List<File> children) {
-		if (rootFile.isFile())
-			children.add(rootFile);
-		else {
-			File[] files = rootFile.listFiles();
-			if (files != null) {
-				for (int i = 0; i < files.length; i++) {
-					listFiles(files[i], children);
-				}
-			}
-		}
-	}
 	
 	public static void main(String[] args) {
 		if (args.length < 1) {
