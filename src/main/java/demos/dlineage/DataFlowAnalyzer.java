@@ -13,11 +13,7 @@ import java.util.List;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.dlineage.dataflow.model.SqlInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
-import gudusoft.gsqlparser.dlineage.dataflow.sqlenv.SQLEnvParser;
-import gudusoft.gsqlparser.sqlenv.TSQLEnv;
-import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
 public class DataFlowAnalyzer {
@@ -130,28 +126,7 @@ public class DataFlowAnalyzer {
 		
 		jsonFormat = argList.indexOf("/json") != -1;
 
-		gudusoft.gsqlparser.dlineage.DataFlowAnalyzer dlineage;
-		if(sqlFiles.isDirectory()){
-			File[] children = listFiles(sqlFiles);
-			SqlInfo[] sqlInfos = new SqlInfo[children.length];
-			for (int i = 0; i < children.length; i++) {
-				SqlInfo info = new SqlInfo();
-				info.setSql(SQLUtil.getFileContent(children[i]));
-				info.setFileName(children[i].getName());
-				info.setOriginIndex(0);
-				sqlInfos[i] = info;
-			}
-            TSQLEnv sqlEnv = new SQLEnvParser().parseSQLEnv(vendor, sqlInfos);
-            if (sqlEnv != null) {
-                sqlEnv.setDefaultCatalogName(TSQLEnv.DEFAULT_DB_NAME);
-                sqlEnv.setDefaultSchemaName(TSQLEnv.DEFAULT_SCHEMA_NAME);
-            }
-			dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(sqlInfos, vendor, simple);
-			dlineage.setSqlEnv(sqlEnv);
-		}
-		else{
-			dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(sqlFiles, vendor, simple);
-		}
+		gudusoft.gsqlparser.dlineage.DataFlowAnalyzer dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(sqlFiles, vendor, simple);
 
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
