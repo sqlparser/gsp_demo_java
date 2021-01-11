@@ -10,15 +10,13 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.util.json.JSON;
 
 public class DataFlowAnalyzer {
-
+	
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
@@ -121,11 +119,9 @@ public class DataFlowAnalyzer {
 		String result = dlineage.generateDataFlow(errorBuffer);
 		
 		if (jsonFormat) {
-			JSONObject jsonResult = new JSONObject();
 			DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dlineage.getDataFlow());
 			model.setDbvendor(vendor.name());
-			jsonResult.put("data", model);
-			result = JSON.toJSONString(jsonResult, true);
+			result = JSON.toJSONString(model);
 		} else if (traceView) {
 			result = dlineage.traceView();
 		}
