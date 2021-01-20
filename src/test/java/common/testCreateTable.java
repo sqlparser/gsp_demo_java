@@ -96,4 +96,19 @@ public class testCreateTable extends TestCase {
         assertTrue(subquery.getTables().getTable(0).toString().equalsIgnoreCase("PROD_STG.FEP_IDEA.CONTRACTENROLLMENTEXTRACT_STG01"));
 
     }
+
+    public void testOnCommit() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "CREATE GLOBAL TEMPORARY TABLE \"TTABLE\" (\n" +
+                "        \"id\" NUMBER(11 , 0)\n" +
+                "    )\n" +
+                "    ON COMMIT PRESERVE ROWS;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement) sqlparser.sqlstatements.get(0);
+        assertTrue(createTable.toString().equalsIgnoreCase("CREATE GLOBAL TEMPORARY TABLE \"TTABLE\" (\n" +
+                "        \"id\" NUMBER(11 , 0)\n" +
+                "    )\n" +
+                "    ON COMMIT PRESERVE ROWS;"));
+    }
 }

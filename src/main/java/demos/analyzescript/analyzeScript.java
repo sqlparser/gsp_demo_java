@@ -47,29 +47,9 @@ public class analyzeScript {
              dbVendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 
          }
-
-         String msg = "Please select SQL dialect: 1: SQL Server, 2: Oralce, 3: MySQL, 4: DB2, 5: PostGRESQL, 6: Teradata, default is 2: Oracle";
-         System.out.println(msg);
-
-//         BufferedReader br=new   BufferedReader(new InputStreamReader(System.in));
-//         try{
-//             int db = Integer.parseInt(br.readLine());
-//             if (db == 1){
-//                 dbVendor = EDbVendor.dbvmssql;
-//             }else if(db == 2){
-//                 dbVendor = EDbVendor.dbvoracle;
-//             }else if(db == 3){
-//                 dbVendor = EDbVendor.dbvmysql;
-//             }else if(db == 4){
-//                 dbVendor = EDbVendor.dbvdb2;
-//             }else if(db == 5){
-//                 dbVendor = EDbVendor.dbvpostgresql;
-//             }else if(db == 6){
-//                 dbVendor = EDbVendor.dbvteradata;
-//             }
-//         }catch(IOException i) {
-//         }catch (NumberFormatException numberFormatException){
-//         }
+//
+//         String msg = "Please select SQL dialect: 1: SQL Server, 2: Oralce, 3: MySQL, 4: DB2, 5: PostGRESQL, 6: Teradata, default is 2: Oracle";
+//         System.out.println(msg);
 
          System.out.println("Selected SQL dialect: "+dbVendor.toString());
 

@@ -242,4 +242,14 @@ public class testSQLServer extends TestCase {
                         "dbo.d_errors.IsDeleted");
     }
 
+
+    public static void testColumnAlias() {
+        doTest("select C*2 as C from T",
+                "Tables:\n" +
+                        "T\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "T.C");
+    }
+
 }

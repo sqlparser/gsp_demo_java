@@ -100,7 +100,7 @@ public class analyzespTest extends TestCase
                 +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_UrunRecete|Table|Read|UrunID1,UrunID2,Miktar\r\n"
                 +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Insert|\r\n"
                 +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Update|UrunID2,ReceteMiktar\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Read|UrunID2\r\n"
+                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Read|UrunID2,AsortiMiktar,ReceteMiktar,TemaTakipNo\r\n"
                 +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_Urun|Table|Read|UrunID,Barkod";
 
 //		System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
