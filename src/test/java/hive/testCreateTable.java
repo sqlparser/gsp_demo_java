@@ -10,6 +10,7 @@ import gudusoft.gsqlparser.nodes.TColumnDefinition;
 import gudusoft.gsqlparser.nodes.TTypeName;
 import gudusoft.gsqlparser.nodes.hive.*;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
@@ -154,6 +155,21 @@ public class testCreateTable extends TestCase {
         assertTrue(tff.getFileFormat() == EHiveStoredFileFormat.sffTBLSEQUENCEFILE);
 
 
+    }
+
+    public void testSubquery(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
+        sqlparser.sqltext = "create table test.concat \n" +
+                "as   select concat(heroes.name,' vs. ',villains.name) as battle \n" +
+                "from heroes \n" +
+                "join villains  \n" +
+                "where heroes.era = villains.era and heroes.planet = villains.planet";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement select =  createTable.getSubQuery();
+        System.out.println(select.toString());
     }
 
 }
