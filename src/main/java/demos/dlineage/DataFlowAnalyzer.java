@@ -12,6 +12,7 @@ import java.util.List;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -115,8 +116,7 @@ public class DataFlowAnalyzer {
 			dlineage.setTextFormat(textFormat);
 		}
 
-		StringBuffer errorBuffer = new StringBuffer();
-		String result = dlineage.generateDataFlow(errorBuffer);
+		String result = dlineage.generateDataFlow();
 		
 		if (jsonFormat) {
 			DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dlineage.getDataFlow());
@@ -155,8 +155,12 @@ public class DataFlowAnalyzer {
 			e.printStackTrace();
 		}
 
-		if (errorBuffer.length() > 0) {
-			System.err.println("Error log:\n" + errorBuffer);
+		List<ErrorInfo> errors = dlineage.getErrorMessages();
+		if (!errors.isEmpty()) {
+			System.err.println("Error log:\n");
+			for (int i = 0; i < errors.size(); i++) {
+				System.err.println(errors.get(i).getErrorMessage());
+			}
 		}
 
 		if (sw != null) {
