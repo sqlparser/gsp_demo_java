@@ -11,6 +11,22 @@ import junit.framework.TestCase;
 
 public class testCreateFunction extends TestCase {
 
+    public void testStmtToString(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqlfilename = common.gspCommon.BASE_SQL_DIR+"java/postgresql/create_function_big_proc.sql";
+        assertTrue(sqlparser.parse() == 0);
+
+        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("intf_crm.p_crm_cust_lbl_smy"));
+//        assertTrue(createFunction.getParameterDeclarations().size() == 2);
+//        TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
+//        assertTrue(parameterDeclaration.getParameterName().toString().equalsIgnoreCase("a"));
+//        assertTrue(parameterDeclaration.getDataType().getDataType() == EDataType.bigint_t);
+//        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.boolean_t);
+//        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpython3u"));
+    }
+
+
     public void testLanguagePython(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
         sqlparser.sqltext = "CREATE OR REPLACE FUNCTION public.s2_cellid_contains(a bigint, b bigint)\n" +
@@ -191,73 +207,7 @@ public class testCreateFunction extends TestCase {
         assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
-    public void testCoordinates1(){
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
-        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION totalRecords (emp_id int)\n" +
-                "RETURNS integer AS $total$\n" +
-                "declare\n" +
-                "total integer;\n" +
-                "BEGIN\n" +
-                "  SELECT TOTAL_SAL into total FROM employee emp where emp.employee_id = emp_id;\n" +
-                "  RETURN total;\n" +
-                "END; $total$ LANGUAGE plpgsql;";
-        assertTrue(sqlparser.parse() == 0);
-
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
-        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
-        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
-
-        assertTrue(createFunction.getBodyStatements().size() == 2);
-        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
-        TTable table = selectSqlStatement.tables.getTable(0);
-        assertTrue(table.getTableName().getLineNo() == 6);
-        assertTrue(table.getTableName().getColumnNo() == 36);
-    }
-
-    public void testCoordinates2(){
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
-        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION\n" +
-                "foo.func1(integer, OUT f1 integer, OUT f2 text)\n" +
-                "RETURNS record\n" +
-                "LANGUAGE sql\n" +
-                "AS $function$ SELECT $1, CAST($1 AS text) || ' is text' $function$";
-        assertTrue(sqlparser.parse() == 0);
-
-        functionVisitor fv = new functionVisitor();
-        sqlparser.sqlstatements.get(0).acceptChildren(fv);
-        assertTrue(fv.LineNo == 5);
-        assertTrue(fv.ColumnNo == 26);
-
-    }
-
-    public void testCoordinates3(){
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
-        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION\n" +
-                "foo.func1(integer, OUT f1 integer, OUT f2 text)\n" +
-                "RETURNS record\n" +
-                "LANGUAGE sql\n" +
-                "AS $function$\n" +
-                "SELECT $1, CAST($1 AS text) || ' is text' $function$";
-        assertTrue(sqlparser.parse() == 0);
-
-        functionVisitor fv = new functionVisitor();
-        sqlparser.sqlstatements.get(0).acceptChildren(fv);
-        assertTrue(fv.LineNo == 6);
-        assertTrue(fv.ColumnNo == 12);
-
-    }
-}
-
-class functionVisitor extends TParseTreeVisitor {
-
-    public long LineNo, ColumnNo;
-    public void preVisit(TFunctionCall functionCall){
-        if (functionCall.getFunctionName().toString().equalsIgnoreCase("cast")){
-            LineNo = functionCall.getFunctionName().getLineNo();
-            ColumnNo = functionCall.getFunctionName().getColumnNo();
-//            System.out.println(functionCall.getFunctionName().getLineNo());
-//            System.out.println(functionCall.getFunctionName().getColumnNo());
-        }
-    }
 
 }
+
+

@@ -109,6 +109,7 @@ public class DataFlowAnalyzer {
 
 		dlineage.setShowJoin(showJoin);
 		dlineage.setIgnoreRecordSet(ignoreResultSets);
+		//dlineage.setLinkOrphanColumnToFirstTable(true);
 
 
 		if (simple && !jsonFormat) {
