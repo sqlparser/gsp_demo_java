@@ -13,7 +13,7 @@ public class parseTest extends TestCase {
     String xsdfile = "file:/C:/prg/gsp_java/library/doc/xml/sqlquery.xsd";
    // public static String gspCommon.BASE_SQL_DIR = "c:/prg/gsp_sqlfiles/TestCases/";
 
-static void parsefiles(EDbVendor db,String dir)  {
+static void parsefiles(EDbVendor db,String dir){
 
     File parent = new File( dir );
     if (!( parent.exists( ) && parent.isDirectory( ))){
@@ -28,20 +28,18 @@ static void parsefiles(EDbVendor db,String dir)  {
         // System.out.printf("%s\n",sqlparser.sqlfilename);
         // boolean b = sqlparser.parse() == 0;
 
-        try{
-            boolean b = sqlparser.parse() == 0;
-            assertTrue(sqlparser.sqlfilename+"\n"+sqlparser.getErrormessage(),b);
+        assertTrue(sqlparser.parse() == 0);
 
-            if (b){
-//                xmlVisitor xv2 = new xmlVisitor(xsdfile);
-//                xv2.run(sqlparser);
+//        try{
+//            boolean b = sqlparser.parse() == 0;
+//            assertTrue(sqlparser.sqlfilename+"\n"+sqlparser.getErrormessage(),b);
+//
+//        }catch (Exception e){
+//            System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
+//            e.printStackTrace();
+//            //throw new Exception("Exception message");
+//        }
 
-                //xv2.validXml();
-            }
-        }catch (Exception e){
-            System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
-            e.printStackTrace();
-        }
     }
 
 }

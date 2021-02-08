@@ -68,4 +68,18 @@ public class testSnowflake extends TestCase {
                         "account_product_month.arr_change\n" +
                         "account_product_month.start_arr");
     }
+
+    public static void testDateTimePart() {
+        doTest("create or replace VIEW PAYMENTS.APN_RT.PARTNER_REPORTING AS\n" +
+                        "SELECT (CASE WHEN substate IN ('REJECTED', 'RETURNED') THEN round((datediff(second, to_timestamp(Create_DATETIME)::timestamp, to_timestamp(Status_updatedate)::timestamp))/60/60/24, 2) END) AGE_DAYS\n" +
+                        ", partner_accounttype FROM payments.apn_rt.apn_report_data ;",
+                "Tables:\n" +
+                        "payments.apn_rt.apn_report_data\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "payments.apn_rt.apn_report_data.Create_DATETIME\n" +
+                        "payments.apn_rt.apn_report_data.partner_accounttype\n" +
+                        "payments.apn_rt.apn_report_data.Status_updatedate\n" +
+                        "payments.apn_rt.apn_report_data.substate");
+    }
 }
