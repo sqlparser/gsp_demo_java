@@ -20,7 +20,7 @@ import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
-import gudusoft.gsqlparser.dlineage.util.SQLUtil;
+import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
 public class DataFlowAnalyzer {
