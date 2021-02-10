@@ -25,27 +25,13 @@ public class testCTE extends TestCase {
          sqlparser.parse();
          option.cteNewlineBeforeAs = false;
          String result = FormatterFactory.pp(sqlparser, option);
-//        assertTrue(result.trim().equalsIgnoreCase("WITH mycte(x) AS (SELECT x = Convert(VARCHAR(1000), 'hello')\n" +
-//                "                  UNION ALL\n" +
-//                "                  SELECT Convert(VARCHAR(1000), x + 'a')\n" +
-//                "                  FROM   mycte\n" +
-//                "                  WHERE  Len(x) < 10\n" +
-//                "                  UNION ALL\n" +
-//                "                  SELECT Convert(VARCHAR(1000), x + 'b')\n" +
-//                "                  FROM   mycte\n" +
-//                "                  WHERE  Len(x) < 10) \n" +
-//                "  SELECT   x\n" +
-//                "  FROM     mycte\n" +
-//                "  ORDER BY Len(x),\n" +
-//                "           x;"));
-
         assertTrue(result.trim().equalsIgnoreCase("WITH mycte(x) AS (SELECT x = Convert(VARCHAR(1000), 'hello')\n" +
                 "                  UNION ALL\n" +
-                "                  SELECT  Convert(VARCHAR(1000), x  +  'a')\n" +
+                "                  SELECT Convert(VARCHAR(1000), x + 'a')\n" +
                 "                  FROM   mycte\n" +
                 "                  WHERE  Len(x) < 10\n" +
                 "                  UNION ALL\n" +
-                "                  SELECT  Convert(VARCHAR(1000), x  +  'b')\n" +
+                "                  SELECT Convert(VARCHAR(1000), x + 'b')\n" +
                 "                  FROM   mycte\n" +
                 "                  WHERE  Len(x) < 10) \n" +
                 "  SELECT   x\n" +
