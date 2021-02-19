@@ -28,6 +28,8 @@ public class testOracleCreateView extends TestCase
 		assertTrue( sqlparser.parse( ) == 0 );
 		String result = FormatterFactory.pp( sqlparser, option );
 		String leftExpr = result.trim( );
+		//System.out.println(leftExpr);
+
 		String rightExpr = "CREATE OR REPLACE FORCE VIEW \"POTC_PO_LINES\" (\"A$CHART_OF_ACCOUNTS_NAME\",\n"
 				+ "                                              \"A$CONTRACT_NUMBER\",\n"
 				+ "                                              \"A$HAZARD_CLASS\",\n"
@@ -278,6 +280,8 @@ public class testOracleCreateView extends TestCase
 				+ "         AND polin.contract_id = contract_number.po_header_id(+)\n"
 				+ "         AND item.inventory_item_id = mstk1.inventory_item_id (+)\n"
 				+ "         AND item.organization_id = mstk1.organization_id (+)";
+
+		//System.out.println(rightExpr);
 		assertTrue( leftExpr.equalsIgnoreCase( rightExpr ) );
 		// System.out.println(result);
 	}
