@@ -28,12 +28,14 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text]] [/json] [/traceView] [/t <database type>] [/o <output file path>][/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s] [/i] [/ic] [/lof] [/j] [/text] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
 			System.out.println("/i: Option, ignore all result sets.");
+			System.out.println("/ic: Option, ignore output coordinates.");
+			System.out.println("/lof: Option, link orphan column to first table.");
 			System.out.println("/traceView: Option, analyze the source tables of views.");
 			System.out.println("/text: Option, print the plain text format output.");
 			System.out.println("/json: Option, print the json format output.");
@@ -93,6 +95,9 @@ public class DataFlowAnalyzer {
 		boolean showJoin = argList.indexOf("/j") != -1;
 		boolean textFormat = false;
 		boolean jsonFormat = false;
+		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
+		boolean ignoreCoordinate = argList.indexOf("/ic") != -1;
+		
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
@@ -122,7 +127,8 @@ public class DataFlowAnalyzer {
 
 			dlineage.setShowJoin(showJoin);
 			dlineage.setIgnoreRecordSet(ignoreResultSets);
-			// dlineage.setLinkOrphanColumnToFirstTable(true);
+			dlineage.setLinkOrphanColumnToFirstTable(linkOrphanColumnToFirstTable);
+			dlineage.setIgnoreCoordinate(ignoreCoordinate);
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
