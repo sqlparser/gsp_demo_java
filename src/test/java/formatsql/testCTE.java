@@ -38,6 +38,7 @@ public class testCTE extends TestCase {
                 "  FROM     mycte\n" +
                 "  ORDER BY Len(x),\n" +
                 "           x;"));
- //       System.out.println(result.trim());
+
+ //      System.out.println(result.trim());
      }
 }
