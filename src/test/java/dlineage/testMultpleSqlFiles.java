@@ -18,7 +18,7 @@ public class testMultpleSqlFiles extends TestCase {
 
 	public void test1() {
 		//File sqlfiles = new File("D:/develop/git/gsp_sqlfiles/TestCases/dlineage/mysql/547");
-		File sqlfiles = new File("c:/prg/gsqlparser/Test/TestCases/dlineage/mysql/547");
+		File sqlfiles = new	 File("c:/prg/gsqlparser/Test/TestCases/dlineage/mysql/547");
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles, EDbVendor.dbvmysql, false);
 		analyzer.generateDataFlow();
 		dataflow dataflow = analyzer.getDataFlow();
@@ -42,21 +42,25 @@ public class testMultpleSqlFiles extends TestCase {
 				procedureCoordinates[0][1]);
 		fileName = procedurePosition.getFile();
 		positions = procedurePosition.getPositions();
+		Pair<Integer, Integer> startPosition = positions.get(0);
+		Pair<Integer, Integer> endPosition = positions.get(1);
 		assertEquals(fileName, "2.sql");
-		assertEquals(positions.get(0), new Pair<Integer, Integer>(3, 18));
-		assertEquals(positions.get(1), new Pair<Integer, Integer>(3, 29));
+		assertEquals(startPosition, new Pair<Integer, Integer>(3, 18));
+		assertEquals(endPosition, new Pair<Integer, Integer>(3, 29));
 
 		DbObjectPosition procedureStatementPosition = helper.getSelectedDbObjectStatementInfo(EDbVendor.dbvmysql,
 				procedureCoordinates[0][0], procedureCoordinates[0][1]);
 		String sql = procedureStatementPosition.getSql();
-		String stmt = "CREATE PROCEDURE `Basic_Sal`()BEGIN\r\n" +
-				"        SELECT * FROM basic;\r\n" +
-				"END;";
+		String stmt = "CREATE PROCEDURE `Basic_Sal`()BEGIN\r\n" 
+				+ "        SELECT * FROM basic;\r\n" 
+				+ "END;";
 		int index = procedureStatementPosition.getIndex();
 		positions = procedureStatementPosition.getPositions();
+		startPosition = positions.get(0);
+		endPosition = positions.get(1);
 		assertEquals(index, 1);
 		assertEquals(sql, stmt);
-		assertEquals(positions.get(0), new Pair<Integer, Integer>(1, 18));
-		assertEquals(positions.get(1), new Pair<Integer, Integer>(1, 29));
+		assertEquals(startPosition, new Pair<Integer, Integer>(1, 18));
+		assertEquals(endPosition, new Pair<Integer, Integer>(1, 29));
 	}
 }
