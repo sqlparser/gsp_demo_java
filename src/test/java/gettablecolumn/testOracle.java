@@ -63,4 +63,22 @@ public class testOracle extends TestCase {
                         "employee.emp_attr_no_alias\n" +
                         "employee.emp_num");
     }
+
+    public static void testColumnInSelectListOfJoin(){
+        doTest("CREATE OR REPLACE FORCE VIEW \"CATALOG_IT\".\"VIEW1\" (\"COL1\", \"COL2\", \"COL3\", \"COL4\") AS\n" +
+                        "SELECT al1.\"COL1\",al1.\"COL2\",al1.\"COL3\", al2.COL1 AS \"COL4\"\n" +
+                        "FROM (SELECT COL1, COL2, COL3 FROM TABLE1 t1) al1\n" +
+                        "JOIN (SELECT COL1, COL2, COL3 FROM TABLE2 t2) al2 ON al2.COL2 = al1.COL2",
+                "Tables:\n" +
+                        "TABLE1\n" +
+                        "TABLE2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "TABLE1.COL1\n" +
+                        "TABLE1.COL2\n" +
+                        "TABLE1.COL3\n" +
+                        "TABLE2.COL1\n" +
+                        "TABLE2.COL2\n" +
+                        "TABLE2.COL3");
+    }
 }
