@@ -16,7 +16,7 @@ public class testGrabitJsonFile extends TestCase {
 
 	public void test1() {
 		//File sqlfiles = new File("D:/develop/git/gsp_sqlfiles/TestCases/grabit/mssql/561.json");
-		File sqlfiles = new	 File("c:/prg/gsqlparser/Test/TestCasesgrabit/mssql/561.json");
+		File sqlfiles = new	 File(common.gspCommon.BASE_SQL_DIR+"grabit/mssql/561.json");
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles, EDbVendor.dbvmssql, false);
 		analyzer.generateDataFlow();
 		dataflow dataflow = analyzer.getDataFlow();
