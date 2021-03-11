@@ -127,4 +127,28 @@ public class testCreateFunction extends TestCase {
        // assertTrue(selectSqlStatement.getTables().getTable(0).toString().equalsIgnoreCase("purchases"));
     }
 
+    public void testLanguageSQL(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE\n" +
+                "FUNCTION UTIL_DB.PUBLIC.SFWHO() RETURNS TABLE (TS TIMESTAMP_LTZ(9), ACCOUNT VARCHAR(16777216)\n" +
+                "\t, USER VARCHAR(16777216), ROLE VARCHAR(16777216), DATABASE VARCHAR(16777216), SCHEMA VARCHAR(16777216), WAREHOUSE VARCHAR(16777216)) LANGUAGE SQL AS 'select\n" +
+                "  current_timestamp(),\n" +
+                "  current_account(),\n" +
+                "  current_user(),\n" +
+                "  current_role(),\n" +
+                "  current_database(),\n" +
+                "  current_schema(),\n" +
+                "  current_warehouse()\n" +
+                "  ';";
+        assertTrue(sqlparser.parse() == 0);
+        TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreatefunction);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlStatement;
+
+        assertTrue(createFunction.getBodyStatements().size() == 1);
+        assertTrue(createFunction.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
+        assertTrue(selectSqlStatement.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("current_timestamp()"));
+    }
+
 }

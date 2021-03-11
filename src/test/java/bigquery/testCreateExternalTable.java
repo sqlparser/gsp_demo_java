@@ -32,6 +32,7 @@ public class testCreateExternalTable extends TestCase {
                 "  uris = ['gs://bucket/path1.csv', 'gs://bucket/path2.csv']\n" +
                 ")"));
 
+
     }
 
     public void test2(){
