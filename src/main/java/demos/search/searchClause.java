@@ -4,7 +4,9 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
+import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -33,7 +35,7 @@ public class searchClause {
         String dir = args[1];
         int ret;
 
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
         SqlFileList sqlfiles = new SqlFileList(dir);
         System.out.println("Found files:"+sqlfiles.sqlfiles.size());
         for(int k=0;k < sqlfiles.sqlfiles.size();k++){
@@ -94,10 +96,20 @@ class searchVisitor extends TParseTreeVisitor {
     public void preVisit(TFunctionCall node)
     {
         //do something
-       // System.out.println(node.getClass().getSimpleName());
+        // System.out.println(node.getClass().getSimpleName());
         if (node.getClass().getSimpleName().compareToIgnoreCase(this.parseTreeNodeName) == 0){
             found = true;
         }
+    }
+
+    public void preVisit(TPostgresqlCreateFunction node)
+    {
+            found = true;
+    }
+
+    public void preVisit(TCreateFunctionStmt node)
+    {
+        found = true;
     }
 
 }
