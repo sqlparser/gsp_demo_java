@@ -20,6 +20,10 @@ import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -28,7 +32,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s] [/i] [/ic] [/lof] [/j] [/text] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s] [/i] [/ic] [/lof] [/j] [/text] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database>]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
@@ -44,6 +48,12 @@ public class DataFlowAnalyzer {
 					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
 			System.out.println("/o: Option, write the output stream to the specified file.");
 			System.out.println("/log: Option, generate a dataflow.log file to log information.");
+			System.out.println("/h: Option, specify the host of jdbc connection");
+			System.out.println("/P: Option, specify the port of jdbc connection, note it's capital P.");
+			System.out.println("/u: Option, specify the username of jdbc connection.");
+			System.out.println("/p: Option, specify the password of jdbc connection, note it's lowercase P.");
+			System.out.println("/db: Option, specify the database of jdbc connection.");
+			System.out.println("/schema: Option, specify the schema which is used for extracting metadata.");
 			return;
 		}
 
@@ -97,7 +107,7 @@ public class DataFlowAnalyzer {
 		boolean jsonFormat = false;
 		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
 		boolean ignoreCoordinate = argList.indexOf("/ic") != -1;
-		
+
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
 		}
@@ -110,6 +120,27 @@ public class DataFlowAnalyzer {
 		jsonFormat = argList.indexOf("/json") != -1;
 
 		boolean stat = argList.indexOf("/stat") != -1;
+
+		TSQLEnv sqlenv = null;
+
+		//Get database metadata from sql jdbc
+		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
+				&& argList.indexOf("/p") != -1 && argList.indexOf("/db") != -1) {
+			try {
+				String host = args[argList.indexOf("/h") + 1];
+				String port = args[argList.indexOf("/P") + 1];
+				String user = args[argList.indexOf("/u") + 1];
+				String passowrd = args[argList.indexOf("/p") + 1];
+				String database = args[argList.indexOf("/db") + 1];
+				String schema = args[argList.indexOf("/schema") + 1];
+				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
+				if (database != null) {
+					sqlenv = TSQLEnv.valueOf(datasource);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 		if (!stat) {
 			FileOutputStream writer = null;
@@ -124,6 +155,10 @@ public class DataFlowAnalyzer {
 
 			gudusoft.gsqlparser.dlineage.DataFlowAnalyzer dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(
 					sqlFiles, vendor, simple);
+
+			if (sqlenv != null) {
+				dlineage.setSqlEnv(sqlenv);
+			}
 
 			dlineage.setShowJoin(showJoin);
 			dlineage.setIgnoreRecordSet(ignoreResultSets);
@@ -232,6 +267,9 @@ public class DataFlowAnalyzer {
 				try {
 					final gudusoft.gsqlparser.dlineage.DataFlowAnalyzer dlineage = new gudusoft.gsqlparser.dlineage.DataFlowAnalyzer(
 							file, vendor, simple);
+					if (sqlenv != null) {
+						dlineage.setSqlEnv(sqlenv);
+					}
 					dlineage.setLinkOrphanColumnToFirstTable(false);
 					dlineage.setHandleListener(new DataFlowHandleAdapter() {
 						long analyzeStartTime;
@@ -314,10 +352,29 @@ public class DataFlowAnalyzer {
 					"Average time per file: " + +Math.round(analyzeTotalTime[0] / (double) dealFileCount) + "ms");
 			System.out.println("Average time per sql statement: "
 					+ Math.round(analyzeTotalTime[0] / (double) successStatementCount[0]) + "ms");
-			//if (ignoreFileCount > 0) 
+			// if (ignoreFileCount > 0)
 			{
 				System.out.println("Files ignored in trial version: " + ignoreFileCount);
 			}
 		}
+	}
+
+	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
+			String passowrd, String database, String schema) {
+		if (vendor == EDbVendor.dbvoracle) {
+			TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
+			if (schema != null) {
+				datasource.setExtractedSchemas(schema);
+			}
+			return datasource;
+		}
+		if (vendor == EDbVendor.dbvmssql) {
+			TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+			if (schema != null) {
+				datasource.setExtractedDbsSchemas(database + "/" + schema);
+			}
+			return datasource;
+		}
+		return null;
 	}
 }

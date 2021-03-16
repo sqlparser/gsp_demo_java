@@ -22,4 +22,4 @@ REM #Set the home directory of the GSP library
 set gspDemoHome=.
 
 REM # set classpath to the GSP library Jar files and the database JDBC drivers.
-set CLASSPATH=%gspDemoHome%\build;%gspDemoHome%\lib;%gspDemoHome%\lib\*;%gspDemoHome%\external_lib;%gspDemoHome%\external_lib\simple-xml-2.6.2.jar;%gspDemoHome%\external_lib\expr4j.jar;%gspDemoHome%\external_lib\commons-logging-1.1.3.jar;%gspDemoHome%\external_lib\jarLoader.jar;%gspDemoHome%\external_lib\junrar-0.7.jar;%gspDemoHome%\external_lib\fastjson-1.2.41.jar;.;
+set CLASSPATH=%gspDemoHome%\build;%gspDemoHome%\lib;%gspDemoHome%\lib\*;%gspDemoHome%\external_lib;%gspDemoHome%\external_lib\simple-xml-2.6.2.jar;%gspDemoHome%\external_lib\expr4j.jar;%gspDemoHome%\external_lib\commons-logging-1.1.3.jar;%gspDemoHome%\external_lib\jarLoader.jar;%gspDemoHome%\external_lib\junrar-0.7.jar;%gspDemoHome%\external_lib\fastjson-1.2.41.jar;%gspDemoHome%\external_lib\jdbc\ojdbc-1.1.1.jar;%gspDemoHome%\external_lib\jdbc\sqljdbc4-4.0.jar;.;

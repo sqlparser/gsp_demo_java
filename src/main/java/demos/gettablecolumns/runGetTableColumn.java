@@ -9,7 +9,10 @@ import java.util.List;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
@@ -222,7 +225,33 @@ public class runGetTableColumn
 		getTableColumn.listStarColumn = true;
 		getTableColumn.showTableEffect = false;
 		//getTableColumn.setMetaDatabase( new sampleMetaDB());
-		getTableColumn.setSqlEnv(new TSQLServerEnv());
+		
+		TSQLEnv sqlenv = null;
+		//Get database metadata from sql jdbc
+		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
+				&& argList.indexOf("/p") != -1 && argList.indexOf("/db") != -1) {
+			try {
+				String host = args[argList.indexOf("/h") + 1];
+				String port = args[argList.indexOf("/P") + 1];
+				String user = args[argList.indexOf("/u") + 1];
+				String passowrd = args[argList.indexOf("/p") + 1];
+				String database = args[argList.indexOf("/db") + 1];
+				String schema = args[argList.indexOf("/schema") + 1];
+				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
+				if (database != null) {
+					sqlenv = TSQLEnv.valueOf(datasource);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (sqlenv == null) {
+			getTableColumn.setSqlEnv(new TSQLServerEnv());
+		}
+		else{
+			getTableColumn.setSqlEnv(sqlenv);
+		}
 
 
 		if ( argList.indexOf( "/showDetail" ) != -1 )
@@ -283,6 +312,31 @@ public class runGetTableColumn
 		System.out.println( "/showTreeStructure: show option, display the information as a tree structure." );
 		System.out.println( "/showBySQLClause: show option, display the information group by sql clause type." );
 		System.out.println( "/showJoin: show option, display the join table and column." );
+		System.out.println("/h: option, specify the host of jdbc connection");
+		System.out.println("/P: option, specify the port of jdbc connection, note it's capital P.");
+		System.out.println("/u: option, specify the username of jdbc connection.");
+		System.out.println("/p: option, specify the password of jdbc connection, note it's lowercase P.");
+		System.out.println("/db: option, specify the database of jdbc connection.");
+		System.out.println("/schema: option, specify the schema which is used for extracting metadata.");
+	}
+	
+	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
+			String passowrd, String database, String schema) {
+		if (vendor == EDbVendor.dbvoracle) {
+			TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
+			if (schema != null) {
+				datasource.setExtractedSchemas(schema);
+			}
+			return datasource;
+		}
+		if (vendor == EDbVendor.dbvmssql) {
+			TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+			if (schema != null) {
+				datasource.setExtractedDbsSchemas(database + "/" + schema);
+			}
+			return datasource;
+		}
+		return null;
 	}
 }
 
