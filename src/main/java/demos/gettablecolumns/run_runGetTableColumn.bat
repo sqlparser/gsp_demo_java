@@ -26,7 +26,7 @@ call setenv\setenv.bat
     )
 
 REM # Run the gsp demo
-%JAVA_CMD% -cp %CLASSPATH% demos.gettablecolumns.runGetTableColumn  %1 %2 %3 %4 %5 %6 %7 %8 %9
+%JAVA_CMD% -cp %CLASSPATH% demos.gettablecolumns.runGetTableColumn  %*
 
 REM # Change back to the original directory
 cd src\main\java\demos\gettablecolumns
