@@ -6,13 +6,7 @@ import gudusoft.gsqlparser.nodes.hive.THiveHintClause;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
-/**
- * Created by IntelliJ IDEA.
- * User: tako
- * Date: 13-8-11
- * Time: 下午6:19
- * To change this template use File | Settings | File Templates.
- */
+
 public class testHint extends TestCase {
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
