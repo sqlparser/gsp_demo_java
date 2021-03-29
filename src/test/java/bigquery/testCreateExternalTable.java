@@ -36,6 +36,30 @@ public class testCreateExternalTable extends TestCase {
 
     }
 
+    public void testAvro(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);
+
+        sqlparser.sqltext = "CREATE EXTERNAL TABLE dataset.CsvTable OPTIONS (\n" +
+                "  format = 'AVRO',\n" +
+                "  uris = ['gs://bucket/path1.csv', 'gs://bucket/path2.csv']\n" +
+                ");";
+
+        assertTrue(sqlparser.parse() == 0);
+
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstcreatetable);
+        TCreateTableSqlStatement createTableSqlStatement = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        TCreateTableOption createTableOption = createTableSqlStatement.getTableOptions().get(0);
+        assertTrue(createTableOption.getCreateTableOptionType() == etoBigQueryExternal);
+        assertTrue(createTableOption.toString().equalsIgnoreCase("OPTIONS (\n" +
+                "  format = 'AVRO',\n" +
+                "  uris = ['gs://bucket/path1.csv', 'gs://bucket/path2.csv']\n" +
+                ")"));
+
+        assertTrue(createTableOption.getFormat().equalsIgnoreCase("'AVRO'"));
+
+    }
+
     public void test2(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);

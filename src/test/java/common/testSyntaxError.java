@@ -3,6 +3,7 @@ package common;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testSyntaxError extends TestCase {
@@ -24,5 +25,42 @@ public class testSyntaxError extends TestCase {
         assertTrue(mergeSqlStatement.getErrorCount() == 0);
         assertTrue(mergeSqlStatement.getSyntaxErrors().size() == 0);
         assertTrue(mergeSqlStatement.getSyntaxHints().size() == 1);
+    }
+
+    public void test2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "    SELECT\n" +
+                "        c.[CustomerKey], \n" +
+                "        x.[Region], \n" +
+                "        x.[Age], \n" +
+                "        CASE x.[Bikes] \n" +
+                "            WHEN 0 THEN 0 \n" +
+                "            ELSE 1 \n" +
+                "        END AS [BikeBuyer]\n" +
+                "    FROM\n" +
+                "        [dbo].[DimCustomer] c INNER JOIN (\n" +
+                "            SELECT\n" +
+                "                [CustomerKey]\n" +
+                "                ,[Region]\n" +
+                "                ,[Age]\n" +
+                "                ,Sum(\n" +
+                "                    CASE [EnglishProductCategoryName] \n" +
+                "                        WHEN 'Bikes' THEN 1 \n" +
+                "                        ELSE 0 \n" +
+                "                    END) AS [Bikes]\n" +
+                "            FROM\n" +
+                "                [dbo].[vDMPrep] \n" +
+                "            GROUP BY\n" +
+                "                [CustomerKey]\n" +
+                "                ,[Region]\n" +
+                "                ,[Age]\n" +
+                "            ) AS [x]\n" +
+                "        ON c.[CustomerKey] = x.[CustomerKey]"
+                ;
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement SqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(SqlStatement.getErrorCount() == 0);
+        assertTrue(SqlStatement.getSyntaxErrors().size() == 0);
+        assertTrue(SqlStatement.getSyntaxHints().size() == 0);
     }
 }

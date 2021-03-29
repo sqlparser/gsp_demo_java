@@ -124,22 +124,27 @@ public class DataFlowAnalyzer {
 		TSQLEnv sqlenv = null;
 
 		//Get database metadata from sql jdbc
-		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
-				&& argList.indexOf("/p") != -1 && argList.indexOf("/db") != -1) {
-			try {
-				String host = args[argList.indexOf("/h") + 1];
-				String port = args[argList.indexOf("/P") + 1];
-				String user = args[argList.indexOf("/u") + 1];
-				String passowrd = args[argList.indexOf("/p") + 1];
-				String database = args[argList.indexOf("/db") + 1];
-				String schema = args[argList.indexOf("/schema") + 1];
-				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
-				if (database != null) {
-					sqlenv = TSQLEnv.valueOf(datasource);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1 && argList.indexOf("/p") != -1) {
+		    try {
+			String host = args[argList.indexOf("/h") + 1];
+			String port = args[argList.indexOf("/P") + 1];
+			String user = args[argList.indexOf("/u") + 1];
+			String passowrd = args[argList.indexOf("/p") + 1];
+			String database = null;
+			String schema = null;
+			if (argList.indexOf("/db") != -1) {
+			    database = args[argList.indexOf("/db") + 1];
 			}
+			if (argList.indexOf("/schema") != -1) {
+			    schema = args[argList.indexOf("/schema") + 1];
+			}
+			TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
+			if (datasource != null) {
+			    sqlenv = TSQLEnv.valueOf(datasource);
+			}
+		    } catch (Exception e) {
+			e.printStackTrace();
+		    }
 		}
 
 		if (!stat) {
@@ -360,21 +365,25 @@ public class DataFlowAnalyzer {
 	}
 
 	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
-			String passowrd, String database, String schema) {
+                                                      String passowrd, String database, String schema) {
 		if (vendor == EDbVendor.dbvoracle) {
-			TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
-			if (schema != null) {
-				datasource.setExtractedSchemas(schema);
-			}
-			return datasource;
+		    TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
+		    if (schema != null) {
+			datasource.setExtractedSchemas(schema);
+		    }
+		    return datasource;
 		}
 		if (vendor == EDbVendor.dbvmssql) {
-			TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+		    TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+		    if (database != null) {
 			if (schema != null) {
-				datasource.setExtractedDbsSchemas(database + "/" + schema);
+			    datasource.setExtractedDbsSchemas(database + "/" + schema);
+			} else {
+			    datasource.setExtractedDbsSchemas(database);
 			}
-			return datasource;
+		    }
+		    return datasource;
 		}
 		return null;
-	}
+    }
 }

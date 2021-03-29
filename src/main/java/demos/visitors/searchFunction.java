@@ -3,6 +3,7 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
 import gudusoft.gsqlparser.nodes.TWindowDef;
 import gudusoft.gsqlparser.stmt.TCallStatement;
@@ -59,6 +60,10 @@ class functionVisitor extends TParseTreeVisitor {
         if (node.getArgs() != null){
             for(int i=0;i<node.getArgs().size();i++){
                 System.out.print(",\targ"+i+": "+node.getArgs().getExpression(i).toString());
+                if (node.getArgs().getExpression(i).getObjectOperand() != null){
+                    TObjectName objectName = node.getArgs().getExpression(i).getObjectOperand();
+                    System.out.println("ObjectType:"+objectName.getDbObjectType());
+                }
             }
         }
         if (node.getAggregateType() != EAggregateType.none){
