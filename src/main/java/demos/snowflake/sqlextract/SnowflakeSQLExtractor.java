@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -107,7 +109,19 @@ public class SnowflakeSQLExtractor {
 
 		int start = procedure.getRoutineBody().indexOf("$$") + 2;
 		int end = procedure.getRoutineBody().lastIndexOf("$$") - 1;
-		buffer.append(procedure.getRoutineBody().substring(start, end).replace("`", "'")).append("\n");
+		String body = procedure.getRoutineBody().substring(start, end);
+		if (body.indexOf("`") != -1) {
+			Pattern pattern = Pattern.compile("`.+?`", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+			Matcher matcher = pattern.matcher(body);
+			StringBuffer replaceBuffer = new StringBuffer();
+			while (matcher.find()) {
+				String condition = matcher.group().replaceAll("\r\n", "\n").replace("'", "\\\\'").replace("\n", "\\\\n'\n+'").replace("`", "'");
+				matcher.appendReplacement(replaceBuffer, condition);
+			}
+			matcher.appendTail(replaceBuffer);
+			body = replaceBuffer.toString();
+		}
+		buffer.append(body);
 		buffer.append("})(");
 		for (int i = 0; i < args.length; i++) {
 			String type = argMap.get(args[i]);
