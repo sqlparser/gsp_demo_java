@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.stmt.TCallStatement;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testCreateProcedure extends TestCase {

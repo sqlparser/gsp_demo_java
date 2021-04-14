@@ -9,8 +9,9 @@ import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExceptionClause;
 import gudusoft.gsqlparser.nodes.TExceptionHandler;
+import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.postgresql.TNullStmt;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+
 import junit.framework.TestCase;
 
 public class testPlpgsql_getdiag extends TestCase {
@@ -36,7 +37,7 @@ public class testPlpgsql_getdiag extends TestCase {
                    "$$ LANGUAGE plpgsql;";
            assertTrue(sqlparser.parse() == 0);
 
-           TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+           TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
           assertTrue(createFunction.getBodyStatements().size() == 1);
           TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
           assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstplsql_nullstmt);

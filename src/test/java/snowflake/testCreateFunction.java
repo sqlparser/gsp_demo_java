@@ -4,7 +4,6 @@ import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.snowflake.TPseudoExprStmt;
-import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCreateFunctionStmt;
 import junit.framework.TestCase;
 
 

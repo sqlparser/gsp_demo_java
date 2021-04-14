@@ -6,7 +6,7 @@ package postgresql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.stmt.TReturnStmt;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_return extends TestCase {
@@ -22,7 +22,7 @@ public class testPlpgsql_return extends TestCase {
                    "$$ LANGUAGE plpgsql;";
            assertTrue(sqlparser.parse() == 0);
 
-           TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+           TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
           assertTrue(createFunction.getBodyStatements().size() == 1);
           TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
           assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_returnstmt);

@@ -8,9 +8,7 @@ import gudusoft.gsqlparser.nodes.TCaseExpression;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.nodes.TWhenClauseItem;
-import gudusoft.gsqlparser.stmt.TAssignStmt;
-import gudusoft.gsqlparser.stmt.TCaseStmt;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_case extends TestCase {
@@ -32,7 +30,7 @@ public class testPlpgsql_case extends TestCase {
                 "LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
 
         assertTrue(createFunction.getParameterDeclarations().size() == 1);
         TParameterDeclaration param = createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
@@ -89,7 +87,7 @@ public class testPlpgsql_case extends TestCase {
                 "LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
 
         assertTrue(createFunction.getParameterDeclarations().size() == 1);
         TParameterDeclaration param = createFunction.getParameterDeclarations().getParameterDeclarationItem(0);

@@ -6,11 +6,7 @@ package postgresql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TVarDeclStmt;
-import gudusoft.gsqlparser.stmt.TCloseStmt;
-import gudusoft.gsqlparser.stmt.TCursorDeclStmt;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_close extends TestCase {
@@ -34,7 +30,7 @@ public class testPlpgsql_close extends TestCase {
                         "$$ LANGUAGE plpgsql;";
                 assertTrue(sqlparser.parse() == 0);
 
-                TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+                TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
 
                 //System.out.println(createFunction.getDeclareStatements().size());
                 //System.out.println(createFunction.getDeclareStatements().get(0).toString());

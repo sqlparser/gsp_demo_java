@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TDeleteSqlStatement;
 import gudusoft.gsqlparser.stmt.TIfStmt;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_delete extends TestCase {
@@ -46,7 +46,7 @@ public class testPlpgsql_delete extends TestCase {
                 "$$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getBodyStatements().size() == 1);
         TIfStmt ifStmt = (TIfStmt)createFunction.getBodyStatements().get(0);
         assertTrue(ifStmt.getThenStatements().size() == 5);

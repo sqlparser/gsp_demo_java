@@ -6,7 +6,7 @@ package postgresql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.stmt.*;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_if extends TestCase {
@@ -42,7 +42,7 @@ public class testPlpgsql_if extends TestCase {
                  "LANGUAGE plpgsql;";
          assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getBodyStatements().size() == 3);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
         assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_loopstmt);
@@ -122,7 +122,7 @@ public class testPlpgsql_if extends TestCase {
                 "$emp_audit$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("process_emp_audit"));
         assertTrue(createFunction.getBodyStatements().size() == 2);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
