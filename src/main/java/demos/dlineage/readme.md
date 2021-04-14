@@ -31,6 +31,17 @@ This tool can connect to a database to fetch the metadata and present a more acc
 	/db: Optional, specify the database of jdbc connection
 	/schema: Optional, specify the schema which is used for extracting metadata.
 ```
+
+When you use this feature, you should put the jdbc driver to your java classpath, and use java -cp command to load the jdbc driver jar.
+
+For example, if you put the jdbc jar to the external_lib directory, the java command is:
+```sh
+	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+
+```
+
+Currently, gsp supports oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
+
 	
 ### Binary version
 http://ftp.gudusoft.com/dl/dataflowanalyzer/DataFlowAnalyzer_trial.zip
