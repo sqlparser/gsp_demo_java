@@ -20,10 +20,15 @@ import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TNetezzaSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TPostgreSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSnowflakeSQLDataSource;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -123,28 +128,29 @@ public class DataFlowAnalyzer {
 
 		TSQLEnv sqlenv = null;
 
-		//Get database metadata from sql jdbc
-		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1 && argList.indexOf("/p") != -1) {
-		    try {
-			String host = args[argList.indexOf("/h") + 1];
-			String port = args[argList.indexOf("/P") + 1];
-			String user = args[argList.indexOf("/u") + 1];
-			String passowrd = args[argList.indexOf("/p") + 1];
-			String database = null;
-			String schema = null;
-			if (argList.indexOf("/db") != -1) {
-			    database = args[argList.indexOf("/db") + 1];
+		// Get database metadata from sql jdbc
+		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
+				&& argList.indexOf("/p") != -1) {
+			try {
+				String host = args[argList.indexOf("/h") + 1];
+				String port = args[argList.indexOf("/P") + 1];
+				String user = args[argList.indexOf("/u") + 1];
+				String passowrd = args[argList.indexOf("/p") + 1];
+				String database = null;
+				String schema = null;
+				if (argList.indexOf("/db") != -1) {
+					database = args[argList.indexOf("/db") + 1];
+				}
+				if (argList.indexOf("/schema") != -1) {
+					schema = args[argList.indexOf("/schema") + 1];
+				}
+				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
+				if (datasource != null) {
+					sqlenv = TSQLEnv.valueOf(datasource);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			if (argList.indexOf("/schema") != -1) {
-			    schema = args[argList.indexOf("/schema") + 1];
-			}
-			TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
-			if (datasource != null) {
-			    sqlenv = TSQLEnv.valueOf(datasource);
-			}
-		    } catch (Exception e) {
-			e.printStackTrace();
-		    }
 		}
 
 		if (!stat) {
@@ -365,25 +371,81 @@ public class DataFlowAnalyzer {
 	}
 
 	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
-                                                      String passowrd, String database, String schema) {
-		if (vendor == EDbVendor.dbvoracle) {
-		    TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
-		    if (schema != null) {
-			datasource.setExtractedSchemas(schema);
-		    }
-		    return datasource;
-		}
-		if (vendor == EDbVendor.dbvmssql) {
-		    TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
-		    if (database != null) {
-			if (schema != null) {
-			    datasource.setExtractedDbsSchemas(database + "/" + schema);
-			} else {
-			    datasource.setExtractedDbsSchemas(database);
+			String passowrd, String database, String schema) {
+		try {
+			if (vendor == EDbVendor.dbvoracle) {
+				TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedSchemas(schema);
+				}
+				return datasource;
 			}
-		    }
-		    return datasource;
+			if (vendor == EDbVendor.dbvmssql) {
+				TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvpostgresql) {
+				TPostgreSQLDataSource datasource = new TPostgreSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvgreenplum) {
+				TGreenplumSQLDataSource datasource = new TGreenplumSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvmysql) {
+				TMysqlSQLDataSource datasource = new TMysqlSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvnetezza) {
+				TNetezzaSQLDataSource datasource = new TNetezzaSQLDataSource(host, port, user, passowrd, database);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvsnowflake) {
+				TSnowflakeSQLDataSource datasource = new TSnowflakeSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+		} catch (Exception e) {
+			System.err.println("Get datasource failed. " + e.getMessage());
+			e.printStackTrace();
 		}
 		return null;
-    }
+	}
 }
