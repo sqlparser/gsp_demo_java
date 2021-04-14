@@ -6,7 +6,7 @@ package postgresql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testCreateFunction extends TestCase {
@@ -16,7 +16,7 @@ public class testCreateFunction extends TestCase {
         sqlparser.sqlfilename = common.gspCommon.BASE_SQL_DIR+"java/postgresql/create_function_big_proc.sql";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("intf_crm.p_crm_cust_lbl_smy"));
 //        assertTrue(createFunction.getParameterDeclarations().size() == 2);
 //        TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
@@ -41,7 +41,7 @@ public class testCreateFunction extends TestCase {
                 "$function$";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("public.s2_cellid_contains"));
         assertTrue(createFunction.getParameterDeclarations().size() == 2);
         TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
@@ -77,7 +77,7 @@ public class testCreateFunction extends TestCase {
                 "$$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("somefunc"));
         assertTrue(createFunction.getDeclareStatements().size() == 1);
         TVarDeclStmt declareVariable = (TVarDeclStmt)createFunction.getDeclareStatements().get(0);
@@ -94,7 +94,7 @@ public class testCreateFunction extends TestCase {
                 "$$ LANGUAGE plpgsql; ";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("sales_tax"));
         assertTrue(createFunction.getParameterDeclarations().size() == 1);
         TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
@@ -117,7 +117,7 @@ public class testCreateFunction extends TestCase {
                 "$$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("extended_sales"));
         TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
         assertTrue(parameterDeclaration.getParameterName().toString().equalsIgnoreCase("p_itemno"));
@@ -169,7 +169,7 @@ public class testCreateFunction extends TestCase {
                 "$function$";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("ibis_speedtestci_tmp.create_speedtest_marketshare_by_month_poa"));
         assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
         assertTrue(createFunction.getBodyStatements().size()==2);
@@ -194,7 +194,7 @@ public class testCreateFunction extends TestCase {
                 "  $total$ language plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
         assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
 

@@ -3,10 +3,9 @@ package demos.search;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
 import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -100,16 +99,6 @@ class searchVisitor extends TParseTreeVisitor {
         if (node.getClass().getSimpleName().compareToIgnoreCase(this.parseTreeNodeName) == 0){
             found = true;
         }
-    }
-
-    public void preVisit(TPostgresqlCreateFunction node)
-    {
-            found = true;
-    }
-
-    public void preVisit(TCreateFunctionStmt node)
-    {
-        found = true;
     }
 
 }

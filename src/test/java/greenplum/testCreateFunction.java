@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.EDataType;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testCreateFunction extends TestCase {
@@ -21,7 +21,7 @@ public class testCreateFunction extends TestCase {
        // System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("complex_add"));
         assertTrue(createFunction.getParameterDeclarations().size() == 2);
         TParameterDeclaration parameterDeclaration = (TParameterDeclaration)createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
@@ -523,7 +523,7 @@ public class testCreateFunction extends TestCase {
        //
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("FUNCTIONOWNER.update_wrk_bdw_gz_account_rollup_AFS_facility"));
         assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
         assertTrue(createFunction.getBodyStatements().size()==14);

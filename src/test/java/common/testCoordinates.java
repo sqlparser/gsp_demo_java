@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.nodes.*;
 
 import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TPostgresqlCreateFunction;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 
@@ -25,7 +25,7 @@ public class testCoordinates extends TestCase {
                 "END; $total$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
         assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
 
@@ -50,7 +50,7 @@ public class testCoordinates extends TestCase {
                 "END; $total$ LANGUAGE plpgsql;";
         assertTrue(sqlparser.parse() == 0);
 
-        TPostgresqlCreateFunction createFunction = (TPostgresqlCreateFunction)sqlparser.sqlstatements.get(0);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("totalrecords"));
         assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("plpgsql"));
 
