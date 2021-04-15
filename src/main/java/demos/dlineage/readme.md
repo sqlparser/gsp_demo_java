@@ -20,6 +20,14 @@ It is the main part of the backend of [this online SQLFlow](https://sqlflow.gudu
 	
 	The result generated with this option is the same as [columnImpact](../columnImpact) demo with /s option.
 	
+
+Here is the list of available database after /t option:
+```
+access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,
+sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,
+sybase,teradata,soql,vertica
+```
+
 	
 ### Connect to the database instance to fetch metadata
 This tool can connect to a database to fetch the metadata and present a more accurate data lineage analysis result.
@@ -39,8 +47,10 @@ For example, if you put the jdbc jar to the external_lib directory, the java com
 	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
 
 ```
-
-Currently, gsp supports oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
+Currently, gsp able to connect to the following databases with the proper JDBC driver
+```
+oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
+```
 
 	
 ### Binary version
@@ -53,12 +63,6 @@ Then, run this utility like this:
 java -jar DataFlowAnalyzer.jar /t mssql /d path_to_directory_includes_sql_files /stat
 ```
 
-Here is the list of available database after /t option:
-```
-access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,
-sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,
-sybase,teradata,soql,vertica
-```
 
 
 ### Links
