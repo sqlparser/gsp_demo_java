@@ -37,7 +37,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s] [/i] [/ic] [/lof] [/j] [/text] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database>]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s] [/i] [/ic] [/lof] [/j] [/text] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]]");
 			System.out.println("/f: Option, specify the sql file path to analyze fdd relation.");
 			System.out.println("/d: Option, specify the sql directory path to analyze fdd relation.");
 			System.out.println("/j: Option, analyze the join relation.");
@@ -59,6 +59,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/p: Option, specify the password of jdbc connection, note it's lowercase P.");
 			System.out.println("/db: Option, specify the database of jdbc connection.");
 			System.out.println("/schema: Option, specify the schema which is used for extracting metadata.");
+			System.out.println("/metadata: Option, output the database metadata information to the file metadata.json.");
 			return;
 		}
 
@@ -146,6 +147,15 @@ public class DataFlowAnalyzer {
 				}
 				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
 				if (datasource != null) {
+					if (argList.indexOf("/metadata") != -1) {
+						try {
+							String metadata = datasource.exportJSON();
+							SQLUtil.writeToFile(new File("./metadata.json"), metadata);
+						} catch (Exception e) {
+							System.err.println("Get datasource metadata failed. " + e.getMessage());
+							e.printStackTrace();
+						}
+					}
 					sqlenv = TSQLEnv.valueOf(datasource);
 				}
 			} catch (Exception e) {
@@ -443,7 +453,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 		} catch (Exception e) {
-			System.err.println("Get datasource failed. " + e.getMessage());
+			System.err.println("Connect datasource failed. " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
