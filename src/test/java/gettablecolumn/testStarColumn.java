@@ -13,6 +13,7 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 
 public class testStarColumn extends TestCase {
+
     public static void test1(){
         TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvoracle);
         sqlParser.sqltext = "select emp.* from emp,dept";
@@ -79,6 +80,47 @@ public class testStarColumn extends TestCase {
         assertTrue(columns.get(0).equalsIgnoreCase("c123"));
         assertTrue(columns.get(1).equalsIgnoreCase("c345"));
     }
+
+    public static void testCTE(){
+        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlParser.sqltext = "CREATE VIEW [dwh_sws_reports].[DimGroupCorporation] AS WITH src AS (\n" +
+                "    SELECT \n" +
+                "      [PackageExecutionID] = tb1.[PackageExecutionID2], \n" +
+                "      [SourceTK] = tb1.[SourceTK], \n" +
+                "      [ValidFromTC] = tb1.[ValidFromTC], \n" +
+                "      [ChecksumTC] = tb1.[ChecksumTC], \n" +
+                "      [IsActiveTC] = tb1.[IsActiveTC], \n" +
+                "      [DimGroupCorporationSK] = tb1.[DimGroupCorporationSK], \n" +
+                "      [GroupCorporationNo] = tb1.[GroupCorporationNo], \n" +
+                "      [GroupCorporationName] = tb1.[GroupCorporationName], \n" +
+                "      [GroupCorporationName_ERP] = tb1.[GroupCorporationName_ERP], \n" +
+                "      [GroupCorporationNameAnnex_ERP] = tb1.[GroupCorporationNameAnnex_ERP], \n" +
+                "      [GroupCorporationNameComplete_ERP] = tb1.[GroupCorporationNameComplete_ERP], \n" +
+                "      [FinalAssemblyActivityCode] = tb1.[FinalAssemblyActivityCode], \n" +
+                "      [ShipmentActivityCode] = tb1.[ShipmentActivityCode], \n" +
+                "      [IsUsedInBAAN] = tb1.[IsUsedInBAAN], \n" +
+                "      [IsActiveInBAAN] = tb1.[IsActiveInBAAN], \n" +
+                "      [IsActive] = tb1.[IsActive] \n" +
+                "    FROM \n" +
+                "      [star_software_solutions].[DimGroupCorporation] AS tb1 \n" +
+                "    WHERE \n" +
+                "      1 = 1\n" +
+                "  ) \n" +
+                "SELECT \n" +
+                "  * \n" +
+                "FROM \n" +
+                "  [src] ";
+
+        assertTrue(sqlParser.parse()==0);
+        nodeVisitor columnVisitor = new nodeVisitor();
+        sqlParser.getSqlstatements().acceptChildren(columnVisitor);
+        ArrayList<String> columns = columnVisitor.columns;
+        assertTrue(columns.size() == 16);
+        assertTrue(columns.get(0).equalsIgnoreCase("[PackageExecutionID]"));
+//        for(String s:columns){
+//            System.out.println(s);
+//        }
+    }
 }
 
 class nodeVisitor extends TParseTreeVisitor {
@@ -91,7 +133,7 @@ class nodeVisitor extends TParseTreeVisitor {
                 }
                 columns.addAll(node.getColumnsLinkedToStarColumn());
             }else{
-                System.out.println("Not linked column found for:"+node.toString());
+                System.out.println("No linked column found for:"+node.toString());
             }
         }
 
