@@ -585,6 +585,11 @@ public class TGetTableColumn{
                         + lcTable.getTableName( )
                         + ")";
             }
+            else if (lcTable.getTableType() == ETableSource.pivoted_table){
+                tn = "(pivot-table:"
+                        + lcTable.getTableName( )
+                        + ")";
+            }
 			else if ( lcTable.getTableName( ) != null )
 			{
 				tn = lcTable.getTableName( ).toString( );

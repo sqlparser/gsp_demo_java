@@ -4,11 +4,17 @@ package common;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
 import gudusoft.gsqlparser.nodes.TResultColumn;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testComment extends TestCase {
 
     public void test0(){
+//        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+//        sqlparser.sqltext = "select * from t1;\n" +
+//                "--this is the query used for analysis\n" +
+//                "select * from t2;";
+
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
         sqlparser.sqltext = "SELECT last_name,                    -- select the name\n" +
                 "    salary + NVL(commission_pct, 0),-- total compensation\n" +
@@ -22,6 +28,8 @@ public class testComment extends TestCase {
                 "      (SELECT salary + NVL(commission_pct,0)  -- the compensation\n" +
                 "    FROM employees \n" +
                 "    WHERE last_name = 'Pataballa')        -- of Pataballa.";
+
+
         assertTrue(sqlparser.parse() == 0);
 
         // fetch all comments
@@ -61,7 +69,15 @@ class selectItemVisitor extends TParseTreeVisitor {
         if (commentToken != null){
             // System.out.println("comment: "+commentToken.toString());
         }
+    }
 
+    public void preVisit(TSelectSqlStatement node){
+        // System.out.println("--> select item: " + node.toString());
+        TSourceToken endToken = node.getEndToken();
+        TSourceToken commentToken =  searchComment(endToken);
+        if (commentToken != null){
+            // System.out.println("comment: "+commentToken.toString());
+        }
     }
 
     TSourceToken searchComment(TSourceToken currentToken){

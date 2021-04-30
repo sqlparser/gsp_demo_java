@@ -81,4 +81,13 @@ public class testOracle extends TestCase {
                         "TABLE2.COL2\n" +
                         "TABLE2.COL3");
     }
+
+    public static void testRowid(){
+        doTest("Select t1.ROWID from table1 t1",
+                "Tables:\n" +
+                        "table1\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table1.ROWID");
+    }
 }
