@@ -25,4 +25,13 @@ public class testCreateSynonym extends TestCase {
         TCreateSynonymStmt synonymStmt = (TCreateSynonymStmt)sqlparser.sqlstatements.get(0);
         assertTrue(synonymStmt.isPublic());
     }
+
+    public void test2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvnetezza);
+        sqlparser.sqltext = "CREATE SYNONYM pr FOR payroll";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateSynonymStmt synonymStmt = (TCreateSynonymStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(synonymStmt.getSynonymName().toString().equalsIgnoreCase("pr"));
+    }
 }
