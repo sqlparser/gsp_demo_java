@@ -20,15 +20,20 @@ import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
+import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TNetezzaSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TPostgreSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TRedshiftSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSnowflakeSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TTeradataSQLDataSource;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -43,6 +48,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/j: Option, analyze the join relation.");
 			System.out.println("/s: Option, simple output, ignore the intermediate results.");
 			System.out.println("/i: Option, ignore all result sets.");
+			System.out.println("/if: Option, ignore functions.");
 			System.out.println("/ic: Option, ignore output coordinates.");
 			System.out.println("/lof: Option, link orphan column to first table.");
 			System.out.println("/traceView: Option, analyze the source tables of views.");
@@ -126,6 +132,8 @@ public class DataFlowAnalyzer {
 		jsonFormat = argList.indexOf("/json") != -1;
 
 		boolean stat = argList.indexOf("/stat") != -1;
+		
+		boolean ignoreFunction = argList.indexOf("/if") != -1;
 
 		TSQLEnv sqlenv = null;
 
@@ -191,14 +199,22 @@ public class DataFlowAnalyzer {
 			}
 
 			String result = dlineage.generateDataFlow();
-
+			
 			if (jsonFormat) {
+				dataflow dataflow = dlineage.getDataFlow();
+				if(ignoreFunction){
+					dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+				}
 				DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer
-						.getSqlflowJSONModel(dlineage.getDataFlow());
+						.getSqlflowJSONModel(dataflow);
 				model.setDbvendor(vendor.name());
 				result = JSON.toJSONString(model);
 			} else if (traceView) {
 				result = dlineage.traceView();
+			} else if(ignoreFunction && result.trim().startsWith("<?xml")){
+				dataflow dataflow = dlineage.getDataFlow();
+				dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+				result =  XML2Model.saveXML(dataflow);
 			}
 
 			if (result != null) {
@@ -419,6 +435,15 @@ public class DataFlowAnalyzer {
 				}
 				return datasource;
 			}
+			if (vendor == EDbVendor.dbvredshift) {
+				TRedshiftSQLDataSource datasource = new TRedshiftSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
 			if (vendor == EDbVendor.dbvmysql) {
 				TMysqlSQLDataSource datasource = new TMysqlSQLDataSource(host, port, user, passowrd);
 				if (database != null) {
@@ -449,6 +474,13 @@ public class DataFlowAnalyzer {
 					} else {
 						datasource.setExtractedDbsSchemas(database);
 					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvteradata) {
+				TTeradataSQLDataSource datasource = new TTeradataSQLDataSource(host, port, user, passowrd, database);
+				if (database != null) {
+					datasource.setExtractedDatabases(database);
 				}
 				return datasource;
 			}
