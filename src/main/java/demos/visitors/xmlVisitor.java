@@ -473,6 +473,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		Element e_literal = xmldoc.createElement( TAG_LITERAL );
 		e_parent = (Element) elementStack.peek( );
 		e_parent.appendChild( e_literal );
+		e_literal.setAttribute("type",node.getLiteralType().toString());
 
 		Element e_value = xmldoc.createElement( "value" );
 		e_literal.appendChild( e_value );

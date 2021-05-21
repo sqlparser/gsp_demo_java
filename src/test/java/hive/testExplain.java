@@ -4,11 +4,10 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TGroupBy;
-import gudusoft.gsqlparser.nodes.hive.EHiveInsertType;
+import gudusoft.gsqlparser.nodes.EHiveInsertType;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.hive.THiveExplain;
-import gudusoft.gsqlparser.stmt.hive.THiveFromQuery;
 import junit.framework.TestCase;
 
 

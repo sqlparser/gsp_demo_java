@@ -4,9 +4,8 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
+import gudusoft.gsqlparser.nodes.TLateralView;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
-import gudusoft.gsqlparser.stmt.sybase.TSybaseDeleteStatistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +72,7 @@ class nodeVisitor extends TParseTreeVisitor {
         System.out.println("\t\tsequenceOption:"+sequenceOption.getSequenceOptionType().toString()+" ,value:"+sequenceOption.getOptionValue().toString());
     }
 
-    public void preVisit(THiveLateralView node){
+    public void preVisit(TLateralView node){
 
         if (node.getUdtf() != null){
             System.out.println(node.getUdtf().toString());
