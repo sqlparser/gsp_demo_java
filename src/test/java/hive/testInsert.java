@@ -70,4 +70,21 @@ public class testInsert extends TestCase {
         assertTrue(joinItem.getOnCondition().toString().equalsIgnoreCase("(pv.userid = u.id)"));
      }
 
+    public void test4(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
+        sqlparser.sqltext = "INSERT OVERWRITE LOCAL DIRECTORY '/tmp/pv_gender_sum'\n" +
+                "SELECT pv_gender_sum.*\n" +
+                "FROM pv_gender_sum;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteLocalDirectory);
+       // System.out.println(insert.getHiveInsertType());
+        assertTrue(insert.getDirectoryName().toString().equalsIgnoreCase("'/tmp/pv_gender_sum'"));
+
+        TSelectSqlStatement select = insert.getSubQuery();
+        assertTrue(select.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("pv_gender_sum.*"));
+        assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("pv_gender_sum"));
+    }
+
 }
