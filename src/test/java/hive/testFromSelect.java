@@ -64,6 +64,8 @@ public class testFromSelect extends TestCase {
                "    USING 'reduce_script'\n" +
                "    AS date, count;" ;
 
+
+       System.out.println(sqlparser.sqltext);
        assertTrue(sqlparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);

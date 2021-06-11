@@ -22,6 +22,7 @@ public class testInsert extends TestCase {
                 "FROM hiveTableName;";
           assertTrue(sqlparser.parse() == 0);
 
+        //  System.out.println(sqlparser.sqlstatements.get(0).sqlstatementtype);
         TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteDirectory);
         assertTrue(insert.getDirectoryName().toString().equalsIgnoreCase("'s3://bucketname/path/subpath/'"));
