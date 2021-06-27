@@ -427,7 +427,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvgreenplum) {
-				TGreenplumSQLDataSource datasource = new TGreenplumSQLDataSource(host, port, user, passowrd, database);
+				TGreenplumSQLDataSource datasource = new TGreenplumSQLDataSource(host, port, user, passowrd);
 				if (schema != null) {
 					datasource.setExtractedDbsSchemas(database + "/" + schema);
 				} else {

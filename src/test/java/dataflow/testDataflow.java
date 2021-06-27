@@ -37,6 +37,17 @@ public class testDataflow extends TestCase {
 						e.printStackTrace();
 					}
 				}
+				if(!dataflow.equals( SQLUtil.readFile(dataflowFile))){
+					File dataflowFile1 = new File(sqlfiles[j].getParentFile(),
+							sqlfiles[j].getName().replace(".sql", "1.xml"));
+					if (!dataflowFile1.exists()) {
+						try {
+							SQLUtil.writeToFile(dataflowFile1, dataflow);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				assertEquals(dataflow, SQLUtil.readFile(dataflowFile));
 			}
 		}
