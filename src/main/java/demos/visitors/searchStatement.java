@@ -1,10 +1,8 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.*;
-import gudusoft.gsqlparser.nodes.ENodeStatus;
-import gudusoft.gsqlparser.nodes.TDeclareVariable;
-import gudusoft.gsqlparser.nodes.TExpression;
-import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
+import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 
 import java.io.File;
@@ -87,8 +85,14 @@ class stmtVisitor extends TParseTreeVisitor {
                 System.out.println("remove:"+expressionNode.toString());
                 expressionNode.removeTokens();
             }
-
         }
+    }
+
+    public void preVisit(TUpdateSqlStatement updateSqlStatement){
+//        System.out.println("Update set clause:\t"+updateSqlStatement.getResultColumnList().getResultColumn(0).toString());
+//        TResultColumn resultColumn = updateSqlStatement.getResultColumnList().getResultColumn(0);
+//        System.out.println("Expression type:\t"+resultColumn.getExpr().getExpressionType());
+
     }
 
 }
