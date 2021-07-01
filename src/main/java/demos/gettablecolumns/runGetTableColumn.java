@@ -16,6 +16,8 @@ import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
+import gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser;
+import gudusoft.gsqlparser.util.SQLUtil;
 
 class sampleMetaDB implements IMetaDatabase
 {
@@ -249,10 +251,17 @@ public class runGetTableColumn
 		    } catch (Exception e) {
 			e.printStackTrace();
 		    }
-        	}
+		}
 		
 		if (sqlenv == null) {
 			getTableColumn.setSqlEnv(new TSQLServerEnv());
+//			TJSONSQLEnvParser jsonsqlEnvParser = new TJSONSQLEnvParser();
+//			String jsonText = SQLUtil.getFileContent("f:\\tmp\\meatdata.json");
+//
+//			TSQLEnv tsqlEnv = jsonsqlEnvParser.parseSQLEnv(vendor, jsonText);
+//			System.out.println(tsqlEnv.toString());
+//
+//			getTableColumn.setSqlEnv(tsqlEnv);
 		}
 		else{
 			getTableColumn.setSqlEnv(sqlenv);

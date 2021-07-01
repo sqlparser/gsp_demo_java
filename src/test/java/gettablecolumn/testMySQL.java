@@ -107,4 +107,27 @@ public class testMySQL extends TestCase {
                         "contacts.first_name\n" +
                         "contacts.last_name");
     }
+
+    public static void testColumnInSubQuery() {
+        doTest("select \n" +
+                        "`combi_actuals`.`date`\n" +
+                        "from `combi_actuals`\n" +
+                        "left join `combi_filters` on `combi_actuals`.`filter_id` = `combi_filters`.`filter_id`,\n" +
+                        "(select Jahr,Jahr234 from m_version_table )a\n" +
+                        "where year(`combi_actuals`.`date`) = (select Jahr from m_version_table2 where Jahr234 = year(now()) limit 1)\n",
+                "Tables:\n" +
+                        "`combi_actuals`\n" +
+                        "`combi_filters`\n" +
+                        "m_version_table\n" +
+                        "m_version_table2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "`combi_actuals`.`date`\n" +
+                        "`combi_actuals`.`filter_id`\n" +
+                        "`combi_filters`.`filter_id`\n" +
+                        "m_version_table.Jahr\n" +
+                        "m_version_table.Jahr234\n" +
+                        "m_version_table2.Jahr\n" +
+                        "m_version_table2.Jahr234");
+    }
 }

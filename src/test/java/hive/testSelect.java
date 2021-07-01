@@ -5,7 +5,7 @@ package hive;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.hive.THiveSortBy;
+import gudusoft.gsqlparser.nodes.TSortBy;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
@@ -109,7 +109,7 @@ public class testSelect extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(select.getResultColumnList().size() == 1);
 
-        THiveSortBy sortBy  = select.getSortBy();
+        TSortBy sortBy  = select.getSortBy();
       assertTrue(sortBy.getItems().getOrderByItem(0).getSortKey().toString().equalsIgnoreCase("amount"));
       assertTrue(sortBy.getItems().getOrderByItem(0).getSortType() == TBaseType.srtDesc);
 

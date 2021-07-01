@@ -56,7 +56,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/json: Option, print the json format output.");
 			System.out.println("/stat: Option, output the analysis statistic information.");
 			System.out.println(
-					"/t: Option, set the database type. Support oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
+					"/t: Option, set the database type. Support sparksql,oracle, mysql, mssql, db2, netezza, teradata, informix, sybase, postgresql, hive, greenplum and redshift, the default type is oracle");
 			System.out.println("/o: Option, write the output stream to the specified file.");
 			System.out.println("/log: Option, generate a dataflow.log file to log information.");
 			System.out.println("/h: Option, specify the host of jdbc connection");

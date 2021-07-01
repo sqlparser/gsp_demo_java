@@ -5,7 +5,6 @@ import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.hive.*;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.hive.THiveFromQuery;
 import junit.framework.TestCase;
 
 
@@ -65,6 +64,8 @@ public class testFromSelect extends TestCase {
                "    USING 'reduce_script'\n" +
                "    AS date, count;" ;
 
+
+       System.out.println(sqlparser.sqltext);
        assertTrue(sqlparser.parse() == 0);
 
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
@@ -116,11 +117,11 @@ public class testFromSelect extends TestCase {
         assertTrue(aliasClause.getColumns().getObjectName(1).toString().equalsIgnoreCase("c2"));
         assertTrue(aliasClause.getColumns().getObjectName(2).toString().equalsIgnoreCase("c3"));
 
-        THiveDistributeBy distributeBy = select1.getDistributeBy();
+        TDistributeBy distributeBy = select1.getDistributeBy();
         assertTrue(distributeBy.getExpressionList().size() == 1);
         assertTrue(distributeBy.getExpressionList().getExpression(0).toString().equalsIgnoreCase("c2"));
 
-        THiveSortBy sortBy = select1.getSortBy();
+        TSortBy sortBy = select1.getSortBy();
         assertTrue(sortBy.getItems().size() == 2);
         assertTrue(sortBy.getItems().getOrderByItem(0).getSortKey().toString().equalsIgnoreCase("c2"));
         assertTrue(sortBy.getItems().getOrderByItem(0).getSortType() == TBaseType.srtNone);
@@ -276,6 +277,6 @@ public class testFromSelect extends TestCase {
        assertTrue(transformClause.getTransformType() == THiveTransformClause.ETransformType.ettMap);
        assertTrue(transformClause.getExpressionList().getExpression(0).toString().equalsIgnoreCase("pv_users.userid"));
        assertTrue(transformClause.getUsingString().toString().equalsIgnoreCase("'map_script'"));
-       assertTrue(map.getHiveClusterBy().getExpressionList().getExpression(0).toString().equalsIgnoreCase("dt"));
+       assertTrue(map.getClusterBy().getExpressionList().getExpression(0).toString().equalsIgnoreCase("dt"));
      }
 }

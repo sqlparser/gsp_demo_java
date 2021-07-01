@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TTable;
-import gudusoft.gsqlparser.nodes.hive.THiveLateralView;
+import gudusoft.gsqlparser.nodes.TLateralView;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
@@ -30,7 +30,7 @@ public class testLateralView extends TestCase {
         assertTrue(table.getTableName().toString().equalsIgnoreCase("exampleTable"));
         assertTrue(table.getLateralViewList().size() == 2);
 
-        THiveLateralView view = table.getLateralViewList().get(0);
+        TLateralView view = table.getLateralViewList().get(0);
         TFunctionCall call = view.getUdtf();
         assertTrue(call.getFunctionName().toString().equalsIgnoreCase("explode"));
         assertTrue(call.getArgs().getExpression(0).toString().equalsIgnoreCase("col1"));

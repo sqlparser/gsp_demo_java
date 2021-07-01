@@ -39,6 +39,18 @@ public class testLoad extends TestCase {
         assertTrue(p.getKeyValues().getExpression(0).getRightOperand().toString().equalsIgnoreCase("'2008-06-08'"));
         assertTrue(p.getKeyValues().getExpression(1).getLeftOperand().toString().equalsIgnoreCase("country"));
         assertTrue(p.getKeyValues().getExpression(1).getRightOperand().toString().equalsIgnoreCase("'US'"));
+    }
 
+    public void test3(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
+        sqlparser.sqltext = "LOAD DATA LOCAL INPATH /tmp/pv_2008-06-08_us.txt INTO TABLE page_view PARTITION(date='2008-06-08', country='US')";
+        assertTrue(sqlparser.parse() == 0);
+
+        THiveLoad load = (THiveLoad)sqlparser.sqlstatements.get(0);
+        assertTrue(load.isIslocal());
+        assertTrue(!load.isIsoverwrite());
+        assertTrue(load.getPath().toString().trim().equalsIgnoreCase("/tmp/pv_2008-06-08_us.txt"));
+        assertTrue(load.getTable().getTableName().toString().equalsIgnoreCase("page_view"));
+       // System.out.println(load.getPath().toString());
     }
 }

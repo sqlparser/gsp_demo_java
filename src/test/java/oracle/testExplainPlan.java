@@ -8,6 +8,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExpression;
+import gudusoft.gsqlparser.nodes.TMultiTargetList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
@@ -52,6 +53,7 @@ public class testExplainPlan extends TestCase {
 
         TSelectSqlStatement select = expression.getRightOperand().getSubQuery();
         assertTrue(select.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("department_id"));
+
 
     }
 

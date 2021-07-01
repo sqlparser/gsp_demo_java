@@ -4,6 +4,8 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 
+import gudusoft.gsqlparser.nodes.TMultiTarget;
+import gudusoft.gsqlparser.nodes.TMultiTargetList;
 import gudusoft.gsqlparser.stmt.TExplainPlan;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
@@ -73,5 +75,21 @@ public class testExplain extends TestCase {
         assertTrue(explainPlan.getStatement().sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement select = (TSelectSqlStatement)explainPlan.getStatement();
         assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("customer"));
+    }
+
+    public void testSparksql(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsparksql);
+        sqlparser.sqltext = "EXPLAIN EXTENDED select k, sum(v) from values (1, 2), (1, 3), t(k, v) group by k;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstExplain);
+        TExplainPlan explainPlan = (TExplainPlan) sqlparser.sqlstatements.get(0);
+        assertTrue(explainPlan.getStatement().sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement select = (TSelectSqlStatement)explainPlan.getStatement();
+        TMultiTargetList multiTargets = select.getTables().getTable(0).getRowList();
+        assertTrue(multiTargets.size() == 3);
+        TMultiTarget multiTarget = multiTargets.getMultiTarget(0);
+        assertTrue(multiTarget.getColumnList().size() == 2);
+        assertTrue(multiTarget.getColumnList().getResultColumn(0).toString().equalsIgnoreCase("1"));
+       // assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("t"));
     }
 }

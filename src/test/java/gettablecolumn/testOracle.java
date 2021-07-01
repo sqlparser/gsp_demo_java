@@ -90,4 +90,13 @@ public class testOracle extends TestCase {
                         "Fields:\n" +
                         "table1.ROWID");
     }
+
+    public static void testListAgg(){
+        doTest("SELECT LISTAGG(DRIVER_NM, ',') WITHIN GROUP (ORDER BY DRIVER_NM) AS DRIVER_NM FROM DRIVER_INFO",
+                "Tables:\n" +
+                        "DRIVER_INFO\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "DRIVER_INFO.DRIVER_NM");
+    }
 }

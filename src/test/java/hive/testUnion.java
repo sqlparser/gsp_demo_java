@@ -2,7 +2,6 @@ package hive;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.hive.THiveClusterBy;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.hive.THiveFromQuery;
@@ -134,7 +133,7 @@ public class testUnion extends TestCase {
           fromQuery = table.getSubquery();
           TSelectSqlStatement select = (TSelectSqlStatement)fromQuery.getHiveBodyList().get(0);
           assertTrue(select.getResultColumnList().size() == 3);
-          THiveClusterBy clusterBy = select.getHiveClusterBy();
+          TClusterBy clusterBy = select.getClusterBy();
           assertTrue(clusterBy.getExpressionList().getExpression(0).toString().equalsIgnoreCase("union_actions.uid"));
 
           table = fromQuery.tables.getTable(0);

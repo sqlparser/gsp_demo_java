@@ -3,7 +3,7 @@ package common;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExpressionList;
-import gudusoft.gsqlparser.nodes.hive.THiveDistributeBy;
+import gudusoft.gsqlparser.nodes.TDistributeBy;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
@@ -17,7 +17,7 @@ public class testDistributeBy extends TestCase {
         assertTrue(tgSqlParser.parse() == 0);
 
         TSelectSqlStatement sqlstatements = (TSelectSqlStatement) tgSqlParser.getSqlstatements().get(0);
-        THiveDistributeBy distributeBy = sqlstatements.getDistributeBy();
+        TDistributeBy distributeBy = sqlstatements.getDistributeBy();
         assertTrue(distributeBy.toString().equalsIgnoreCase("distribute by mid"));
     }
 
@@ -29,7 +29,7 @@ public class testDistributeBy extends TestCase {
         assertTrue(tgSqlParser.parse() == 0);
 
         TSelectSqlStatement sqlstatements = (TSelectSqlStatement) tgSqlParser.getSqlstatements().get(0);
-        THiveDistributeBy distributeBy = sqlstatements.getDistributeBy();
+        TDistributeBy distributeBy = sqlstatements.getDistributeBy();
         assertTrue(distributeBy.toString().equalsIgnoreCase("distribute by mid,name"));
 
         TExpressionList expressionList = distributeBy.getExpressionList();

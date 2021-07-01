@@ -85,6 +85,12 @@ public class testJSONEnv extends TestCase {
         TSQLTable sqlTable = sqlEnv.searchTable(tableName);
         assertTrue(sqlTable != null);
 
+        TSQLEnv.tableCollationCaseSensitive[EDbVendor.dbvmssql.ordinal()] = true;
+        tableName = "DataMart.dbo.loaN";
+        sqlTable = sqlEnv.searchTable(tableName);
+        assertTrue(sqlTable == null);
+
+        TSQLEnv.tableCollationCaseSensitive[EDbVendor.dbvmssql.ordinal()] = false;
         tableName = "DataMart.dbo.loaN";
         sqlTable = sqlEnv.searchTable(tableName);
         assertTrue(sqlTable != null);
