@@ -21,6 +21,7 @@ import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
 import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
@@ -66,6 +67,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/db: Option, specify the database of jdbc connection.");
 			System.out.println("/schema: Option, specify the schema which is used for extracting metadata.");
 			System.out.println("/metadata: Option, output the database metadata information to the file metadata.json.");
+			System.out.println("/tableLineage: Option, output tabel level lineage.");
 			return;
 		}
 
@@ -134,6 +136,12 @@ public class DataFlowAnalyzer {
 		boolean stat = argList.indexOf("/stat") != -1;
 		
 		boolean ignoreFunction = argList.indexOf("/if") != -1;
+		
+		boolean tableLineage = argList.indexOf("/tableLineage") != -1;
+		if(tableLineage) {
+			simple = false;
+			ignoreResultSets = false;
+		}
 
 		TSQLEnv sqlenv = null;
 
@@ -198,23 +206,36 @@ public class DataFlowAnalyzer {
 				dlineage.setTextFormat(textFormat);
 			}
 
-			String result = dlineage.generateDataFlow();
-			
-			if (jsonFormat) {
-				dataflow dataflow = dlineage.getDataFlow();
-				if(ignoreFunction){
-					dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+			String result = null;
+			if (tableLineage) {
+				dlineage.generateDataFlow();
+				dataflow originDataflow = dlineage.getDataFlow();
+				dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
+				if (jsonFormat) {
+					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+					model.setDbvendor(vendor.name());
+					result = JSON.toJSONString(model);
+				} else {
+					result = XML2Model.saveXML(dataflow);
 				}
-				DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer
-						.getSqlflowJSONModel(dataflow);
-				model.setDbvendor(vendor.name());
-				result = JSON.toJSONString(model);
-			} else if (traceView) {
-				result = dlineage.traceView();
-			} else if(ignoreFunction && result.trim().startsWith("<?xml")){
-				dataflow dataflow = dlineage.getDataFlow();
-				dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
-				result =  XML2Model.saveXML(dataflow);
+			} else {
+				result = dlineage.generateDataFlow();
+
+				if (jsonFormat) {
+					dataflow dataflow = dlineage.getDataFlow();
+					if (ignoreFunction) {
+						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+					}
+					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+					model.setDbvendor(vendor.name());
+					result = JSON.toJSONString(model);
+				} else if (traceView) {
+					result = dlineage.traceView();
+				} else if (ignoreFunction && result.trim().startsWith("<?xml")) {
+					dataflow dataflow = dlineage.getDataFlow();
+					dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+					result = XML2Model.saveXML(dataflow);
+				}
 			}
 
 			if (result != null) {
