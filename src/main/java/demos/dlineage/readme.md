@@ -1,4 +1,4 @@
-## DataFlowAnalyzer
+# DataFlowAnalyzer
 Collects the end-to-end column-level data lineage in the Data Warehouses environment 
 by analyzing SQL script especially stored procedure like PL/SQL.
 
@@ -8,7 +8,7 @@ that is compatible with the Apache Atlas type system to describle the data flow 
 This tool is built from the scratch, it is the main part of the backend of [the SQLFlow Cloud](https://sqlflow.gudusoft.com).
 
 
-### Usage
+## Usage
 ```
 Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]]
 /f: Optional, the full path to SQL file.
@@ -48,7 +48,18 @@ sybase,teradata,soql,vertica
 ```
 
 	
-### Connect to the database instance to fetch metadata
+## Resolve the ambiguous columns in SQL query
+```sql
+select ename
+from emp, dept
+where emp.deptid = dept.id
+```
+
+column `ename` in the first line is not qualified by table emp, so it’s ambiguous to know which table this column belongs to emp or dept.
+
+By connecting to the database to fetch metadata, column `ename` can be link to the table `emp` correctly.
+
+###  Connect to the database instance to fetch metadata
 This tool can connect to a database to fetch the metadata and present a more accurate data lineage analysis result.
 ```
 	/h: Optional, specify the host of jdbc connection
