@@ -47,6 +47,15 @@ sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowfl
 sybase,teradata,soql,vertica
 ```
 
+## Binary version
+http://ftp.gudusoft.com/dl/dataflowanalyzer/DataFlowAnalyzer_trial.zip
+
+In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
+Then, run this utility like this:
+
+```
+java -jar DataFlowAnalyzer.jar /t mssql /d path_to_directory_includes_sql_files 
+```
 	
 ## Resolve the ambiguous columns in SQL query
 ```sql
@@ -106,17 +115,6 @@ oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
 	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
 ```
 
-
-	
-### Binary version
-http://ftp.gudusoft.com/dl/dataflowanalyzer/DataFlowAnalyzer_trial.zip
-
-In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
-Then, run this utility like this:
-
-```
-java -jar DataFlowAnalyzer.jar /t mssql /d path_to_directory_includes_sql_files /stat
-```
 
 
 ### Links
