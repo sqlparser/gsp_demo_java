@@ -96,8 +96,10 @@ When you use this feature, you should put the jdbc driver to your java classpath
 
 Currently, gsp able to connect to the following databases with the proper JDBC driver
 ```
-oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
+azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sqlserver, teradata
 ```
+
+
 
 ### connect to SQL Server
 Tables are under `scott` user, `sample` db.
