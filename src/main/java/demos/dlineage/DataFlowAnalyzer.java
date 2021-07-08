@@ -296,11 +296,8 @@ public class DataFlowAnalyzer {
 				}
 			}
 		} else {
-			final File[] files = SQLUtil.listFiles(sqlFiles, new FileFilter() {
-				public boolean accept(File file) {
-					return file.isDirectory() || file.getName().toLowerCase().endsWith(".sql");
-				}
-			});
+			final File[] files = SQLUtil.listFiles(sqlFiles, file -> file.isDirectory() || file.getName().toLowerCase().endsWith(".sql"));
+
 
 			final int[] totalLines = new int[1];
 			final int[] totalStatementCount = new int[1];
