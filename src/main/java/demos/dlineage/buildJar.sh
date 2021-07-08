@@ -24,9 +24,9 @@ sudo cp -r $bin_dir/gudusoft.gsqlparser.jar $class_dir/lib
 
 
 
-javac -d $class_dir  -cp .:$bin_dir/gudusoft.gsqlparser.jar -g -sourcepath $src_dir @$src_dir/sources.list
+sudo javac -d $class_dir  -cp .:$bin_dir/gudusoft.gsqlparser.jar -g -sourcepath $src_dir @$src_dir/sources.list
 
 cd $class_dir
-jar -cvfm $cur_dir/data_flow_analyzer.jar MANIFEST.MF *
+sudo jar -cvfm $cur_dir/data_flow_analyzer.jar MANIFEST.MF *
 sudo rm -rf $class_dir
 
