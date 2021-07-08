@@ -103,21 +103,21 @@ oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
 Tables are under `scott` user, `sample` db.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
 ```
 
 ### connect to Oracle
 Tables are under `scott` user.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
 ```
 
 ### connect to MySQL
 Tables are under `scott` user, `sample` db.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
 ```
 
 
