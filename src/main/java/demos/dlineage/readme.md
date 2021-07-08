@@ -55,12 +55,25 @@ from emp, dept
 where emp.deptid = dept.id
 ```
 
-column `ename` in the first line is not qualified by table emp, so it’s ambiguous to know which table this column belongs to emp or dept.
+column `ename` in the first line is not qualified by table name `emp`, so it’s ambiguous to know which table this column belongs to?
 
-By connecting to the database to fetch metadata, column `ename` can be link to the table `emp` correctly.
+If we already created table `emp`, `dept` in the database using this DDL.
+```sql
+create table emp(
+	id int,
+	ename char(50),
+	deptid int
+);
 
-###  Connect to the database instance to fetch metadata
-This tool can connect to a database to fetch the metadata and present a more accurate data lineage analysis result.
+create table dept(
+	id int,
+	dname char(50)
+);
+```
+
+By connecting to the database to fetch metadata, column `ename` should be linked to the table `emp` correctly.
+
+This is a list of arguments used when connect to a database:
 ```
 	/h: Optional, specify the host of jdbc connection
 	/P: Optional, specify the port of jdbc connection
@@ -72,15 +85,27 @@ This tool can connect to a database to fetch the metadata and present a more acc
 
 When you use this feature, you should put the jdbc driver to your java classpath, and use java -cp command to load the jdbc driver jar.
 
-For example, if you put the jdbc jar to the external_lib directory, the java command is:
-```sh
-	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
-
-```
 Currently, gsp able to connect to the following databases with the proper JDBC driver
 ```
 oracle, sql server, mysql, postgresql, greenplum, netezza, snowflake.
 ```
+
+### connect to SQL Server
+
+```sh
+	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+```
+
+### connect to Oracle
+```sh
+	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+```
+
+### connect to MySQL
+```sh
+	java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /h localhost /P 3306 /u root /p password /db sample /t mysql /f sample.sql /s /json 
+```
+
 
 	
 ### Binary version
