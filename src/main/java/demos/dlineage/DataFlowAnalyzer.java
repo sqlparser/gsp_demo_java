@@ -330,7 +330,7 @@ public class DataFlowAnalyzer {
 						dlineage.setSqlEnv(sqlenv);
 					}
 					dlineage.setLinkOrphanColumnToFirstTable(false);
-					dlineage.setHandleListener(new DataFlowHandleAdapter() {
+					gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter listener = new gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter() {
 						long analyzeStartTime;
 						int statmentCount = 0;
 
@@ -372,7 +372,8 @@ public class DataFlowAnalyzer {
 
 							analyzeTotalTime[0] += spendTime;
 						}
-					});
+					};
+					dlineage.setHandleListener(listener);
 					dlineage.generateDataFlow();
 				} catch (Exception e) {
 					e.printStackTrace();
