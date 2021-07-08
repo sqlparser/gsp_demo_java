@@ -84,12 +84,12 @@ By connecting to the database to fetch metadata, column `ename` should be linked
 
 This is a list of arguments used when connect to a database:
 ```
-	/h: Optional, specify the host of jdbc connection
-	/P: Optional, specify the port of jdbc connection
-	/u: Optional, specify the username of jdbc connection.
-	/p: Optional, specify the password of jdbc connection
-	/db: Optional, specify the database of jdbc connection
-	/schema: Optional, specify the schema which is used for extracting metadata.
+/h: Optional, specify the host of jdbc connection
+/P: Optional, specify the port of jdbc connection
+/u: Optional, specify the username of jdbc connection.
+/p: Optional, specify the password of jdbc connection
+/db: Optional, specify the database of jdbc connection
+/schema: Optional, specify the schema which is used for extracting metadata.
 ```
 
 When you use this feature, you should put the jdbc driver to your java classpath, and use java -cp command to load the jdbc driver jar.
