@@ -17,7 +17,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
-import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
+import gudusoft.gsqlparser.dlineage.dataflow.listener.*;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
@@ -330,7 +330,7 @@ public class DataFlowAnalyzer {
 						dlineage.setSqlEnv(sqlenv);
 					}
 					dlineage.setLinkOrphanColumnToFirstTable(false);
-					gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter listener = new gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter() {
+					DataFlowHandleAdapter listener = new DataFlowHandleAdapter() {
 						long analyzeStartTime;
 						int statmentCount = 0;
 
