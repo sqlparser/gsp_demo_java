@@ -123,7 +123,8 @@ java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h loca
 ```
 
 ### Releases
-- Ver2.1.0, 2021/07/11
+- [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
+- [Ver2.1.0, 2021/07/11] Release gsp core 2.3.1.5
 
 ### Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
