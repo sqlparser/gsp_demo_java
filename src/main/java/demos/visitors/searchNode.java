@@ -1,6 +1,7 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
@@ -97,5 +98,10 @@ class nodeVisitor extends TParseTreeVisitor {
         }
     }
 
+    public void preVisit(TExpression node) {
+        if (node.getExpressionType() == EExpressionType.simple_constant_t){
+            System.out.println(node.toString()+"\t"+node.getConstantOperand().getStartToken()+"\t"+node.getLocation());
+        }
+    }
 
 }
