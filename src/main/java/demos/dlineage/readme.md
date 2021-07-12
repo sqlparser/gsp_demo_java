@@ -48,13 +48,13 @@ sybase,teradata,soql,vertica
 ```
 
 ## Binary version
-http://ftp.gudusoft.com/dl/dataflowanalyzer/DataFlowAnalyzer_trial.zip
+https://www.gudusoft.com/gsp_java/dlineage.zip
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 Then, run this utility like this:
 
 ```
-java -jar DataFlowAnalyzer.jar /t mssql /d path_to_directory_includes_sql_files 
+java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
 	
 ## Resolve the ambiguous columns in SQL query
