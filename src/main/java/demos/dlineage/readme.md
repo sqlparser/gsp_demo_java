@@ -123,7 +123,7 @@ java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h loca
 ```
 
 ### Releases
-- Ver2.1, 2021/07/11
+- Ver2.1.0, 2021/07/11
 
 ### Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
