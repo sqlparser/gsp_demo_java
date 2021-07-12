@@ -122,7 +122,8 @@ Tables are under `scott` user, `sample` db.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
 ```
 
-
+### Releases
+- Ver2.1, 2021/07/11
 
 ### Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
