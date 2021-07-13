@@ -102,25 +102,26 @@ azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sq
 
 
 ### connect to SQL Server
-Tables are under `scott` user, `sample` db.
+Tables are `AdventureWorksDW2019` db. `dbo` schema.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /s /json 
 ```
 
 ### connect to Oracle
-Tables are under `scott` user.
+Tables are `orcl` db. `HR` schema.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /s /json 
 ```
 
 ### connect to MySQL
-Tables are under `scott` user, `sample` db.
+Tables are `employees` db.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db sample /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /s /json 
 ```
+
 
 ### Releases
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
