@@ -102,14 +102,14 @@ azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sq
 
 
 ### connect to SQL Server
-Tables are under this schemae: `AdventureWorksDW2019/dbo`.
+Tables are under this schema: `AdventureWorksDW2019/dbo`.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /s /json 
 ```
 
 ### connect to Oracle
-Tables are under `HR` schema and connect to database use `orcl` instance.
+Tables are under `HR` schema and connect to database using `orcl` instance.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /s /json 
