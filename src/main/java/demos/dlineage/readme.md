@@ -102,21 +102,21 @@ azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sq
 
 
 ### connect to SQL Server
-Tables are `AdventureWorksDW2019` db. `dbo` schema.
+Tables are under this schemae: `AdventureWorksDW2019/dbo`.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /s /json 
 ```
 
 ### connect to Oracle
-Tables are `orcl` db. `HR` schema.
+Tables are under `HR` schema and connect to database use `orcl` instance.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /s /json 
 ```
 
 ### connect to MySQL
-Tables are `employees` db.
+Tables are under `employees` database.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /s /json 
@@ -124,6 +124,7 @@ java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h loca
 
 
 ### Releases
+- [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
 - [Ver2.1.0, 2021/07/11] Release gsp core 2.3.1.5
 
