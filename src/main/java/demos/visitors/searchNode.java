@@ -7,6 +7,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TLateralView;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
+import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class searchNode {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvhive;
+        EDbVendor dbVendor = EDbVendor.dbvoracle;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -52,6 +53,8 @@ public class searchNode {
 }
 
 class nodeVisitor extends TParseTreeVisitor {
+    private int stmtCount = 0;
+
     public void preVisit(TAlterTableOption node){
         System.out.print("--> node pos"
                 +"("+ node.getStartToken().lineNo+","+node.getStartToken().columnNo +"): "
@@ -99,9 +102,15 @@ class nodeVisitor extends TParseTreeVisitor {
     }
 
     public void preVisit(TExpression node) {
-        if (node.getExpressionType() == EExpressionType.simple_constant_t){
-            System.out.println(node.toString()+"\t"+node.getConstantOperand().getStartToken()+"\t"+node.getLocation());
-        }
+//        if (node.getExpressionType() == EExpressionType.simple_constant_t){
+//            System.out.println(node.toString()+"\t"+node.getConstantOperand().getStartToken()+"\t"+node.getLocation());
+//        }
     }
+
+    public void preVisit(TPlsqlExecImmeStmt node) {
+        System.out.println("\n"+(++stmtCount)+" Statement:\t"+node.sqlstatementtype);
+        System.out.println(node.getDynamicSQL());
+    }
+
 
 }

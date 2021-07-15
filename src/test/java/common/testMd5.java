@@ -85,4 +85,24 @@ public class testMd5 extends TestCase {
         assertTrue(!md51.equalsIgnoreCase(md52));
     }
 
+    public void testGetCompactString(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "create or replace view test22 as select /*+  RULE  */ t.account_name, t.account_number from  AP13_BANK_ACCOUNTS t;";
+        assertTrue(sqlparser.parse() == 0);
+        String md51 = sqlparser.sqlstatements.get(0).getCompactString();
+
+        sqlparser.sqltext = "create or replace view test22 " +
+                "as select /*+  RULE  */ t.account_name, t.account_number -- comment\n" +
+                "from  AP13_BANK_ACCOUNTS t;";
+        assertTrue(sqlparser.parse() == 0);
+        String md52 = sqlparser.sqlstatements.get(0).getCompactString();
+
+        assertTrue(md51.equalsIgnoreCase(md52));
+
+//        System.out.println(md51);
+//        System.out.println(md52);
+    }
+
+
 }
