@@ -9,7 +9,7 @@ For more detailed information about how this tools works, please check [this art
 `java runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]`
 
 ## Binary version
-https://www.gudusoft.com/gsp_java/gettablecolumns.zip
+https://www.gudusoft.com/gsp_java/gettablecolumn.zip
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 Then, run this utility like this:
