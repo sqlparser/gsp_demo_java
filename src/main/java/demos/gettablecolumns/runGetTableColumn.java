@@ -17,7 +17,7 @@ import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TPostgreSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TRedshiftSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSnowflakeSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TTeradataSQLDataSource
+import gudusoft.gsqlparser.sqlenv.TTeradataSQLDataSource;
 
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
