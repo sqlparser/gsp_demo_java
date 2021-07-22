@@ -5,16 +5,20 @@ package demos.expressionTraverser;
  */
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+
+import java.util.Stack;
 
 public class expressionTraverser  {
 
     public static void main(String args[])
      {
-         //
-          oracleWhereCondition();
+         oracleStringConcate();
+         // oracleWhereCondition();
         //  sqlServerSelectList();
         // functionArg();
      }
@@ -39,6 +43,34 @@ public class expressionTraverser  {
         }
     }
 
+
+    static void oracleStringConcate(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+
+        //sqlparser.sqltext = "select col1, col2,sum(col3) from table1, table2 where col4 > col5 and col6= 1000 or c1 = 1 and not sal";
+        sqlparser.sqltext = "SELECT * FROM Customers\n" +
+                "WHERE"+
+                "'CREATE TABLE USRTEMP.T$_AYF_F_D_DEP_TRAF_POST_'||V_THREAD||' TABLESPACE <P_DB_TBS_TEMP>\n" +
+                "\tAS\n" +
+                "    SELECT * FROM DWA.AYF_F_D_DEPART_TRAF_POSTPAGO\n" +
+                "    WHERE 1=0'";
+
+
+        int ret = sqlparser.parse();
+        if (ret == 0){
+            TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+            TExpression expr = select.getWhereClause().getCondition();
+
+           // doTraverse(expr,"pre");
+            //doTraverse(expr,"in");
+            calculateExprVisitor cv = new calculateExprVisitor();
+            expr.postOrderTraverse(cv);
+            System.out.println(expr.getPlainText());
+
+        }else{
+            System.out.println(sqlparser.getErrormessage());
+        }
+    }
 
     static void oracleWhereCondition(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
@@ -176,4 +208,39 @@ class exprVisitor implements IExpressionVisitor {
         }
         return true;
     };
+}
+
+class calculateExprVisitor implements IExpressionVisitor {
+   Stack <TExpression> expressionStack = new Stack<>();
+
+    public boolean exprVisit(TParseTreeNode pNode,boolean isLeafNode){
+        if (isLeafNode){
+            expressionStack.push((TExpression)pNode);
+        }
+
+        TExpression expr = (TExpression)pNode;
+        switch (expr.getExpressionType()){
+            case concatenate_t:
+                TExpression expr1 = expressionStack.pop();
+                TExpression expr2 = expressionStack.pop();
+
+                String expr1Str = expr1.toString();
+                String expr2Str = expr2.toString();
+                if (expr1.getExpressionType() == EExpressionType.simple_constant_t){
+                    expr1Str = TBaseType.getStringInsideLiteral(expr1Str);
+                }
+                if (expr2.getExpressionType() == EExpressionType.simple_constant_t){
+                    expr2Str = TBaseType.getStringInsideLiteral(expr2Str);
+                }
+
+                //TExpression expr3 = expressionStack.peek();
+                ((TExpression)pNode).setString(expr2Str+expr1Str);
+
+                expressionStack.push((TExpression)pNode);
+
+                break;
+        }
+        return true;
+    };
+
 }

@@ -44,6 +44,8 @@ public class testBlankLines extends TestCase {
                  "END;\n" +
                  "GO ";
 
+         //System.out.println(sqlparser.sqltext);
+
          sqlparser.parse();
          option.emptyLines = TEmptyLinesOption.EloMergeIntoOne;
         option.insertBlankLineInBatchSqls = false;
