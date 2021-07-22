@@ -59,7 +59,7 @@ public class testMultpleSqlFiles extends TestCase {
 		startPosition = positions.get(0);
 		endPosition = positions.get(1);
 		assertEquals(index, 1);
-		assertEquals(sql, stmt);
+		assertEquals(sql.trim(), stmt.trim());
 		assertEquals(startPosition, new Pair<Integer, Integer>(1, 18));
 		assertEquals(endPosition, new Pair<Integer, Integer>(1, 29));
 	}
