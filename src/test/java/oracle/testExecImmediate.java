@@ -72,4 +72,5 @@ public class testExecImmediate extends TestCase {
         //System.out.println(execImmeStmt.getDynamicSQL().toString());
         assertTrue(execImmeStmt.getDynamicSQL().toString().equalsIgnoreCase("INSERT INTO XXX VALUES ('AA', 'BB')"));
     }
+
 }

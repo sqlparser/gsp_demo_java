@@ -9,8 +9,16 @@ import java.util.List;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TNetezzaSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TPostgreSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TRedshiftSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TSnowflakeSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.TTeradataSQLDataSource;
+
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
@@ -335,27 +343,99 @@ public class runGetTableColumn
 	}
 	
 	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
-                                                      String passowrd, String database, String schema) {
-		if (vendor == EDbVendor.dbvoracle) {
-		    TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
-		    if (schema != null) {
-			datasource.setExtractedSchemas(schema);
-		    }
-		    return datasource;
-		}
-		if (vendor == EDbVendor.dbvmssql) {
-		    TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
-		    if (database != null) {
-			if (schema != null) {
-			    datasource.setExtractedDbsSchemas(database + "/" + schema);
-			} else {
-			    datasource.setExtractedDbsSchemas(database);
+													  String passowrd, String database, String schema) {
+		try {
+			if (vendor == EDbVendor.dbvoracle) {
+				TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedSchemas(schema);
+				}
+				return datasource;
 			}
-		    }
-		    return datasource;
+			if (vendor == EDbVendor.dbvmssql) {
+				TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvpostgresql) {
+				TPostgreSQLDataSource datasource = new TPostgreSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvgreenplum) {
+				TGreenplumSQLDataSource datasource = new TGreenplumSQLDataSource(host, port, user, passowrd);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvredshift) {
+				TRedshiftSQLDataSource datasource = new TRedshiftSQLDataSource(host, port, user, passowrd, database);
+				if (schema != null) {
+					datasource.setExtractedDbsSchemas(database + "/" + schema);
+				} else {
+					datasource.setExtractedDbsSchemas(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvmysql) {
+				TMysqlSQLDataSource datasource = new TMysqlSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvnetezza) {
+				TNetezzaSQLDataSource datasource = new TNetezzaSQLDataSource(host, port, user, passowrd, database);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvsnowflake) {
+				TSnowflakeSQLDataSource datasource = new TSnowflakeSQLDataSource(host, port, user, passowrd);
+				if (database != null) {
+					if (schema != null) {
+						datasource.setExtractedDbsSchemas(database + "/" + schema);
+					} else {
+						datasource.setExtractedDbsSchemas(database);
+					}
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvteradata) {
+				TTeradataSQLDataSource datasource = new TTeradataSQLDataSource(host, port, user, passowrd, database);
+				if (database != null) {
+					datasource.setExtractedDatabases(database);
+				}
+				return datasource;
+			}
+		} catch (Exception e) {
+			System.err.println("Connect datasource failed. " + e.getMessage());
+			e.printStackTrace();
 		}
 		return null;
-    }
+	}
 }
 
 class TSQLServerEnv extends TSQLEnv{
