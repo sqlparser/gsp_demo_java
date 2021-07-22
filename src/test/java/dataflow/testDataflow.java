@@ -18,6 +18,8 @@ public class testDataflow extends TestCase {
 
 		for (int i = 0; i < sqlDirs.length; i++) {
 			File vendorDir = sqlDirs[i];
+			if(vendorDir.getName().startsWith("."))
+				continue;
 			EDbVendor vendor = EDbVendor.valueOf("dbv" + vendorDir.getName());
 			File[] sqlfiles = vendorDir.listFiles(new FileFilter() {
 				public boolean accept(File pathname) {
