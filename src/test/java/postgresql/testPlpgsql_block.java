@@ -4,7 +4,7 @@ package postgresql;
  */
 
 import gudusoft.gsqlparser.*;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.TAssignStmt;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 import gudusoft.gsqlparser.stmt.TRaiseStmt;

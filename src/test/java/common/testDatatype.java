@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import junit.framework.TestCase;
 
 public class testDatatype extends TestCase {

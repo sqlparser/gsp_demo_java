@@ -58,7 +58,7 @@ public class testExecImmediate extends TestCase {
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstplsql_execimmestmt);
         TPlsqlExecImmeStmt execImmeStmt = (TPlsqlExecImmeStmt) sqlparser.sqlstatements.get(0);
         //System.out.println(execImmeStmt.getDynamicSQL().toString());
-        assertTrue(execImmeStmt.getDynamicSQL().toString().equalsIgnoreCase("INSERT INTO XXX VALUES (''AA'', ''BB'')"));
+        assertTrue(execImmeStmt.getDynamicSQL().toString().equalsIgnoreCase("INSERT INTO XXX VALUES ('AA', 'BB')"));
     }
 
     public void test4(){

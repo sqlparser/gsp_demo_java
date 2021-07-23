@@ -5,7 +5,7 @@ package postgresql;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 

@@ -11,7 +11,7 @@ import gudusoft.gsqlparser.TStatementList;
 import gudusoft.gsqlparser.stmt.TAssignStmt;
 import gudusoft.gsqlparser.stmt.TIfStmt;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateProcedure;
 
 public class analyzePLSQLProcedure {

@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.EDataType;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TStatementList;
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateProcedure;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlTableTypeDefStmt;
 import junit.framework.TestCase;

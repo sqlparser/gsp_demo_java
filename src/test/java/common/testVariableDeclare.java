@@ -4,7 +4,7 @@ package common;
  * Time: 17:17:50
  */
 
-import gudusoft.gsqlparser.nodes.TVarDeclStmt;
+import gudusoft.gsqlparser.stmt.TVarDeclStmt;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;
