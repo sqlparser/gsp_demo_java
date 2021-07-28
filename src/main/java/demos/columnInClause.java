@@ -47,7 +47,8 @@ class columnVisitor implements IExpressionVisitor {
             for(int i=0;i<lcStmt.tables.size();i++){
                 table = lcStmt.tables.getTable(i);
                 for(int j=0;j<table.getLinkedColumns().size();j++){
-                    if (objectName == table.getLinkedColumns().getObjectName(j)){
+                    //if (objectName == table.getLinkedColumns().getObjectName(j)){
+                     if (objectName.toString().equalsIgnoreCase(table.getLinkedColumns().getObjectName(j).toString())){
                         if(table.isBaseTable()){
                             ret =  table.getTableName()+"."+objectName.getColumnNameOnly();
                         }else{
