@@ -34,8 +34,8 @@ public class testClusterBy extends TestCase {
         assertTrue(tableOption.getCreateTableOptionType() == ECreateTableOption.etoClusterBy);
         TExpressionList expressionList = tableOption.getExpressionList();
 
-        new columnInClause().printColumns(expressionList.getExpression(0),createTableSqlStatement);
-        new columnInClause().printColumns(expressionList.getExpression(1),createTableSqlStatement);
+//        new columnInClause().printColumns(expressionList.getExpression(0),createTableSqlStatement);
+//        new columnInClause().printColumns(expressionList.getExpression(1),createTableSqlStatement);
     }
 
 }
