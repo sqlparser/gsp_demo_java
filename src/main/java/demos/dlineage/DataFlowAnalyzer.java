@@ -44,7 +44,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/tableLineage [/csv]]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -58,6 +58,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/json: Optional, print the json format output.");
 			System.out.println("/stat: Optional, output the analysis statistic information.");
 			System.out.println("/tableLineage: Optional, output tabel level lineage.");
+			System.out.println("/csv: Optional, output tabel level lineage csv format.");
 			System.out.println(
 					"/t: Option, set the database type. " +
 							"Support access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,\n" +
@@ -143,6 +144,7 @@ public class DataFlowAnalyzer {
 		boolean ignoreFunction = argList.indexOf("/if") != -1;
 		
 		boolean tableLineage = argList.indexOf("/tableLineage") != -1;
+		boolean csv = argList.indexOf("/csv") != -1;
 		if(tableLineage) {
 			simple = false;
 			ignoreResultSets = false;
@@ -215,13 +217,18 @@ public class DataFlowAnalyzer {
 			if (tableLineage) {
 				dlineage.generateDataFlow();
 				dataflow originDataflow = dlineage.getDataFlow();
-				dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
-				if (jsonFormat) {
-					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
-					model.setDbvendor(vendor.name());
-					result = JSON.toJSONString(model);
-				} else {
-					result = XML2Model.saveXML(dataflow);
+				if(csv) {
+					result = ProcessUtility.generateTableLevelLineageCsv(dlineage, originDataflow);
+				}
+				else {
+					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
+					if (jsonFormat) {
+						DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+						model.setDbvendor(vendor.name());
+						result = JSON.toJSONString(model);
+					} else {
+						result = XML2Model.saveXML(dataflow);
+					}
 				}
 			} else {
 				result = dlineage.generateDataFlow();
