@@ -117,8 +117,10 @@ public class testStarColumn extends TestCase {
         ArrayList<String> columns = columnVisitor.columns;
         assertTrue(columns.size() == 16);
         assertTrue(columns.get(0).equalsIgnoreCase("[PackageExecutionID]"));
+//        int i = 0;
 //        for(String s:columns){
-//            System.out.println(s);
+//            i++;
+//            System.out.println(i+":\t"+s);
 //        }
     }
 }
