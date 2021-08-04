@@ -13,25 +13,25 @@ import org.junit.Assert;
 
 public class TestAcceptChildren extends TestCase {
 
-//    public void testHiveHintClause() {
-//        EDbVendor dbVendor = EDbVendor.dbvhive;
-//        TGSqlParser sqlparser = new TGSqlParser(dbVendor);
-//
-//        sqlparser.sqltext = "select /*+ MAPJOIN(time_dim) */ count(*) from\n" +
-//                "store_sales join time_dim on (ss_sold_time_sk = t_time_sk);";
-//        int ret = sqlparser.parse();
-//        Assert.assertEquals(0, ret);
-//
-//        TSelectSqlStatement sqlStatement;
-//        for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
-//            sqlStatement = (TSelectSqlStatement) sqlparser.sqlstatements.get(i);
-//            sqlStatement.acceptChildren(new TParseTreeVisitor() {
-//                public void preVisit(THiveHintClause clause) {
-//                    Assert.assertEquals(clause.toString(), "/*+ MAPJOIN(time_dim) */");
-//                }
-//            });
-//        }
-//    }
+    public void testHiveHintClause() {
+        EDbVendor dbVendor = EDbVendor.dbvhive;
+        TGSqlParser sqlparser = new TGSqlParser(dbVendor);
+
+        sqlparser.sqltext = "select /*+ MAPJOIN(time_dim) */ count(*) from\n" +
+                "store_sales join time_dim on (ss_sold_time_sk = t_time_sk);";
+        int ret = sqlparser.parse();
+        Assert.assertEquals(0, ret);
+
+        TSelectSqlStatement sqlStatement;
+        for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
+            sqlStatement = (TSelectSqlStatement) sqlparser.sqlstatements.get(i);
+            sqlStatement.acceptChildren(new TParseTreeVisitor() {
+                public void preVisit(THiveHintClause clause) {
+                    Assert.assertEquals(clause.toString(), "/*+ MAPJOIN(time_dim) */");
+                }
+            });
+        }
+    }
 //
 //    public void testTransformClause() {
 //        EDbVendor dbVendor = EDbVendor.dbvhive;
