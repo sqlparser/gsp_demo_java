@@ -24,6 +24,7 @@ Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_incl
 /json: Optional, print the json format output.
 /stat: Optional, output the analysis statistic information.
 /tableLineage: Optional, output tabel level lineage.
+/tableLineage /csv : Optional, output tabel level lineage in csv format.
 /t: Option, set the database type. Support access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,
 sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,
 sybase,teradata,soql,vertica
@@ -122,11 +123,19 @@ Tables are under `employees` database.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /s /json 
 ```
 
+### Hive metastore
+The metadata of Hive usually stored in MySQL database or other relational database such as PostgreSQL. 
+Let's say your Hive metastore is stored in a MySQL database using the database with name: `hive`,
 
-### Releases
+You can use the command like this:
+```sh
+
+```
+
+## Releases
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
 - [Ver2.1.0, 2021/07/11] Release gsp core 2.3.1.5
 
-### Links
+## Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
