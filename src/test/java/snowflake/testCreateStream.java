@@ -16,5 +16,15 @@ public class testCreateStream extends TestCase {
         assertTrue(createStreamStmt.getStreamName().toString().equalsIgnoreCase("mystream"));
         assertTrue(createStreamStmt.getTableName().toString().equalsIgnoreCase("mytable"));
     }
+
+    public void test2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create stream my_ext_table_stream on external table my_ext_table insert_only = true;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateStreamStmt createStreamStmt = (TCreateStreamStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createStreamStmt.getStreamName().toString().equalsIgnoreCase("my_ext_table_stream"));
+        assertTrue(createStreamStmt.getTableName().toString().equalsIgnoreCase("my_ext_table"));
+    }
 }
 
