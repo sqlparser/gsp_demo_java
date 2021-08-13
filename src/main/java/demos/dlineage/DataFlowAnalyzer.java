@@ -24,6 +24,7 @@ import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
 import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.THiveMetadataDataSource;
 import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TNetezzaSQLDataSource;
@@ -42,7 +43,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/tableLineage [/csv]]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/hiveMetastore] [/tableLineage [/csv]]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -71,6 +72,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/p: Optional, specify the password of jdbc connection, note it's lowercase P.");
 			System.out.println("/db: Optional, specify the database of jdbc connection.");
 			System.out.println("/jdbc: Optional, specify the jdbc url of connection.");
+			System.out.println("/hiveMetastore: Optional, get hive metastore from jdbc connction.");
 			System.out.println("/schema: Optional, specify the schema which is used for extracting metadata.");
 			System.out.println("/metadata: Optional, output the database metadata information to the file metadata.json.");
 			return;
@@ -86,21 +88,25 @@ public class DataFlowAnalyzer {
 			return;
 		}
 
-		if (argList.indexOf("/f") != -1 && argList.size() > argList.indexOf("/f") + 1) {
-			sqlFiles = new File(args[argList.indexOf("/f") + 1]);
-			if (!sqlFiles.exists() || !sqlFiles.isFile()) {
-				System.out.println(sqlFiles + " is not a valid file.");
+		boolean isMetadata = argList.indexOf("/metadata") != -1;
+		
+		if (!isMetadata) {
+			if (argList.indexOf("/f") != -1 && argList.size() > argList.indexOf("/f") + 1) {
+				sqlFiles = new File(args[argList.indexOf("/f") + 1]);
+				if (!sqlFiles.exists() || !sqlFiles.isFile()) {
+					System.out.println(sqlFiles + " is not a valid file.");
+					return;
+				}
+			} else if (argList.indexOf("/d") != -1 && argList.size() > argList.indexOf("/d") + 1) {
+				sqlFiles = new File(args[argList.indexOf("/d") + 1]);
+				if (!sqlFiles.exists() || !sqlFiles.isDirectory()) {
+					System.out.println(sqlFiles + " is not a valid directory.");
+					return;
+				}
+			} else {
+				System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
 				return;
 			}
-		} else if (argList.indexOf("/d") != -1 && argList.size() > argList.indexOf("/d") + 1) {
-			sqlFiles = new File(args[argList.indexOf("/d") + 1]);
-			if (!sqlFiles.exists() || !sqlFiles.isDirectory()) {
-				System.out.println(sqlFiles + " is not a valid directory.");
-				return;
-			}
-		} else {
-			System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
-			return;
 		}
 
 		EDbVendor vendor = EDbVendor.dbvoracle;
@@ -151,6 +157,8 @@ public class DataFlowAnalyzer {
 
 		TSQLEnv sqlenv = null;
 
+		boolean hiveMetastore = argList.indexOf("/hiveMetastore") != -1;
+		
 		// Get database metadata from sql jdbc
 		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
 				&& argList.indexOf("/p") != -1) {
@@ -167,7 +175,7 @@ public class DataFlowAnalyzer {
 				if (argList.indexOf("/schema") != -1) {
 					schema = args[argList.indexOf("/schema") + 1];
 				}
-				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
+				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema, hiveMetastore);
 				if (datasource != null) {
 					if (argList.indexOf("/metadata") != -1) {
 						try {
@@ -196,7 +204,7 @@ public class DataFlowAnalyzer {
 				if (argList.indexOf("/schema") != -1) {
 					schema = args[argList.indexOf("/schema") + 1];
 				}
-				TSQLDataSource datasource = createSQLDataSource(vendor, jdbc, user, passowrd, schema);
+				TSQLDataSource datasource = createSQLDataSource(vendor, jdbc, user, passowrd, schema, hiveMetastore);
 				if (datasource != null) {
 					if (argList.indexOf("/metadata") != -1) {
 						try {
@@ -456,17 +464,20 @@ public class DataFlowAnalyzer {
 	}
 
 	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String jdbc, String user, String passowrd,
-			String schema) {
+			String schema, boolean hiveMetastore) {
 		try {
+			if (hiveMetastore) {
+				return TSQLDataSource.createSQLDataSource(jdbc, user, passowrd, hiveMetastore);
+			}
 			if (vendor == EDbVendor.dbvoracle) {
-				TOracleSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TOracleSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				if (schema != null) {
 					datasource.setExtractedSchemas(schema);
 				}
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvmssql) {
-				TMssqlSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TMssqlSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -478,7 +489,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvpostgresql) {
-				TPostgreSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TPostgreSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -490,7 +501,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvgreenplum) {
-				TGreenplumSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TGreenplumSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -502,7 +513,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvredshift) {
-				TRedshiftSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TRedshiftSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -514,7 +525,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvmysql) {
-				TMysqlSQLDataSource datasource  = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TMysqlSQLDataSource datasource  = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -526,7 +537,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvnetezza) {
-				TNetezzaSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TNetezzaSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -538,7 +549,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvsnowflake) {
-				TSnowflakeSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TSnowflakeSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					if (schema != null) {
@@ -550,7 +561,7 @@ public class DataFlowAnalyzer {
 				return datasource;
 			}
 			if (vendor == EDbVendor.dbvteradata) {
-				TTeradataSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
+				TTeradataSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd, hiveMetastore);
 				String database = datasource.getDatabase();
 				if (database != null) {
 					datasource.setExtractedDatabases(database);
@@ -565,8 +576,12 @@ public class DataFlowAnalyzer {
 	}
 
 	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
-			String passowrd, String database, String schema) {
+			String passowrd, String database, String schema, boolean hiveMetastore) {
 		try {
+			if(hiveMetastore) {
+				THiveMetadataDataSource datasource = new THiveMetadataDataSource(vendor, host, port, user, passowrd, database);
+				return datasource;
+			}
 			if (vendor == EDbVendor.dbvoracle) {
 				TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
 				if (schema != null) {
