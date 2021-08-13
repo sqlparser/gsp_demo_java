@@ -129,7 +129,7 @@ Let's say your Hive metastore is stored in a MySQL database using the database w
 
 You can use the command like this:
 ```sh
-
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /h localhost /P 3306 /u root /p password /db hive /f sample.sql /s /json 
 ```
 
 ## Releases
