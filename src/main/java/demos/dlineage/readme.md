@@ -220,6 +220,11 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /jdbc jdbc:mysql://127.0.0.1:3306  /u root /p password  /f sample.sql /s /json 
 ```
 
+## custom ddl export sql
+conf.zip file contains all ddl export sql, you can edit the sql file in the conf.zip, keep the same of return fields, put the modified sql file at: <work dirctory>/conf/<db vendor>/<sql file>
+	
+for example, when you edit the conf/mssql/query.sql, please copy it to <work dirctory>/conf/mssql/query.sql, the DataFlowAnalyzer will load your modified sql file as ddl export sql.	
+
 ## Releases
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
