@@ -2,6 +2,7 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 
@@ -56,8 +57,8 @@ public class searchStatement {
                 sqlStatement.acceptChildren(fv);
             }
 
-            System.out.println("\n\nvisit again:");
-            sqlStatement.acceptChildren(fv);
+//            System.out.println("\n\nvisit again:");
+//            sqlStatement.acceptChildren(fv);
 
         }else{
             System.out.println(sqlparser.getErrormessage());
@@ -75,17 +76,23 @@ class stmtVisitor extends TParseTreeVisitor {
         }
     }
     public void preVisit(TDeclareVariable declareVariable){
-        System.out.print("\tvariable name:"+declareVariable.getVariableName().toString()+", data type:"+declareVariable.getDatatype().toString());
+        System.out.print("\n\tvariable name:"+declareVariable.getVariableName().toString()+", data type:"+declareVariable.getDatatype().toString());
     }
 
     public void preVisit(TExpression expressionNode){
-        System.out.println("expr:"+expressionNode.getNodeStatus()+",\ttext:"+expressionNode.toString());
-        if (expressionNode.toString().equalsIgnoreCase("fx(2)")){
-            if (expressionNode.getNodeStatus() == ENodeStatus.nsNormal){
-                System.out.println("remove:"+expressionNode.toString());
-                expressionNode.removeTokens();
+        if (expressionNode.getExpressionType() == EExpressionType.in_t){
+            System.out.println("expr:"+expressionNode.getNodeStatus()+",\ttext:"+expressionNode.toString());
+            if (expressionNode.getNotToken() != null){
+                System.out.println(expressionNode.getNotToken().toString());
             }
         }
+
+//        if (expressionNode.toString().equalsIgnoreCase("fx(2)")){
+//            if (expressionNode.getNodeStatus() == ENodeStatus.nsNormal){
+//                System.out.println("remove:"+expressionNode.toString());
+//                expressionNode.removeTokens();
+//            }
+//        }
     }
 
     public void preVisit(TUpdateSqlStatement updateSqlStatement){
@@ -94,5 +101,7 @@ class stmtVisitor extends TParseTreeVisitor {
 //        System.out.println("Expression type:\t"+resultColumn.getExpr().getExpressionType());
 
     }
-
+    public void preVisit(TInsertSqlStatement insertSqlStatement){
+        System.out.println("\ninsert stmt:\n"+insertSqlStatement.toString());
+    }
 }
