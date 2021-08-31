@@ -30,7 +30,7 @@ public class searchNode {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvoracle;
+        EDbVendor dbVendor = EDbVendor.dbvhive;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -103,9 +103,12 @@ class nodeVisitor extends TParseTreeVisitor {
     }
 
     public void preVisit(TExpression node) {
-//        if (node.getExpressionType() == EExpressionType.simple_constant_t){
-//            System.out.println(node.toString()+"\t"+node.getConstantOperand().getStartToken()+"\t"+node.getLocation());
-//        }
+        if (node.getExpressionType() == EExpressionType.in_t){
+            System.out.println(node.toString()+"\t"+node.getLocation());
+            if (node.getNotToken() != null){
+                System.out.println(node.getNotToken());
+            }
+        }
     }
 
     public void preVisit(TPlsqlExecImmeStmt node) {
