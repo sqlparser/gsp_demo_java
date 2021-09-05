@@ -49,7 +49,7 @@ sybase,teradata,soql,vertica
 ```
 
 ## Binary version
-https://www.gudusoft.com/gsp_java/dlineage.zip
+https://www.gudusoft.com/download-data-lineage-java-library/
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 Then, run this utility like this:
