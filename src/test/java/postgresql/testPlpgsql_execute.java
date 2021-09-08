@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.stmt.postgresql.TExecuteSqlStatement;
+import gudusoft.gsqlparser.stmt.TExecuteSqlStatement;
 import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
@@ -34,7 +34,7 @@ public class testPlpgsql_execute extends TestCase {
            TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
           assertTrue(createFunction.getBodyStatements().size() == 2);
           TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
-          assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstpostgresqlExecute);
+          assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstExecute);
        TExecuteSqlStatement exec = (TExecuteSqlStatement)stmt;
        assertTrue(exec.getStmtString().toString().equalsIgnoreCase("'SELECT count(*) FROM '\n" +
                "    || tabname::regclass\n" +
@@ -45,4 +45,28 @@ public class testPlpgsql_execute extends TestCase {
        assertTrue(exec.getUsingVariables().getExpression(0).toString().equalsIgnoreCase("checked_user"));
        assertTrue(exec.getUsingVariables().getExpression(1).toString().equalsIgnoreCase("checked_date"));
    }
+
+    public void test2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION t.mergemodel(_modelid integer)\n" +
+                "RETURNS void\n" +
+                "LANGUAGE plpgsql\n" +
+                "AS $function$\n" +
+                "BEGIN\n" +
+                "    EXECUTE format ('INSERT INTO InSelections\n" +
+                "                                  SELECT * FROM AddInSelections_%s', modelid);\n" +
+                "                    \n" +
+                "END;\n" +
+                "$function$";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getBodyStatements().size() == 1);
+        TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstExecute);
+        TExecuteSqlStatement exec = (TExecuteSqlStatement)stmt;
+        assertTrue(exec.getSqlText().equalsIgnoreCase("'INSERT INTO InSelections\n" +
+                "                                  SELECT * FROM AddInSelections_PLACEHOLDER'"));
+    }
+
 }

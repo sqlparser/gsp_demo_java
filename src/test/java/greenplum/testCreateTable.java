@@ -6,7 +6,7 @@ package greenplum;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
-import gudusoft.gsqlparser.stmt.TExecutePreparedStatement;
+import gudusoft.gsqlparser.stmt.TExecuteSqlStatement;
 import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
@@ -18,7 +18,7 @@ public class testCreateTable extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TCreateTableSqlStatement createTableSqlStatement = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
-        TExecutePreparedStatement executePreparedStatement = createTableSqlStatement.getExecutePreparedStatement();
+        TExecuteSqlStatement executePreparedStatement = createTableSqlStatement.getExecutePreparedStatement();
         assertTrue(executePreparedStatement.getStatementName().toString().equalsIgnoreCase("recentfilms"));
         assertTrue(executePreparedStatement.getParameters().getExpression(0).toString().equalsIgnoreCase("'2007-01-01'"));
 
