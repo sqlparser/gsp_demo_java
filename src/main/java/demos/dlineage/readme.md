@@ -49,7 +49,7 @@ sybase,teradata,soql,vertica
 ```
 
 ## Binary version
-https://www.gudusoft.com/gsp_java/dlineage.zip
+https://www.gudusoft.com/download-data-lineage-java-library/
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 Then, run this utility like this:
@@ -109,6 +109,12 @@ Tables are under this schema: `AdventureWorksDW2019/dbo`.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /s /json 
 ```
 
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /jdbc jdbc:sqlserver://127.0.0.1:1433;DatabaseName=AdventureWorksDW2019  /u root /p password  /f sample.sql /s /json 
+```
+
 ### connect to Oracle
 Tables are under `HR` schema and connect to database using `orcl` instance.
 
@@ -116,11 +122,88 @@ Tables are under `HR` schema and connect to database using `orcl` instance.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /s /json 
 ```
 
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /jdbc jdbc:oracle:thin:@127.0.0.1:1521/orcl /u root /p password /f sample.sql /s /json 
+```
+
 ### connect to MySQL
 Tables are under `employees` database.
 
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /jdbc jdbc:mysql://127.0.0.1:3306/employees  /u root /p password  /f sample.sql /s /json 
+```
+
+### connect to Postgresql
+Tables are under `kingland` database.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t postgresql /h localhost /P 5432 /u root /p password /db kingland /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t postgresql /jdbc jdbc:postgresql://127.0.0.1:5432/kingland  /u root /p password  /f sample.sql /s /json 
+```
+
+### connect to Netezza
+Tables are under `MASTER_DB` database.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t netezza /h localhost /P 5480 /u root /p password /db MASTER_DB /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t netezza /jdbc jdbc:netezza://127.0.0.1:5480/MASTER_DB  /u root /p password  /f sample.sql /s /json 
+```
+
+### connect to Greenplum
+Tables are under `postgres` database.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t greenplum /h localhost /P 2345 /u root /p password /db postgres /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t greenplum /jdbc jdbc:pivotal:greenplum://127.0.0.1:2345;DatabaseName=postgres  /u root /p password  /f sample.sql /s /json 
+```
+
+### connect to Snowflake
+Tables are under `DEMO_DB` database.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t snowflake /h localhost /P 443 /u root /p password /db DEMO_DB /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t snowflake /jdbc jdbc:snowflake://127.0.0.1:443?db=DEMO_DB  /u root /p password  /f sample.sql /s /json 
+```
+
+### connect to Teradata
+Tables are under `DEMO_DB` database.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /h localhost /P 1025 /u root /p password /db DEMO_DB /f sample.sql /s /json 
+```
+
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /jdbc jdbc:teradata://127.0.0.1:1025/DEMO_DB  /u root /p password  /f sample.sql /s /json 
 ```
 
 ### Hive metastore
@@ -131,6 +214,16 @@ You can use the command like this:
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /h localhost /P 3306 /u root /p password /db hive /f sample.sql /s /json 
 ```
+Connect using the specified JDBC URL.
+
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /jdbc jdbc:mysql://127.0.0.1:3306  /u root /p password  /f sample.sql /s /json 
+```
+
+## custom ddl export sql
+conf.zip file contains all ddl export sql, you can edit the sql file in the conf.zip, keep the same of return fields, put the modified sql file at: <work dirctory>/conf/<db vendor>/<sql file>
+	
+for example, when you edit the conf/mssql/query.sql, please copy it to <work dirctory>/conf/mssql/query.sql, the DataFlowAnalyzer will load your modified sql file as ddl export sql.	
 
 ## Releases
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
