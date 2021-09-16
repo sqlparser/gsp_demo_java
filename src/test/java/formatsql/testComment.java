@@ -60,5 +60,35 @@ public class testComment extends TestCase {
 
     }
 
+    public static void testcomma_with_comment(){
+        GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "." + new Exception().getStackTrace()[0].getMethodName());
+       option.removeComment = false;
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+        sqlparser.sqltext = "SELECT                                                                                                                                            \n"
+        		+ "\n"
+        		+ "       OWNAMT as OWNAMT1--comment1   \n"
+        		+ "\n"
+        		+ "     , CMPYAMT as CMPYAMT1 --comment2  \n"
+        		+ "\n"
+        		+ "     , INSUAMT as INSUAMT1--comment3  \n"
+        		+ "\n"
+        		+ "  FROM AST.APADGNRL GNRL                                                                                                                                  \n"
+        		+ "\n"
+        		+ "     , AST.APAMACPT ACPT                                                                                                                                    \n"
+        		+ "\n"
+        		+ " WHERE ACPT.INSTCD       = GNRL.INSTCD";
+
+        sqlparser.parse();
+        String result = FormatterFactory.pp(sqlparser, option);
+       assertTrue(result.trim().equalsIgnoreCase("SELECT OWNAMT  AS OWNAMT1,--comment1   \n"
+       		+ "       CMPYAMT AS CMPYAMT1, --comment2  \n"
+       		+ "       INSUAMT AS INSUAMT1--comment3  \n"
+       		+ "FROM   AST.APADGNRL GNRL,\n"
+       		+ "       AST.APAMACPT ACPT\n"
+       		+ "WHERE  ACPT.INSTCD = GNRL.INSTCD"));
+       //assertTrue("remove_comment is not supported",false);
+       // System.out.println(result);
+   }
 
 }
