@@ -47,4 +47,16 @@ public class testLateralView extends TestCase {
         assertTrue(view.getColumnAliasList().getObjectName(0).toString().equalsIgnoreCase("myCol2"));
 
     }
+
+    public void test2() {
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
+        sqlparser.sqltext = "select full_name, t.* from foodmart.trimmed_employee\n" +
+                "lateral view json_tuple('{\"email\":\"amy@only_for_json_udf_test.net\", \"owner\":123}','owner','email') t as owner,email;";
+        //System.out.println(sqlparser.sqltext);
+        assertTrue(sqlparser.parse() == 0);
+
+        TSelectSqlStatement select = (TSelectSqlStatement) sqlparser.sqlstatements.get(0);
+        assertTrue(select.joins.size() == 1);
+    }
 }
