@@ -73,10 +73,12 @@ public class DataFlowAnalyzer {
 			System.out.println("/db: Optional, specify the database of jdbc connection.");
 			System.out.println("/jdbc: Optional, specify the jdbc url of connection.");
 			System.out.println("/hiveMetastore: Optional, get hive metastore from jdbc connction.");
-			System.out.println("/schema: Optional, specify the schema which is used for extracting metadata.");
+			System.out.println("/metadata-schema: Optional, specify the schema which is used for extracting metadata.");
 			System.out.println("/metadata: Optional, output the database metadata information to the file metadata.json.");
 			System.out.println("/transform: Optional, output the relation transform code.");
-			System.out.println("/transform-ic: Optional, output the relation transform coordinate.");
+			System.out.println("/transform-coor: Optional, output the relation transform coordinate.");
+			System.out.println("/defaultDatabase: Optional, specify the default schema.");
+			System.out.println("/defaultSchema: Optional, specify the default schema.");
 			return;
 		}
 
@@ -131,7 +133,7 @@ public class DataFlowAnalyzer {
 		boolean ignoreResultSets = argList.indexOf("/i") != -1;
 		boolean showJoin = argList.indexOf("/j") != -1;
 		boolean transform = argList.indexOf("/transform") != -1;
-		boolean transformCoordinate = argList.indexOf("/transform-ic") != -1;
+		boolean transformCoordinate = argList.indexOf("/transform-coor") != -1;
 		boolean textFormat = false;
 		boolean jsonFormat = false;
 		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
@@ -176,8 +178,8 @@ public class DataFlowAnalyzer {
 				if (argList.indexOf("/db") != -1) {
 					database = args[argList.indexOf("/db") + 1];
 				}
-				if (argList.indexOf("/schema") != -1) {
-					schema = args[argList.indexOf("/schema") + 1];
+				if (argList.indexOf("/metadata-schema") != -1) {
+					schema = args[argList.indexOf("/metadata-schema") + 1];
 				}
 				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema, hiveMetastore);
 				if (datasource != null) {
@@ -205,8 +207,8 @@ public class DataFlowAnalyzer {
 				String user = args[argList.indexOf("/u") + 1];
 				String passowrd = args[argList.indexOf("/p") + 1];
 				String schema = null;
-				if (argList.indexOf("/schema") != -1) {
-					schema = args[argList.indexOf("/schema") + 1];
+				if (argList.indexOf("/metadata-schema") != -1) {
+					schema = args[argList.indexOf("/metadata-schema") + 1];
 				}
 				TSQLDataSource datasource = createSQLDataSource(vendor, jdbc, user, passowrd, schema, hiveMetastore);
 				if (datasource != null) {
@@ -241,6 +243,12 @@ public class DataFlowAnalyzer {
 					sqlFiles, vendor, simple);
 
 			if (sqlenv != null) {
+				if (argList.indexOf("/defaultDatabase") != -1) {
+					sqlenv.setDefaultCatalogName(args[argList.indexOf("/defaultDatabase") + 1]);
+				}
+				if (argList.indexOf("/defaultSchema") != -1) {
+					sqlenv.setDefaultSchemaName(args[argList.indexOf("/defaultSchema") + 1]);
+				}
 				dlineage.setSqlEnv(sqlenv);
 			}
 
