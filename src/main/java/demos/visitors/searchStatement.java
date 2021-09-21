@@ -2,6 +2,7 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.stmt.TForStmt;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
@@ -30,7 +31,7 @@ public class searchStatement {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvmssql;
+        EDbVendor dbVendor = EDbVendor.dbvdb2;
 
         List<String> argList = Arrays.asList( args );
         int index = argList.indexOf( "/t" );
@@ -103,5 +104,10 @@ class stmtVisitor extends TParseTreeVisitor {
     }
     public void preVisit(TInsertSqlStatement insertSqlStatement){
         System.out.println("\ninsert stmt:\n"+insertSqlStatement.toString());
+    }
+
+    public void preVisit(TForStmt forStmt){
+        System.out.println("\nfor stmt:\n"+forStmt.getBodyStatements().size());
+        //System.out.println("\nfor stmt:\n"+forStmt.toString());
     }
 }

@@ -207,6 +207,31 @@ public class testCreateFunction extends TestCase {
         assertTrue(variableName.getDbObjectType() == EDbObjectType.variable);
     }
 
+    public void testCreateFunction1(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE OR REPLACE FUNCTION test_data_it.function3(double precision, double precision)\n" +
+                " RETURNS double precision\n" +
+                " LANGUAGE sql\n" +
+                " STABLE\n" +
+                "AS $function$\n" +
+                "    select case when $1 > $2 then $1\n" +
+                "        else $2\n" +
+                "    end\n" +
+                "$function$";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createFunction.getFunctionName().toString().equalsIgnoreCase("test_data_it.function3"));
+        assertTrue(createFunction.getProcedureLanguage().toString().equalsIgnoreCase("sql"));
+
+        assertTrue(createFunction.getBodyStatements().size() == 1);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)createFunction.getBodyStatements().get(0);
+        TExpression expr = selectSqlStatement.getResultColumnList().getResultColumn(0).getExpr();
+        assertTrue(expr.getExpressionType() == EExpressionType.case_t);
+        TCaseExpression caseExpression = expr.getCaseExpression();
+
+        assertTrue(caseExpression.getElse_expr().toString().equalsIgnoreCase("$2"));
+    }
 
 }
 
