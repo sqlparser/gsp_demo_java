@@ -75,6 +75,8 @@ public class DataFlowAnalyzer {
 			System.out.println("/hiveMetastore: Optional, get hive metastore from jdbc connction.");
 			System.out.println("/schema: Optional, specify the schema which is used for extracting metadata.");
 			System.out.println("/metadata: Optional, output the database metadata information to the file metadata.json.");
+			System.out.println("/transform: Optional, output the relation transform code.");
+			System.out.println("/transform-ic: Optional, output the relation transform coordinate.");
 			return;
 		}
 
@@ -128,6 +130,8 @@ public class DataFlowAnalyzer {
 		boolean simple = argList.indexOf("/s") != -1;
 		boolean ignoreResultSets = argList.indexOf("/i") != -1;
 		boolean showJoin = argList.indexOf("/j") != -1;
+		boolean transform = argList.indexOf("/transform") != -1;
+		boolean transformCoordinate = argList.indexOf("/transform-ic") != -1;
 		boolean textFormat = false;
 		boolean jsonFormat = false;
 		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
@@ -240,6 +244,8 @@ public class DataFlowAnalyzer {
 				dlineage.setSqlEnv(sqlenv);
 			}
 
+			dlineage.setTransform(transform);
+			dlineage.setTransformCoordinate(transformCoordinate);
 			dlineage.setShowJoin(showJoin);
 			dlineage.setIgnoreRecordSet(ignoreResultSets);
 			dlineage.setLinkOrphanColumnToFirstTable(linkOrphanColumnToFirstTable);
