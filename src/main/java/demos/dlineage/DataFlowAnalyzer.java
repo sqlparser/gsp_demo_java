@@ -43,7 +43,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/hiveMetastore] [/tableLineage [/csv]]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/hiveMetastore] [/tableLineage [/csv]] [/transform [/coor]]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -76,7 +76,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/metadata-schema: Optional, specify the schema which is used for extracting metadata.");
 			System.out.println("/metadata: Optional, output the database metadata information to the file metadata.json.");
 			System.out.println("/transform: Optional, output the relation transform code.");
-			System.out.println("/transform-coor: Optional, output the relation transform coordinate.");
+			System.out.println("/coor: Optional, output the relation transform coordinate, but not the code.");
 			System.out.println("/defaultDatabase: Optional, specify the default schema.");
 			System.out.println("/defaultSchema: Optional, specify the default schema.");
 			return;
@@ -133,7 +133,7 @@ public class DataFlowAnalyzer {
 		boolean ignoreResultSets = argList.indexOf("/i") != -1;
 		boolean showJoin = argList.indexOf("/j") != -1;
 		boolean transform = argList.indexOf("/transform") != -1;
-		boolean transformCoordinate = argList.indexOf("/transform-coor") != -1;
+		boolean transformCoordinate = transform && (argList.indexOf("/coor") != -1);
 		boolean textFormat = false;
 		boolean jsonFormat = false;
 		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
