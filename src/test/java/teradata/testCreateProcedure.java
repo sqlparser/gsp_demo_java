@@ -37,7 +37,7 @@ public class testCreateProcedure extends TestCase {
 
 
         System.out.println(cp.getBodyStatements().get(3).sqlstatementtype);
-        assertTrue(cp.getBodyStatements().get(3).sqlstatementtype == sstPrepare);
+        assertTrue(cp.getBodyStatements().get(3).sqlstatementtype == sstprepare);
         TPrepareStmt prepareStmt =(TPrepareStmt)cp.getBodyStatements().get(3);
         assertTrue(prepareStmt.getStmtName().toString().equalsIgnoreCase("S1"));
         assertTrue(prepareStmt.getPreparableStmtStr().equalsIgnoreCase("SqlStr"));
