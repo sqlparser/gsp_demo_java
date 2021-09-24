@@ -38,6 +38,10 @@ sybase,teradata,soql,vertica
 /db: Optional, specify the database of jdbc connection.
 /schema: Optional, specify the schema which is used for extracting metadata.
 /metadata: Optional, output the database metadata information to the file metadata.json.
+/transform: Optional, output the relation transform code.
+/coor: Optional, output the relation transform coordinate, but not the code.
+/defaultDatabase: Optional, specify the default schema.
+/defaultSchema: Optional, specify the default schema.
 ```
 
 
