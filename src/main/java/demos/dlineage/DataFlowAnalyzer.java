@@ -155,10 +155,11 @@ public class DataFlowAnalyzer {
 		
 		boolean ignoreFunction = argList.indexOf("/if") != -1;
 		
-		if(argList.indexOf("/s") != -1 && argList.indexOf("/topselectlist")!=-1) {
-			simple = false;
-			ignoreResultSets = true;
-			ignoreFunction = true;
+		boolean topselectlist = argList.indexOf("/topselectlist") != -1;
+		
+		if (argList.indexOf("/s") != -1 && argList.indexOf("/topselectlist") != -1) {
+			simple = true;
+			topselectlist = true;
 		}
 		
 		boolean tableLineage = argList.indexOf("/tableLineage") != -1;
@@ -265,6 +266,7 @@ public class DataFlowAnalyzer {
 			dlineage.setIgnoreRecordSet(ignoreResultSets);
 			dlineage.setLinkOrphanColumnToFirstTable(linkOrphanColumnToFirstTable);
 			dlineage.setIgnoreCoordinate(ignoreCoordinate);
+			dlineage.setSimpleShowTopSelectResultSet(topselectlist);
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
