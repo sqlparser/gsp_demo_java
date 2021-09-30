@@ -62,7 +62,7 @@ Then, run this utility like this:
 java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
 	
-## Resolve the ambiguous columns in SQL query
+## 1. Resolve the ambiguous columns in SQL query
 ```sql
 select ename
 from emp, dept
@@ -106,7 +106,7 @@ azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sq
 
 
 
-### connect to SQL Server
+### 1.1 connect to SQL Server
 Tables are under this schema: `AdventureWorksDW2019/dbo`.
 
 ```sh
@@ -119,7 +119,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /jdbc jdbc:sqlserver://127.0.0.1:1433;DatabaseName=AdventureWorksDW2019  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Oracle
+### 1.2 connect to Oracle
 Tables are under `HR` schema and connect to database using `orcl` instance.
 
 ```sh
@@ -132,7 +132,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /jdbc jdbc:oracle:thin:@127.0.0.1:1521/orcl /u root /p password /f sample.sql /s /json 
 ```
 
-### connect to MySQL
+### 1.3 connect to MySQL
 Tables are under `employees` database.
 
 ```sh
@@ -145,7 +145,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /jdbc jdbc:mysql://127.0.0.1:3306/employees  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Postgresql
+### 1.4 connect to Postgresql
 Tables are under `kingland` database.
 
 ```sh
@@ -158,7 +158,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t postgresql /jdbc jdbc:postgresql://127.0.0.1:5432/kingland  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Netezza
+### 1.5 connect to Netezza
 Tables are under `MASTER_DB` database.
 
 ```sh
@@ -171,7 +171,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t netezza /jdbc jdbc:netezza://127.0.0.1:5480/MASTER_DB  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Greenplum
+### 1.6 connect to Greenplum
 Tables are under `postgres` database.
 
 ```sh
@@ -184,7 +184,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t greenplum /jdbc jdbc:pivotal:greenplum://127.0.0.1:2345;DatabaseName=postgres  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Snowflake
+### 1.7 connect to Snowflake
 Tables are under `DEMO_DB` database.
 
 ```sh
@@ -197,7 +197,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t snowflake /jdbc jdbc:snowflake://127.0.0.1:443?db=DEMO_DB  /u root /p password  /f sample.sql /s /json 
 ```
 
-### connect to Teradata
+### 1.8 connect to Teradata
 Tables are under `DEMO_DB` database.
 
 ```sh
@@ -210,9 +210,8 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /jdbc jdbc:teradata://127.0.0.1:1025/DEMO_DB  /u root /p password  /f sample.sql /s /json 
 ```
 
-### Hive metastore
-The metadata of Hive usually stored in MySQL database or other relational database such as PostgreSQL. 
-Let's say your Hive metastore is stored in a MySQL database using the database with name: `hive`,
+### 1.7 connect to Hive
+Connect to Hive server and fetch the metadata to help resolve the ambiguous columns in SQL query.
 
 You can use the command like this:
 ```sh
@@ -223,6 +222,16 @@ Connect using the specified JDBC URL.
 ```sh
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /jdbc jdbc:mysql://127.0.0.1:3306  /u root /p password  /f sample.sql /s /json 
 ```
+
+## 2 export metadata from a database
+By specifing the `/metadata` option, we can extract metadata from a database for a specified schema and output to the file with name: metadata.json.
+
+### 2.1 export from SQL Server
+Export metadata under this schema: `AdventureWorksDW2019/dbo`.
+
+### 2.2 export from Hive server
+Export metadata from hive metastore.
+
 
 ## custom ddl export sql
 conf.zip file contains all ddl export sql, you can edit the sql file in the conf.zip, keep the same of return fields, put the modified sql file at: <work dirctory>/conf/<db vendor>/<sql file>
