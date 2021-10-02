@@ -212,15 +212,16 @@ java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /jdb
 
 ### 1.7 connect to Hive
 Connect to Hive server and fetch the metadata to help resolve the ambiguous columns in SQL query.
+Tables are under `default` database.
 
 You can use the command like this:
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /h localhost /P 3306 /u root /p password /db hive /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h 127.0.1.1 /P 10000 /u root /p password /db default /f sample.sql /s /json 
 ```
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /hiveMetastore /t mysql /jdbc jdbc:mysql://127.0.0.1:3306  /u root /p password  /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /jdbc jdbc:hive2://127.0.1.1:10000/default /u root /p password /f sample.sql /s /json 
 ```
 
 ## 2 export metadata from a database
@@ -228,10 +229,16 @@ By specifing the `/metadata` option, we can extract metadata from a database for
 
 ### 2.1 export from SQL Server
 Export metadata under this schema: `AdventureWorksDW2019/dbo`.
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /metadata 
+```
 
 ### 2.2 export from Hive server
 Export metadata from hive metastore.
 
+```sh
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h 127.0.1.1 /P 10000 /db default /u root /p password /metadata 
+```
 
 ## custom ddl export sql
 conf.zip file contains all ddl export sql, you can edit the sql file in the conf.zip, keep the same of return fields, put the modified sql file at: <work dirctory>/conf/<db vendor>/<sql file>
