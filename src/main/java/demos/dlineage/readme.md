@@ -216,12 +216,12 @@ Tables are under `default` database.
 
 You can use the command like this:
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h 127.0.1.1 /P 10000 /u root /p password /db default /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h localhost /P 10000 /u root /p password /db default /f sample.sql /s /json 
 ```
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /jdbc jdbc:hive2://127.0.1.1:10000/default /u root /p password /f sample.sql /s /json 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /jdbc jdbc:hive2://localhost:10000/default /u root /p password /f sample.sql /s /json 
 ```
 
 ## 2 export metadata from a database
@@ -237,7 +237,7 @@ java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h loca
 Export metadata from hive metastore.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h 127.0.1.1 /P 10000 /db default /u root /p password /metadata 
+java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h localhost /P 10000 /db default /u root /p password /metadata 
 ```
 
 ## custom ddl export sql
