@@ -26,7 +26,7 @@ Tables are under this schema: `AdventureWorksDW2019/dbo`.
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.columnInspect.ColumnInspect /t mssql /jdbc jdbc:sqlserver://127.0.0.1:1433 /db AdventureWorksDW2019 /schema dbo /u root /p password  /f sample.sql
+java -cp .;lib/*;external_lib/* demos.columninspect.ColumnInspect /t mssql /jdbc jdbc:sqlserver://127.0.0.1:1433 /db AdventureWorksDW2019 /schema dbo /u root /p password  /f sample.sql
 ```
 
 ### 1.2 connect to Oracle
@@ -35,7 +35,7 @@ Tables are under `HR` schema and connect to database using `orcl` instance.
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.columnInspect.ColumnInspect /t oracle /jdbc jdbc:oracle:thin:@127.0.0.1:1521/orcl /db orcl /schema HR /u root /p password /f sample.sql 
+java -cp .;lib/*;external_lib/* demos.columninspect.ColumnInspect /t oracle /jdbc jdbc:oracle:thin:@127.0.0.1:1521/orcl /db orcl /schema HR /u root /p password /f sample.sql 
 ```
 
 ### 1.3 connect to MySQL
@@ -44,7 +44,7 @@ Tables are under `employees` database.
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.columnInspect.ColumnInspect /t mysql /jdbc jdbc:mysql://127.0.0.1:3306/employees  /u root /p password  /db employees /f sample.sql 
+java -cp .;lib/*;external_lib/* demos.columninspect.ColumnInspect /t mysql /jdbc jdbc:mysql://127.0.0.1:3306/employees  /u root /p password  /db employees /f sample.sql 
 ```
 
 ### 1.4 connect to Postgresql
@@ -53,5 +53,5 @@ Tables are under `kingland` database.
 Connect using the specified JDBC URL.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.columnInspect.ColumnInspect /t postgresql /jdbc jdbc:postgresql://127.0.0.1:5432/kingland  /u root /p password /db kingland  /f sample.sql 
+java -cp .;lib/*;external_lib/* demos.columninspect.ColumnInspect /t postgresql /jdbc jdbc:postgresql://127.0.0.1:5432/kingland  /u root /p password /db kingland  /f sample.sql 
 ```
