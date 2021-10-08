@@ -19,7 +19,7 @@ public class ColumnInspect {
 
     public static void main(String[] args) {
         if (args.length < 12) {
-            System.out.println("Usage: java ColumnInspect [/t] [dbname] [/f] [sql file path] [/jdbc] [jdbc command] [/u] [username] [/p] [password]");
+            System.out.println("Usage: java ColumnInspect [/t] [dbname] [/f] [sql file path] [/jdbc] [jdbc command] [/u] [username] [/p] [password] [/db] [database] [/schema] [schema]");
             System.out.println("/t: required, specify the database type.");
             System.out.println("/f: required, specify the SQL script file path to analyze.");
             System.out.println("/u: required, specify the username of jdbc connection.");
@@ -78,13 +78,13 @@ public class ColumnInspect {
                 for (Object database : databases) {
                     JSONObject databaseJson = (JSONObject) database;
                     String databaseName = databaseJson.getString("name");
-                    if (matchDatabase(db, databaseName, vendor)) {
+                    if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotCatalog, db, databaseName)) {
                         JSONArray ts = databaseJson.getJSONArray("tables");
                         for (Object t : ts) {
                             JSONObject tb = (JSONObject) t;
                             if (schema != null) {
                                 String sch = tb.getString("schema");
-                                if (schema.equalsIgnoreCase(sch)) {
+                                if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotSchema, schema, sch)) {
                                     String name = tb.getString("name");
                                     JSONArray columns = tb.getJSONArray("columns");
                                     Map<String, JSONObject> p = new HashMap<>();
@@ -108,16 +108,15 @@ public class ColumnInspect {
                     }
                 }
                 for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
-                    columnInspectByTable(sqlparser.sqlstatements.get(i), map);
+                    columnInspectByTable(vendor, sqlparser.sqlstatements.get(i), map);
                 }
             } catch (Exception e) {
                 System.err.println("Get datasource metadata failed. " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
 
-    private static void columnInspectByTable(TCustomSqlStatement stmt, Map<String, Map<String, JSONObject>> map) throws InterruptedException {
+    private static void columnInspectByTable(EDbVendor vendor, TCustomSqlStatement stmt, Map<String, Map<String, JSONObject>> map) {
         System.out.println("-------------------------------------------");
         System.out.println("SQL : " + stmt.toString());
         ArrayList<TSyntaxError> syntaxErrors = stmt.getSyntaxErrors();
@@ -131,7 +130,17 @@ public class ColumnInspect {
         for (int i = 0; i < tTables.size(); i++) {
             TTable table = tTables.getTable(i);
             String tableName = table.getName();
-            Map<String, JSONObject> tbs = map.get(tableName);
+            System.out.println();
+            System.out.println(tableName + "：");
+
+            Map<String, JSONObject> tbs = null;
+            for (Map.Entry<String, Map<String, JSONObject>> entry : map.entrySet()) {
+                String key = entry.getKey();
+                if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotTable, tableName, key)) {
+                    tbs = entry.getValue();
+                }
+            }
+
             TResultColumnList columns = stmt.getResultColumnList();
             if (null != tbs) {
                 for (int j = 0; j < columns.size(); j++) {
@@ -145,7 +154,13 @@ public class ColumnInspect {
                                 resultColumn = columns.getResultColumn(j).getStartToken().toString();
                             }
                         }
-                        JSONObject jsonObject = tbs.get(resultColumn);
+                        JSONObject jsonObject = null;
+                        for (Map.Entry<String, JSONObject> entry : tbs.entrySet()) {
+                            String key = entry.getKey();
+                            if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotColumn, resultColumn, key)) {
+                                jsonObject = entry.getValue();
+                            }
+                        }
                         if (null != jsonObject) {
                             String columnName = columns.getResultColumn(j).getAliasClause() != null ? columns.getResultColumn(j).getAliasClause().toString() :
                                     resultColumn;
@@ -180,31 +195,9 @@ public class ColumnInspect {
             r = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
         } catch (Exception e) {
             System.err.println("connect datasource failed. " + e.getMessage());
-            e.printStackTrace();
             System.exit(1);
         }
         return r;
     }
 
-    private static boolean matchDatabase(String d1, String d2, EDbVendor vendor) {
-        boolean r = false;
-        switch (vendor) {
-            case dbvmssql:
-                d1 = "[" + d1 + "]";
-                r = d1.equalsIgnoreCase(d2);
-                break;
-            case dbvmysql:
-                d1 = "`" + d1 + "`";
-                r = d1.equalsIgnoreCase(d2);
-                break;
-            case dbvoracle:
-            case dbvpostgresql:
-                d1 = "\"" + d1 + "\"";
-                r = d1.equalsIgnoreCase(d2);
-                break;
-            default:
-                break;
-        }
-        return r;
-    }
 }
