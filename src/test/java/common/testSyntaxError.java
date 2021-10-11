@@ -2,11 +2,25 @@ package common;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TMergeSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testSyntaxError extends TestCase {
+
+    public void testSnowflakePivot(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE VIEW ATLAN_SAMPLE_DATA.OTT_PLATFORMS.NETFLIX_CUSTOMER_PAYMENTS_BY_TYPE \n" +
+                "AS  SELECT NC.*, NCP.CREDIT_CARD, NCP.DEBIT_CARD, NCP.VOUCHER \n" +
+                "FROM ATLAN_SAMPLE_DATA.OTT_PLATFORMS.NETFLIX_CUSTOMER_MASTER AS NC \n" +
+                "JOIN ( SELECT *   \n" +
+                "\t\tFROM ATLAN_SAMPLE_DATA.OTT_PLATFORMS.NETFLIX_CUSTOMER_PAYMENTS_MASTER     PIVOT(sum(PAYMENT_VALUE) FOR PAYMENT_TYPE IN ('credit_card', 'debit_card', 'voucher')) AS P (CUSTOMER_ID, CREDIT_CARD, DEBIT_CARD, VOUCHER) ) AS NCP  \n" +
+                "\t\t\t\tON NC.CUSTOMER_ID = NCP.CUSTOMER_ID;";
+        assertTrue(sqlparser.parse() == 0);
+        TCreateViewSqlStatement createViewSqlStatement = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createViewSqlStatement.getSyntaxHints().size() == 0);
+    }
 
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);

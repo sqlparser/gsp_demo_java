@@ -63,4 +63,23 @@ public class testCreateDatabase extends TestCase {
         assertTrue(databaseName.getDbObjectType() == EDbObjectType.database);
         assertTrue(databaseName.toString().equalsIgnoreCase("DEFINITION_SCHEMA.ECM_SABER2"));
     }
+
+    public void testSnowflake1(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create or replace database mydatabase;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateDatabaseSqlStatement createDatabaseSqlStatement = (TCreateDatabaseSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createDatabaseSqlStatement.getDatabaseName().toString().equalsIgnoreCase("mydatabase"));
+    }
+
+    public void testSnowflakeClone(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create database mytestdb_clone clone mytestdb;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateDatabaseSqlStatement createDatabaseSqlStatement = (TCreateDatabaseSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createDatabaseSqlStatement.getDatabaseName().toString().equalsIgnoreCase("mytestdb_clone"));
+        assertTrue(createDatabaseSqlStatement.getCloneSourceDb().toString().equalsIgnoreCase("mytestdb"));
+    }
 }
