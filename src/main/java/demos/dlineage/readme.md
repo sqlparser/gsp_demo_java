@@ -210,7 +210,7 @@ Connect using the specified JDBC URL.
 java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /jdbc jdbc:teradata://127.0.0.1:1025/DEMO_DB  /u root /p password  /f sample.sql /s /json 
 ```
 
-### 1.7 connect to Hive
+### 1.9 connect to Hive
 Connect to Hive server and fetch the metadata to help resolve the ambiguous columns in SQL query.
 Tables are under `default` database.
 
