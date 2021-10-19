@@ -1,0 +1,1 @@
+select DatabaseName from "DBC".Databases;
