@@ -34,6 +34,7 @@ public class testSyntaxError extends TestCase {
                 "  INSERT(product, quantity, supply_constrained)\n" +
                 "  VALUES(product, quantity, false)\n" +
                 ";";
+        System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TMergeSqlStatement mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(mergeSqlStatement.getErrorCount() == 0);
