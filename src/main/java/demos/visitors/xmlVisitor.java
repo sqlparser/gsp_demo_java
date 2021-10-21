@@ -4780,6 +4780,33 @@ public class xmlVisitor extends TParseTreeVisitor
 		elementStack.pop( );
 	}
 
+	public void preVisit( TCreateProcedureStmt node )
+	{
+
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_procedure = xmldoc.createElement( "create_procedure_statement" );
+		e_parent.appendChild( e_create_procedure );
+		elementStack.push( e_create_procedure );
+
+		Element e_procedure_spec = xmldoc.createElement( "procedure_specification_statement" );
+		e_create_procedure.appendChild( e_procedure_spec );
+		elementStack.push( e_procedure_spec );
+		current_objectName_tag = "procedure_name";
+		node.getProcedureName( ).accept( this );
+
+		if ( node.getParameterDeclarations( ) != null )
+			node.getParameterDeclarations( ).accept( this );
+
+		if ( node.getBodyStatements( ).size( ) > 0 )
+		{
+			current_statement_list_tag = "body_statement_list";
+			node.getBodyStatements( ).accept( this );
+		}
+
+		elementStack.pop( );
+		elementStack.pop( );
+	}
+
 	public void preVisit( TParameterDeclarationList list )
 	{
 		e_parent = (Element) elementStack.peek( );
