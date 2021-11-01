@@ -19,7 +19,7 @@ public class testExceptionClause extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        sqlfile = gspCommon.BASE_SQL_DIR+"java/oracle/exception_handler.sql";
+        sqlfile = gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"oracle/exception_handler.sql";
         parser = new TGSqlParser(EDbVendor.dbvoracle);
     }
 

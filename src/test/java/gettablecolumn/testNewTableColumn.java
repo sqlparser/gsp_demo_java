@@ -11,7 +11,6 @@ import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
 import junit.framework.TestCase;
-import org.junit.Test;
 import common.SqlFileList;
 import common.gspCommon;
 
@@ -237,13 +236,13 @@ public class testNewTableColumn extends TestCase {
   }
 
    public static void testOracle(){
-       doTest(EDbVendor.dbvoracle, gspCommon.BASE_SQL_DIR+ "java/oracle/dbobject/");
-       doTest(EDbVendor.dbvoracle,gspCommon.BASE_SQL_DIR+ "fetchdbobject\\oracle\\");
+       doTest(EDbVendor.dbvoracle, gspCommon.BASE_SQL_DIR_PRIVATE + "java/oracle/dbobject/");
+       doTest(EDbVendor.dbvoracle,gspCommon.BASE_SQL_DIR_PRIVATE + "fetchdbobject\\oracle\\");
    }
 
     public static void testSqlServer(){
-        doTest(EDbVendor.dbvmssql,gspCommon.BASE_SQL_DIR+ "java/mssql/dbobject/");
-        doTest(EDbVendor.dbvmssql,gspCommon.BASE_SQL_DIR+ "fetchdbobject\\mssql\\bydbobject\\");
+        doTest(EDbVendor.dbvmssql,gspCommon.BASE_SQL_DIR_PRIVATE + "java/mssql/dbobject/");
+        doTest(EDbVendor.dbvmssql,gspCommon.BASE_SQL_DIR_PRIVATE + "fetchdbobject\\mssql\\bydbobject\\");
     }
 
     public static void testTableEffectDelete(){

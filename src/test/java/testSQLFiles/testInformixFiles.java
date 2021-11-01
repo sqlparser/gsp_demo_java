@@ -7,6 +7,6 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testInformixFiles extends TestCase {
     public  void testInformix(){
-        parsefiles(EDbVendor.dbvinformix,common.gspCommon.BASE_SQL_DIR+"informix");
+        parsefiles(EDbVendor.dbvinformix,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"informix");
     }
 }

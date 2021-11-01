@@ -59,4 +59,14 @@ public class testCreateSchema extends TestCase {
         assertTrue(createSchemaSqlStatement.getBodyStatements().get(1).sqlstatementtype == ESqlStatementType.sstGrant);
         assertTrue(createSchemaSqlStatement.getBodyStatements().get(2).sqlstatementtype == ESqlStatementType.sstmssqldeny);
     }
+
+    public void testSnowflakeClone(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE SCHEMA demo.demo_table CLONE demo_stg.demo_table WITH MANAGED ACCESS;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateSchemaSqlStatement createSchemaSqlStatement = (TCreateSchemaSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createSchemaSqlStatement.getSchemaName().toString().equalsIgnoreCase("demo.demo_table"));
+        assertTrue(createSchemaSqlStatement.getCloneSourceSchema().toString().equalsIgnoreCase("demo_stg.demo_table"));
+    }
 }

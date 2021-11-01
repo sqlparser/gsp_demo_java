@@ -1,0 +1,1 @@
+SELECT Database AS databasename FROM _v_database

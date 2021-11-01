@@ -7,7 +7,7 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testImpalaFiles extends TestCase {
     public  void testImpala(){
-        parsefiles(EDbVendor.dbvimpala,common.gspCommon.BASE_SQL_DIR+"impala");
-        parsefiles(EDbVendor.dbvimpala,common.gspCommon.BASE_SQL_DIR+"java/impala");
+        parsefiles(EDbVendor.dbvimpala,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"impala");
+        parsefiles(EDbVendor.dbvimpala,common.gspCommon.BASE_SQL_DIR_PRIVATE +"java/impala");
     }
 }

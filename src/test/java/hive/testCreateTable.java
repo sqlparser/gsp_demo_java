@@ -74,7 +74,7 @@ public class testCreateTable extends TestCase {
         assertTrue(dataType.getTypeOfList().getDataType() == EDataType.string_t);
 
         dataType = cd.getDatatype().getColTypeList().getElement(3);
-        assertTrue(dataType.getDataType() == EDataType.structType_t);
+        assertTrue(dataType.getDataType() == EDataType.struct_t);
         assertTrue(dataType.getColumnDefList().size() == 2);
         TColumnDefinition cd1 = dataType.getColumnDefList().getColumn(0);
         assertTrue(cd1.getColumnName().toString().equalsIgnoreCase("a"));
@@ -112,7 +112,7 @@ public class testCreateTable extends TestCase {
 
         cd = createTable.getColumnList().getColumn(1);
         assertTrue(cd.getColumnName().toString().equalsIgnoreCase("User"));
-        assertTrue(cd.getDatatype().getDataType() == EDataType.structType_t);
+        assertTrue(cd.getDatatype().getDataType() == EDataType.struct_t);
         assertTrue(cd.getDatatype().getColumnDefList().size() == 5);
 
         THiveRowFormat rowFormat = createTable.getHiveRowFormat();
