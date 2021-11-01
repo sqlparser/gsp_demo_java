@@ -16,7 +16,7 @@ public class analyzespTest extends TestCase
 
 	protected void setUp( )
 	{
-		basedir = gspCommon.BASE_SQL_DIR_PRIVATE +"sqlscripts/analyze_sp";
+		basedir = common.gspCommon.BASE_SQL_DIR+"private/sqlscripts/analyze_sp";
 	}
 
 	public void testSample1( )
