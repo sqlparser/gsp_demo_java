@@ -1905,7 +1905,7 @@ public class xmlVisitor extends TParseTreeVisitor
 			e_object_name.appendChild( e_database );
 			e_database.setTextContent( node.getDatabaseToken( ).toString( ) );
 		}
-		if ( node.getSchemaToken( ) != null )
+		if (( node.getSchemaToken( ) != null )&&(!node.isImplicitSchema()))
 		{
 			Element e_schema = xmldoc.createElement( "schema_name" );
 			e_object_name.appendChild( e_schema );

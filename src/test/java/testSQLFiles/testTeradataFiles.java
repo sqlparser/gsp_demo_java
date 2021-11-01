@@ -7,8 +7,8 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testTeradataFiles extends TestCase {
     public  void testTeradata(){
-        parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR+"teradata/verified");
-        parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR+"java/teradata");
+        parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"teradata/verified");
+        parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR_PRIVATE +"java/teradata");
     }
 
 }

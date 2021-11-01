@@ -7,6 +7,6 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testRedshiftFiles extends TestCase {
     public  void testRedshift(){
-        parsefiles(EDbVendor.dbvredshift,common.gspCommon.BASE_SQL_DIR+"java/redshift");
+        parsefiles(EDbVendor.dbvredshift,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"java/redshift");
     }
 }

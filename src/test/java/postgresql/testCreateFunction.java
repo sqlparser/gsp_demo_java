@@ -13,7 +13,7 @@ public class testCreateFunction extends TestCase {
 
     public void testStmtToString(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
-        sqlparser.sqlfilename = common.gspCommon.BASE_SQL_DIR+"java/postgresql/create_function_big_proc.sql";
+        sqlparser.sqlfilename = common.gspCommon.BASE_SQL_DIR_PRIVATE +"java/postgresql/create_function_big_proc.sql";
         assertTrue(sqlparser.parse() == 0);
 
         TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);

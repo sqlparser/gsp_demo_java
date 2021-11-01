@@ -2,7 +2,6 @@ package greenplum;
 
 
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 import junit.framework.TestCase;
@@ -11,7 +10,7 @@ public class testDeclareBlock extends TestCase {
 
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgreenplum);
-        sqlparser.setSqlfilename(common.gspCommon.BASE_SQL_DIR+"java/greenplum/timewalking/declare_block.sql");
+        sqlparser.setSqlfilename(common.gspCommon.BASE_SQL_DIR_PRIVATE +"java/greenplum/timewalking/declare_block.sql");
         assertTrue(sqlparser.parse() == 0);
 
         TCommonBlock block = (TCommonBlock)sqlparser.sqlstatements.get(0);

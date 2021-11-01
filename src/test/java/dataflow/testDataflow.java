@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 public class testDataflow extends TestCase {
 	public void test1() {
 
-		File baseDir = new File(gspCommon.BASE_SQL_DIR, "dataflow");
+		File baseDir = new File(gspCommon.BASE_SQL_DIR_PRIVATE, "dataflow");
 		File[] sqlDirs = baseDir.listFiles();
 
 		for (int i = 0; i < sqlDirs.length; i++) {

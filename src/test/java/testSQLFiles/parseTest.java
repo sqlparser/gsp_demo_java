@@ -46,7 +46,7 @@ static void parsefiles(EDbVendor db,String dir){
 
 
     public  void testDax(){
-        parsefiles(EDbVendor.dbvdax, common.gspCommon.BASE_SQL_DIR+"dax");
+        parsefiles(EDbVendor.dbvdax, common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"dax");
     }
 
 //    public  void testSnowflake(){

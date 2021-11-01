@@ -3,6 +3,7 @@ package dlineage;
 import java.io.File;
 import java.util.List;
 
+import common.gspCommon;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.DbObjectPosition;
@@ -18,7 +19,7 @@ public class testMultpleSqlFiles extends TestCase {
 
 	public void test1() {
 		//File sqlfiles = new File("D:/develop/git/gsp_sqlfiles/TestCases/dlineage/mysql/547");
-		File sqlfiles = new	 File(common.gspCommon.BASE_SQL_DIR+"dlineage/mysql/547");
+		File sqlfiles = new	 File(gspCommon.BASE_SQL_DIR_PRIVATE +"dlineage/mysql/547");
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles, EDbVendor.dbvmysql, false);
 		analyzer.generateDataFlow();
 		dataflow dataflow = analyzer.getDataFlow();
