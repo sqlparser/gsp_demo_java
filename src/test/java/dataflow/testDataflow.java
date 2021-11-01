@@ -3,6 +3,9 @@ package dataflow;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import common.gspCommon;
 import gudusoft.gsqlparser.EDbVendor;
@@ -12,10 +15,17 @@ import junit.framework.TestCase;
 
 public class testDataflow extends TestCase {
 	public void test1() {
+		File privateDir = new File(gspCommon.BASE_SQL_DIR, "private/dataflow");
+		File publicDir = new File(gspCommon.BASE_SQL_DIR, "public/dataflow");
+		List<File> sqlDirList = new ArrayList<>();
+		if(privateDir.exists() && privateDir.listFiles()!=null){
+			sqlDirList.addAll(Arrays.asList(privateDir.listFiles()));
+		}
+		if(publicDir.exists() && publicDir.listFiles()!=null){
+			sqlDirList.addAll(Arrays.asList(publicDir.listFiles()));
+		}
 
-		File baseDir = new File(gspCommon.BASE_SQL_DIR, "dataflow");
-		File[] sqlDirs = baseDir.listFiles();
-
+		File[] sqlDirs = sqlDirList.toArray(new File[0]);
 		for (int i = 0; i < sqlDirs.length; i++) {
 			File vendorDir = sqlDirs[i];
 			if(vendorDir.getName().startsWith("."))
