@@ -79,6 +79,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/coor: Optional, output the relation transform coordinate, but not the code.");
 			System.out.println("/defaultDatabase: Optional, specify the default schema.");
 			System.out.println("/defaultSchema: Optional, specify the default schema.");
+			System.out.println("/showImplicitSchema: Optional, show implicit schema.");
 			return;
 		}
 
@@ -138,6 +139,7 @@ public class DataFlowAnalyzer {
 		boolean jsonFormat = false;
 		boolean linkOrphanColumnToFirstTable = argList.indexOf("/lof") != -1;
 		boolean ignoreCoordinate = argList.indexOf("/ic") != -1;
+		boolean showImplicitSchema = argList.indexOf("/showImplicitSchema") != -1;
 
 		if (simple) {
 			textFormat = argList.indexOf("/text") != -1;
@@ -264,6 +266,7 @@ public class DataFlowAnalyzer {
 			dlineage.setLinkOrphanColumnToFirstTable(linkOrphanColumnToFirstTable);
 			dlineage.setIgnoreCoordinate(ignoreCoordinate);
 			dlineage.setSimpleShowTopSelectResultSet(topselectlist);
+			dlineage.setShowImplicitSchema(showImplicitSchema);
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
