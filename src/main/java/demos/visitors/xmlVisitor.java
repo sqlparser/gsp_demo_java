@@ -1905,11 +1905,15 @@ public class xmlVisitor extends TParseTreeVisitor
 			e_object_name.appendChild( e_database );
 			e_database.setTextContent( node.getDatabaseToken( ).toString( ) );
 		}
-		if (( node.getSchemaToken( ) != null )&&(!node.isImplicitSchema()))
+		if (( (node.getSchemaToken( ) != null )&&(!node.isImplicitSchema()))||(node.getImplictSchemaString() != null))
 		{
 			Element e_schema = xmldoc.createElement( "schema_name" );
 			e_object_name.appendChild( e_schema );
-			e_schema.setTextContent( node.getSchemaToken( ).toString( ) );
+			if ((node.getSchemaToken() != null)&&(!node.isImplicitSchema())){
+				e_schema.setTextContent( node.getSchemaToken( ).toString( ) );
+			}else{
+				e_schema.setTextContent( node.getImplictSchemaString());
+			}
 		}
 		if ( node.getObjectToken( ) != null )
 		{
