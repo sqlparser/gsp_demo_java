@@ -15,6 +15,17 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+	public void testSnwoflakeConcat( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvsnowflake);
+		sqlparser.sqltext = "select 'a' || 'b'";
+
+		assertTrue(sqlparser.parse( ) == 0);
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvsnowflake,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
 	public void testOnprimay( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
