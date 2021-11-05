@@ -2358,6 +2358,49 @@ public class xmlVisitor extends TParseTreeVisitor
 
 	}
 
+	public void preVisit( TCreateFunctionStmt node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_function = xmldoc.createElement( "create_function_statement" );
+		e_parent.appendChild( e_function );
+		elementStack.push( e_function );
+		// doFunctionSpecification(node);
+
+		e_parent = (Element) elementStack.peek( );
+		Element e_function_spec = xmldoc.createElement( "function_specification_statement" );
+		e_parent.appendChild( e_function_spec );
+		elementStack.push( e_function_spec );
+		current_objectName_tag = "function_name";
+		node.getFunctionName( ).accept( this );
+		if ( node.getEndlabelName( ) != null )
+		{
+			current_objectName_tag = "end_function_name";
+			node.getEndlabelName( ).accept( this );
+		}
+
+		if ( node.getReturnDataType( ) != null )
+		{
+			current_datatype_tag = "return_datatype";
+			node.getReturnDataType( ).accept( this );
+		}
+
+		if ( node.getParameterDeclarations( ) != null )
+		{
+			node.getParameterDeclarations( ).accept( this );
+		}
+
+		if ( node.getBodyStatements( ).size( ) > 0 )
+		{
+			current_statement_list_tag = "body_statement_list";
+			node.getBodyStatements( ).accept( this );
+		}
+
+		elementStack.pop( );
+
+		elementStack.pop( );
+
+	}
+
 	public void preVisit( TCreateDatabaseSqlStatement stmt )
 	{
 		Element e_use_database = xmldoc.createElement( "create_database_statement" );
@@ -4234,7 +4277,12 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent.appendChild( e_assign_stmt );
 		elementStack.push( e_assign_stmt );
 		current_expression_tag = "left";
-		node.getLeft( ).accept( this );
+		if (node.getVariableName() != null){
+			node.getVariableName().accept(this);
+		}else{
+			node.getLeft( ).accept( this );
+		}
+
 		current_expression_tag = "right";
 		node.getExpression( ).accept( this );
 		elementStack.pop( );
