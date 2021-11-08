@@ -90,9 +90,10 @@ public class testCreateProcedure extends TestCase {
         assertTrue(cp.getBodyStatements().size() == 2);
 
 
-        assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == sstmssqlset);
-        TMssqlSet setStmt = (TMssqlSet)cp.getBodyStatements().get(1);
-        assertTrue(setStmt.toString().equalsIgnoreCase("SET A = 10;"));
+        assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == sstset);
+        TSetStmt setStmt = (TSetStmt)cp.getBodyStatements().get(1);
+        assertTrue(setStmt.getVariableName().toString().equalsIgnoreCase("A"));
+        assertTrue(setStmt.getVariableValue().toString().equalsIgnoreCase("10"));
     }
 
     public void testWhile(){

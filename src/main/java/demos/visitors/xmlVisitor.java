@@ -33,6 +33,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
+import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
 import gudusoft.gsqlparser.stmt.mdx.TMdxSelect;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlBlock;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlCommit;
@@ -429,6 +430,49 @@ public class xmlVisitor extends TParseTreeVisitor
 	}
 
 	// process parse tree nodes
+
+	public void preVisit( TDb2SetVariableStmt stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_set_varaible = xmldoc.createElement( "set_variable_statement" );
+		e_parent.appendChild( e_set_varaible );
+		elementStack.push( e_set_varaible );
+		for(int i=0;i<stmt.getAssignments().size();i++) {
+			TSetAssignment assignStmt = (TSetAssignment)stmt.getAssignments().getElement(i);
+			assignStmt.accept(this);
+		}
+		elementStack.pop( );
+	}
+
+	public void preVisit( TSetAssignment stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_set_assignment = xmldoc.createElement( "set_assignment" );
+		e_parent.appendChild( e_set_assignment );
+		elementStack.push( e_set_assignment );
+		stmt.getParameterName().accept(this);
+		stmt.getParameterValue().accept(this);
+		elementStack.pop( );
+	}
+
+	public void preVisit( TSetStmt stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_set_assignment = xmldoc.createElement( "set_statement" );
+		e_parent.appendChild( e_set_assignment );
+		elementStack.push( e_set_assignment );
+		if (stmt.getVariableName() != null){
+			stmt.getVariableName().accept(this);
+		}
+		if (stmt.getVariableNameList() != null){
+			stmt.getVariableNameList().accept(this);
+		}
+		if (stmt.getVariableValue() != null){
+			stmt.getVariableValue().accept(this);
+		}
+		if (stmt.getVariableValueList() != null){
+			stmt.getVariableValueList().accept(this);
+		}
+		elementStack.pop( );
+	}
+
 
 	public void preVisit( TConstant node )
 	{
@@ -2829,6 +2873,14 @@ public class xmlVisitor extends TParseTreeVisitor
 		if ( node.getDatatype( ) != null )
 		{
 			node.getDatatype( ).accept( this );
+		}
+
+		if (node.getDefaultExpression() != null){
+			Element e_defualt_expr = xmldoc.createElement( "default_expression" );
+			e_column.appendChild( e_defualt_expr );
+			elementStack.push( e_defualt_expr );
+			node.getDefaultExpression().accept( this );
+			elementStack.pop( );
 		}
 
 		if ( ( node.getConstraints( ) != null )
@@ -5386,7 +5438,28 @@ public class xmlVisitor extends TParseTreeVisitor
 		elementStack.pop( );
 	}
 
-	public void preVisit( TPlsqlForallStmt stmt )
+	public void preVisit( TForStmt stmt ) {
+		e_parent = (Element) elementStack.peek();
+		Element e_for_stmt = xmldoc.createElement("for_statement");
+		e_parent.appendChild(e_for_stmt);
+		elementStack.push(e_for_stmt);
+		if (stmt.getLoopName() != null){
+			e_for_stmt.setAttribute("loop_name",stmt.getLoopName().toString());
+		}
+		if (stmt.getCursorName() != null){
+			e_for_stmt.setAttribute("cursor_name",stmt.getCursorName().toString());
+		}
+		if (stmt.getSubquery() != null){
+			stmt.getSubquery().accept(this);
+		}
+		if (stmt.getBodyStatements().size() > 0){
+			stmt.getBodyStatements().accept(this);
+		}
+
+		elementStack.pop( );
+
+	}
+		public void preVisit( TPlsqlForallStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_forall_stmt = xmldoc.createElement( "forall_statement" );
