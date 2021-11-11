@@ -6,6 +6,8 @@ import gudusoft.gsqlparser.TGSqlParser;
 
 import gudusoft.gsqlparser.nodes.TMultiTarget;
 import gudusoft.gsqlparser.nodes.TMultiTargetList;
+import gudusoft.gsqlparser.nodes.TResultColumnList;
+import gudusoft.gsqlparser.nodes.TValueClause;
 import gudusoft.gsqlparser.stmt.TExplainPlan;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
@@ -85,11 +87,11 @@ public class testExplain extends TestCase {
         TExplainPlan explainPlan = (TExplainPlan) sqlparser.sqlstatements.get(0);
         assertTrue(explainPlan.getStatement().sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement select = (TSelectSqlStatement)explainPlan.getStatement();
-        TMultiTargetList multiTargets = select.getTables().getTable(0).getRowList();
-        assertTrue(multiTargets.size() == 3);
-        TMultiTarget multiTarget = multiTargets.getMultiTarget(0);
-        assertTrue(multiTarget.getColumnList().size() == 2);
-        assertTrue(multiTarget.getColumnList().getResultColumn(0).toString().equalsIgnoreCase("1"));
+        TValueClause valueClause = select.getTables().getTable(0).getValueClause();
+        assertTrue(valueClause.getRows().size() == 3);
+        TResultColumnList row = valueClause.getRows().get(0);
+        assertTrue(row.size() == 2);
+        assertTrue(row.getResultColumn(0).toString().equalsIgnoreCase("1"));
        // assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("t"));
     }
 }

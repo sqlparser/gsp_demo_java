@@ -8,6 +8,6 @@ import static testSQLFiles.parseTest.parsefiles;
 
 public class testSOQLFiles extends TestCase {
     public  void testSoql(){
-        parsefiles(EDbVendor.dbvsoql, gspCommon.BASE_SQL_DIR_PUBLIC +"java/salesforce_soql");
+        parsefiles(EDbVendor.dbvsoql, gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"salesforce_soql");
     }
 }

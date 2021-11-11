@@ -716,7 +716,7 @@ class simplXmlVisitor extends TParseTreeVisitor {
                 break;
             }
             case rowList:{
-                node.getRowList().accept(this);
+                node.getValueClause().accept(this);
                 break;
             }
             case pivoted_table:{

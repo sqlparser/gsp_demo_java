@@ -75,13 +75,13 @@ public class testMerge extends TestCase {
         assertTrue(mergeSqlStatement.getTargetTable().getAliasClause().toString().equalsIgnoreCase("Target"));
         TTable usingTable = mergeSqlStatement.getUsingTable();
         assertTrue(usingTable.getTableType() == ETableSource.rowList);
-        assertTrue(usingTable.getRowList().size() == 3);
-        assertTrue(usingTable.getRowList().getMultiTarget(0).getColumnList().getResultColumn(0).toString().equalsIgnoreCase("'Recommendation'"));
-        assertTrue(usingTable.getRowList().getMultiTarget(0).getColumnList().getResultColumn(1).toString().equalsIgnoreCase("'Other'"));
-        assertTrue(usingTable.getRowList().getMultiTarget(1).getColumnList().getResultColumn(0).toString().equalsIgnoreCase("'Review'"));
-        assertTrue(usingTable.getRowList().getMultiTarget(1).getColumnList().getResultColumn(1).toString().equalsIgnoreCase("'Marketing'"));
-        assertTrue(usingTable.getRowList().getMultiTarget(2).getColumnList().getResultColumn(0).toString().equalsIgnoreCase("'Internet'"));
-        assertTrue(usingTable.getRowList().getMultiTarget(2).getColumnList().getResultColumn(1).toString().equalsIgnoreCase("'Promotion'"));
+        assertTrue(usingTable.getValueClause().getRows().size() == 3);
+        assertTrue(usingTable.getValueClause().getRows().get(0).getResultColumn(0).toString().equalsIgnoreCase("'Recommendation'"));
+        assertTrue(usingTable.getValueClause().getRows().get(0).getResultColumn(1).toString().equalsIgnoreCase("'Other'"));
+        assertTrue(usingTable.getValueClause().getRows().get(1).getResultColumn(0).toString().equalsIgnoreCase("'Review'"));
+        assertTrue(usingTable.getValueClause().getRows().get(1).getResultColumn(1).toString().equalsIgnoreCase("'Marketing'"));
+        assertTrue(usingTable.getValueClause().getRows().get(2).getResultColumn(0).toString().equalsIgnoreCase("'Internet'"));
+        assertTrue(usingTable.getValueClause().getRows().get(2).getResultColumn(1).toString().equalsIgnoreCase("'Promotion'"));
 
         assertTrue(usingTable.getAliasClause().toString().equalsIgnoreCase("Source (NewName, NewReasonType)"));
         assertTrue(usingTable.getAliasClause().getAliasName().toString().equalsIgnoreCase("Source"));

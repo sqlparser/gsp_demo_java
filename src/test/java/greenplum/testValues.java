@@ -6,9 +6,7 @@ package greenplum;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.TTable;
-import gudusoft.gsqlparser.nodes.TValueClause;
-import gudusoft.gsqlparser.nodes.TValueRowItem;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
@@ -21,10 +19,11 @@ public class testValues extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TValueClause valueClause = select.getValueClause();
-        assertTrue(valueClause.getValueRows().size() == 3);
-        TValueRowItem rowItem = valueClause.getValueRows().getValueRowItem(0);
-        assertTrue(rowItem.getExprList().getExpression(0).toString().equalsIgnoreCase("1"));
-        assertTrue(rowItem.getExprList().getExpression(1).toString().equalsIgnoreCase("'one'"));
+        assertTrue(valueClause.getRows().size() == 3);
+        TResultColumnList row0 = valueClause.getRows().get(0);
+        assertTrue(row0.getResultColumn(0).toString().equalsIgnoreCase("1"));
+        assertTrue(row0.getResultColumn(1).toString().equalsIgnoreCase("'one'"));
+
     }
 
     public void test2(){
@@ -37,18 +36,23 @@ public class testValues extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(select.joins.size() == 2 );
         TTable table2 = select.joins.getJoin(1).getTable();
-        assertTrue(table2.getTableType() == ETableSource.subquery);
+        assertTrue(table2.getTableType() == ETableSource.rowList);
         assertTrue(table2.getAliasClause().getAliasName().toString().equalsIgnoreCase("t"));
         assertTrue(table2.getAliasClause().getColumns().getObjectName(0).toString().equalsIgnoreCase("studio"));
-        select = table2.getSubquery();
 
-        TValueClause valueClause = select.getValueClause();
-        assertTrue(valueClause.getValueRows().size() == 2);
-        TValueRowItem rowItem = valueClause.getValueRows().getValueRowItem(0);
-        assertTrue(rowItem.getExprList().getExpression(0).toString().equalsIgnoreCase("'MGM'"));
-        assertTrue(rowItem.getExprList().getExpression(1).toString().equalsIgnoreCase("'Horror'"));
-        rowItem = valueClause.getValueRows().getValueRowItem(1);
-        assertTrue(rowItem.getExprList().getExpression(0).toString().equalsIgnoreCase("'UA'"));
-        assertTrue(rowItem.getExprList().getExpression(1).toString().equalsIgnoreCase("'Sci-Fi'"));
+        //select = table2.getSubquery();
+
+        TTable valueTable = select.getTables().getTable(1);
+        TValueClause valueClause = valueTable.getValueClause();
+        assertTrue(valueTable.getAliasClause().getColumns().size() == 2);
+        assertTrue(valueTable.getAliasClause().getColumns().getObjectName(0).toString().equalsIgnoreCase("studio"));
+        assertTrue(valueClause.getRows().size() == 2);
+
+        TResultColumnList row0 = valueClause.getRows().get(0);
+        TResultColumnList row1 = valueClause.getRows().get(1);
+        assertTrue(row0.getResultColumn(0).toString().equalsIgnoreCase("'MGM'"));
+        assertTrue(row0.getResultColumn(1).toString().equalsIgnoreCase("'Horror'"));
+        assertTrue(row1.getResultColumn(0).toString().equalsIgnoreCase("'UA'"));
+        assertTrue(row1.getResultColumn(1).toString().toString().equalsIgnoreCase("'Sci-Fi'"));
     }
 }
