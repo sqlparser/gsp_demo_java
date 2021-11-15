@@ -22,6 +22,7 @@ static void parsefiles(EDbVendor db,String dir){
     }
 
     TGSqlParser sqlparser = new TGSqlParser(db);
+    //sqlparser.setSqlCharset("UTF-8");
     SqlFileList sqlfiles = new SqlFileList(dir,true);
     for(int k=0;k < sqlfiles.sqlfiles.size();k++){
         sqlparser.sqlfilename = sqlfiles.sqlfiles.get(k).toString();
