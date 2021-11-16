@@ -1,5 +1,6 @@
 package testSQLFiles;
 
+import common.gspCommon;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -9,5 +10,6 @@ public class testAthenaFiles  extends TestCase {
 
     public  void testAthena(){
         parsefiles(EDbVendor.dbvathena,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"athena");
+        parsefiles(EDbVendor.dbvathena, gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"athena");
     }
 }

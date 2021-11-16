@@ -10,7 +10,8 @@ public class testTeradataFiles extends TestCase {
     public  void testTeradata(){
         parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS +"teradata/verified");
         parsefiles(EDbVendor.dbvteradata, gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"teradata");
-        parsefiles(EDbVendor.dbvteradata,common.gspCommon.BASE_SQL_DIR_PRIVATE +"java/teradata");
+        parsefiles(EDbVendor.dbvteradata, gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"teradata");
+        parsefiles(EDbVendor.dbvteradata, gspCommon.BASE_SQL_DIR_PRIVATE_ALLVERSIONS +"teradata");
     }
 
 }

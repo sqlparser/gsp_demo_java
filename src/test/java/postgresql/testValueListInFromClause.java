@@ -6,12 +6,11 @@ package postgresql;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.nodes.TAliasClause;
-import gudusoft.gsqlparser.nodes.TMultiTarget;
-import gudusoft.gsqlparser.nodes.TMultiTargetList;
-import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
+
+import java.util.ArrayList;
 
 public class testValueListInFromClause extends TestCase {
     public void test1(){
@@ -23,17 +22,17 @@ public class testValueListInFromClause extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TTable table = select.tables.getTable(0);
         assertTrue(table.getTableType() == ETableSource.rowList);
-        TMultiTargetList rowList =  table.getRowList();
+        ArrayList<TResultColumnList> rowList =  table.getValueClause().getRows();
         assertTrue(rowList.size() == 3);
-        TMultiTarget row = rowList.getMultiTarget(0);
-        assertTrue(row.getColumnList().size() == 2);
-        assertTrue(row.getColumnList().getResultColumn(0).toString().equalsIgnoreCase("1"));
-        assertTrue(row.getColumnList().getResultColumn(1).toString().equalsIgnoreCase("'one'"));
+        TResultColumnList row = rowList.get(0);
+        assertTrue(row.size() == 2);
+        assertTrue(row.getResultColumn(0).toString().equalsIgnoreCase("1"));
+        assertTrue(row.getResultColumn(1).toString().equalsIgnoreCase("'one'"));
 
-        row = rowList.getMultiTarget(2);
-        assertTrue(row.getColumnList().size() == 2);
-        assertTrue(row.getColumnList().getResultColumn(0).toString().equalsIgnoreCase("3"));
-        assertTrue(row.getColumnList().getResultColumn(1).toString().equalsIgnoreCase("'three'"));
+        row = rowList.get(2);
+        assertTrue(row.size() == 2);
+        assertTrue(row.getResultColumn(0).toString().equalsIgnoreCase("3"));
+        assertTrue(row.getResultColumn(1).toString().equalsIgnoreCase("'three'"));
 
         TAliasClause aliasClause = table.getAliasClause();
         assertTrue(aliasClause.getAliasName().toString().equalsIgnoreCase("t"));
