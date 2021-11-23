@@ -81,6 +81,27 @@ public class testModifySql extends TestCase {
     }
 
 
+//    public void testModifySelectList2(){
+//        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvpostgresql);
+//        sqlParser.sqltext = "SELECT  COL1, \n" +
+//                "CAST(CO2 AS VARCHAR) x, \n" +
+//                "COL3 || \"-\" || COL4 y, \n" +
+//                "MIN(COL5) MIN5\n" +
+//                "FROM T";
+//        assertTrue(sqlParser.parse() == 0);
+//
+//        TSelectSqlStatement select = (TSelectSqlStatement)sqlParser.sqlstatements.get(0);
+//        TResultColumn resultColumn0 = select.getResultColumnList().getResultColumn(0);
+//        String column0 = resultColumn0.getExpr().toString();
+//        resultColumn0.setExpr(parser.parseExpression("MYUDF("+column0+")"));
+//
+//        TResultColumn resultColumn1 = select.getResultColumnList().getResultColumn(1);
+//        String column1 = resultColumn1.getExpr().toString();
+//        resultColumn1.setExpr(parser.parseExpression("MYUDF2("+column1+")"));
+//
+//        System.out.println(select.toScript());
+//    }
+
     public void testModifySelectList(){
         parser.sqltext = "select t1.f1, t2.f2 as f2 from table1 t1 left join table2 t2 on t1.f1 = t2.f2 ";
         assertTrue(parser.parse() == 0);
