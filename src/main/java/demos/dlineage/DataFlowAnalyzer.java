@@ -218,8 +218,8 @@ public class DataFlowAnalyzer {
 			if (argList.indexOf("/metadata-schema") != -1) {
 				schema = args[argList.indexOf("/metadata-schema") + 1];
 			}
-			String user = args[argList.indexOf("/u") + 1];
-			String password = args[argList.indexOf("/p") + 1];
+			String user = argList.indexOf("/u") != -1 ? args[argList.indexOf("/u") + 1] : null;
+			String password = argList.indexOf("/p") != -1 ? args[argList.indexOf("/p") + 1] : null;
 			Class<?> driverClass;
 			try {
 				driverClass = Class.forName(driver);

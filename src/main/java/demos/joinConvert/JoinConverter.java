@@ -273,16 +273,15 @@ public class JoinConverter {
     }
 
     public static void main(String[] args) {
-        EDbVendor vendor = EDbVendor.dbvoracle;
-        String sql = "SELECT *\n"
-                + "FROM   smmtccon.ccn_menu menu,\n"
-                + "       smmtccon.ccn_page paget\n"
-                + "WHERE  ( menu.page_id = paget.page_id(+) )\n"
-                + "       AND ( NOT enabled = 'N' )\n"
-                + "       AND ( ( :parent_menu_id IS NULL\n"
-                + "               AND menu.parent_menu_id IS NULL )\n"
-                + "              OR ( menu.parent_menu_id = :parent_menu_id ) )\n"
-                + "ORDER  BY item_seq";
+        EDbVendor vendor = EDbVendor.dbvmssql;
+        String sql = "SELECT *\r\n"
+        		+ "FROM	table1 t1,\r\n"
+        		+ " 	table2 t2,\r\n"
+        		+ "	table3 t3,\r\n"
+        		+ "	table4 t4\r\n"
+        		+ "WHERE	t3.f1 *= t2.f1\r\n"
+        		+ "	AND t1.f12 *= t3.f2\r\n"
+        		+ "	AND t3.f3 *= t4.f3";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
         joinConverter.convert();
         System.out.println(joinConverter.getQuery()
@@ -804,6 +803,9 @@ public class JoinConverter {
                     if ((select.getWhereClause()
                             .getCondition()
                             .getStartToken() == null)
+                    		|| select.getWhereClause()
+                            .getCondition()
+                            .toString() == null
                             || (select.getWhereClause()
                             .getCondition()
                             .toString()
