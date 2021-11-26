@@ -10,7 +10,7 @@ This tool is built from the scratch, it is the main part of the backend of [the 
 
 ## Usage
 ```
-Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]]
+Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/tableLineage [/csv]] [/transform [/coor]]
 /f: Optional, the full path to SQL file.
 /d: Optional, the full path to the directory includes the SQL files.
 /j: Optional, return the result including the join relation.
@@ -42,6 +42,7 @@ sybase,teradata,soql,vertica
 /coor: Optional, output the relation transform coordinate, but not the code.
 /defaultDatabase: Optional, specify the default schema.
 /defaultSchema: Optional, specify the default schema.
+/showImplicitSchema: Optional, show implicit schema.
 ```
 
 
@@ -248,7 +249,7 @@ for example, when you edit the conf/mssql/query.sql, please copy it to <work dir
 ## Releases
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
-- [Ver2.1.0, 2021/07/11] Release gsp core 2.3.1.5
+- [Ver2.1.0, 2021/07/11] Release gsp core 2.3.7.2
 
 ## Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
