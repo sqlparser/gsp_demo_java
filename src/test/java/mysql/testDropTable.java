@@ -11,14 +11,14 @@ public class testDropTable extends TestCase {
 
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
-        sqlparser.sqltext = "DROP TABLE schema_n.table_n";
+        sqlparser.sqltext = "DROP TABLE database_n.table_n";
         assertTrue(sqlparser.parse() == 0);
         TDropTableSqlStatement dropTableSqlStatement =  (TDropTableSqlStatement)sqlparser.sqlstatements.get(0);
         TTable targetTable = dropTableSqlStatement.getTargetTable();
         assertTrue(targetTable.getEffectType() == ETableEffectType.tetDrop);
-        assertTrue(dropTableSqlStatement.getTableNameList().getObjectName(0).getSchemaString().equalsIgnoreCase("schema_n"));
+        assertTrue(dropTableSqlStatement.getTableNameList().getObjectName(0).getDatabaseString().equalsIgnoreCase("database_n"));
         assertTrue(dropTableSqlStatement.getTableNameList().getObjectName(0).getObjectString().equalsIgnoreCase("table_n"));
-        assertTrue(dropTableSqlStatement.getTableNameList().getObjectName(0).toString().equalsIgnoreCase("schema_n.table_n"));
+        assertTrue(dropTableSqlStatement.getTableNameList().getObjectName(0).toString().equalsIgnoreCase("database_n.table_n"));
     }
 
 }
