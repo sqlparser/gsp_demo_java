@@ -23,18 +23,7 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
 import gudusoft.gsqlparser.dlineage.util.XML2Model;
-import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.THiveMetadataDataSource;
-import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TNetezzaSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TOracleSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TPostgreSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TRedshiftSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TSQLEnv;
-import gudusoft.gsqlparser.sqlenv.TSnowflakeSQLDataSource;
-import gudusoft.gsqlparser.sqlenv.TTeradataSQLDataSource;
+import gudusoft.gsqlparser.sqlenv.*;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -593,6 +582,11 @@ public class DataFlowAnalyzer {
 						password);
 				return datasource;
 			}
+			if (vendor == EDbVendor.dbvimpala) {
+				TImpalaSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, driver, jdbc, account,
+						password);
+				return datasource;
+			}
 		} catch (Exception e) {
 			System.err.println("Connect datasource failed. " + e.getMessage());
 			e.printStackTrace();
@@ -710,6 +704,14 @@ public class DataFlowAnalyzer {
 				}
 				return datasource;
 			}
+			if (vendor == EDbVendor.dbvimpala) {
+				TImpalaSQLDataSource datasource = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, password);
+				String database = datasource.getDatabase();
+				if (database != null) {
+					datasource.setExtractedDatabases(database);
+				}
+				return datasource;
+			}
 		} catch (Exception e) {
 			System.err.println("Connect datasource failed. " + e.getMessage());
 			e.printStackTrace();
@@ -758,6 +760,13 @@ public class DataFlowAnalyzer {
 			}
 			if (vendor == EDbVendor.dbvhive) {
 				THiveMetadataDataSource datasource = new THiveMetadataDataSource(host, port, user, password, database);
+				if (database != null) {
+					datasource.setExtractedDatabases(database);
+				}
+				return datasource;
+			}
+			if (vendor == EDbVendor.dbvimpala) {
+				TImpalaSQLDataSource datasource = new TImpalaSQLDataSource(host, port, user, password, database);
 				if (database != null) {
 					datasource.setExtractedDatabases(database);
 				}
