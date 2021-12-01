@@ -100,6 +100,34 @@ public class testSQLServerExec  extends TestCase {
         assertTrue(nodeVisitor.sqlText.equalsIgnoreCase("SELECT id, name, price FROM Books WHERE price > 4000"));
     }
 
+    public void test3(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "CREATE PROCEDURE testschema.TestProcWithResultSet\n" +
+                " AS\n" +
+                " begin\n" +
+                " \n" +
+                " DECLARE @SQL varchar(8000),@interval INT,@handle UNIQUEIDENTIFIER = NULL,@message_type_name SYSNAME\n" +
+                " SET @SQL = 'SELECT deptno , [Department Name] from TestCatalog.TestSchema.TestTableDept ttd'\n" +
+                " EXEC (@SQL)\n" +
+                " WITH RESULT SETS\n" +
+                " (\n" +
+                "      ( deptno INT, DepartmentName VARCHAR(150))\n" +
+                "    )\n" +
+                "    \n" +
+                "     SET @handle = 678\n" +
+                "    \n" +
+                "   BEGIN TRANSACTION\n" +
+                "    BEGIN CONVERSATION TIMER (@handle) TIMEOUT = @interval;\n" +
+                "    COMMIT TRANSACTION;\n" +
+                " end;";
+        assertTrue(sqlparser.parse() == 0);
+
+        getSQLServerExecSQLTextVisitor nodeVisitor = new getSQLServerExecSQLTextVisitor();
+        sqlparser.sqlstatements.acceptChildren(nodeVisitor);
+        //System.out.println(nodeVisitor.sqlText);
+       assertTrue(nodeVisitor.sqlText.equalsIgnoreCase("SELECT deptno , [Department Name] from TestCatalog.TestSchema.TestTableDept ttd"));
+    }
+
 }
 
 class getSQLServerExecSQLTextVisitor extends TParseTreeVisitor {

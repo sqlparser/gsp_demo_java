@@ -151,7 +151,7 @@ public class testTObjectName extends TestCase {
         assertTrue(table.getTableName().toString().equalsIgnoreCase("`Test`.`geom`"));
         assertTrue(table.getTableName().getObjectToken().toString().equalsIgnoreCase("`geom`"));
         assertTrue(table.getTableName().getTableString().toString().equalsIgnoreCase("`geom`"));
-        assertTrue(table.getTableName().getSchemaString().toString().equalsIgnoreCase("`Test`"));
+        assertTrue(table.getTableName().getDatabaseString().toString().equalsIgnoreCase("`Test`"));
     }
 
 }
