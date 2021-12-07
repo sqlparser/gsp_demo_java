@@ -18,8 +18,8 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
-import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
-import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dlineage;
+import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dlineage;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
 import gudusoft.gsqlparser.dlineage.util.XML2Model;
@@ -296,13 +296,13 @@ public class DataFlowAnalyzer {
 			String result = null;
 			if (tableLineage) {
 				dlineage.generateDataFlow();
-				dataflow originDataflow = dlineage.getDataFlow();
+				dlineage originDataflow = dlineage.getDataFlow();
 				if (csv) {
 					result = ProcessUtility.generateTableLevelLineageCsv(dlineage, originDataflow);
 				} else {
-					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
+					dlineage dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
 					if (jsonFormat) {
-						DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+						Dlineage model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 						model.setDbvendor(vendor.name());
 						result = JSON.toJSONString(model);
 					} else {
@@ -312,21 +312,21 @@ public class DataFlowAnalyzer {
 			} else {
 				result = dlineage.generateDataFlow();
 				if (csv) {
-					dataflow originDataflow = dlineage.getDataFlow();
+					dlineage originDataflow = dlineage.getDataFlow();
 					result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow);
 				}
 				else if (jsonFormat) {
-					dataflow dataflow = dlineage.getDataFlow();
+					dlineage dataflow = dlineage.getDataFlow();
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
 					}
-					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+					Dlineage model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 					model.setDbvendor(vendor.name());
 					result = JSON.toJSONString(model);
 				} else if (traceView) {
 					result = dlineage.traceView();
 				} else if (ignoreFunction && result.trim().startsWith("<?xml")) {
-					dataflow dataflow = dlineage.getDataFlow();
+					dlineage dataflow = dlineage.getDataFlow();
 					dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
 					result = XML2Model.saveXML(dataflow);
 				}
