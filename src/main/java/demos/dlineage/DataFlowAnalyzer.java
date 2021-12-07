@@ -311,8 +311,11 @@ public class DataFlowAnalyzer {
 				}
 			} else {
 				result = dlineage.generateDataFlow();
-
-				if (jsonFormat) {
+				if (csv) {
+					dataflow originDataflow = dlineage.getDataFlow();
+					result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow);
+				}
+				else if (jsonFormat) {
 					dataflow dataflow = dlineage.getDataFlow();
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
