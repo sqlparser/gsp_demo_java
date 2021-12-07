@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.DbObjectPosition;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Coordinate;
-import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dlineage;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.error;
 import gudusoft.gsqlparser.dlineage.util.SqlInfoHelper;
 import junit.framework.TestCase;
@@ -20,7 +20,7 @@ public class testGrabitJsonFile extends TestCase {
 		File sqlfiles = new	 File(common.gspCommon.BASE_SQL_DIR+"private/grabit/mssql/561.json");
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles, EDbVendor.dbvmssql, false);
 		analyzer.generateDataFlow();
-		dataflow dataflow = analyzer.getDataFlow();
+		dlineage dataflow = analyzer.getDataFlow();
 		String sqlInfoJson = SqlInfoHelper.getSqlInfoJson(analyzer);
 		SqlInfoHelper helper = new SqlInfoHelper(sqlInfoJson);
 

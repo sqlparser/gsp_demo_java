@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.DbObjectPosition;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Coordinate;
-import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dlineage;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.procedure;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.table;
 import gudusoft.gsqlparser.dlineage.util.Pair;
@@ -22,7 +22,7 @@ public class testMultpleSqlFiles extends TestCase {
 		File sqlfiles = new	 File(common.gspCommon.BASE_SQL_DIR+"private/dlineage/mysql/547");
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles, EDbVendor.dbvmysql, false);
 		analyzer.generateDataFlow();
-		dataflow dataflow = analyzer.getDataFlow();
+		dlineage dataflow = analyzer.getDataFlow();
 		String sqlInfoJson = SqlInfoHelper.getSqlInfoJson(analyzer);
 		SqlInfoHelper helper = new SqlInfoHelper(sqlInfoJson);
 
