@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.DbObjectPosition;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Coordinate;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.column;
-import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dlineage;
+import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.dlineage.util.Pair;
 import gudusoft.gsqlparser.dlineage.util.SqlInfoHelper;
 import junit.framework.TestCase;
@@ -18,7 +18,7 @@ public class testSimpleSql extends TestCase {
 		String sql = "select first from employee;\nselect second from employee;";
 		DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sql, EDbVendor.dbvmysql, true);
 		analyzer.generateDataFlow();
-		dlineage dataflow = analyzer.getDataFlow();
+		dataflow dataflow = analyzer.getDataFlow();
 		
 		//Collect the sql information, and user should persist it.
 		String sqlInfoJson = SqlInfoHelper.getSqlInfoJson(analyzer);
