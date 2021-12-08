@@ -18,7 +18,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
-import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
@@ -302,7 +302,7 @@ public class DataFlowAnalyzer {
 				} else {
 					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
 					if (jsonFormat) {
-						DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+						Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 						model.setDbvendor(vendor.name());
 						result = JSON.toJSONString(model);
 					} else {
@@ -320,7 +320,7 @@ public class DataFlowAnalyzer {
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
 					}
-					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+					Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 					model.setDbvendor(vendor.name());
 					result = JSON.toJSONString(model);
 				} else if (traceView) {
