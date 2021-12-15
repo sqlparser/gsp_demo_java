@@ -1,7 +1,7 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
@@ -26,7 +26,7 @@ public class visitStarColumn {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvredshift;
+        EDbVendor dbVendor = EDbVendor.dbvpostgresql;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
@@ -39,6 +39,7 @@ public class visitStarColumn {
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
                 sqlStatement.acceptChildren(starColumnVisitor);
+                System.out.println(starColumnVisitor.getResultColumns().toString());
             }
 
         }else{
@@ -52,20 +53,23 @@ public class visitStarColumn {
 class ResultColumnVisitor extends TParseTreeVisitor {
     private int stmtCount = 0;
 
+    public StringBuilder getResultColumns() {
+        return resultColumns;
+    }
+
+    private StringBuilder resultColumns = new StringBuilder();
+
 
     public void preVisit(TResultColumn node) {
 
-        if (node.toString().equalsIgnoreCase("*")){
+        if (node.toString().endsWith("*")){
             TObjectName starColumn = node.getExpr().getObjectOperand();
-            System.out.println("\nFound star column * in table:"+starColumn.getSourceTable().getName());
+            //System.out.println("\nFound star column * in table:"+starColumn.getSourceTable().getName());
+            resultColumns.append(TBaseType.windowsLinebreak+"Found star column * in table:"+starColumn.getSourceTable().getName()+TBaseType.windowsLinebreak);
             for(String colum:starColumn.getColumnsLinkedToStarColumn()){
-                System.out.println("\t"+colum);
+                //System.out.println("\t"+colum);
+                resultColumns.append("\t"+colum+TBaseType.windowsLinebreak);
             }
-
-//            System.out.println("Expand star column:"+starColumn.getSourceTable().toString());
-//            for(String column:starColumn.getColumnsLinkedToStarColumn() ){
-//                System.out.println(column);
-//            }
         }
 
     }
