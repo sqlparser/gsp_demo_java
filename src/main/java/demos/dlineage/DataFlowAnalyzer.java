@@ -1,24 +1,13 @@
 
 package demos.dlineage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.List;
-
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
-import gudusoft.gsqlparser.dlineage.dataflow.model.json.DataFlow;
+import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
@@ -26,6 +15,12 @@ import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.*;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
+
+import java.io.*;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 
 public class DataFlowAnalyzer {
 
@@ -302,7 +297,7 @@ public class DataFlowAnalyzer {
 				} else {
 					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
 					if (jsonFormat) {
-						DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+						Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 						model.setDbvendor(vendor.name());
 						result = JSON.toJSONString(model);
 					} else {
@@ -317,7 +312,7 @@ public class DataFlowAnalyzer {
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
 					}
-					DataFlow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
+					Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
 					model.setDbvendor(vendor.name());
 					result = JSON.toJSONString(model);
 				} else if (traceView) {
