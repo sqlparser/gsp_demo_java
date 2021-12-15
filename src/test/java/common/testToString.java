@@ -6,6 +6,7 @@ package common;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
+import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateProcedure;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateProcedure;
@@ -158,8 +159,39 @@ public class testToString extends TestCase {
         assertTrue(procedure.getStatements().get(0).toString().equalsIgnoreCase("CREATE AGGREGATE Concatenate(@input nvarchar(4000))\n" +
                 "RETURNS nvarchar(4000)\n" +
                 "EXTERNAL NAME [StringUtilities].[Microsoft.Samples.SqlServer.Concatenate]") );
+    }
 
 
+    public void testRedshiftSubquery(){
+        TGSqlParser sqlparser=new TGSqlParser(EDbVendor.dbvredshift);
+        sqlparser.sqltext = "CREATE table stg213_bw4_finance_universal_journal as \n" +
+                "SELECT\n" +
+                "\t\tNULLIF(TRIM(AC_LEDGER),'')\tas\tledger_code\n" +
+                "\t\t,NULLIF(TRIM(COMP_CODE),'')\tas\tcompany_code\n" +
+                "\t\t,NULLIF(TRIM(FISCYEAR),'')::integer\tas\tfiscal_year\n" +
+                "\t\t,NULLIF(TRIM(FISCVARNT),'')\tas\tfiscal_year_variant\n" +
+                "\t\t,NULLIF(TRIM(AC_DOC_NO),'')\tas\taccounting_document_number\n" +
+                "\t\t,NULLIF(LTRIM(TRIM(AC_DOC_LN),'0'),'')\tas\taccounting_document_line_item\n" +
+                "\t\t,NULLIF(TRIM(RECORDMODE),'')\tas\trecord_mode\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZBFC_MJAI\"),'')\tas\tbfc_major_ai\n" +
+                "\t\t,NULLIF(TRIM(CLR_DOC_NO),'')\tas\tclearing_document_number\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZDESTID\"),'')\tas\tgeography\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZREPRTUNT\"),'')\tas\told_reporting_unit\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZNWRPUNT\"),'')\tas\treporting_unit\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZOLDCMPCD\"),'')\tas\told_company_code\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZMATCAT\"),'')\tas\tproduct_category\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZMAT_FLAG\"),'')\tas\tmaterial_record_type\n" +
+                "\t\t,CASE \n" +
+                "\t\t\tWHEN NULLIF(TRIM(BAL_FLAG),'') = 'X' THEN TRUE\n" +
+                "\t\t\tELSE FALSE \n" +
+                "\t\tEND as\tbalancesheet_flag\n" +
+                "\t\t,NULLIF(TRIM(\"/BIC/ZLDAISRG\"),'')\tas\tleadai_srg\n" +
+                "\t\t,NULLIF(LTRIM(TRIM(\"/BIC/ZMATERIAL\"),'0'),'')\tas\tmaterial_id\n" +
+                "\t\t,NULLIF(TRIM(COUNTRY),'')\tas\tcountry;";
+        assertTrue(sqlparser.parse() == 0);
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        TSelectSqlStatement subquery = createTable.getSubQuery();
+        assertTrue(subquery.toString() != null);
     }
 
 }

@@ -45,8 +45,8 @@ public class DataFlowAnalyzer {
 					"/text: Optional, this option is valid only /s is used, output the column dependency in text mode.");
 			System.out.println("/json: Optional, print the json format output.");
 			System.out.println("/stat: Optional, output the analysis statistic information.");
-			System.out.println("/tableLineage: Optional, output tabel level lineage.");
-			System.out.println("/csv: Optional, output tabel level lineage csv format.");
+			System.out.println("/tableLineage [/csv]: Optional, output tabel level lineage.");
+			System.out.println("/csv: Optional, output column level lineage in csv format.");
 			System.out.println("/t: Option, set the database type. "
 					+ "Support access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,\n"
 					+ "sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,\n"
@@ -306,8 +306,11 @@ public class DataFlowAnalyzer {
 				}
 			} else {
 				result = dlineage.generateDataFlow();
-
-				if (jsonFormat) {
+				if (csv) {
+					dataflow originDataflow = dlineage.getDataFlow();
+					result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow);
+				}
+				else if (jsonFormat) {
 					dataflow dataflow = dlineage.getDataFlow();
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
