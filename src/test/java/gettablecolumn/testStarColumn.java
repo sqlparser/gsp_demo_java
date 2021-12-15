@@ -4,6 +4,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
+import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
@@ -127,13 +128,14 @@ public class testStarColumn extends TestCase {
 
 class nodeVisitor extends TParseTreeVisitor {
     ArrayList<String> columns  = new ArrayList<>();
+
     public void preVisit(TObjectName node) {
         if (node.toString().endsWith("*")){
             if (node.getColumnsLinkedToStarColumn().size() > 0){
                 for(String column : node.getColumnsLinkedToStarColumn()){
-                   // System.out.println(column);
+                   columns.add(column);
                 }
-                columns.addAll(node.getColumnsLinkedToStarColumn());
+                //columns.addAll(node.getColumnsLinkedToStarColumn());
             }else{
                 System.out.println("No linked column found for:"+node.toString());
             }

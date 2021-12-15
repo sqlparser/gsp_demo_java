@@ -10,6 +10,19 @@ import junit.framework.TestCase;
 
 public class testCreateDatabase extends TestCase {
 
+    public void testInformix1(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvinformix);
+        sqlparser.sqltext = "CREATE DATABASE employees WITH LOG MODE ANSI";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateDatabaseSqlStatement stmt = (TCreateDatabaseSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(stmt.getDatabaseName().toString().equalsIgnoreCase("employees"));
+        TObjectName databaseName = stmt.getDatabaseName();
+        assertTrue(databaseName.getDbObjectType() == EDbObjectType.database);
+        assertTrue(databaseName.getObjectToken().toString().equalsIgnoreCase("employees"));
+    }
+
     public void test1(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
