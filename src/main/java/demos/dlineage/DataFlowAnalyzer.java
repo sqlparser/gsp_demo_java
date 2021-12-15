@@ -1,17 +1,6 @@
 
 package demos.dlineage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.List;
-
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -26,6 +15,12 @@ import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.*;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
+
+import java.io.*;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 
 public class DataFlowAnalyzer {
 
