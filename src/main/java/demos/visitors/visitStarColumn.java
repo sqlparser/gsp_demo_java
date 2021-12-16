@@ -5,6 +5,10 @@ import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +34,10 @@ public class visitStarColumn {
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
+        sqlparser.setSqlEnv(new TOracleEnv1());
         sqlparser.sqlfilename  = args[0];
-
         int ret = sqlparser.parse();
+
         if (ret == 0){
             ResultColumnVisitor starColumnVisitor = new ResultColumnVisitor();
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
@@ -74,4 +79,26 @@ class ResultColumnVisitor extends TParseTreeVisitor {
 
     }
 
+}
+
+
+class TOracleEnv1 extends TSQLEnv {
+    public TOracleEnv1(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+        TSQLCatalog sqlCatalog = createSQLCatalog("default");
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("scott");
+        TSQLTable aTab = sqlSchema.createTable("emp");
+        aTab.addColumn("no");
+        aTab.addColumn("name");
+        aTab.addColumn("deptNo");
+        TSQLTable bTab = sqlSchema.createTable("dept");
+        bTab.addColumn("no");
+        bTab.addColumn("name");
+        bTab.addColumn("location");
+    }
 }

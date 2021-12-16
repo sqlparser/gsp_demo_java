@@ -12,8 +12,6 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class testStarColumnInfile  extends TestCase {
 
@@ -28,34 +26,6 @@ public class testStarColumnInfile  extends TestCase {
     public static String starColumnsPrivateDir =  gspCommon.BASE_SQL_DIR_PRIVATE+"starColumns/";
     public static String starColumnsPublicDir =  gspCommon.BASE_SQL_DIR_PUBLIC+"starColumns/";
 
-    static String readFile(String path, Charset encoding)
-            throws IOException
-    {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return new String(encoded, encoding);
-    }
-
-
-    static boolean comparyStringArray(String[] fromSQL, String[] fromText){
-        boolean ret = true;
-        if (fromSQL.length != fromText.length){
-            System.out.println("Total lines in not equal, from file: "+ fromText.length+", from SQL: "+fromSQL.length);
-            return false;
-        }
-
-        for(int i=0;i<fromText.length;i++){
-            if (fromText[i].equalsIgnoreCase(fromSQL[i])){
-                continue;
-            }else{
-                System.out.println("File text of Line:"+(i+1)+" is not equal");
-                System.out.println("From  SQL:"+fromSQL[i]);
-                System.out.println("From file:"+fromText[i]);
-                ret = false;
-                break;
-            }
-        }
-        return ret;
-    }
 
     public static void doCompare(EDbVendor dbVendor, String in, String out){
 
@@ -63,7 +33,7 @@ public class testStarColumnInfile  extends TestCase {
         String[] a = null,b=null;
 
         try {
-            outStr = readFile(out, Charset.defaultCharset());
+            outStr = TBaseType.readFile(out, Charset.defaultCharset());
             a = outStr.trim().split(TBaseType.windowsLinebreakEscape);
 
         } catch (IOException e) {
@@ -82,7 +52,7 @@ public class testStarColumnInfile  extends TestCase {
                 StringBuilder sbout = starColumnVisitor.getResultColumns();
                 b = sbout.toString().trim().split(TBaseType.windowsLinebreakEscape);
             }
-            assertTrue(comparyStringArray(b,a));
+            assertTrue( TBaseType.comparyStringArray(b,a));
         }else{
             System.out.println(sqlparser.getErrormessage());
         }
