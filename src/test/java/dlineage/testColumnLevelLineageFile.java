@@ -79,6 +79,10 @@ public class testColumnLevelLineageFile extends TestCase {
     public void test17() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/with.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/with.csv", EDbVendor.dbvoracle));
     }
+    
+    public void test18() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/select.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/select.csv", EDbVendor.dbvoracle));
+    }
 
     private boolean compare(String sourceFile, String resultFile, EDbVendor vendor) {
         if ((null == sourceFile || "".equals(sourceFile)) ||
