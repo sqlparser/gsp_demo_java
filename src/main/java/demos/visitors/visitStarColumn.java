@@ -30,7 +30,7 @@ public class visitStarColumn {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvpostgresql;
+        EDbVendor dbVendor = EDbVendor.dbvoracle;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
