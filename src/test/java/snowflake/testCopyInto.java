@@ -13,6 +13,7 @@ public class testCopyInto extends TestCase {
         sqlparser.sqltext = "copy into mycsvtable\n" +
                 "  from @my_csv_stage/tutorials/dataloading/contacts1.csv\n" +
                 "  on_error = 'skip_file';";
+        System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
@@ -99,6 +100,20 @@ public class testCopyInto extends TestCase {
         assertTrue(copyIntoStmt.getFileList().size()==2);
         assertTrue(copyIntoStmt.getFileList().get(0).equalsIgnoreCase("'test1.csv'"));
         assertTrue(copyIntoStmt.getFileList().get(1).equalsIgnoreCase("'test2.csv'"));
+    }
+
+    public void testIntoLocation(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "copy into 's3://mybucket/unload/'\n" +
+                "  from mytable\n" +
+                "  credentials = (aws_key_id='xxxx' aws_secret_key='xxxxx' aws_token='xxxxxx')\n" +
+                "  file_format = (format_name = my_csv_format);";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_LOCATION);
+        assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
+        assertTrue(copyIntoStmt.getStageLocation().getExternalLocation().toString().equalsIgnoreCase("'s3://mybucket/unload/'"));
     }
 
 
