@@ -20,6 +20,36 @@ public class testSQLServer extends TestCase {
        // System.out.println(desireResult);
     }
 
+    public static void testSearchTopLevel() {
+        doTest("select\n" +
+                        "    case\n" +
+                        "        c.[SIZE] when 3 then (\n" +
+                        "        select\n" +
+                        "            name\n" +
+                        "        from\n" +
+                        "            (\n" +
+                        "            select\n" +
+                        "                ename as name\n" +
+                        "            from\n" +
+                        "                TestCatalog.TestSchema.TestTableEmployee tte\n" +
+                        "            where\n" +
+                        "                tte.[department id] = c.deptno ) a)\n" +
+                        "        when 5 Then c.[Department Location]\n" +
+                        "    end deptNameLoc\n" +
+                        "from\n" +
+                        "    TestCatalog.TestSchema.TestTableDept c",
+                "Tables:\n" +
+                        "TestCatalog.TestSchema.TestTableDept\n" +
+                        "TestCatalog.TestSchema.TestTableEmployee\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "TestCatalog.TestSchema.TestTableDept.[Department Location]\n" +
+                        "TestCatalog.TestSchema.TestTableDept.[SIZE]\n" +
+                        "TestCatalog.TestSchema.TestTableDept.deptno\n" +
+                        "TestCatalog.TestSchema.TestTableEmployee.[department id]\n" +
+                        "TestCatalog.TestSchema.TestTableEmployee.ename");
+    }
+
     public static void testColumnInSubquery() {
         doTest("SELECT\n" +
                         "     [FacilityAccountID] = CAST(enc.FacilityAccountID AS VARCHAR(255))\n" +

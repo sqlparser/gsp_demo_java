@@ -1,8 +1,12 @@
 package scriptWriter;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+import gudusoft.gsqlparser.TStatementList;
+import gudusoft.gsqlparser.nodes.TExpression;
+import gudusoft.gsqlparser.nodes.TResultColumn;
+import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testModifyPGSP extends TestCase
