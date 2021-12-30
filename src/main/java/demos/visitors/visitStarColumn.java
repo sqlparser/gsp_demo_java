@@ -1,10 +1,14 @@
 package demos.visitors;
 
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
+import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.sqlenv.TSQLSchema;
+import gudusoft.gsqlparser.sqlenv.TSQLTable;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,19 +30,21 @@ public class visitStarColumn {
             return;
         }
 
-        EDbVendor dbVendor = EDbVendor.dbvredshift;
+        EDbVendor dbVendor = EDbVendor.dbvoracle;
         System.out.println("Selected SQL dialect: "+dbVendor.toString());
 
         TGSqlParser sqlparser = new TGSqlParser(dbVendor);
+        sqlparser.setSqlEnv(new TOracleEnv1());
         sqlparser.sqlfilename  = args[0];
-
         int ret = sqlparser.parse();
+
         if (ret == 0){
             ResultColumnVisitor starColumnVisitor = new ResultColumnVisitor();
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
                 sqlStatement.acceptChildren(starColumnVisitor);
+                System.out.println(starColumnVisitor.getResultColumns().toString());
             }
 
         }else{
@@ -52,22 +58,47 @@ public class visitStarColumn {
 class ResultColumnVisitor extends TParseTreeVisitor {
     private int stmtCount = 0;
 
+    public StringBuilder getResultColumns() {
+        return resultColumns;
+    }
+
+    private StringBuilder resultColumns = new StringBuilder();
+
 
     public void preVisit(TResultColumn node) {
 
-        if (node.toString().equalsIgnoreCase("*")){
+        if (node.toString().endsWith("*")){
             TObjectName starColumn = node.getExpr().getObjectOperand();
-            System.out.println("\nFound star column * in table:"+starColumn.getSourceTable().getName());
+            //System.out.println("\nFound star column * in table:"+starColumn.getSourceTable().getName());
+            resultColumns.append(TBaseType.windowsLinebreak+"Found star column * in table:"+starColumn.getSourceTable().getName()+TBaseType.windowsLinebreak);
             for(String colum:starColumn.getColumnsLinkedToStarColumn()){
-                System.out.println("\t"+colum);
+                //System.out.println("\t"+colum);
+                resultColumns.append("\t"+colum+TBaseType.windowsLinebreak);
             }
-
-//            System.out.println("Expand star column:"+starColumn.getSourceTable().toString());
-//            for(String column:starColumn.getColumnsLinkedToStarColumn() ){
-//                System.out.println(column);
-//            }
         }
 
     }
 
+}
+
+
+class TOracleEnv1 extends TSQLEnv {
+    public TOracleEnv1(){
+        super(EDbVendor.dbvoracle);
+        initSQLEnv();
+    }
+
+    @Override
+    public void initSQLEnv() {
+        TSQLCatalog sqlCatalog = createSQLCatalog("default");
+        TSQLSchema sqlSchema = sqlCatalog.createSchema("scott");
+        TSQLTable aTab = sqlSchema.createTable("emp");
+        aTab.addColumn("no");
+        aTab.addColumn("name");
+        aTab.addColumn("deptNo");
+        TSQLTable bTab = sqlSchema.createTable("dept");
+        bTab.addColumn("no");
+        bTab.addColumn("name");
+        bTab.addColumn("location");
+    }
 }

@@ -452,14 +452,14 @@ class TSQLServerEnv extends TSQLEnv{
 		TSQLCatalog sqlCatalog = createSQLCatalog("master");
 		// add a new schema: dbo
 		TSQLSchema sqlSchema = sqlCatalog.createSchema("dbo");
-//		//add a new table: aTab
-//		TSQLTable aTab = sqlSchema.createTable("aTab");
-//		aTab.addColumn("Quantity1");
-//
-//		//add a new table: bTab
-//		TSQLTable bTab = sqlSchema.createTable("bTab");
-//		bTab.addColumn("Quantity2");
-//
+		//add a new table: aTab
+		TSQLTable aTab = sqlSchema.createTable("aTab");
+		aTab.addColumn("Quantity1");
+
+		//add a new table: bTab
+		//TSQLTable bTab = sqlSchema.createTable("bTab");
+		//bTab.addColumn("Quantity2");
+
 //		//add a new table: cTab
 //		TSQLTable cTab = sqlSchema.createTable("cTab");
 //		cTab.addColumn("Quantity");
@@ -467,5 +467,27 @@ class TSQLServerEnv extends TSQLEnv{
 		//add a new table: cTab
 		TSQLTable ExecutionLogStorage = sqlSchema.createTable("ExecutionLogStorage");
 		ExecutionLogStorage.addColumn("UserName");
+	}
+}
+
+class THiveEnv extends TSQLEnv{
+
+	public THiveEnv(){
+		super(EDbVendor.dbvhive);
+		initSQLEnv();
+	}
+
+	@Override
+	public void initSQLEnv() {
+
+		// add a new database
+		TSQLCatalog sqlCatalog = createSQLCatalog("pharos_business_vault");
+		// hive don't have schema, we use a default schema
+		TSQLSchema sqlSchema = sqlCatalog.createSchema("default");
+
+		//add a new table: cTab
+		TSQLTable ExecutionLogStorage = sqlSchema.createTable("b_content_datamart_bv");
+		ExecutionLogStorage.addColumn("a_beginn_pe");
+		ExecutionLogStorage.addColumn("a_perspektive_verbrauch");
 	}
 }
