@@ -5,7 +5,7 @@ package mysql;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
-import gudusoft.gsqlparser.stmt.mysql.TMySQLCreateProcedure;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import junit.framework.TestCase;
 
 public class testSPParameter extends TestCase {
@@ -25,18 +25,33 @@ public class testSPParameter extends TestCase {
       if (ret == 0) {
          TCustomSqlStatement sql = sqlparser.sqlstatements.get(0);
          //System.out.println("SQL Statement: " + sql.sqlstatementtype);
-          assertTrue(sql.sqlstatementtype == ESqlStatementType.sstmysqlcreateprocedure);
+          assertTrue(sql.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
 
-         TMySQLCreateProcedure procedure = (TMySQLCreateProcedure) sql;
+          TCreateProcedureStmt procedure = (TCreateProcedureStmt) sql;
          //System.out.println("Procedure name: " + procedure.getProcedureName().toString());
          //System.out.println("Parameters:");
+
+          TParameterDeclaration param0 = procedure.getParameterDeclarations().getParameterDeclarationItem(0);
+          TParameterDeclaration param1 = procedure.getParameterDeclarations().getParameterDeclarationItem(1);
+          TParameterDeclaration param2 = procedure.getParameterDeclarations().getParameterDeclarationItem(2);
+          assertTrue(param0.getParameterName().toString().equalsIgnoreCase("`in`"));
+          assertTrue(param0.getDataType().toString().equalsIgnoreCase("VARCHAR(255)"));
+          assertTrue(param0.getMode() == 1);
+
+          assertTrue(param1.getParameterName().toString().equalsIgnoreCase("`out`"));
+          assertTrue(param1.getDataType().toString().equalsIgnoreCase("tinyint"));
+          assertTrue(param1.getMode() == 2);
+
+          assertTrue(param2.getParameterName().toString().equalsIgnoreCase("`inout`"));
+          assertTrue(param2.getDataType().toString().equalsIgnoreCase("tinyint"));
+          assertTrue(param2.getMode() == 3);
 
          TParameterDeclaration param = null;
          for (int i = 0; i < procedure.getParameterDeclarations().size(); i++) {
             param = procedure.getParameterDeclarations().getParameterDeclarationItem(i);
-           // System.out.println("\tName:" + param.getParameterName().toString());
-           // System.out.println("\tDatatype:" + param.getDataType().toString());
-           // System.out.println("\tIN/OUT:" + param.getMode());
+//            System.out.println("\tName:" + param.getParameterName().toString());
+//            System.out.println("\tDatatype:" + param.getDataType().toString());
+//            System.out.println("\tIN/OUT:" + param.getMode());
          }
       } else {
          System.out.println(sqlparser.getErrormessage());

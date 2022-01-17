@@ -6,8 +6,8 @@ package mysql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TSetAssignment;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TTruncateStatement;
-import gudusoft.gsqlparser.stmt.mysql.TMySQLCreateProcedure;
 import gudusoft.gsqlparser.stmt.mysql.TMySQLIfStmt;
 import gudusoft.gsqlparser.stmt.mysql.TMySQLSet;
 import junit.framework.TestCase;
@@ -64,9 +64,10 @@ public class testSet extends TestCase {
                 "  SET p1 = 10;\n" +
                 "END IF;\n" +
                 "END;";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
-        TMySQLCreateProcedure createProcedure = (TMySQLCreateProcedure)sqlparser.sqlstatements.get(0);
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createProcedure.getBodyStatements().size() == 1);
         assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstmysqlifstmt);
         TMySQLIfStmt ifStmt = (TMySQLIfStmt)createProcedure.getBodyStatements().get(0);
