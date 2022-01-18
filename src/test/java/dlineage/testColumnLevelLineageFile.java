@@ -161,7 +161,7 @@ public void test20() {
 
     private List<String[]> resolver(String str) {
         List<String[]> r = new ArrayList<>();
-        String[] vars = str.split("\n");
+        String[] vars = str.replace(";", ",").split("\n");
         for (int i = 0; i < vars.length; i++) {
             if (i == 0) {
                 r.add(vars[i].split(","));
