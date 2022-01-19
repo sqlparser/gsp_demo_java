@@ -126,9 +126,8 @@ public void test20() {
         dlineage.generateDataFlow();
         dataflow originDataflow = dlineage.getDataFlow();
         String result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow);
-
         // compare
-        List<String[]> c1 = resolver1(v1.toString());
+        List<String[]> c1 = resolver(v1.toString());
         List<String[]> c2 = resolver(result);
 
         if (c1.isEmpty() || c2.isEmpty() || c1.size() != c2.size()) {
@@ -143,19 +142,6 @@ public void test20() {
             }
         }
 
-        return r;
-    }
-
-    private List<String[]> resolver1(String str) {
-        List<String[]> r = new ArrayList<>();
-        String[] vars = str.split("\n");
-        for (int i = 0; i < vars.length; i++) {
-            if (i == 0) {
-                r.add(vars[i].split(","));
-                continue;
-            }
-            r.add(vars[i].split(";"));
-        }
         return r;
     }
 
