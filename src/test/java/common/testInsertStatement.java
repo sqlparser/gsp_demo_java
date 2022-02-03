@@ -2,6 +2,7 @@ package common;
 
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.EInsertSource;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
@@ -27,4 +28,17 @@ public class testInsertStatement  extends TestCase {
         TSelectSqlStatement subquery = insert.getSubQuery();
         assertTrue(subquery.getTables().getTable(0).toString().equalsIgnoreCase("test_111"));
     }
+
+
+    public void testInsertExec(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "INSERT into dbo.targetTable(product_name, model_year, list_price) exec dbo.udfProductInYear";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstinsert);
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+        // This means the source from an exec statement
+        assertTrue(insert.getInsertSource() == EInsertSource.execute);
+        assertTrue(insert.getExecuteStmt().getModuleName().toString().equalsIgnoreCase("dbo.udfProductInYear"));
+    }
+
 }

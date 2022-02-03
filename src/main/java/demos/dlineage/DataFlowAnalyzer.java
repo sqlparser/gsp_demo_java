@@ -283,7 +283,7 @@ public class DataFlowAnalyzer {
 			dlineage.setIgnoreCoordinate(ignoreCoordinate);
 			dlineage.setSimpleShowTopSelectResultSet(topselectlist);
 			dlineage.setShowImplicitSchema(showImplicitSchema);
-//			dlineage.setShowConstantTable(true);
+			//dlineage.setShowConstantTable(true);
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
