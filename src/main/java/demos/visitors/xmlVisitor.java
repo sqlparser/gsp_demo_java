@@ -94,6 +94,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -4894,6 +4895,28 @@ public class xmlVisitor extends TParseTreeVisitor
 		elementStack.pop( );
 		elementStack.pop( );
 	}
+
+	public void preVisit( TTeradataCreateMacro stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_macro = xmldoc.createElement( "create_macro_statement" );
+		e_parent.appendChild( e_create_macro );
+		elementStack.push( e_create_macro );
+
+		current_objectName_tag = "marco_name";
+		stmt.getMacroName().accept( this );
+
+
+		if ( stmt.getBodyStatements( ).size( ) > 0 )
+		{
+			current_statement_list_tag = "body_statement_list";
+			stmt.getBodyStatements( ).accept( this );
+		}
+
+
+		elementStack.pop( );
+
+	}
+
 
 	public void preVisit( TCreateProcedureStmt node )
 	{
