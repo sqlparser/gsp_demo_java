@@ -59,4 +59,5 @@ public class testLateralView extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement) sqlparser.sqlstatements.get(0);
         assertTrue(select.joins.size() == 1);
     }
+
 }

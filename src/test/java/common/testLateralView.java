@@ -33,4 +33,33 @@ public class testLateralView extends TestCase {
         assertTrue(element.toString().equalsIgnoreCase("adid"));
     }
 
+     public void testLateralViewOrphanColumn1() {
+          TGSqlParser tgSqlParser = new TGSqlParser(EDbVendor.dbvhive);
+
+          tgSqlParser.sqlfilename = gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"hive/prosiebensat1/join-lateral-view1.sql";
+
+          assertTrue(tgSqlParser.parse() == 0);
+          TSelectSqlStatement sqlstatements = (TSelectSqlStatement) tgSqlParser.getSqlstatements().get(0);
+          assertTrue(sqlstatements.getSyntaxHints().size() == 0);
+     }
+
+     public void testLateralViewOrphanColumn2() {
+          TGSqlParser tgSqlParser = new TGSqlParser(EDbVendor.dbvhive);
+
+          tgSqlParser.sqlfilename = gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"hive/prosiebensat1/join-lateral-view2.sql";
+
+          assertTrue(tgSqlParser.parse() == 0);
+          TSelectSqlStatement sqlstatements = (TSelectSqlStatement) tgSqlParser.getSqlstatements().get(0);
+          assertTrue(sqlstatements.getSyntaxHints().size() == 0);
+     }
+
+     public void testLateralViewOrphanColumn3() {
+          TGSqlParser tgSqlParser = new TGSqlParser(EDbVendor.dbvhive);
+
+          tgSqlParser.sqlfilename = gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"hive/prosiebensat1/join-lateral-view3.sql";
+
+          assertTrue(tgSqlParser.parse() == 0);
+          TSelectSqlStatement sqlstatements = (TSelectSqlStatement) tgSqlParser.getSqlstatements().get(0);
+          assertTrue(sqlstatements.getSyntaxHints().size() == 0);
+     }
 }
