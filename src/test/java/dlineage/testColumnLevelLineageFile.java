@@ -91,6 +91,10 @@ public class testColumnLevelLineageFile extends TestCase {
 public void test20() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-select.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-select.csv", EDbVendor.dbvoracle));
     }
+    
+    public void test21() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.csv", EDbVendor.dbvoracle));
+    }
 
 
     private boolean compare(String sourceFile, String resultFile, EDbVendor vendor) {
