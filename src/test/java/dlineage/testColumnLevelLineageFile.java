@@ -93,7 +93,7 @@ public void test20() {
     }
     
     public void test21() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.csv", EDbVendor.dbvoracle));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.csv", EDbVendor.dbvmssql));
     }
 
 
