@@ -10,6 +10,15 @@ import junit.framework.TestCase;
 
 public class testCreateTable extends TestCase {
 
+    public void testCreateTableAsTable(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "CREATE TABLE a AS TABLE b";
+        assertTrue(sqlparser.parse() == 0);
+        TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createTable.getTableName().toString().equalsIgnoreCase("a"));
+        assertTrue(createTable.getAsTable().toString().equalsIgnoreCase("b"));
+    }
+
     public void testCreateTableClone(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlparser.sqltext = "create table orders_clone_restore clone orders at (timestamp => to_timestamp_tz('04/05/2013 01:02:03', 'mm/dd/yyyy hh24:mi:ss'));";
