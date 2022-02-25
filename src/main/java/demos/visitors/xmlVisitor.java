@@ -5165,6 +5165,8 @@ public class xmlVisitor extends TParseTreeVisitor
 		{
 			current_objectName_tag = "expression";
 			node.getReturnExpr( ).accept( this );
+		}else if (node.getSubquery() != null){
+			node.getSubquery().accept(this);
 		}
 		elementStack.pop( );
 	}

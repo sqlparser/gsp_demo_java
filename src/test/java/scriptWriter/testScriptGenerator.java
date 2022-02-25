@@ -15,6 +15,17 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+	public void testsqlserverOption( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
+		sqlparser.sqltext = "SELECT * FROM HumanResources.Employee AS e1 UNION SELECT * FROM HumanResources.Employee AS e2 OPTION (MERGE UNION);";
+
+		assertTrue(sqlparser.parse( ) == 0);
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
 	public void testSnwoflakeConcat( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvsnowflake);
