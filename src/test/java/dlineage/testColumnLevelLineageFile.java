@@ -95,6 +95,18 @@ public class testColumnLevelLineageFile extends TestCase {
     public void test21() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-procedure.csv", EDbVendor.dbvmssql));
     }
+    
+    public void test22() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.csv", EDbVendor.dbvmysql));
+    }
+    
+    public void test23() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/with-select.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/with-select.csv", EDbVendor.dbvmssql));
+    }
+
+    public void test24() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-function.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-function.csv", EDbVendor.dbvmssql));
+    }
 
 
     private boolean compare(String sourceFile, String resultFile, EDbVendor vendor) {
