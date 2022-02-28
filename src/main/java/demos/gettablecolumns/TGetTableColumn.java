@@ -590,6 +590,11 @@ public class TGetTableColumn{
                         + lcTable.getTableName( )
                         + ")";
             }
+            else if (lcTable.getTableType() == ETableSource.unnest){
+                tn = "(unnest-table:"
+                        + lcTable.getAliasName( )
+                        + ")";
+            }
 			else if ( lcTable.getTableName( ) != null )
 			{
 				tn = lcTable.getTableName( ).toString( );
