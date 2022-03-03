@@ -5,6 +5,7 @@ import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.nodes.TUnnestClause;
 import gudusoft.gsqlparser.nodes.TValueClause;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
@@ -32,6 +33,13 @@ public class testUnnest extends TestCase {
         assertTrue(columns.size() == 2);
         assertTrue(columns.getResultColumn(0).getExpr().toString().equalsIgnoreCase("ARRAY[2, 5]"));
         assertTrue(columns.getResultColumn(1).getExpr().toString().equalsIgnoreCase("ARRAY['dog', 'cat', 'bird']"));
+
+        TTable table1  = select.getTables().getTable(1);
+        assertTrue (table1.getTableType() == ETableSource.unnest);
+        TUnnestClause unnestClause = table1.getUnnestClause();
+        assertTrue(unnestClause.getColumns().size() == 2);
+        assertTrue(unnestClause.getColumns().getObjectName(0).toString().equalsIgnoreCase("numbers"));
+        assertTrue(unnestClause.getColumns().getObjectName(1).toString().equalsIgnoreCase("animals"));
 
     }
 

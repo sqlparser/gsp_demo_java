@@ -3466,6 +3466,11 @@ public class xmlVisitor extends TParseTreeVisitor
 					stmt.getVariables( ).accept( this );
 				}
 				break;
+			case cursor:
+				current_objectName_tag = "cursor_name";
+				stmt.getCursorName().accept(this);
+				stmt.getSubquery().accept(this);
+				break;
 			default :
 				// if (stmt.getSubquery() != null)
 				// stmt.getSubquery().accept(this);
