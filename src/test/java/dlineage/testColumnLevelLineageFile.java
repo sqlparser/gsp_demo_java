@@ -107,6 +107,26 @@ public class testColumnLevelLineageFile extends TestCase {
     public void test24() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-function.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/create-function.csv", EDbVendor.dbvmssql));
     }
+    
+    public void test25() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/plsql-array.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/plsql-array.csv", EDbVendor.dbvoracle));
+    }
+
+    public void test26() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-1.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-1.csv", EDbVendor.dbvpresto));
+    }
+
+    public void test27() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.csv", EDbVendor.dbvpresto));
+    }
+
+    public void test28() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.csv", EDbVendor.dbvpresto));
+    }
+
+    public void test29() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.csv", EDbVendor.dbvpresto));
+    }
 
 
     private boolean compare(String sourceFile, String resultFile, EDbVendor vendor) {
