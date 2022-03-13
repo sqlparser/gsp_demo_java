@@ -5210,9 +5210,9 @@ public class xmlVisitor extends TParseTreeVisitor
 	public void preVisit( TCursorDeclStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
-		switch ( stmt.getKind( ) )
+		switch ( stmt.getCursorKind( ) )
 		{
-			case TCursorDeclStmt.kind_ref_cursor_type_definition :
+			case  typeDefinition: //TCursorDeclStmt.kind_ref_cursor_type_definition :
 				Element e_stmt = xmldoc.createElement( "ref_cursor_type_definition_statement" );
 				e_parent.appendChild( e_stmt );
 				elementStack.push( e_stmt );
@@ -5224,7 +5224,7 @@ public class xmlVisitor extends TParseTreeVisitor
 				}
 				elementStack.pop( );
 				break;
-			case TCursorDeclStmt.kind_cursor_declaration :
+			case declaration: //TCursorDeclStmt.kind_cursor_declaration :
 				Element e_cursor_stmt = xmldoc.createElement( "cursor_declaration_statement" );
 				e_parent.appendChild( e_cursor_stmt );
 				elementStack.push( e_cursor_stmt );
@@ -5243,10 +5243,27 @@ public class xmlVisitor extends TParseTreeVisitor
 				stmt.getSubquery( ).accept( this );
 				elementStack.pop( );
 				break;
-			default :
+			case specification:
 				Element e_cursor_decl_stmt = xmldoc.createElement( "cursor_decl_stmt" );
 				e_parent.appendChild( e_cursor_decl_stmt );
-				e_cursor_decl_stmt.setTextContent( stmt.toString( ) );
+				elementStack.push( e_cursor_decl_stmt );
+				current_objectName_tag = "cursor_name";
+				stmt.getCursorName( ).accept( this );
+
+				//e_cursor_decl_stmt.setTextContent( stmt.toString( ) );
+
+				Element returnType = xmldoc.createElement( "return_type" );
+				e_cursor_decl_stmt.appendChild( returnType );
+				elementStack.push( returnType );
+				stmt.getRowtype().accept(this);
+				elementStack.pop( );
+
+				elementStack.pop( );
+				break;
+			case body:
+				Element e_cursor_decl_body_stmt = xmldoc.createElement( "cursor_decl_stmt" );
+				e_parent.appendChild( e_cursor_decl_body_stmt );
+				e_cursor_decl_body_stmt.setTextContent( stmt.toString( ) );
 				break;
 		}
 	}

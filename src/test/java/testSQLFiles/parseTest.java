@@ -29,17 +29,17 @@ static void parsefiles(EDbVendor db,String dir){
         // System.out.printf("%s\n",sqlparser.sqlfilename);
         // boolean b = sqlparser.parse() == 0;
 
-         //assertTrue(sqlparser.parse() == 0);
+         assertTrue(sqlparser.parse() == 0);
 
-        try{
-            boolean b = sqlparser.parse() == 0;
-            assertTrue(sqlparser.sqlfilename+"\n"+sqlparser.getErrormessage(),b);
-
-        }catch (Exception e){
-            System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
-            e.printStackTrace();
-            //throw new Exception("Exception message");
-        }
+//        try{
+//            boolean b = sqlparser.parse() == 0;
+//            assertTrue(sqlparser.sqlfilename+"\n"+sqlparser.getErrormessage(),b);
+//
+//        }catch (Exception e){
+//            System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
+//            e.printStackTrace();
+//            //throw new Exception("Exception message");
+//        }
 
     }
 
