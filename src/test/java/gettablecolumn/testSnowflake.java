@@ -82,4 +82,24 @@ public class testSnowflake extends TestCase {
                         "payments.apn_rt.apn_report_data.Status_updatedate\n" +
                         "payments.apn_rt.apn_report_data.substate");
     }
+
+    public static void testCTEWithSameName() {
+        doTest("WITH cte_2 AS \n" +
+                        "(\n" +
+                        "\tSELECT ID, \"NAME\",'cc'\n" +
+                        "\tFROM SUNNY.HR.TEST\n" +
+                        "),\n" +
+                        "cte_2 AS \n" +
+                        "(\n" +
+                        "\tSELECT ID, \"NAME\",*\n" +
+                        "\tFROM cte_2\n" +
+                        ")\n" +
+                        "select * FROM cte_2",
+                "Tables:\n" +
+                        "SUNNY.HR.TEST\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "SUNNY.HR.TEST.\"NAME\"\n" +
+                        "SUNNY.HR.TEST.ID");
+    }
 }

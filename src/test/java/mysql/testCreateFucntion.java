@@ -2,7 +2,7 @@ package mysql;
 
 
 import gudusoft.gsqlparser.*;
-import gudusoft.gsqlparser.stmt.mysql.TMySQLCreateFunction;
+import gudusoft.gsqlparser.stmt.TCreateFunctionStmt;
 import junit.framework.TestCase;
 
 public class testCreateFucntion extends TestCase {
@@ -61,8 +61,8 @@ public void test2(){
         sqlparser.sqltext = "create aggregate function encsum returns string soname 'udf_example.so'";
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
-        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstmysqlcreatefunction);
-        TMySQLCreateFunction createFunction = (TMySQLCreateFunction)sqlStatement;
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreatefunction);
+        TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlStatement;
         assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.string_t);
         assertTrue(createFunction.getSharedLibraryName().equalsIgnoreCase("'udf_example.so'"));
 }

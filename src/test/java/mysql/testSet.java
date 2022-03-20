@@ -4,12 +4,10 @@ package mysql;
  */
 
 import gudusoft.gsqlparser.*;
-import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TSetAssignment;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
-import gudusoft.gsqlparser.stmt.TTruncateStatement;
+import gudusoft.gsqlparser.stmt.TSetStmt;
 import gudusoft.gsqlparser.stmt.mysql.TMySQLIfStmt;
-import gudusoft.gsqlparser.stmt.mysql.TMySQLSet;
 import junit.framework.TestCase;
 
 public class testSet extends TestCase {
@@ -19,7 +17,7 @@ public class testSet extends TestCase {
         sqlparser.sqltext = "SET sort_buffer_size=10000;";
         assertTrue(sqlparser.parse() == 0);
 
-        TMySQLSet set = (TMySQLSet)sqlparser.sqlstatements.get(0);
+        TSetStmt set = (TSetStmt)sqlparser.sqlstatements.get(0);
         assertTrue(set.getAssignments().getElement(0).getParameterName().toString().equalsIgnoreCase("sort_buffer_size"));
         assertTrue(set.getAssignments().getElement(0).getParameterValue().toString().equalsIgnoreCase("10000"));
 
@@ -30,7 +28,7 @@ public class testSet extends TestCase {
         sqlparser.sqltext = "SET GLOBAL sort_buffer_size=1000000, SESSION sort_buffer_size=1000000;";
         assertTrue(sqlparser.parse() == 0);
 
-        TMySQLSet set = (TMySQLSet)sqlparser.sqlstatements.get(0);
+        TSetStmt set = (TSetStmt)sqlparser.sqlstatements.get(0);
         assertTrue(set.getSetStatementType() == ESetStatementType.variable);
         TSetAssignment assignment = set.getAssignments().getElement(0);
         assertTrue(assignment.getSetScope() == ESetScope.global);
@@ -47,7 +45,7 @@ public class testSet extends TestCase {
         sqlparser.sqltext = "SET PASSWORD FOR 'bob'@'%.example.org' = PASSWORD('cleartext password');";
         assertTrue(sqlparser.parse() == 0);
 
-        TMySQLSet set = (TMySQLSet)sqlparser.sqlstatements.get(0);
+        TSetStmt set = (TSetStmt)sqlparser.sqlstatements.get(0);
         assertTrue(set.getSetStatementType() == ESetStatementType.password);
 
         assertTrue(set.getUserName().toString().equalsIgnoreCase("'bob'@'%.example.org'"));
@@ -72,7 +70,7 @@ public class testSet extends TestCase {
         assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstmysqlifstmt);
         TMySQLIfStmt ifStmt = (TMySQLIfStmt)createProcedure.getBodyStatements().get(0);
         assertTrue(ifStmt.getCondition().toString().equalsIgnoreCase("p1 = -1"));
-        TMySQLSet set = (TMySQLSet)ifStmt.getThenStmts().get(0);
+        TSetStmt set = (TSetStmt)ifStmt.getThenStmts().get(0);
         assertTrue(set.getSetStatementType() == ESetStatementType.variable);
 //        TSetAssignment setAssignment = set.getAssignments().getElement(0);
 //

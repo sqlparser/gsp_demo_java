@@ -50,6 +50,7 @@ import gudusoft.gsqlparser.stmt.mssql.TMssqlReturn;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlRollback;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlSaveTran;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlSet;
+import gudusoft.gsqlparser.stmt.mysql.TMySQLDeallocatePrepareStmt;
 import gudusoft.gsqlparser.stmt.oracle.TBasicStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlContinue;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateFunction;
@@ -459,6 +460,12 @@ public class xmlVisitor extends TParseTreeVisitor
 		Element e_set_assignment = xmldoc.createElement( "set_statement" );
 		e_parent.appendChild( e_set_assignment );
 		elementStack.push( e_set_assignment );
+		if (stmt.getAssignments() != null){
+			for(int i=0;i<stmt.getAssignments().size();i++) {
+				TSetAssignment assignStmt = (TSetAssignment)stmt.getAssignments().getElement(i);
+				assignStmt.accept(this);
+			}
+		}
 		if (stmt.getVariableName() != null){
 			stmt.getVariableName().accept(this);
 		}
@@ -473,6 +480,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 		elementStack.pop( );
 	}
+
 
 
 	public void preVisit( TConstant node )
@@ -3456,6 +3464,7 @@ public class xmlVisitor extends TParseTreeVisitor
 
 		e_parent = (Element) elementStack.peek( );
 		Element e_declare_varaible = xmldoc.createElement( "declare_variable_statement" );
+		e_declare_varaible.setAttribute("declare_type",stmt.getDeclareType().toString());
 		e_parent.appendChild( e_declare_varaible );
 		elementStack.push( e_declare_varaible );
 		switch ( stmt.getDeclareType( ) )
@@ -3470,6 +3479,9 @@ public class xmlVisitor extends TParseTreeVisitor
 				current_objectName_tag = "cursor_name";
 				stmt.getCursorName().accept(this);
 				stmt.getSubquery().accept(this);
+				break;
+			case handlers:
+				stmt.getBodyStatements().accept(this);
 				break;
 			default :
 				// if (stmt.getSubquery() != null)
@@ -3634,6 +3646,7 @@ public class xmlVisitor extends TParseTreeVisitor
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_create_table = xmldoc.createElement( "create_table_statement" );
+		e_create_table.setAttribute("source_type",stmt.getTableSourceType().toString());
 		e_parent.appendChild( e_create_table );
 		elementStack.push( e_create_table );
 		current_table_reference_tag = "table_name";
@@ -3664,6 +3677,17 @@ public class xmlVisitor extends TParseTreeVisitor
 			stmt.getSubQuery( ).accept( this );
 		}
 
+		switch (stmt.getTableSourceType()){
+			case like:
+				Element e_like_table = xmldoc.createElement( "like_table" );
+				e_create_table.appendChild( e_like_table );
+				elementStack.push( e_like_table );
+				stmt.getLikeTableName().accept(this);
+				elementStack.pop( );
+
+				break;
+		}
+
 		elementStack.pop( );
 	}
 
@@ -3671,10 +3695,27 @@ public class xmlVisitor extends TParseTreeVisitor
 	{
 	}
 
+	public void preVisit( TLeaveStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_leave = xmldoc.createElement( "leave_statement" );
+		e_parent.appendChild( e_leave );
+
+		elementStack.push( e_leave );
+		current_objectName_tag = "cursor_name";
+		stmt.getCursorName( ).accept( this );
+
+		elementStack.pop( );
+	}
+
+
 	public void preVisit( TDropTableSqlStatement stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_drop = xmldoc.createElement( "drop_table_statement" );
+		e_drop.setAttribute("if_exists",String.valueOf(stmt.isIfExists()));
+		e_drop.setAttribute("table_kind",String.valueOf(stmt.getTableKind()));
+
 		e_parent.appendChild( e_drop );
 		elementStack.push( e_drop );
 		current_objectName_tag = "table_name";
@@ -4551,6 +4592,56 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 	}
 
+	public void addElementOfString( String tagName, String str )
+	{
+		Element e_literal = xmldoc.createElement( tagName );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_literal );
+
+		Element e_value = xmldoc.createElement( "value" );
+		e_literal.appendChild( e_value );
+		e_value.setTextContent( str );
+	}
+
+
+	public void preVisit( TMySQLDeallocatePrepareStmt node ) {
+		e_parent = (Element) elementStack.peek();
+		Element e_prepare_stmt = xmldoc.createElement("deallocate_prepare_statement");
+		e_parent.appendChild(e_prepare_stmt);
+		elementStack.push(e_prepare_stmt);
+		current_objectName_tag = "stmt_name";
+		node.getStmtName().accept(this);
+		elementStack.pop( );
+	}
+
+	public void preVisit( TPrepareStmt node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_prepare_stmt = xmldoc.createElement( "prepare_statement" );
+		e_parent.appendChild( e_prepare_stmt );
+		elementStack.push( e_prepare_stmt );
+		switch (node.dbvendor){
+			case dbvpresto:
+			case dbvhana:
+				if (node.getParentStmt() != null){
+					node.getPreparableStmt().accept(this);
+				}
+				break;
+			default:
+				current_objectName_tag = "stmt_name";
+				node.getStmtName().accept( this );
+				if (node.getPreparableStmt() != null){
+					node.getPreparableStmt().accept(this);
+				}
+				if (node.getPreparableStmtStr().length() > 0){
+					addElementOfString("stmt_value",node.getPreparableStmtStr());
+				}
+				break;
+		}
+
+		elementStack.pop( );
+	}
+
 	public void preVisit( TCloseStmt node )
 	{
 		e_parent = (Element) elementStack.peek( );
@@ -5411,7 +5502,12 @@ public class xmlVisitor extends TParseTreeVisitor
 		current_objectName_tag = "cursor_name";
 		stmt.getCursorName( ).accept( this );
 		current_expression_list_tag = "into_list";
-		stmt.getVariableNames( ).accept( this );
+		if (stmt.dbvendor == EDbVendor.dbvmysql){
+			stmt.getVariableNameObjectList().accept(this);
+		}else{
+			stmt.getVariableNames( ).accept( this );
+		}
+
 
 		elementStack.pop( );
 
