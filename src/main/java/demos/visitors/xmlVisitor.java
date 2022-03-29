@@ -33,6 +33,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
+import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
 import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
 import gudusoft.gsqlparser.stmt.mdx.TMdxSelect;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlBlock;
@@ -432,6 +433,38 @@ public class xmlVisitor extends TParseTreeVisitor
 	}
 
 	// process parse tree nodes
+
+
+
+	public void preVisit( TDb2HandlerDeclaration stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_declare = xmldoc.createElement( "declare_statement" );
+		e_parent.appendChild( e_declare );
+		elementStack.push( e_declare );
+
+		stmt.getStmt().accept(this);
+
+		elementStack.pop( );
+	}
+
+	public void preVisit( TSignalStmt stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_signal_stmt = xmldoc.createElement( "signal_statement" );
+		e_signal_stmt.setAttribute("is_resignal",(stmt.getStartToken().astext.equalsIgnoreCase("resignal"))?"yes":"no");
+		e_parent.appendChild( e_signal_stmt );
+		elementStack.push( e_signal_stmt );
+		if (stmt.getStateValue() != null){
+			addElementOfNode("state_value",stmt.getStateValue());
+		}else if (stmt.getConditionName() != null){
+			current_objectName_tag = "cnodition_name";
+			stmt.getConditionName().accept(this);
+		}
+		if (stmt.getSignalInformations() != null){
+			addElementOfNode("signal_informations",stmt.getSignalInformations());
+		}
+
+		elementStack.pop( );
+	}
 
 	public void preVisit( TDb2SetVariableStmt stmt ){
 		e_parent = (Element) elementStack.peek( );
@@ -3481,7 +3514,19 @@ public class xmlVisitor extends TParseTreeVisitor
 				stmt.getSubquery().accept(this);
 				break;
 			case handlers:
-				stmt.getBodyStatements().accept(this);
+				if (stmt.getHandleBlock() != null){
+					stmt.getHandleBlock().accept(this);
+				}else
+					stmt.getBodyStatements().accept(this);
+				break;
+			case conditions:
+				current_objectName_tag = "condition_name";
+				stmt.getConditionName().accept(this);
+				if (stmt.getStateValue() != null){
+					addElementOfNode("state_value",stmt.getStateValue());
+				}else if (stmt.getErrorCode() != null){
+					addElementOfNode("state_value",stmt.getErrorCode());
+				}
 				break;
 			default :
 				// if (stmt.getSubquery() != null)
@@ -3702,7 +3747,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent.appendChild( e_leave );
 
 		elementStack.push( e_leave );
-		current_objectName_tag = "cursor_name";
+		current_objectName_tag = "label_name";
 		stmt.getCursorName( ).accept( this );
 
 		elementStack.pop( );
@@ -4603,6 +4648,16 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_value.setTextContent( str );
 	}
 
+	public void addElementOfNode( String tagName, TParseTreeNode node )
+	{
+		Element e_element = xmldoc.createElement( tagName );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_element );
+		elementStack.push(e_element);
+		node.accept(this);
+		elementStack.pop();
+	}
+
 
 	public void preVisit( TMySQLDeallocatePrepareStmt node ) {
 		e_parent = (Element) elementStack.peek();
@@ -5013,6 +5068,26 @@ public class xmlVisitor extends TParseTreeVisitor
 
 	}
 
+	public void preVisit( TBlockSqlNode node ) {
+		e_parent = (Element) elementStack.peek( );
+		Element e_begin_end = xmldoc.createElement( "begin_end_block" );
+		if (node.getLabelName() != null){
+			e_begin_end.setAttribute("label",node.getLabelNameStr());
+		}
+		e_parent.appendChild( e_begin_end );
+		elementStack.push( e_begin_end );
+		if (node.getDeclareStatements().size() > 0){
+			current_statement_list_tag = "declare_statement_list";
+			node.getDeclareStatements().accept(this);
+		}
+		if ( node.getBodyStatements( ).size( ) > 0 )
+		{
+			current_statement_list_tag = "body_statement_list";
+			node.getBodyStatements( ).accept( this );
+		}
+
+		elementStack.pop( );
+	}
 
 	public void preVisit( TCreateProcedureStmt node )
 	{
@@ -5031,7 +5106,14 @@ public class xmlVisitor extends TParseTreeVisitor
 		if ( node.getParameterDeclarations( ) != null )
 			node.getParameterDeclarations( ).accept( this );
 
-		if ( node.getBodyStatements( ).size( ) > 0 )
+		if (node.getDeclareStatements().size() > 0){
+			current_statement_list_tag = "declare_statement_list";
+			node.getDeclareStatements().accept(this);
+		}
+		if (node.getBlockBody() != null){
+			node.getBlockBody().accept(this);
+		}
+		else if ( node.getBodyStatements( ).size( ) > 0 )
 		{
 			current_statement_list_tag = "body_statement_list";
 			node.getBodyStatements( ).accept( this );
@@ -5359,6 +5441,31 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 	}
 
+
+
+	public void preVisit( TGetDiagStmt stmt ) {
+
+		Element e_stmt = xmldoc.createElement( "get_diagnostics_statement" );
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild( e_stmt );
+		elementStack.push( e_stmt );
+		elementStack.pop( );
+
+	}
+
+	public void preVisit( TWhileStmt stmt ) {
+
+		Element e_stmt = xmldoc.createElement( "while_statement" );
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild( e_stmt );
+		elementStack.push( e_stmt );
+		e_stmt.setAttribute("label",stmt.getLabelNameStr());
+		addElementOfNode("condition",stmt.getCondition());
+		stmt.getBodyStatements().accept(this);
+		elementStack.pop( );
+
+	}
+
 	public void preVisit( TLoopStmt stmt )
 	{
 		Element e_stmt = null;
@@ -5383,6 +5490,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		{
 			e_parent.appendChild( e_stmt );
 			elementStack.push( e_stmt );
+			e_stmt.setAttribute("label",stmt.getLabelNameStr());
 			if ( stmt.getRecordName( ) != null )
 			{
 				current_objectName_tag = "record";

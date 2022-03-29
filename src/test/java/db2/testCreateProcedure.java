@@ -3,9 +3,8 @@ package db2;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.stmt.TCreateDatabaseSqlStatement;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
-import gudusoft.gsqlparser.stmt.db2.TDb2CreateProcedure;
 import junit.framework.TestCase;
 
 
@@ -29,8 +28,8 @@ public class testCreateProcedure extends TestCase {
 
         assertTrue(sqlparser.parse() == 0);
 
-        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstdb2createprocedure);
-        TDb2CreateProcedure procedure = (TDb2CreateProcedure)sqlparser.sqlstatements.get(0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstcreateprocedure);
+        TCreateProcedureStmt procedure = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
        // System.out.print(procedure.getBodyStatements().size());
         assertTrue(procedure.getDeclareStatements().size() == 3);
         assertTrue(procedure.getDeclareStatements().get(2).toString().equalsIgnoreCase("DECLARE CONTINUE HANDLER FOR NOT FOUND\n" +

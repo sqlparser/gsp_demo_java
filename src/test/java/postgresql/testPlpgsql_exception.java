@@ -50,7 +50,7 @@ public class testPlpgsql_exception extends TestCase {
         assertTrue(handler.getStatements().size() == 1);
         stmt = handler.getStatements().get(0);
         //System.out.println(stmt.toString());
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstpostgresqlgetdiag);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstgetdiagnostics);
 
       }
 
