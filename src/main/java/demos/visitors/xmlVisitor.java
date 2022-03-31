@@ -3692,6 +3692,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent = (Element) elementStack.peek( );
 		Element e_create_table = xmldoc.createElement( "create_table_statement" );
 		e_create_table.setAttribute("source_type",stmt.getTableSourceType().toString());
+		e_create_table.setAttribute("is_external",stmt.isExternal()?"true":"false");
 		e_parent.appendChild( e_create_table );
 		elementStack.push( e_create_table );
 		current_table_reference_tag = "table_name";
@@ -3733,8 +3734,51 @@ public class xmlVisitor extends TParseTreeVisitor
 				break;
 		}
 
+		if (stmt.getTableOptions() != null){
+			for(TCreateTableOption option:stmt.getTableOptions()){
+				option.accept(this);
+			}
+		}
+
 		elementStack.pop( );
 	}
+
+
+	public void preVisit( TCreateTableOption node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_table_option = xmldoc.createElement( "create_table_option" );
+		e_create_table_option.setAttribute("type",node.getCreateTableOptionType().toString());
+		e_parent.appendChild( e_create_table_option );
+		elementStack.push( e_create_table_option );
+
+		switch (node.getCreateTableOptionType()){
+			case etoWithLocation:
+				node.getStageLocation().accept(this);
+				break;
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit( TStageLocation node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_stage = xmldoc.createElement( "stage_location" );
+		e_stage.setAttribute("type",node.getStageLocationType().toString());
+
+		e_parent.appendChild( e_stage );
+		elementStack.push( e_stage );
+		if (node.getStageName() != null){
+			addElementOfNode("stage_name",node.getStageName());
+		}
+		if (node.getNameSpace() != null){
+			addElementOfNode("namespace",node.getNameSpace());
+		}
+		elementStack.pop();
+	}
+
+
 
 	public void preVisit( TDropIndexSqlStatement stmt )
 	{

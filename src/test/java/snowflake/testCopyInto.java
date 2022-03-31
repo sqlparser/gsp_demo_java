@@ -20,6 +20,7 @@ public class testCopyInto extends TestCase {
         assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mycsvtable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
+        assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalNamed);
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("my_csv_stage"));
         assertTrue(stageLocation.getPath().toString().equals("tutorials/dataloading/contacts1.csv"));
        // System.out.println(stageLocation.getPath());
@@ -37,6 +38,7 @@ public class testCopyInto extends TestCase {
         assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mycsvtable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
+        assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalNamed);
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("my_csv_stage"));
         assertTrue(stageLocation.getPath().toString().equals("tutorials/dataloading"));
         assertTrue(copyIntoStmt.getRegex_pattern().equalsIgnoreCase("'.*contacts[1-5].csv'"));
@@ -52,7 +54,8 @@ public class testCopyInto extends TestCase {
         assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
-        assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("~"));
+        assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalUser);
+        //assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("~"));
         assertTrue(stageLocation.getPath().toString().equals("staged"));
         assertTrue(copyIntoStmt.getFileFormatName().equalsIgnoreCase("'mycsv'"));
     }
@@ -81,6 +84,11 @@ public class testCopyInto extends TestCase {
         TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
         assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
+
+        TStageLocation stageLocation = copyIntoStmt.getStageLocation();
+        assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.location);
+
+
         assertTrue(copyIntoStmt.getStageLocation().getExternalLocation().toString().equalsIgnoreCase("'s3://mybucket/data/files'"));
         assertTrue(copyIntoStmt.getFileFormatName().equalsIgnoreCase("my_csv_format"));
     }
@@ -95,6 +103,9 @@ public class testCopyInto extends TestCase {
         TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
         assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("load1"));
+        TStageLocation stageLocation = copyIntoStmt.getStageLocation();
+        assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalTable);
+
         assertTrue(copyIntoStmt.getStageLocation().getTableName().toString().equalsIgnoreCase("load1"));
         assertTrue(copyIntoStmt.getStageLocation().getPath().toString().equalsIgnoreCase("data1"));
         assertTrue(copyIntoStmt.getFileList().size()==2);
