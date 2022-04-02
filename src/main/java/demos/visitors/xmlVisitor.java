@@ -2141,6 +2141,8 @@ public class xmlVisitor extends TParseTreeVisitor
 		if ( node.getItems( ) != null )
 		{
 			Element e_group_by = xmldoc.createElement( "group_by_clause" );
+			e_group_by.setAttribute("withRollup",node.isRollupModifier()?"true":"false");
+			e_group_by.setAttribute("withCube",node.isCubeModifier()?"true":"false");
 			e_parent = (Element) elementStack.peek( );
 			e_parent.appendChild( e_group_by );
 			elementStack.push( e_group_by );
