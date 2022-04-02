@@ -137,15 +137,15 @@ public class testColumnLevelLineageFile extends TestCase {
     }
     
     public void test32() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/update-set-clause.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/update-set-clause.csv", EDbVendor.dbvmssql));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/update-set-clause.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/update-set-clause.csv", EDbVendor.dbvmssql));
     }
 
     public void test33() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/column-alias.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/column-alias.csv", EDbVendor.dbvmssql));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/column-alias.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/column-alias.csv", EDbVendor.dbvmssql));
     }
-    
+
     public void test34() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/subquery-alais.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/subquery-alais.csv", EDbVendor.dbvmssql));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/subquery-alais.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/subquery-alais.csv", EDbVendor.dbvmssql));
     }
 
 
