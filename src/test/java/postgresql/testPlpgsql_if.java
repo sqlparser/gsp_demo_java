@@ -6,7 +6,6 @@ package postgresql;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.stmt.*;
-import gudusoft.gsqlparser.stmt.*;
 import junit.framework.TestCase;
 
 public class testPlpgsql_if extends TestCase {
@@ -76,7 +75,7 @@ public class testPlpgsql_if extends TestCase {
         assertTrue(whenCondition.getRightOperand().toString().equalsIgnoreCase("0"));
 
         stmt = createFunction.getBodyStatements().get(2);
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_block_with_label);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_plsql_block);
         TCommonBlock block = (TCommonBlock)stmt;
         assertTrue(block.getLabelName().toString().equalsIgnoreCase("ablock"));
 

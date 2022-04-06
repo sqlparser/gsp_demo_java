@@ -1102,7 +1102,6 @@ public class xmlVisitor extends TParseTreeVisitor
 			case year_to_month_t :
 			case floating_point_t :
 			case is_of_type_t :
-			case typecast_t :
 			case unary_factorial_t :
 				e_expression = xmldoc.createElement( TAG_UNARY_EXPR );
 				e_parent = (Element) elementStack.peek( );
@@ -1110,6 +1109,16 @@ public class xmlVisitor extends TParseTreeVisitor
 				elementStack.push( e_expression );
 				current_expression_tag = "first_expr";
 				node.getLeftOperand( ).accept( this );
+				elementStack.pop( );
+				break;
+			case typecast_t :
+				e_expression = xmldoc.createElement( TAG_UNARY_EXPR );
+				e_parent = (Element) elementStack.peek( );
+				e_parent.appendChild( e_expression );
+				elementStack.push( e_expression );
+				current_expression_tag = "first_expr";
+				node.getLeftOperand( ).accept( this );
+				addElementOfNode("datatype",node.getTypeName());
 				elementStack.pop( );
 				break;
 			case unary_plus_t :
@@ -2581,7 +2590,7 @@ public class xmlVisitor extends TParseTreeVisitor
 
 		if ( node.getBodyStatements( ).size( ) > 0 )
 		{
-			current_statement_list_tag = "body_statement_list";
+			current_statement_list_tag = "begen_end_block";
 			node.getBodyStatements( ).accept( this );
 		}
 
@@ -2652,7 +2661,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 		if ( node.getBodyStatements( ).size( ) > 0 )
 		{
-			current_statement_list_tag = "body_statement_list";
+			current_statement_list_tag = "begin_end_block";
 			node.getBodyStatements( ).accept( this );
 		}
 		if ( node.getExceptionClause( ) != null )
@@ -2704,7 +2713,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		current_statement_list_tag = "declaration_section";
 		if ( node.getDeclareStatements( ).size( ) > 0 )
 			node.getDeclareStatements( ).accept( this );
-		current_statement_list_tag = "body_statement_list";
+		current_statement_list_tag = "body_section";
 		if ( node.getBodyStatements( ).size( ) > 0 )
 			node.getBodyStatements( ).accept( this );
 
@@ -4466,21 +4475,37 @@ public class xmlVisitor extends TParseTreeVisitor
 		appendEndTag( node );
 	}
 
-	public void preVisit( TAssignStmt node )
+	public void preVisit( TAssignStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_assign_stmt = xmldoc.createElement( "assignment_statement" );
+		e_assign_stmt.setAttribute("type",stmt.getAssignType().toString());
 		e_parent.appendChild( e_assign_stmt );
 		elementStack.push( e_assign_stmt );
-		current_expression_tag = "left";
-		if (node.getVariableName() != null){
-			node.getVariableName().accept(this);
-		}else{
-			node.getLeft( ).accept( this );
-		}
 
-		current_expression_tag = "right";
-		node.getExpression( ).accept( this );
+		switch (stmt.getAssignType()){
+			case normal:
+				current_expression_tag = "left";
+				if (stmt.getVariableName() != null){
+					stmt.getVariableName().accept(this);
+				}else{
+					stmt.getLeft( ).accept( this );
+				}
+
+				current_expression_tag = "right";
+				stmt.getExpression( ).accept( this );
+				break;
+			case variableAssignment:
+				addElementOfNode("variable",stmt.getVariableName());
+				stmt.getExpression( ).accept( this );
+				break;
+			case cursorAssignment:
+				addElementOfNode("variable",stmt.getVariableName());
+				stmt.getQuery().accept(this);
+				break;
+			case resultsetAssignment:
+				break;
+		}
 		elementStack.pop( );
 	}
 
@@ -5114,9 +5139,26 @@ public class xmlVisitor extends TParseTreeVisitor
 
 	}
 
+
+	public void preVisit( TRepeatStmt stmt ) {
+		e_parent = (Element) elementStack.peek( );
+		Element e_repeat_stmt = xmldoc.createElement( "repeat_stmt" );
+		if (stmt.getLabelName() != null){
+			e_repeat_stmt.setAttribute("label",stmt.getLabelNameStr());
+		}
+		e_parent.appendChild( e_repeat_stmt );
+		elementStack.push( e_repeat_stmt );
+
+		addElementOfNode("condition",stmt.getCondition()	);
+		current_statement_list_tag = "repeat_body";
+		stmt.getBodyStatements( ).accept( this );
+
+		elementStack.pop( );
+	}
+
 	public void preVisit( TBlockSqlNode node ) {
 		e_parent = (Element) elementStack.peek( );
-		Element e_begin_end = xmldoc.createElement( "begin_end_block" );
+		Element e_begin_end = xmldoc.createElement( "plsql_block" );
 		if (node.getLabelName() != null){
 			e_begin_end.setAttribute("label",node.getLabelNameStr());
 		}
@@ -5152,17 +5194,22 @@ public class xmlVisitor extends TParseTreeVisitor
 		if ( node.getParameterDeclarations( ) != null )
 			node.getParameterDeclarations( ).accept( this );
 
-		if (node.getDeclareStatements().size() > 0){
-			current_statement_list_tag = "declare_statement_list";
-			node.getDeclareStatements().accept(this);
+		if (node.getReturnDataType() != null){
+			addElementOfNode("return_type", node.getReturnDataType());
 		}
+
 		if (node.getBlockBody() != null){
 			node.getBlockBody().accept(this);
-		}
-		else if ( node.getBodyStatements( ).size( ) > 0 )
-		{
-			current_statement_list_tag = "body_statement_list";
-			node.getBodyStatements( ).accept( this );
+		}else{
+			if (node.getDeclareStatements().size() > 0){
+				current_statement_list_tag = "declare_statement_list";
+				node.getDeclareStatements().accept(this);
+			}
+			if ( node.getBodyStatements( ).size( ) > 0 )
+			{
+				current_statement_list_tag = "body_statement_list";
+				node.getBodyStatements( ).accept( this );
+			}
 		}
 
 		elementStack.pop( );
@@ -5309,7 +5356,9 @@ public class xmlVisitor extends TParseTreeVisitor
 				elementStack.push( e_var_decl_stmt );
 				current_objectName_tag = "variable_name";
 				node.getElementName( ).accept( this );
-				node.getDataType( ).accept( this );
+				if (node.getDataType() != null){
+					node.getDataType( ).accept( this );
+				}
 				if ( node.getDefaultValue( ) != null )
 				{
 					current_expression_tag = "default_value";
@@ -5484,6 +5533,10 @@ public class xmlVisitor extends TParseTreeVisitor
 				e_parent.appendChild( e_cursor_decl_body_stmt );
 				e_cursor_decl_body_stmt.setTextContent( stmt.toString( ) );
 				break;
+			case resultsetName:
+				Element e_cursor_resultsetName = xmldoc.createElement( "cursor_decl_resultset" );
+				addElementOfNode("resultset",stmt.getResultsetName());
+				break;
 		}
 	}
 
@@ -5626,6 +5679,19 @@ public class xmlVisitor extends TParseTreeVisitor
 
 	}
 
+	public void preVisit( TExecuteSqlStatement stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_execute = xmldoc.createElement( "execute_statement" );
+		e_parent.appendChild( e_execute );
+		elementStack.push( e_execute );
+		if ( stmt.getStmt( ) != null )
+		{
+			stmt.getStmt().accept(this);
+		}
+		elementStack.pop( );
+	}
+
 	public void preVisit( TExitStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
@@ -5644,7 +5710,6 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 
 		elementStack.pop( );
-
 	}
 
 	public void preVisit( TFetchStmt stmt )

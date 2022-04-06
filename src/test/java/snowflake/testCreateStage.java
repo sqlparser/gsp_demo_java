@@ -7,6 +7,29 @@ import junit.framework.TestCase;
 
 public class testCreateStage extends TestCase {
 
+    public void testQualified(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create or replace stage STAGING.stage_07020728_MOCK_DATA_2";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateStageStmt createStageStmt = (TCreateStageStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getNameSpace().toString().equalsIgnoreCase("STAGING"));
+        assertTrue(createStageStmt.getNameSpace().getSchemaToken().toString().equalsIgnoreCase("STAGING"));
+    }
+
+    public void testQualified2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create or replace stage DATAMAX_ETL.STAGING.stage_07020728_MOCK_DATA_2";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateStageStmt createStageStmt = (TCreateStageStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getNameSpace().toString().equalsIgnoreCase("DATAMAX_ETL.STAGING"));
+        assertTrue(createStageStmt.getNameSpace().getDatabaseToken().toString().equalsIgnoreCase("DATAMAX_ETL"));
+        assertTrue(createStageStmt.getNameSpace().getSchemaToken().toString().equalsIgnoreCase("STAGING"));
+    }
+
     public void testAmazonS3(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlparser.sqltext = "create or replace stage my_int_stage\n" +

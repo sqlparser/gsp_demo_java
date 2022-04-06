@@ -58,7 +58,7 @@ public class testPlpgsql_block extends TestCase {
         assertTrue(assignStmt.getExpression().toString().equalsIgnoreCase("50"));
 
         stmt = createFunction.getBodyStatements().get(2);
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_block_with_label);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_plsql_block);
         TCommonBlock block = (TCommonBlock)stmt;
 
         assertTrue(block.getDeclareStatements().size() == 1);

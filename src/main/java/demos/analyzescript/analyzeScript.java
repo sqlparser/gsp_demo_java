@@ -10,10 +10,7 @@ import gudusoft.gsqlparser.stmt.mysql.*;
 import gudusoft.gsqlparser.stmt.oracle.TBasicStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreatePackage;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,7 +107,7 @@ public class analyzeScript {
             case sstmssqlsetrowcount:
                 System.out.println("set rowcount statement, number is:"+((TMssqlSetRowCount)stmt).getNumberExpr().toString());
                 break;
-            case sst_block_with_label:
+            case sst_plsql_block:
                 analyzeplsqlblock((TCommonBlock) stmt);
                 break;
             default:

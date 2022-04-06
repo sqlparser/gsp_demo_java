@@ -80,7 +80,7 @@ public class testPlpgsql_loop extends TestCase {
         assertTrue(whenCondition.getRightOperand().toString().equalsIgnoreCase("0"));
 
         stmt = createFunction.getBodyStatements().get(2);
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_block_with_label);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_plsql_block);
         TCommonBlock block = (TCommonBlock)stmt;
         assertTrue(block.getLabelName().toString().equalsIgnoreCase("ablock"));
 
