@@ -41,7 +41,7 @@ public class testAlterTable extends TestCase {
         TAlterTableOption alterTableOption = alterTable.getAlterTableOptionList().getAlterTableOption(0);
         assertTrue(alterTableOption.getOptionType() == EAlterTableOptionType.unArchive);
         assertTrue(alterTableOption.getPartitionSpecList().size() == 1);
-        TPartitionExtensionClause partitionSpec = alterTableOption.getPartitionSpecList().getElement(0);
+        TPartitionExtensionClause partitionSpec = alterTableOption.getPartitionSpecList().get(0);
         assertTrue(partitionSpec.getKeyValues().getExpression(0).toString().equalsIgnoreCase("ds='2008-04-08'"));
 
     }

@@ -10,6 +10,7 @@ import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TStatementList;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
 import gudusoft.gsqlparser.nodes.mdx.TMdxAxis;
@@ -2521,6 +2522,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent = (Element) elementStack.peek( );
 		e_parent.appendChild( e_create_schema );
 		elementStack.push( e_create_schema );
+		e_create_schema.setAttribute("externalSchema",stmt.isExternalSchema()?"true":"false");
 		current_objectName_tag = "schema_name";
 		stmt.getSchemaName( ).accept( this );
 		if ( stmt.getOwnerName( ) != null )
@@ -2532,6 +2534,19 @@ public class xmlVisitor extends TParseTreeVisitor
 		{
 			stmt.getBodyStatements( ).accept( this );
 		}
+
+		if (stmt.getFromSource() != TCreateSchemaSqlStatement.EFromSource.NA){
+			addElementOfString("from_source",stmt.getFromSource().toString());
+		}
+
+		if (stmt.getSourceDatabase() != null){
+			addElementOfNode("source_database",stmt.getSourceDatabase());
+			if (stmt.getSourceSchema() != null){
+				addElementOfNode("source_schema",stmt.getSourceSchema());
+			}
+		}
+
+
 		elementStack.pop( );
 	}
 
@@ -2845,6 +2860,14 @@ public class xmlVisitor extends TParseTreeVisitor
 				}
 				elementStack.pop( );
 				break;
+			case setLocation:
+				addElementOfNode("table_location",node.getTableLocation());
+				break;
+			case addPartitionSpecList:
+				for(int i=0;i<node.getPartitionSpecList().size();i++){
+					node.getPartitionSpecList().get(i).accept(this);
+				}
+				break;
 			default :
 				e_option = xmldoc.createElement( "not_implemented_option" );
 				e_alter_table_option.appendChild( e_option );
@@ -2854,6 +2877,37 @@ public class xmlVisitor extends TParseTreeVisitor
 		}
 
 		elementStack.pop( );
+	}
+
+
+	public void preVisit( TPartitionExtensionClause node ) {
+
+		Element e_partition = xmldoc.createElement("partition_clause");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_partition);
+		elementStack.push(e_partition);
+		if (node.getPartitionName() != null){
+			addElementOfNode("partition_name",node.getPartitionName());
+		}
+		if (node.getKeyValues() != null){
+			Element e_partition_list = xmldoc.createElement("partition_list");
+			e_partition.appendChild(e_partition_list);
+			elementStack.push(e_partition_list);
+
+			for(int i=0;i<node.getKeyValues().size();i++){
+				TExpression e = node.getKeyValues().getExpression(i);
+				//addElementOfNode("column_name",e.getLeftOperand());
+				addElementOfString("column_name",e.getLeftOperand().toString());
+				addElementOfString("column_value",e.getRightOperand().toString());
+			}
+			elementStack.pop();
+		}
+
+		if (node.getPartitionLocation() != null){
+			addElementOfNode("partition_location",node.getPartitionLocation());
+		}
+
+		elementStack.pop();
 	}
 
 	public void preVisit( TAlterTableStatement stmt )
@@ -3751,9 +3805,25 @@ public class xmlVisitor extends TParseTreeVisitor
 			}
 		}
 
+		if (stmt.getHiveTablePartition() != null){
+			stmt.getHiveTablePartition().accept(this);
+		}
+		if (stmt.getTableLocation() != null){
+			addElementOfNode("table_location",stmt.getTableLocation());
+		}
+
 		elementStack.pop( );
 	}
 
+
+	public void preVisit( THiveTablePartition node ) {
+		e_parent = (Element) elementStack.peek();
+		Element e_table_partition = xmldoc.createElement("table_partition");
+		e_parent.appendChild(e_table_partition);
+		elementStack.push(e_table_partition);
+		node.getColumnDefList().accept(this);
+		elementStack.pop();
+	}
 
 	public void preVisit( TCreateTableOption node )
 	{
