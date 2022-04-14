@@ -5,6 +5,7 @@ package hive;
 
 import gudusoft.gsqlparser.EDataType;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.EFileFormat;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TColumnDefinition;
 import gudusoft.gsqlparser.nodes.TTypeName;
@@ -38,7 +39,7 @@ public class testCreateTable extends TestCase {
         assertTrue(cd.getDatatype().getDataType() == EDataType.int_t);
 
         THiveTableFileFormat tff = createTable.getHiveTableFileFormat();
-        assertTrue(tff.getFileFormat() == EHiveStoredFileFormat.sffFILEFORMAT_GENERIC);
+        assertTrue(tff.getFileFormat() == EFileFormat.sffFILEFORMAT_GENERIC);
         assertTrue(tff.getGenericSpec().toString().equalsIgnoreCase("orc"));
 
         THiveTableProperties tp = createTable.getHiveTableProperties();
@@ -152,7 +153,7 @@ public class testCreateTable extends TestCase {
         assertTrue(rowFormat.getTableRowFormatFieldIdentifier().getTerminateString().toString().equalsIgnoreCase("'1'"));
 
         THiveTableFileFormat tff = createTable.getHiveTableFileFormat();
-        assertTrue(tff.getFileFormat() == EHiveStoredFileFormat.sffTBLSEQUENCEFILE);
+        assertTrue(tff.getFileFormat() == EFileFormat.sffTBLSEQUENCEFILE);
 
 
     }

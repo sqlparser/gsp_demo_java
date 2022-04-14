@@ -22,7 +22,29 @@ public class testCreateExternalDataSource extends TestCase {
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstmssqlcreateevexternalDataSource);
         TCreateExternalDataSourceStmt createExternalDataSourceStmt = (TCreateExternalDataSourceStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createExternalDataSourceStmt.getDataSourceName().toString().equalsIgnoreCase("WWIStorage"));
+        assertTrue(createExternalDataSourceStmt.getOptionNames().get(0).equalsIgnoreCase("TYPE"));
+        assertTrue(createExternalDataSourceStmt.getOptionNames().get(1).equalsIgnoreCase("LOCATION"));
+        assertTrue(createExternalDataSourceStmt.getOption("type").equalsIgnoreCase("Hadoop"));
+        assertTrue(createExternalDataSourceStmt.getOption("LOCATION").equalsIgnoreCase("'wasbs://wideworldimporters@sqldwholdata.blob.core.windows.net'"));
     }
 
+    public void test2(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "CREATE EXTERNAL DATA SOURCE MyOracleServer\n" +
+                "WITH\n" +
+                "  ( LOCATION = 'oracle://145.145.145.145:1521',\n" +
+                "    CREDENTIAL = OracleProxyAccount,\n" +
+                "    PUSHDOWN = ON\n" +
+                "  ) ;";
+        int result = sqlparser.parse();
+        assertTrue(result==0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstmssqlcreateevexternalDataSource);
+        TCreateExternalDataSourceStmt createExternalDataSourceStmt = (TCreateExternalDataSourceStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(createExternalDataSourceStmt.getDataSourceName().toString().equalsIgnoreCase("MyOracleServer"));
+        assertTrue(createExternalDataSourceStmt.getOption("CREDENTIAL").equalsIgnoreCase("OracleProxyAccount"));
+        assertTrue(createExternalDataSourceStmt.getOption("LOCATION").equalsIgnoreCase("'oracle://145.145.145.145:1521'"));
+        assertTrue(createExternalDataSourceStmt.getOption("PUSHDOWN").equalsIgnoreCase("ON"));
+    }
 
 }
