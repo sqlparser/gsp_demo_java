@@ -3,7 +3,7 @@ package snowflake;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TStageLocation;
-import gudusoft.gsqlparser.stmt.snowflake.TCopyIntoStmt;
+import gudusoft.gsqlparser.stmt.snowflake.TSnowlflakeCopyIntoStmt;
 import junit.framework.TestCase;
 
 public class testCopyInto extends TestCase {
@@ -16,8 +16,8 @@ public class testCopyInto extends TestCase {
         System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mycsvtable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
         assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalNamed);
@@ -34,8 +34,8 @@ public class testCopyInto extends TestCase {
                 "  on_error = 'skip_file';";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mycsvtable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
         assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalNamed);
@@ -50,8 +50,8 @@ public class testCopyInto extends TestCase {
                 "file_format = (format_name = 'mycsv');";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
         assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalUser);
@@ -66,8 +66,8 @@ public class testCopyInto extends TestCase {
                 "file_format = (type = csv);";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
         assertTrue(copyIntoStmt.getFileFormatType().equalsIgnoreCase("csv"));
     }
@@ -81,8 +81,8 @@ public class testCopyInto extends TestCase {
                 "  file_format = (format_name = my_csv_format);";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
 
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
@@ -100,8 +100,8 @@ public class testCopyInto extends TestCase {
                 "    force=true;";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_TABLE);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("load1"));
         TStageLocation stageLocation = copyIntoStmt.getStageLocation();
         assertTrue(stageLocation.getStageLocationType() == TStageLocation.EStageLocationType.internalTable);
@@ -121,8 +121,8 @@ public class testCopyInto extends TestCase {
                 "  file_format = (format_name = my_csv_format);";
         assertTrue(sqlparser.parse() == 0);
 
-        TCopyIntoStmt copyIntoStmt = (TCopyIntoStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(copyIntoStmt.getCopyIntoType() == TCopyIntoStmt.COPY_INTO_LOCATION);
+        TSnowlflakeCopyIntoStmt copyIntoStmt = (TSnowlflakeCopyIntoStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(copyIntoStmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_LOCATION);
         assertTrue(copyIntoStmt.getTableName().toString().equalsIgnoreCase("mytable"));
         assertTrue(copyIntoStmt.getStageLocation().getExternalLocation().toString().equalsIgnoreCase("'s3://mybucket/unload/'"));
     }

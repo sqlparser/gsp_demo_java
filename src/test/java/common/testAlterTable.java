@@ -12,6 +12,18 @@ import junit.framework.TestCase;
 
 public class testAlterTable extends TestCase {
 
+    public void testMSSQLDropColumn(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "ALTER TABLE test DROP COLUMN IF EXISTS column1";
+        assertTrue(sqlparser.parse() == 0);
+        TAlterTableStatement alterTable = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(alterTable.getTableName().toString().equalsIgnoreCase("test"));
+
+        TAlterTableOption ato = alterTable.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(ato.getOptionType() == EAlterTableOptionType.DropColumn);
+        assertTrue(ato.getColumnName().toString().equalsIgnoreCase("column1"));
+    }
+
     public void testMySQLAfterColumn(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
         sqlparser.sqltext = "alter table qatest.movies ADD COLUMN viewCount SMALLINT AFTER description;";
