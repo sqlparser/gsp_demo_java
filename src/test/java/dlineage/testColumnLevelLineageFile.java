@@ -147,6 +147,14 @@ public class testColumnLevelLineageFile extends TestCase {
     public void test34() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/subquery-alais.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/subquery-alais.csv", EDbVendor.dbvmssql));
     }
+    
+    public void test35() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external1.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external1.csv", EDbVendor.dbvbigquery));
+    }
+
+    public void test36() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.sql", EDbVendor.dbvbigquery));
+    }
 
 
     private boolean compare(String sourceFile, String resultFile, EDbVendor vendor) {
