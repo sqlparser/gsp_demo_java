@@ -153,7 +153,11 @@ public class testColumnLevelLineageFile extends TestCase {
     }
 
     public void test36() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.sql", EDbVendor.dbvbigquery));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external2.csv", EDbVendor.dbvbigquery));
+    }
+    
+    public void test37() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external3.sql", common.gspCommon.BASE_SQL_DIR_PRIVATE + "lineage/create-external3.csv", EDbVendor.dbvredshift));
     }
 
 
