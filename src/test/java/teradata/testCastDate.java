@@ -2,6 +2,7 @@ package teradata;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.ELiteralType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TResultColumn;
@@ -9,6 +10,27 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testCastDate extends TestCase {
+
+    public void test0(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "select (date),f3 (date) from t1";
+
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TResultColumn resultColumn0 = select.getResultColumnList().getResultColumn(0);
+        TExpression expression0 = resultColumn0.getExpr();
+        assertTrue(expression0.getExpressionType() == EExpressionType.parenthesis_t);
+        assertTrue(expression0.getLeftOperand().getExpressionType() == EExpressionType.function_t);
+        assertTrue(expression0.getLeftOperand().getFunctionCall().toString().equalsIgnoreCase("date"));
+
+        TResultColumn resultColumn1 = select.getResultColumnList().getResultColumn(1);
+        TExpression expression1 = resultColumn1.getExpr();
+        assertTrue(expression1.getExpressionType() == EExpressionType.simple_object_name_t);
+        assertTrue(expression1.getObjectOperand().toString().equalsIgnoreCase("f3"));
+        assertTrue(expression1.getDataConversions().size() == 1);
+
+    }
 
     public void test1(){
 
@@ -37,13 +59,17 @@ public class testCastDate extends TestCase {
                 "having hire_date(DATE) = DATE '1971-10-18' \n" +
                 "order by hire_date(DATE)";
 
+       // System.out.println(sqlparser.sqltext);
+
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
         //System.out.println(resultColumn.getExpr().getExpressionType());
 
-        TExpression where = select.getWhereClause().getCondition().getLeftOperand();
-        //System.out.println(where.getExpressionType());
+        TExpression right = select.getWhereClause().getCondition().getRightOperand();
+        assertTrue(right.getExpressionType() == EExpressionType.simple_constant_t);
+        assertTrue(right.getConstantOperand().getLiteralType() == ELiteralType.etDate);
+        //System.out.println(right.getConstantOperand().getLiteralType());
 
         TExpression having = select.getGroupByClause().getHavingClause().getLeftOperand();
        // System.out.println(having.getExpressionType());
@@ -60,7 +86,8 @@ public class testCastDate extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
-        System.out.println(resultColumn.getExpr().getExpressionType() );
+        assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.simple_object_name_t);
+       // System.out.println(resultColumn.getExpr().getExpressionType() );
 //        assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.simple_object_name_t);
     }
 

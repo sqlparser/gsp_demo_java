@@ -109,6 +109,8 @@ public class testCreateTable extends TestCase {
             "       SELECT COL1\n" +
             "       FROM MYREC\n" +
             ")WITH DATA PRIMARY INDEX(COL1) ON COMMIT PRESERVE ROWS;";
+
+    //System.out.println(sqlparser.sqltext);
     assertTrue(sqlparser.parse() == 0);
 
         TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);

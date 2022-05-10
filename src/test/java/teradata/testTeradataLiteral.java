@@ -4,10 +4,9 @@ package teradata;
  * Time: 9:37:10
  */
 
-import gudusoft.gsqlparser.EExpressionType;
+import gudusoft.gsqlparser.*;
+import gudusoft.gsqlparser.nodes.teradata.TDataDefinition;
 import junit.framework.TestCase;
-import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
@@ -96,10 +95,22 @@ public class testTeradataLiteral extends TestCase {
         TColumnDefinition column = createTable.getColumnList().getColumn(0);
 
         TTypeName datatype = column.getDatatype();
-        TDatatypeAttribute datatypeAttribute = datatype.getDatatypeAttributeList().getElement(0);// .getDatatypeAttribute(0);
+
+        assertTrue(datatype.getDataType() == EDataType.decimal_t);
+
+        //System.out.println(column.getDataDefinitions().size());
+        assertTrue(column.getDataDefinitions().size() == 2);
+        TDataDefinition dataDefinition = column.getDataDefinitions().get(0);
+        assertTrue(dataDefinition.getDataDefinitionType() == TDataDefinition.EDataDefinitionType.dataAttribute);
+
+
+        TDatatypeAttribute datatypeAttribute = dataDefinition.getDatatypeAttribute();
+        assertTrue(datatypeAttribute.getAttributeType() == EDataTypeAttribute.format_t);
 
         //System.out.println(datatypeAttribute.toString());
         assertTrue(datatypeAttribute.toString().equalsIgnoreCase("FORMAT 'ZZZ,ZZ9.99'"));
+
+        assertTrue(column.getConstraints().getConstraint(0).getConstraint_type() == EConstraintType.check);
     }
 
 

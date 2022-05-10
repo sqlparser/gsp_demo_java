@@ -18,6 +18,8 @@ public class testDateFunction extends TestCase {
                 "FROM foodmart.TRIMMED_EMPLOYEE\n" +
                 "GROUP BY DATE, EMPLOYEE_ID;";
 
+       // System.out.println(sqlparser.sqltext);
+
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TExpression expression = select.getGroupByClause().getItems().getGroupByItem(0).getExpr();

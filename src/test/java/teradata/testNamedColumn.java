@@ -6,6 +6,8 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversion;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
@@ -23,14 +25,16 @@ public class testNamedColumn extends TestCase {
         sqlparser.sqltext = "CREATE VIEW V AS\n" +
                 "SELECT a*5+3 (NAMED X), x*2 (NAMED Y)\n" +
                 "FROM T;";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TCreateViewSqlStatement createView = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
         TSelectSqlStatement select = createView.getSubquery();
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(1);
         assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.arithmetic_times_t);
-        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("x*2"));
+        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("x*2 (NAMED Y)"));
      //   System.out.print(resultColumn.getExpr()..toString());
         TAliasClause a = resultColumn.getAliasClause();
+        //System.out.println(a.toString());
         assertTrue(a.getAliasName().toString().equalsIgnoreCase("Y"));
 
     }
@@ -65,7 +69,7 @@ public class testNamedColumn extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement) sqlparser.sqlstatements.get(0);
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
         assertTrue(resultColumn.getExpr().getExpressionType() == EExpressionType.concatenate_t);
-        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("'a' || 'b'"));
+        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("'a' || 'b' (NAMED \"x\")"));
         TAliasClause a = resultColumn.getAliasClause();
         assertTrue(a.getAliasName().toString().equalsIgnoreCase("\"x\""));
 
@@ -95,7 +99,7 @@ public class testNamedColumn extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
-        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("cast(cal_dt as date)"));
+        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("cast(cal_dt as date) (named cal_dt1)"));
         TAliasClause a = resultColumn.getAliasClause();
         assertTrue(a.getAliasName().toString().equalsIgnoreCase("cal_dt1"));
 
@@ -110,11 +114,18 @@ public class testNamedColumn extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TResultColumn resultColumn = select.getResultColumnList().getResultColumn(0);
-        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("((lastresptime - starttime) hour(2) to second)"));
-        TExplicitDataTypeConversion dataTypeConversion = resultColumn.getExpr().getDataTypeConversionList().getElement(0);
-        TDatatypeAttribute datatypeAttribute = dataTypeConversion.getDataTypeAttributeList1().getElement(0);
-        assertTrue(datatypeAttribute.getAttributeType() == EDataTypeAttribute.named_t);
-        assertTrue(datatypeAttribute.getValue_identifier().toString().equalsIgnoreCase("ElapsedTime"));
+        assertTrue(resultColumn.getExpr().toString().equalsIgnoreCase("((lastresptime - starttime) hour(2) to second) (Named ElapsedTime)"));
+        TDataConversion dataConversion = resultColumn.getExpr().getDataConversions().get(0);
+        TDataConversionItem dataConversionItem = dataConversion.getDataConversionItems().get(0);
+        assertTrue(dataConversionItem.getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(dataConversionItem.getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.named_t);
+        assertTrue(dataConversionItem.getDatatypeAttribute().getNamedName().toString().equalsIgnoreCase("ElapsedTime"));
+
+//        TExplicitDataTypeConversion dataTypeConversion = resultColumn.getExpr().getDataTypeConversionList().getElement(0);
+//        TDatatypeAttribute datatypeAttribute = dataTypeConversion.getDataTypeAttributeList1().getElement(0);
+//        assertTrue(datatypeAttribute.getAttributeType() == EDataTypeAttribute.named_t);
+//        assertTrue(datatypeAttribute.getValue_identifier().toString().equalsIgnoreCase("ElapsedTime"));
+
         TExpression expression = resultColumn.getExpr().getLeftOperand();
 
         assertTrue(expression.getExpressionType() == EExpressionType.interval_t);

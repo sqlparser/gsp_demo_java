@@ -5,6 +5,7 @@ package common;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
@@ -34,9 +35,18 @@ public class testDatatype extends TestCase {
         TResultColumn resultColumn = selectSqlStatement.getResultColumnList().getResultColumn(0);
         TFunctionCall functionCall = resultColumn.getExpr().getFunctionCall();
         TTypeName datatype = functionCall.getTypename();
-        assertTrue(datatype.toString().equalsIgnoreCase("DATE FORMAT 'yyyymmdd'"));
-        TDatatypeAttribute attribute = datatype.getDatatypeAttributeList().getElement(0);
-        assertTrue(attribute.getValue_literal().toString().equalsIgnoreCase("'yyyymmdd'"));
+        assertTrue(functionCall.getDataConversionItems().size() == 2);
+        TDataConversionItem item0 = functionCall.getDataConversionItems().get(0);
+        assertTrue(item0.getDataConversionType() == TDataConversionItem.EDataConversionype.dataType);
+        assertTrue(item0.getDataType().getDataType() == EDataType.date_t);
+
+        TDataConversionItem item1 = functionCall.getDataConversionItems().get(1);
+        assertTrue(item1.getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(item1.getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.format_t);
+
+//        assertTrue(datatype.toString().equalsIgnoreCase("DATE FORMAT 'yyyymmdd'"));
+//        TDatatypeAttribute attribute = datatype.getDatatypeAttributeList().getElement(0);
+//        assertTrue(attribute.getValue_literal().toString().equalsIgnoreCase("'yyyymmdd'"));
     }
 
     public void testrowtype0(){

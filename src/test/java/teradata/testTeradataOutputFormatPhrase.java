@@ -1,15 +1,11 @@
 package teradata;
 
 
-import gudusoft.gsqlparser.EDataTypeAttribute;
-import gudusoft.gsqlparser.EExpressionType;
-import gudusoft.gsqlparser.nodes.TDatatypeAttribute;
-import gudusoft.gsqlparser.nodes.TExplicitDataTypeConversion;
+import gudusoft.gsqlparser.*;
+import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversion;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
 import junit.framework.TestCase;
-import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.nodes.TResultColumn;
-import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 public class testTeradataOutputFormatPhrase extends TestCase {
@@ -25,18 +21,16 @@ public class testTeradataOutputFormatPhrase extends TestCase {
         assertTrue(expr.getExpressionType() == EExpressionType.simple_object_name_t);
         assertTrue(expr.getObjectOperand().toString().equalsIgnoreCase("b.c"));
 
-        TExplicitDataTypeConversion dataTypeConversion = expr.getDataTypeConversionList().getElement(0);
+        assertTrue(expr.getDataConversions().size() == 2);
+        TDataConversion dataConversion0 = expr.getDataConversions().get(0);
+        assertTrue(dataConversion0.getDataConversionItems().size() == 1);
+        assertTrue(dataConversion0.getDataConversionItems().get(0).getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(dataConversion0.getDataConversionItems().get(0).getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.format_t);
 
-        assertTrue(dataTypeConversion.getDataTypeAttributeList1().size() == 1);
-        TDatatypeAttribute datatypeAttribute0 = dataTypeConversion.getDataTypeAttributeList1().getElement(0);
-        assertTrue(datatypeAttribute0.getAttributeType() == EDataTypeAttribute.format_t);
-        assertTrue(datatypeAttribute0.getAttributeValue().toString().equalsIgnoreCase ("'X(30)'"));
-
-        dataTypeConversion = expr.getDataTypeConversionList().getElement(1);
-        TDatatypeAttribute datatypeAttribute1 = dataTypeConversion.getDataTypeAttributeList1().getElement(0);
-        assertTrue(datatypeAttribute1.getAttributeType() == EDataTypeAttribute.title_t);
-        assertTrue(datatypeAttribute1.getAttributeValue().toString().equalsIgnoreCase ("'Internal Hex Representation of TableName'"));
-
+        TDataConversion dataConversion1 = expr.getDataConversions().get(1);
+        assertTrue(dataConversion1.getDataConversionItems().size() == 1);
+        assertTrue(dataConversion1.getDataConversionItems().get(0).getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(dataConversion1.getDataConversionItems().get(0).getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.title_t);
     }
 
     public void test1(){
@@ -69,20 +63,25 @@ public class testTeradataOutputFormatPhrase extends TestCase {
 //        System.out.println(expr.toString());
 //        System.out.println(column0.toString());
         assertTrue(expr.getExpressionType() == EExpressionType.arithmetic_plus_t);
-        assertTrue(expr.toString().equalsIgnoreCase("SUM(Salary)+1"));
-        assertTrue(expr.getDataTypeConversionList().size() == 2);
+        assertTrue(expr.toString().equalsIgnoreCase("SUM(Salary)+1 (FORMAT '$$99,999.99') (CHAR(12), UC)"));
+        assertTrue(expr.getDataConversions().size() == 2);
 
-        TExplicitDataTypeConversion dataTypeConversion0 = expr.getDataTypeConversionList().getElement(0);
-        assertTrue(dataTypeConversion0.getDataTypeAttributeList1().size() == 1);
-        TDatatypeAttribute  datatypeAttribute = dataTypeConversion0.getDataTypeAttributeList1().getElement(0);
-        assertTrue(datatypeAttribute.getAttributeType() == EDataTypeAttribute.format_t);
-        assertTrue(datatypeAttribute.getAttributeValue().equalsIgnoreCase("'$$99,999.99'"));
+        TDataConversion dataConversion0 = expr.getDataConversions().get(0); //(FORMAT '$$99,999.99')
+        assertTrue(dataConversion0.getDataConversionItems().size() == 1);
+        TDataConversionItem item = dataConversion0.getDataConversionItems().get(0);
+        assertTrue(item.getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(item.getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.format_t);
 
-        TExplicitDataTypeConversion dataTypeConversion1 = expr.getDataTypeConversionList().getElement(1);
-        assertTrue(dataTypeConversion1.getDataType().toString().equalsIgnoreCase("CHAR(12)"));
-        assertTrue(dataTypeConversion1.getDataTypeAttributeList1().size() == 1);
-        datatypeAttribute = dataTypeConversion1.getDataTypeAttributeList1().getElement(0);
-        assertTrue(datatypeAttribute.getAttributeType() == EDataTypeAttribute.uppercase_t);
+        TDataConversion dataConversion1 = expr.getDataConversions().get(1); // (CHAR(12), UC)
+        assertTrue(dataConversion1.getDataConversionItems().size() == 2);
+        TDataConversionItem item0 = dataConversion1.getDataConversionItems().get(0); // CHAR(12)
+        assertTrue(item0.getDataConversionType() == TDataConversionItem.EDataConversionype.dataType);
+        TTypeName dataType = item0.getDataType();
+        assertTrue(dataType.getDataType() == EDataType.char_t);
+
+        TDataConversionItem item1 = dataConversion1.getDataConversionItems().get(1); // UC
+        assertTrue(item1.getDataConversionType() == TDataConversionItem.EDataConversionype.dataAttribute);
+        assertTrue(item1.getDatatypeAttribute().getAttributeType() == EDataTypeAttribute.uppercase_t);
 
     }
 
