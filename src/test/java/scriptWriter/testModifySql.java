@@ -50,6 +50,34 @@ public class testModifySql extends TestCase {
     }
 
 
+    public void testAddJoin(){
+        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlParser.sqltext = "SELECT count(*), age FROM people\n" +
+                "GROUP BY people";
+        assertTrue(sqlParser.parse() == 0);
+
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlParser.sqlstatements.get(0);
+        TJoinList joinList = select.joins;
+        TJoinItem joinItem = new TJoinItem();
+        joinList.getJoin(0).getJoinItems().addJoinItem(joinItem);
+        joinItem.setJoinType(EJoinType.inner);
+        TTable joinTable = new TTable();
+        joinItem.setTable(joinTable);
+        joinTable.setTableName(sqlParser.parseObjectName("otherTable"));
+        joinItem.setOnCondition(sqlParser.parseExpression("people.id = otherTable.id"));
+        System.out.println(select.toScript());
+
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvoracle
+                , select.toScript()
+                , "select \n" +
+                        "count(*),age\n" +
+                        " from \n" +
+                        "people\n" +
+                        " inner join otherTable on people.id = otherTable.id\n" +
+                        " group  by people"
+        ));
+    }
+
     public void testSimpleConverter(){
         TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvoracle);
         sqlParser.sqltext = "SELECT * FROM t1,t2 where t1.f1=t2.f2";

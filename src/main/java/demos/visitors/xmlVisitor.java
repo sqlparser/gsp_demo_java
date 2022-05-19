@@ -2034,6 +2034,10 @@ public class xmlVisitor extends TParseTreeVisitor
 			e_object_name.appendChild( e_part );
 			e_part.setTextContent( node.getPartToken( ).toString( ) );
 		}
+
+		if (node.getSourceTable() != null){
+			addElementOfString("source_table",node.getSourceTable().toString());
+		}
 	}
 
 	public void postVisit( TObjectName node )
