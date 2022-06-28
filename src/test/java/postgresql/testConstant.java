@@ -3,10 +3,7 @@ package postgresql;
  * Date: 11-5-20
  */
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.EExpressionType;
-import gudusoft.gsqlparser.TCustomLexer;
-import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TConstant;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TResultColumn;
@@ -24,8 +21,9 @@ public class testConstant extends TestCase {
 
         TResultColumn column0 = select.getResultColumnList().getResultColumn(0);
         TExpression expr0 = column0.getExpr();
-        assertTrue(expr0.getExpressionType() == EExpressionType.simple_constant_t);
-        assertTrue(expr0.getConstantOperand().toString().equalsIgnoreCase("REAL '1.23'"));
+        assertTrue(expr0.getExpressionType() == EExpressionType.typecast_t);
+        assertTrue(expr0.getLeftOperand().toString().equalsIgnoreCase("'1.23'"));
+        assertTrue(expr0.getTypeName().getDataType() == EDataType.real_t);
         assertTrue(expr0.toString().equalsIgnoreCase("REAL '1.23'"));
 
         TResultColumn column1 = select.getResultColumnList().getResultColumn(1);

@@ -1062,13 +1062,13 @@ public class testScriptGenerator extends TestCase
 				" fld73 smallint,\n" +
 				" fld74 numeric,\n" +
 				" fld75 numeric(9),\n" +
-				" fld75 numeric(9,10),\n" +
+				" fld751 numeric(9,10),\n" +
 				" fld76 decimal,\n" +
 				" fld76 decimal(2),\n" +
-				" fld76 decimal(9,3),\n" +
+				" fld761 decimal(9,3),\n" +
 				" fld77 dec,\n" +
-				" fld77 dec(9),\n" +
-				" fld77 dec(9,8),\n" +
+				" fld771 dec(9),\n" +
+				" fld772 dec(9,8),\n" +
 				" fld78 float,\n" +
 				" fld79 float(9),\n" +
 				" fld710 double precision,\n" +
@@ -1080,7 +1080,7 @@ public class testScriptGenerator extends TestCase
 				" fld13 timestamp(10) with local time zone)";
 
 		sqlParser.parse();
-//		System.out.println( sqlParser.sqlstatements.get(0).toScript());
+		//System.out.println( sqlParser.sqlstatements.get(0).toScript());
 		assertTrue(verifyScript(EDbVendor.dbvoracle, sqlParser.sqlstatements.get(0).toString(), sqlParser.sqlstatements.get(0).toScript()));
 	}
 

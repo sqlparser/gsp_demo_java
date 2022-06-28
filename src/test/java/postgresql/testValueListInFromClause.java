@@ -21,8 +21,10 @@ public class testValueListInFromClause extends TestCase {
 
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TTable table = select.tables.getTable(0);
-        assertTrue(table.getTableType() == ETableSource.rowList);
-        ArrayList<TResultColumnList> rowList =  table.getValueClause().getRows();
+        assertTrue(table.getTableType() == ETableSource.subquery);
+
+
+        ArrayList<TResultColumnList> rowList =  table.getSubquery().getValueClause().getRows();
         assertTrue(rowList.size() == 3);
         TResultColumnList row = rowList.get(0);
         assertTrue(row.size() == 2);
