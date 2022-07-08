@@ -116,17 +116,17 @@ public class testColumnLevelLineageFile extends TestCase {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-1.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-1.csv", EDbVendor.dbvpresto));
     }
 
-//    public void test27() {
-//        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.csv", EDbVendor.dbvpresto));
-//    }
-//
-//    public void test28() {
-//        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.csv", EDbVendor.dbvpresto));
-//    }
-//
-//    public void test29() {
-//        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.csv", EDbVendor.dbvpresto));
-//    }
+    public void test27() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-2.csv", EDbVendor.dbvpresto));
+    }
+
+    public void test28() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-3.csv", EDbVendor.dbvpresto));
+    }
+
+    public void test29() {
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/presto-unnest-4.csv", EDbVendor.dbvpresto));
+    }
     
     public void test30() {
         assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/star-column.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/star-column.csv", EDbVendor.dbvoracle));
