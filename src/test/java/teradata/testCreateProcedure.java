@@ -228,8 +228,9 @@ public class testCreateProcedure extends TestCase {
 
         assertTrue(cp.getBodyStatements().get(1).sqlstatementtype == sstmssqldeclare);
         declare = (TMssqlDeclare)cp.getBodyStatements().get(1);
-        assertTrue(declare.getDeclareType() == EDeclareType.handlers);
-        TSelectSqlStatement subquery = declare.getSubquery();
+        assertTrue(declare.getDeclareType() == EDeclareType.exitHandlers);
+        assertTrue(declare.getBodyStatements().size() == 1);
+        TSelectSqlStatement subquery =  (TSelectSqlStatement)declare.getBodyStatements().get(0);   //declare.getSubquery();
         assertTrue(subquery.getTables().getTable(0).toString().equalsIgnoreCase("EDW_TABLES_DEV.ITEM_COST_STG"));
 
         assertTrue(cp.getBodyStatements().get(2).sqlstatementtype == ESqlStatementType.sstdelete);

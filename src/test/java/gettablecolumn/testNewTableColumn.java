@@ -451,7 +451,6 @@ public class testNewTableColumn extends TestCase {
                 "   UnitMeasureCode\n" +
                 "   Name\n" +
                 "   *\n" +
-                "   $action\n" +
                 "   *\n" +
                 " (subquery, alias:source)\n" +
                 "   UnitMeasureCode\n" +
@@ -487,7 +486,6 @@ public class testNewTableColumn extends TestCase {
                 "   UnitMeasureCode(insertColumn)\n" +
                 "   Name(insertColumn)\n" +
                 "   *(output)\n" +
-                "   $action(output)\n" +
                 "   *(output)\n" +
                 " (subquery, alias:source)\n" +
                 "   UnitMeasureCode(joinCondition)\n" +
@@ -496,7 +494,7 @@ public class testNewTableColumn extends TestCase {
                 "   Name(insertValues)\n" +
                 " #MyTempTable(tetOutput)\n" +
                 " sstselect";
-        //System.out.println("Required:\n"+requiredStr+"\n\nActual:\n"+strActual);
+       // System.out.println("Required:\n"+requiredStr+"\n\nActual:\n"+strActual);
         assertTrue(strActual.trim().equalsIgnoreCase(requiredStr));
     }
 

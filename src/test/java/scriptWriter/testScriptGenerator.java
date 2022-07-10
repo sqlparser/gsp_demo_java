@@ -57,7 +57,7 @@ public class testScriptGenerator extends TestCase
 				"   ON [PRIMARY]) ON [PRIMARY];";
 
 		sqlparser.parse( );
-		System.out.println(sqlparser.sqlstatements.get(0).toScript());
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
 
 		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
 	}

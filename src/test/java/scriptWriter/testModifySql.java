@@ -65,7 +65,7 @@ public class testModifySql extends TestCase {
         joinItem.setTable(joinTable);
         joinTable.setTableName(sqlParser.parseObjectName("otherTable"));
         joinItem.setOnCondition(sqlParser.parseExpression("people.id = otherTable.id"));
-        System.out.println(select.toScript());
+       // System.out.println(select.toScript());
 
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvoracle
                 , select.toScript()
