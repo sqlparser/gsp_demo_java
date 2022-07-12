@@ -3565,6 +3565,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent = (Element) elementStack.peek( );
 		Element e_declare_varaible = xmldoc.createElement( "declare_variable_statement" );
 		e_declare_varaible.setAttribute("declare_type",stmt.getDeclareType().toString());
+		e_declare_varaible.setAttribute("with_return_only",String.valueOf(stmt.isWithReturnOnly()));
 		e_parent.appendChild( e_declare_varaible );
 		elementStack.push( e_declare_varaible );
 		switch ( stmt.getDeclareType( ) )
