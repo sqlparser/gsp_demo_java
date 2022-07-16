@@ -32,6 +32,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWhereNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithMemberNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
+import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
@@ -2981,7 +2982,7 @@ public class xmlVisitor extends TParseTreeVisitor
 		e_parent = (Element) elementStack.peek( );
 		e_parent.appendChild( e_column );
 		elementStack.push( e_column );
-		e_column.setAttribute( "nullable", String.valueOf( node.isNull( ) ) );
+		e_column.setAttribute( "explict_nullable", String.valueOf( node.isNull( ) ) );
 		current_objectName_tag = "column_name";
 		node.getColumnName( ).accept( this );
 
@@ -3871,9 +3872,44 @@ public class xmlVisitor extends TParseTreeVisitor
 			addElementOfNode("table_location",stmt.getTableLocation());
 		}
 
+		if (stmt.getIndexDefinitions() != null){
+			Element e_element = xmldoc.createElement( "index_definition_list" );
+			e_parent = (Element) elementStack.peek( );
+			e_parent.appendChild( e_element );
+			elementStack.push(e_element);
+			for(int i=0;i<stmt.getIndexDefinitions().size();i++){
+				stmt.getIndexDefinitions().get(i).accept(this);
+			}
+			elementStack.pop();
+		}
+
 		elementStack.pop( );
 	}
 
+
+	public void preVisit( TIndexDefinition node ) {
+		e_parent = (Element) elementStack.peek();
+		Element e_index_definition = xmldoc.createElement("index_definition");
+		e_index_definition.setAttribute("primary", String.valueOf(node.isPrimary()));
+		e_index_definition.setAttribute("unique", String.valueOf(node.isUnique()));
+		e_index_definition.setAttribute("all", String.valueOf(node.isAll()));
+		e_parent.appendChild(e_index_definition);
+		elementStack.push(e_index_definition);
+
+		if (node.getIndexName() != null){
+			node.getIndexName().accept(this);
+		}
+
+		if (node.getIndexColumns() != null){
+			node.getIndexColumns().accept(this);
+		}
+
+		if (node.getPartitionExprList() != null){
+			addElementOfNode("partion_clause", node.getPartitionExprList());
+		}
+
+		elementStack.pop();
+	}
 
 	public void preVisit( THiveTablePartition node ) {
 		e_parent = (Element) elementStack.peek();
@@ -5371,8 +5407,10 @@ public class xmlVisitor extends TParseTreeVisitor
 		Element e_parameter = xmldoc.createElement( tag_name );
 		e_parent.appendChild( e_parameter );
 		elementStack.push( e_parameter );
-		current_objectName_tag = "name";
-		node.getParameterName( ).accept( this );
+		if (node.getParameterName() != null){ // netezza may not specify parameter name
+			current_objectName_tag = "name";
+			node.getParameterName( ).accept( this );
+		}
 		node.getDataType( ).accept( this );
 		if ( node.getDefaultValue( ) != null )
 		{

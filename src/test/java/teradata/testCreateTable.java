@@ -33,7 +33,7 @@ public class testCreateTable extends TestCase {
         assertTrue(createTable.getTableName().toString().equalsIgnoreCase("tst.table"));
         assertTrue(createTable.getColumnList().size() == 2 );
 
-        TIndexDefinition indexDefinition = createTable.getIndexDefinitions().getElement(0);
+        TIndexDefinition indexDefinition = createTable.getIndexDefinitions().get(0);
         assertTrue(indexDefinition.isPrimary());
         assertTrue(!indexDefinition.isUnique());
         assertTrue(indexDefinition.getIndexColumns().size() == 1);
@@ -71,7 +71,7 @@ public class testCreateTable extends TestCase {
         assertTrue(createTable.getTableName().toString().equalsIgnoreCase("Sales"));
         assertTrue(createTable.getColumnList().size() == 6 );
 
-        TIndexDefinition indexDefinition = createTable.getIndexDefinitions().getElement(0);
+        TIndexDefinition indexDefinition = createTable.getIndexDefinitions().get(0);
         assertTrue(indexDefinition.isPrimary());
         assertTrue(indexDefinition.isUnique());
         assertTrue(indexDefinition.getIndexColumns().size() == 3);
