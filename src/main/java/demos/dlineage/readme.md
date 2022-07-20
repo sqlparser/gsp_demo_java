@@ -10,7 +10,7 @@ This tool is built from the scratch, it is the main part of the backend of [the 
 
 ## Usage
 ```
-"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/tableLineage [/csv]] [/transform [/coor]]");
+"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>] [/tableLineage [/csv]] [/transform [/coor]]");
 
 System.out.println("/f: Optional, the full path to SQL file.");
 System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
@@ -37,16 +37,7 @@ System.out.println("/t: Option, set the database type. "
 + "sybase,teradata,soql,vertica\n, " + "the default value is oracle");
 System.out.println("/o: Optional, write the output stream to the specified file.");
 System.out.println("/log: Optional, generate a dataflow.log file to log information.");
-System.out.println("/h: Optional, specify the host of jdbc connection");
-System.out.println("/P: Optional, specify the port of jdbc connection, note it's capital P.");
-System.out.println("/u: Optional, specify the username of jdbc connection.");
-System.out.println("/p: Optional, specify the password of jdbc connection, note it's lowercase P.");
-System.out.println("/db: Optional, specify the database of jdbc connection.");
-System.out.println("/driver: Optional, specify the jdbc driver.");
-System.out.println("/jdbc: Optional, specify the jdbc url of connection.");
-System.out.println("/metadata-schema: Optional, specify the schema which is used for extracting metadata.");
-System.out.println(
-"/metadata: Optional, output the database metadata information to the file metadata.json.");
+System.out.println("/env: Optional, specify a metadata.json to get the database metadata information.");
 System.out.println("/transform: Optional, output the relation transform code.");
 System.out.println("/coor: Optional, output the relation transform coordinate, but not the code.");
 System.out.println("/defaultDatabase: Optional, specify the default schema.");
@@ -97,165 +88,17 @@ create table dept(
 );
 ```
 
-By connecting to the database to fetch metadata, column `ename` should be linked to the table `emp` correctly.
+By providing metadata.json to fetch metadata, column `ename` should be linked to the table `emp` correctly.
 
-This is a list of arguments used when connect to a database:
+You can use `/env` to specify a metadata.json:
+
 ```
-/h: Optional, specify the host of jdbc connection
-/P: Optional, specify the port of jdbc connection
-/u: Optional, specify the username of jdbc connection.
-/p: Optional, specify the password of jdbc connection
-/db: Optional, specify the database of jdbc connection
-/schema: Optional, specify the schema which is used for extracting metadata.
+/env: Optional, specify a metadata.json to get the database metadata information.
 ```
 
-When you use this feature, you should put the jdbc driver to your java classpath, and use java -cp command to load the jdbc driver jar.
+More information about metadata.json, you can access the github project: 
 
-Currently, gsp able to connect to the following databases with the proper JDBC driver
-```
-azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sqlserver, teradata
-```
-
-
-
-### 1.1 connect to SQL Server
-Tables are under this schema: `AdventureWorksDW2019/dbo`.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /jdbc jdbc:sqlserver://127.0.0.1:1433;DatabaseName=AdventureWorksDW2019  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.2 connect to Oracle
-Tables are under `HR` schema and connect to database using `orcl` instance.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t oracle /jdbc jdbc:oracle:thin:@127.0.0.1:1521/orcl /u root /p password /f sample.sql /s /json 
-```
-
-### 1.3 connect to MySQL
-Tables are under `employees` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mysql /jdbc jdbc:mysql://127.0.0.1:3306/employees  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.4 connect to Postgresql
-Tables are under `kingland` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t postgresql /h localhost /P 5432 /u root /p password /db kingland /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t postgresql /jdbc jdbc:postgresql://127.0.0.1:5432/kingland  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.5 connect to Netezza
-Tables are under `MASTER_DB` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t netezza /h localhost /P 5480 /u root /p password /db MASTER_DB /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t netezza /jdbc jdbc:netezza://127.0.0.1:5480/MASTER_DB  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.6 connect to Greenplum
-Tables are under `postgres` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t greenplum /h localhost /P 2345 /u root /p password /db postgres /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t greenplum /jdbc jdbc:pivotal:greenplum://127.0.0.1:2345;DatabaseName=postgres  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.7 connect to Snowflake
-Tables are under `DEMO_DB` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t snowflake /h localhost /P 443 /u root /p password /db DEMO_DB /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t snowflake /jdbc jdbc:snowflake://127.0.0.1:443?db=DEMO_DB  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.8 connect to Teradata
-Tables are under `DEMO_DB` database.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /h localhost /P 1025 /u root /p password /db DEMO_DB /f sample.sql /s /json 
-```
-
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t teradata /jdbc jdbc:teradata://127.0.0.1:1025/DEMO_DB  /u root /p password  /f sample.sql /s /json 
-```
-
-### 1.9 connect to Hive
-Connect to Hive server and fetch the metadata to help resolve the ambiguous columns in SQL query.
-Tables are under `default` database.
-
-You can use the command like this:
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h localhost /P 10000 /u root /p password /db default /f sample.sql /s /json 
-```
-Connect using the specified JDBC URL.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /jdbc jdbc:hive2://localhost:10000/default /u root /p password /f sample.sql /s /json 
-```
-
-## 2 export metadata from a database
-By specifing the `/metadata` option, we can extract metadata from a database for a specified schema and output to the file with name: metadata.json.
-
-### 2.1 export from SQL Server
-Export metadata under this schema: `AdventureWorksDW2019/dbo`.
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /metadata 
-```
-
-### 2.2 export from Hive server
-Export metadata from hive metastore.
-
-```sh
-java -cp .;lib/*;external_lib/* demos.dlineage.DataFlowAnalyzer /t hive /h localhost /P 10000 /db default /u root /p password /metadata 
-```
-
-## custom ddl export sql
-conf.zip file contains all ddl export sql, you can edit the sql file in the conf.zip, keep the same of return fields, put the modified sql file at: <work dirctory>/conf/<db vendor>/<sql file>
-	
-for example, when you edit the conf/mssql/query.sql, please copy it to <work dirctory>/conf/mssql/query.sql, the DataFlowAnalyzer will load your modified sql file as ddl export sql.	
+`https://github.com/sqlparser/sqlflow_public`
 
 ## Releases
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.

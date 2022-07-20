@@ -9,10 +9,12 @@ import gudusoft.gsqlparser.dlineage.dataflow.listener.DataFlowHandleAdapter;
 import gudusoft.gsqlparser.dlineage.dataflow.model.ErrorInfo;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.dataflow.sqlenv.SQLEnvParser;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
 import gudusoft.gsqlparser.dlineage.util.RemoveDataflowFunction;
 import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import gudusoft.gsqlparser.sqlenv.*;
+import gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser;
 import gudusoft.gsqlparser.util.SQLUtil;
 import gudusoft.gsqlparser.util.json.JSON;
 
@@ -27,7 +29,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/jdbc jdbcUrl /u <username> /p <password> [/metadata]] [/h <host> /P <port> /u <username> /p <password> /db <database> [/metadata]] [/tableLineage [/csv]] [/transform [/coor]]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv]] [/transform [/coor]]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -53,16 +55,7 @@ public class DataFlowAnalyzer {
 					+ "sybase,teradata,soql,vertica\n, " + "the default value is oracle");
 			System.out.println("/o: Optional, write the output stream to the specified file.");
 			System.out.println("/log: Optional, generate a dataflow.log file to log information.");
-			System.out.println("/h: Optional, specify the host of jdbc connection");
-			System.out.println("/P: Optional, specify the port of jdbc connection, note it's capital P.");
-			System.out.println("/u: Optional, specify the username of jdbc connection.");
-			System.out.println("/p: Optional, specify the password of jdbc connection, note it's lowercase P.");
-			System.out.println("/db: Optional, specify the database of jdbc connection.");
-			System.out.println("/driver: Optional, specify the jdbc driver.");
-			System.out.println("/jdbc: Optional, specify the jdbc url of connection.");
-			System.out.println("/metadata-schema: Optional, specify the schema which is used for extracting metadata.");
-			System.out.println(
-					"/metadata: Optional, output the database metadata information to the file metadata.json.");
+			System.out.println("/env: Optional, specify a metadata.json to get the database metadata information.");
 			System.out.println("/transform: Optional, output the relation transform code.");
 			System.out.println("/coor: Optional, output the relation transform coordinate, but not the code.");
 			System.out.println("/defaultDatabase: Optional, specify the default schema.");
@@ -81,26 +74,23 @@ public class DataFlowAnalyzer {
 			return;
 		}
 
-		boolean isMetadata = argList.indexOf("/metadata") != -1;
-
-		if (!isMetadata) {
-			if (argList.indexOf("/f") != -1 && argList.size() > argList.indexOf("/f") + 1) {
-				sqlFiles = new File(args[argList.indexOf("/f") + 1]);
-				if (!sqlFiles.exists() || !sqlFiles.isFile()) {
-					System.out.println(sqlFiles + " is not a valid file.");
-					return;
-				}
-			} else if (argList.indexOf("/d") != -1 && argList.size() > argList.indexOf("/d") + 1) {
-				sqlFiles = new File(args[argList.indexOf("/d") + 1]);
-				if (!sqlFiles.exists() || !sqlFiles.isDirectory()) {
-					System.out.println(sqlFiles + " is not a valid directory.");
-					return;
-				}
-			} else {
-				System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
+		if (argList.indexOf("/f") != -1 && argList.size() > argList.indexOf("/f") + 1) {
+			sqlFiles = new File(args[argList.indexOf("/f") + 1]);
+			if (!sqlFiles.exists() || !sqlFiles.isFile()) {
+				System.out.println(sqlFiles + " is not a valid file.");
 				return;
 			}
+		} else if (argList.indexOf("/d") != -1 && argList.size() > argList.indexOf("/d") + 1) {
+			sqlFiles = new File(args[argList.indexOf("/d") + 1]);
+			if (!sqlFiles.exists() || !sqlFiles.isDirectory()) {
+				System.out.println(sqlFiles + " is not a valid directory.");
+				return;
+			}
+		} else {
+			System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
+			return;
 		}
+		
 
 		EDbVendor vendor = EDbVendor.dbvoracle;
 
@@ -159,95 +149,12 @@ public class DataFlowAnalyzer {
 		}
 
 		TSQLEnv sqlenv = null;
-
-		// Get database metadata from sql jdbc
-		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1
-				&& argList.indexOf("/p") != -1) {
-			try {
-				String host = args[argList.indexOf("/h") + 1];
-				String port = args[argList.indexOf("/P") + 1];
-				String user = args[argList.indexOf("/u") + 1];
-				String password = args[argList.indexOf("/p") + 1];
-				String database = null;
-				String schema = null;
-				if (argList.indexOf("/db") != -1) {
-					database = args[argList.indexOf("/db") + 1];
-				}
-				if (argList.indexOf("/metadata-schema") != -1) {
-					schema = args[argList.indexOf("/metadata-schema") + 1];
-				}
-				TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, password, database, schema);
-				if (datasource != null) {
-					if (argList.indexOf("/metadata") != -1) {
-						try {
-							String metadata = datasource.exportJSON();
-							SQLUtil.writeToFile(new File("./metadata.json"), metadata);
-						} catch (Exception e) {
-							System.err.println("Get datasource metadata failed. " + e.getMessage());
-							e.printStackTrace();
-						}
-					}
-					sqlenv = TSQLEnv.valueOf(datasource);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		// Get database metadata from sql jdbc
-		if (argList.indexOf("/jdbc") != -1 && argList.indexOf("/driver") != -1) {
-			String jdbc = args[argList.indexOf("/jdbc") + 1];
-			String driver = args[argList.indexOf("/driver") + 1];
-			String schema = null;
-			if (argList.indexOf("/metadata-schema") != -1) {
-				schema = args[argList.indexOf("/metadata-schema") + 1];
-			}
-			String user = argList.indexOf("/u") != -1 ? args[argList.indexOf("/u") + 1] : null;
-			String password = argList.indexOf("/p") != -1 ? args[argList.indexOf("/p") + 1] : null;
-			Class<?> driverClass;
-			try {
-				driverClass = Class.forName(driver);
-				TSQLDataSource datasource = createSQLDataSource(vendor, driverClass, jdbc, user, password, schema);
-				if (datasource != null) {
-					if (argList.indexOf("/metadata") != -1) {
-						try {
-							String metadata = datasource.exportJSON();
-							SQLUtil.writeToFile(new File("./metadata.json"), metadata);
-						} catch (Exception e) {
-							System.err.println("Get datasource metadata failed. " + e.getMessage());
-							e.printStackTrace();
-						}
-					}
-					sqlenv = TSQLEnv.valueOf(datasource);
-				}
-			} catch (ClassNotFoundException e) {
-				System.err.println("Get datasource metadata failed. " + e.getMessage());
-				e.printStackTrace();
-			}
-		} else if (argList.indexOf("/jdbc") != -1 && argList.indexOf("/u") != -1 && argList.indexOf("/p") != -1) {
-			try {
-				String jdbc = args[argList.indexOf("/jdbc") + 1];
-				String user = args[argList.indexOf("/u") + 1];
-				String password = args[argList.indexOf("/p") + 1];
-				String schema = null;
-				if (argList.indexOf("/metadata-schema") != -1) {
-					schema = args[argList.indexOf("/metadata-schema") + 1];
-				}
-				TSQLDataSource datasource = createSQLDataSource(vendor, jdbc, user, password, schema);
-				if (datasource != null) {
-					if (argList.indexOf("/metadata") != -1) {
-						try {
-							String metadata = datasource.exportJSON();
-							SQLUtil.writeToFile(new File("./metadata.json"), metadata);
-						} catch (Exception e) {
-							System.err.println("Get datasource metadata failed. " + e.getMessage());
-							e.printStackTrace();
-						}
-					}
-					sqlenv = TSQLEnv.valueOf(datasource);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+		
+		if (argList.indexOf("/env") != -1 && argList.size() > argList.indexOf("/env") + 1) {
+			File metadataFile = new File(args[argList.indexOf("/env") + 1]);
+			if (metadataFile.exists()) {
+				TJSONSQLEnvParser jsonSQLEnvParser = new TJSONSQLEnvParser();
+				sqlenv = jsonSQLEnvParser.parseSQLEnv(vendor, SQLUtil.getFileContent(metadataFile));
 			}
 		}
 
