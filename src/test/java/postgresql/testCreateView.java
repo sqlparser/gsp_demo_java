@@ -35,6 +35,7 @@ public class testCreateView extends TestCase {
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
         sqlparser.sqltext = viewSql;
+        //System.out.println(viewSql);
 
         assertTrue(sqlparser.parse() == 0);
 

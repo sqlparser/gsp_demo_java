@@ -8,7 +8,10 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
+import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import junit.framework.TestCase;
+
+import static gudusoft.gsqlparser.EExpressionType.unary_minus_t;
 
 public class testDatatype extends TestCase {
 
@@ -129,5 +132,20 @@ public class testDatatype extends TestCase {
         assertTrue(cd1.getDatatype().getDataType() == EDataType.bigserial_t);
         assertTrue(cd2.getDatatype().getDataType() == EDataType.money_t);
         assertTrue(cd3.getDatatype().getDataType() == EDataType.bytea_t);
+    }
+
+    public void test10(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "INSERT INTO bigint_table ( clear_test  , enc_test) VALUES ( -922337203  , -10.2)";
+        assertTrue(sqlparser.parse() == 0);
+        TInsertSqlStatement insertSqlStatement = (TInsertSqlStatement)sqlparser.getSqlstatements().get(0);
+        TResultColumn resultColumn = insertSqlStatement.getValues().getMultiTarget(0).getColumnList().getResultColumn(0);
+        TExpression expression = resultColumn.getExpr();
+        assertTrue(expression.getExpressionType() == unary_minus_t);
+
+        TResultColumn resultColumn1 = insertSqlStatement.getValues().getMultiTarget(0).getColumnList().getResultColumn(1);
+        TExpression expression1 = resultColumn1.getExpr();
+        assertTrue(expression1.getExpressionType() == unary_minus_t);
     }
 }
