@@ -132,7 +132,7 @@ create table dept(
 Since dlineage v2.2.0 (2022/7/21), This dlineage tool supports `/env` parameter to accept a metadata json file
 which includes the metadata exported from a database.
 
-By providing metadata.json to fetch metadata, column `ename` should be linked to the table `emp` correctly.
+By providing metadata.json that includes the metadata, column `ename` should be linked to the table `emp` correctly.
 
 You can use `/env` to specify a metadata.json like this:
 
