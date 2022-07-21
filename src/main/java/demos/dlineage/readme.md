@@ -54,18 +54,32 @@ sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowfl
 sybase,teradata,soql,vertica
 ```
 
-## Binary version
+## 1. Binary version
 https://www.gudusoft.com/download-data-lineage-java-library/    
 > update date: 2022/07/12
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
-Then, run this utility like this:
+	
+## 2. Analyze data linege from SQL files	
+Please use `/f` parameter to specify a single SQL file,
+or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
 
 ```
 java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
-	
-## 1. Resolve the ambiguous columns in SQL query
+
+## 3. Analyze data linege from a database
+Since version 2.2.0, the dlineage tool no longer connect to the database to analyze
+the data lineage directly. Instead it accept a metadata json file which 
+includes all metadata of a database and analyze the data lineage from this json file.
+
+```
+java -jar gudusoft.dlineage.jar /t oracle /f metadata.json
+```
+
+
+
+## 4. Resolve the ambiguous columns in SQL query
 ```sql
 select ename
 from emp, dept
@@ -74,7 +88,11 @@ where emp.deptid = dept.id
 
 column `ename` in the first line is not qualified by table name `emp`, so it’s ambiguous to know which table this column belongs to?
 
-If we already created table `emp`, `dept` in the database using this DDL.
+### solution 1, provides create table DDL 
+
+Put the following DDL before the above SQL statement in the same SQL file.
+the column `ename` will be linked to the table `emp` correctly.
+
 ```sql
 create table emp(
 	id int,
@@ -88,19 +106,37 @@ create table dept(
 );
 ```
 
+### solution 2: provide metadata exported from database
+Since dlineage v2.2.0 (2022/7/21), This dlineage tool supports `/env` parameter to accept a metadata json file
+which includes the metadata exported from a database.
+
 By providing metadata.json to fetch metadata, column `ename` should be linked to the table `emp` correctly.
 
-You can use `/env` to specify a metadata.json:
+You can use `/env` to specify a metadata.json like this:
 
 ```
-/env: Optional, specify a metadata.json to get the database metadata information.
+java -jar gudusoft.dlineage.jar /t oracle /f path_to_sql_file /env metadata.json
 ```
 
-More information about metadata.json, you can access the github project: 
+## 5. How to extract metadata from various databases
+sqlflow-ingester is a tool that extract metadata from various database,
+you can download the tool here:
 
-`https://github.com/sqlparser/sqlflow_public`
+https://github.com/sqlparser/sqlflow_public/releases
+
+Under linux:
+```
+./exporter.sh -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save c:\tmp\sqlflow-ingester -dbVendor dbvoracle
+```
+
+Under windows:
+```
+exporter.bat -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save /tmp/sqlflow-ingester -dbVendor dbvoracle
+```
+
 
 ## Releases
+- [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
 - [Ver2.1.0, 2021/07/11] Release gsp core 2.3.7.2
