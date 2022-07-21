@@ -73,6 +73,28 @@ Since version 2.2.0, the dlineage tool no longer connect to the database to anal
 the data lineage directly. Instead it accept a metadata json file which 
 includes all metadata of a database and analyze the data lineage from this json file.
 
+### 3.1 extract metdata from database
+
+[sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) is a tool that extract metadata from various database,
+you can download the tool here:
+
+https://github.com/sqlparser/sqlflow_public/releases
+
+Under linux:
+```
+./exporter.sh -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save c:\tmp\sqlflow-ingester -dbVendor dbvoracle
+```
+
+Under windows:
+```
+exporter.bat -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save /tmp/sqlflow-ingester -dbVendor dbvoracle
+```
+
+you will get a metadata.json file.
+
+### 3.2 analyze metadata file
+
+After you get the metadata.json file, use analyze it like a normal sql file with `/f` parmeter:
 ```
 java -jar gudusoft.dlineage.jar /t oracle /f metadata.json
 ```
@@ -118,22 +140,7 @@ You can use `/env` to specify a metadata.json like this:
 java -jar gudusoft.dlineage.jar /t oracle /f path_to_sql_file /env metadata.json
 ```
 
-## 5. How to extract metadata from various databases
-sqlflow-ingester is a tool that extract metadata from various database,
-you can download the tool here:
-
-https://github.com/sqlparser/sqlflow_public/releases
-
-Under linux:
-```
-./exporter.sh -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save c:\tmp\sqlflow-ingester -dbVendor dbvoracle
-```
-
-Under windows:
-```
-exporter.bat -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save /tmp/sqlflow-ingester -dbVendor dbvoracle
-```
-
+You can always extract metadata from the database use the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) tool.
 
 ## Releases
 - [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
