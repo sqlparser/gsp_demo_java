@@ -55,8 +55,8 @@ sybase,teradata,soql,vertica
 ```
 
 ## 1. Binary version
-https://www.gudusoft.com/download-data-lineage-java-library/    
-> update date: 2022/07/12
+https://github.com/sqlparser/gsp_demo_java/releases/ 
+> update date: 2022/07/22
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 	
