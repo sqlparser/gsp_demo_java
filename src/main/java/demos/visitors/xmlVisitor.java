@@ -32,6 +32,8 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWhereNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithMemberNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversion;
+import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
 import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
@@ -1290,6 +1292,60 @@ public class xmlVisitor extends TParseTreeVisitor
 				break;
 		}
 
+		if ((node.getDataConversions()!=null)&&(node.getDataConversions().size()>0)){
+			//addElementOfString("data_conversion",node.getDataConversions().toString());
+			Element e_data_conversion = xmldoc.createElement( "data_conversions" );
+			e_expression.appendChild( e_data_conversion );
+			elementStack.push( e_data_conversion );
+			for(int i=0;i<node.getDataConversions().size();i++){
+				node.getDataConversions().get(i).accept(this);
+			}
+			//node.getDataConversions( ).accept( this );
+			elementStack.pop( );
+		}
+
+		elementStack.pop( );
+	}
+
+	public void preVisit( TDataConversion node )
+	{
+		Element e_data_conversion = xmldoc.createElement( "data_conversion" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_data_conversion );
+		elementStack.push( e_data_conversion );
+		for(int i=0;i<node.getDataConversionItems().size();i++){
+			node.getDataConversionItems().get(i).accept(this);
+		}
+		elementStack.pop( );
+	}
+
+	public void preVisit( TDataConversionItem node )
+	{
+		Element e_data_conversion = xmldoc.createElement( "data_conversion_item" );
+		e_data_conversion.setAttribute( "type", node.getDataConversionType().toString() );
+
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_data_conversion );
+		elementStack.push( e_data_conversion );
+		switch (node.getDataConversionType()){
+			case dataType:
+				node.getDataType().accept(this);
+				break;
+			case dataAttribute:
+				node.getDatatypeAttribute().accept(this);
+				break;
+		}
+		elementStack.pop( );
+	}
+
+	public void preVisit( TDatatypeAttribute node )
+	{
+		Element e_datatype_attribute = xmldoc.createElement( "datatype_attribute" );
+		e_datatype_attribute.setAttribute( "type", node.getAttributeType().toString() );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_datatype_attribute );
+		elementStack.push( e_datatype_attribute );
+		addElementOfString("datatypeAttribute",node.toString());
 		elementStack.pop( );
 	}
 
