@@ -1979,6 +1979,22 @@ public class xmlVisitor extends TParseTreeVisitor
 				elementStack.pop( );
 				break;
 			}
+			case externalTable:
+				{
+					e_table_reference = xmldoc.createElement( "named_table_reference" );
+					e_parent = (Element) elementStack.peek( );
+					e_parent.appendChild( e_table_reference );
+					elementStack.push( e_table_reference );
+					current_objectName_tag = "table_name";
+					node.getTableName( ).accept( this );
+					current_objectName_tag = null;
+
+					node.getColumnDefinitions().accept(this);
+
+					elementStack.pop( );
+					// sb.append(node.toString().replace(">","&#62;").replace("<","&#60;"));
+					break;
+				}
 			default :
 				e_table_reference = xmldoc.createElement( "named_table_reference" );
 				e_parent = (Element) elementStack.peek( );
@@ -4461,6 +4477,12 @@ public class xmlVisitor extends TParseTreeVisitor
 				e_functionCall.appendChild( e_not_support );
 				e_not_support.setTextContent( node.toString( ) );
 				break;
+			case struct_t://bigquery
+				addElementOfNode("field_values",node.getFieldValues());
+				if (node.getFieldDefs() != null){
+					addElementOfNode("field_defs",node.getFieldDefs());
+				}
+				break;
 			default :
 				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
 				e_functionCall.appendChild( e_function );
@@ -5906,8 +5928,24 @@ public class xmlVisitor extends TParseTreeVisitor
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_execute = xmldoc.createElement( "execute_statement" );
+		e_execute.setAttribute( "executeType", stmt.getExecuteType( ).toString( ) );
+
+
 		e_parent.appendChild( e_execute );
 		elementStack.push( e_execute );
+		switch (stmt.getExecuteType()){
+			case module:
+				current_objectName_tag = "module_name";
+				stmt.getModuleName().accept(this);
+				if (stmt.getParameters() != null){
+					current_expression_list_tag = "module_parameters";
+					stmt.getParameters().accept(this);
+				}
+				break;
+			default:
+				break;
+		}
+
 		if ( stmt.getStmt( ) != null )
 		{
 			stmt.getStmt().accept(this);
