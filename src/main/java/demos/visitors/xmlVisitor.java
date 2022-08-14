@@ -3546,7 +3546,25 @@ public class xmlVisitor extends TParseTreeVisitor
 		elementStack.pop( );
 	}
 
-	public void preVisit( TCreateAliasStmt stmt )
+	public void preVisit( TCopyStmt stmt ) {
+		e_parent = (Element) elementStack.peek();
+		Element e_copy_stmt = xmldoc.createElement("copy_statement");
+		e_copy_stmt.setAttribute("copy_type",stmt.getCopyType().toString());
+		e_parent.appendChild(e_copy_stmt);
+		elementStack.push(e_copy_stmt);
+
+		if (stmt.getTables().size() >0 ){
+			current_objectName_tag = "table_name";
+			stmt.getTables().getTable(0).accept(this);
+		}
+		if (stmt.getFilename() != null){
+			addElementOfString("filename",stmt.getFilename());
+		}
+		elementStack.pop( );
+
+	}
+
+		public void preVisit( TCreateAliasStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_create_alias = xmldoc.createElement( "create_alias_statement" );
