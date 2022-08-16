@@ -2101,6 +2101,10 @@ public class xmlVisitor extends TParseTreeVisitor
 			e_part.setTextContent( node.getPartToken( ).toString( ) );
 		}
 
+		if (node.getDblink() != null){
+			addElementOfNode("db_link",node.getDblink());
+		}
+
 		if (node.getSourceTable() != null){
 			String sourceTable = node.getSourceTable().getTableName().toString();
 			if (node.getSourceTable().getAliasClause() != null){
