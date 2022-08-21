@@ -100,6 +100,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -4505,6 +4506,12 @@ public class xmlVisitor extends TParseTreeVisitor
 					addElementOfNode("field_defs",node.getFieldDefs());
 				}
 				break;
+			case csum_t:
+			case rank_t:
+				if (node.getOrderByList() != null){
+					node.getOrderByList().accept(this);
+				}
+				break;
 			default :
 				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
 				e_functionCall.appendChild( e_function );
@@ -5404,6 +5411,16 @@ public class xmlVisitor extends TParseTreeVisitor
 
 	}
 
+	public void preVisit( TAllocateStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_allocate_stmt = xmldoc.createElement( "allocate_statement" );
+		e_parent.appendChild( e_allocate_stmt );
+		elementStack.push( e_allocate_stmt );
+		addElementOfNode("cursor",stmt.getCursorName());
+		addElementOfNode("procedure",stmt.getProcedureName());
+		elementStack.pop( );
+	}
 
 	public void preVisit( TRepeatStmt stmt ) {
 		e_parent = (Element) elementStack.peek( );
