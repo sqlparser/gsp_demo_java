@@ -2172,6 +2172,23 @@ public class xmlVisitor extends TParseTreeVisitor
 		appendEndTag( node );
 	}
 
+	public void preVisit( TShowStmt stmt )
+	{
+
+		Element e_show_stmt = xmldoc.createElement( "show_stmt" );
+		e_show_stmt.setAttribute("showType", stmt.getShowType().toString());
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_show_stmt );
+		elementStack.push( e_show_stmt );
+		if (stmt.getParameterName() != null){
+			addElementOfNode("parameter_name",stmt.getParameterName());
+		}
+
+		elementStack.pop( );
+
+	}
+
+
 	public void preVisit( THierarchical node )
 	{
 
