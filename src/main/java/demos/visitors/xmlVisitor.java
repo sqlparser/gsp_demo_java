@@ -3556,6 +3556,17 @@ public class xmlVisitor extends TParseTreeVisitor
 		elementStack.pop( );
 	}
 
+	public void preVisit( TCreateTriggerStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_trigger = xmldoc.createElement( "create_trigger_statement" );
+		e_parent.appendChild( e_create_trigger );
+		elementStack.push( e_create_trigger );
+		addElementOfNode("trigger_name",stmt.getTriggerName());
+		stmt.getBodyStatements().accept(this);
+		elementStack.pop( );
+	}
+
 	public void preVisit( TCreateVariableStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
