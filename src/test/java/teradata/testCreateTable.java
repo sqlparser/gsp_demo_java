@@ -11,6 +11,7 @@ import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
+import gudusoft.gsqlparser.nodes.teradata.TRangeNFunctionItem;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
 import junit.framework.TestCase;
 
@@ -81,13 +82,20 @@ public class testCreateTable extends TestCase {
         assertTrue(partitionExpr.getExpressionType() == EExpressionType.function_t);
         TFunctionCall functionCall = partitionExpr.getFunctionCall();
         assertTrue(functionCall.getFunctionType() == EFunctionType.range_n_t);
-        TExpression betweenExpr = functionCall.getBetweenExpr();
-        assertTrue(betweenExpr.getBetweenOperand().toString().equalsIgnoreCase("salesdate"));
-        assertTrue(betweenExpr.getLeftOperand().toString().equalsIgnoreCase("DATE '2002-01-01'"));
-        assertTrue(betweenExpr.getRightOperand().toString().equalsIgnoreCase("DATE '2008-12-31'"));
-        TExpression rangSize = functionCall.getRangeSize();
+        TExpression test_expression = functionCall.getExpr1();
+        assertTrue(test_expression.toString().equalsIgnoreCase("salesdate"));
+        assertTrue(functionCall.getRangeNFunctionItems().size() == 1);
+
+        TRangeNFunctionItem rangeNFunctionItem = functionCall.getRangeNFunctionItems().get(0);
+        assertTrue(rangeNFunctionItem.getStartExpression().toString().equalsIgnoreCase("DATE '2002-01-01'"));
+        assertTrue(rangeNFunctionItem.getEndExpression().toString().equalsIgnoreCase("DATE '2008-12-31'"));
+        assertTrue(rangeNFunctionItem.getRangeSize().toString().equalsIgnoreCase("INTERVAL '1' YEAR"));
+//        assertTrue(test_expression.getBetweenOperand().toString().equalsIgnoreCase("salesdate"));
+//        assertTrue(test_expression.getLeftOperand().toString().equalsIgnoreCase("DATE '2002-01-01'"));
+//        assertTrue(test_expression.getRightOperand().toString().equalsIgnoreCase("DATE '2008-12-31'"));
+//        TExpression rangSize = functionCall.getRangeSize();
         //System.out.println(rangSize.toString());
-        assertTrue(rangSize.toString().equalsIgnoreCase("INTERVAL '1' YEAR"));
+//        assertTrue(rangSize.toString().equalsIgnoreCase("INTERVAL '1' YEAR"));
     }
 
 
