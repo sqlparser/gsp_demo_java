@@ -8,6 +8,60 @@ import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import junit.framework.TestCase;
 
 public class TestCreateProcedure  extends TestCase {
+
+    public void testPlSQL1(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE COVID19.\"PUBLIC\".INSERT_CDC_DATA()\n" +
+                "RETURNS NUMBER(38,0)\n" +
+                "LANGUAGE SQL\n" +
+                "STRICT\n" +
+                "EXECUTE AS OWNER\n" +
+                "AS '\n" +
+                "insert into COVID19.PUBLIC.CDC_INPATIENT_BEDS_ALL (STATE, DATE, ISO3166_1, LAST_REPORTED_FLAG)\n" +
+                "values (''A'',\n" +
+                "    ''2021-01-01 00:00:00 +0000'',\n" +
+                "    ''C'',\n" +
+                "    true);\n" +
+                "';";
+        //System.out.println(sqlparser.sqltext);
+
+        assertTrue(sqlparser.parse() == 0);
+        TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlStatement;
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("COVID19.\"PUBLIC\".INSERT_CDC_DATA"));
+        assertTrue(createProcedure.getRoutineLanguage().equalsIgnoreCase("sql"));
+        assertTrue(createProcedure.getBodyStatements().size() == 1);
+        assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstinsert);
+    }
+
+    public void testPlSQL2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE COVID19.\"PUBLIC\".INSERT_CDC_DATA()\n" +
+                "RETURNS NUMBER(38,0)\n" +
+                "LANGUAGE SQL\n" +
+                "STRICT\n" +
+                "EXECUTE AS OWNER\n" +
+                "AS $$\n" +
+                "insert into COVID19.PUBLIC.CDC_INPATIENT_BEDS_ALL (STATE, DATE, ISO3166_1, LAST_REPORTED_FLAG)\n" +
+                "values ('A',\n" +
+                "    '2021-01-01 00:00:00 +0000',\n" +
+                "    'C',\n" +
+                "    true);\n" +
+                "$$;";
+        //System.out.println(sqlparser.sqltext);
+
+        assertTrue(sqlparser.parse() == 0);
+        TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlStatement;
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("COVID19.\"PUBLIC\".INSERT_CDC_DATA"));
+        assertTrue(createProcedure.getRoutineLanguage().equalsIgnoreCase("sql"));
+        assertTrue(createProcedure.getBodyStatements().size() == 1);
+        assertTrue(createProcedure.getBodyStatements().get(0).sqlstatementtype == ESqlStatementType.sstinsert);
+    }
+
+
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlparser.sqltext = "CREATE or replace PROCEDURE proc3()\n" +

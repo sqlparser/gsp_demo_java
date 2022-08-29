@@ -73,4 +73,19 @@ public class testExecuteOption extends TestCase {
 
     }
 
+    public void test4(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "SP_EXECUTESQL N'SET FMTONLY ON SELECT * FROM [dbo].[insertbulk] '";
+
+        int result = sqlparser.parse();
+        assertTrue(result==0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstmssqlexec);
+        TMssqlExecute execute = (TMssqlExecute)sqlparser.sqlstatements.get(0);
+        assertTrue(execute.getExecuteType() == EExecType.module_with_params);
+        assertTrue(execute.getModuleName().toString().equalsIgnoreCase("SP_EXECUTESQL"));
+        assertTrue(execute.getParameters().getExecParameter(0).toString().equalsIgnoreCase("N'SET FMTONLY ON SELECT * FROM [dbo].[insertbulk] '"));
+        assertTrue(execute.getParameters().getExecParameter(0).getParameterValue().toString().equalsIgnoreCase("N'SET FMTONLY ON SELECT * FROM [dbo].[insertbulk] '"));
+    }
+
 }

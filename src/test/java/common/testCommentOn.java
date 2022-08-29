@@ -39,4 +39,14 @@ public class testCommentOn extends TestCase {
         assertTrue(commentOnSqlStmt.getObjectName().getTableString().equalsIgnoreCase("sql_policy"));
         assertTrue(commentOnSqlStmt.getMessage().toString().equalsIgnoreCase("'test'"));
     }
+
+    public void testPostgres(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "COMMENT ON TABLE ACT_DIM_HLHA IS 'Type lieu HAD historise';";
+        assertTrue(sqlparser.parse() == 0);
+        TCommentOnSqlStmt commentOnSqlStmt = (TCommentOnSqlStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(commentOnSqlStmt.getDbObjectType() == EDbObjectType.table);
+        assertTrue(commentOnSqlStmt.getObjectName().toString().equalsIgnoreCase("ACT_DIM_HLHA"));
+        assertTrue(commentOnSqlStmt.getMessage().toString().equalsIgnoreCase("'Type lieu HAD historise'"));
+    }
 }

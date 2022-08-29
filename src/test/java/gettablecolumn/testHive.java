@@ -18,6 +18,37 @@ public class testHive extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
+    public static void testColumnInSelectListInCTAS() {
+        doTest("create table a(a int, b int);\n" +
+                        "create table a as select b from c",
+                "Tables:\n" +
+                        "a\n" +
+                        "c\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "a.a:int\n" +
+                        "a.b\n" +
+                        "a.b:int\n" +
+                        "c.b");
+    }
+
+    public static void testDate() {
+        doTest("create table table1(date date, col1 varchar(2));\n" +
+                        "\n" +
+                        "insert into table2\n" +
+                        "select date, col1 from table1",
+                "Tables:\n" +
+                        "table1\n" +
+                        "table2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table1.col1\n" +
+                        "table1.col1:varchar:2\n" +
+                        "table1.date\n" +
+                        "table1.date:date");
+    }
+
+
     public static void testCreateFunction() {
         doTest("SELECT\n" +
                         "    ssa.h_sammelanlage_hk,\n" +
