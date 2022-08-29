@@ -29,7 +29,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv]] [/transform [/coor]]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv]] [/transform [/coor]] [/showConstant]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -61,6 +61,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/defaultDatabase: Optional, specify the default schema.");
 			System.out.println("/defaultSchema: Optional, specify the default schema.");
 			System.out.println("/showImplicitSchema: Optional, show implicit schema.");
+			System.out.println("/showConstant: Optional, show constant table.");
 			return;
 		}
 
@@ -193,7 +194,9 @@ public class DataFlowAnalyzer {
 			if(simple) {
 				dlineage.setShowCallRelation(true);
 			}
-			//dlineage.setShowConstantTable(true);
+			
+			dlineage.setShowConstantTable(argList.indexOf("/showConstant")!=-1);
+			
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
