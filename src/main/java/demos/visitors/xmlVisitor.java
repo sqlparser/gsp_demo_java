@@ -4130,6 +4130,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 					node.getOrderByList().accept(this);
 				}
 				break;
+			case if_t:
+				node.getExpr1().accept(this);
+				node.getExpr2().accept(this);
+				node.getExpr3().accept(this);
+				break;
 			default :
 				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
 				e_functionCall.appendChild( e_function );
