@@ -349,4 +349,25 @@ public class testTeradataGetTableColumns extends TestCase {
                         "zxxountLevelxhzrgem.ydLLdNG_mTzTEMENT_dD");
     }
 
+    public static void testSeperateTable() {
+        doTest("USING _spVV0 (INTEGER) \n" +
+                        "\tINSERT INTO table3 \n" +
+                        "\t\tSELECT :_spVV0,x. *,m.col3 \n" +
+                        "\t\tfrom ((           select table1.col1, (table1.col1 + table5.col2) c from table1 \n" +
+                        "\t\t\t\tunion all select col3,col4 from table2) x \n" +
+                        "\t\t\t  cross join (select id from table2) m )",
+                "Tables:\n" +
+                        "table1\n" +
+                        "table2\n" +
+                        "table3\n" +
+                        "table5\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table1.col1\n" +
+                        "table2.col3\n" +
+                        "table2.col4\n" +
+                        "table2.id\n" +
+                        "table5.col2");
+    }
+
 }

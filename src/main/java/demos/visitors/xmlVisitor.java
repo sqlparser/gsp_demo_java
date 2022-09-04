@@ -3646,6 +3646,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case etoWithLocation:
 				node.getStageLocation().accept(this);
 				break;
+			case etoDistributeOn:
+				addElementOfNode("distribute_on",node.getColumnNamelist());
+				break;
+			case etoOrganizeOn:
+				addElementOfNode("organize_on",node.getColumnNamelist());
+				break;
 		}
 
 		elementStack.pop();
