@@ -21,7 +21,7 @@ public class testCopy extends TestCase {
         TRedshiftCopy copy = (TRedshiftCopy) sqlparser.sqlstatements.get(0);
         assertTrue(copy.getTableName().toString().equalsIgnoreCase("listing"));
        assertTrue(copy.getFromSource().equalsIgnoreCase("'s3://mybucket/data/listings_pipe.txt'"));
-        assertTrue(copy.getCredentials().equalsIgnoreCase("'aws_access_key_id=<temporary-access-key-id><aws_secret_ac \n" +
+        assertTrue(copy.getAuthorizationClause().getCredentials().equalsIgnoreCase("'aws_access_key_id=<temporary-access-key-id><aws_secret_ac \n" +
                 "cess_key=<temporary-secret-access-key>;token=<temporary-token>;master_symmet \n" +
                 "ric_key=<master_key>'"));
 
