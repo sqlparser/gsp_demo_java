@@ -797,6 +797,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getAliasClause() != null) {
 			node.getAliasClause().accept(this);
 		}
+
+		if (node.getExceptColumnList() != null){
+			addElementOfNode("except_columns",node.getExceptColumnList());
+		}
 		elementStack.pop();
 	}
 

@@ -13,6 +13,7 @@ public class testBigQuery extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.showDatatype = true;
+        getTableColumn.listStarColumn = true;
         getTableColumn.runText(inputQuery);
         // System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
@@ -75,5 +76,16 @@ public class testBigQuery extends TestCase {
                         "`schema1.table1`.id2\n" +
                         "`schema1.table2`.id1\n" +
                         "`schema1.table2`.id3");
+    }
+
+    public static void testExceptColumns() {
+        doTest("SELECT COMMON.* EXCEPT (column1, column2) FROM dataset1.table1 COMMON;",
+                "Tables:\n" +
+                        "dataset1.table1\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "dataset1.table1.*\n" +
+                        "dataset1.table1.column1\n" +
+                        "dataset1.table1.column2");
     }
 }
