@@ -27,10 +27,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
-import gudusoft.gsqlparser.nodes.teradata.TDataConversion;
-import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
-import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
-import gudusoft.gsqlparser.nodes.teradata.TRangeNFunctionItem;
+import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
@@ -2817,7 +2814,40 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
+		if (node.getDataDefinitions() != null){
+			Element e_dataDefinitions = xmldoc.createElement("data_definitions");
+			e_column.appendChild(e_dataDefinitions);
+			elementStack.push(e_dataDefinitions);
+			for(int i=0;i<node.getDataDefinitions().size();i++){
+				node.getDataDefinitions().get(i).accept(this);
+			}
+			elementStack.pop();
+		}
+
 		elementStack.pop();
+	}
+
+
+	public void preVisit(TDataDefinition node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_data_definition = xmldoc.createElement("data_definition");
+		e_parent.appendChild(e_data_definition);
+		elementStack.push(e_data_definition);
+
+		switch (node.getDataDefinitionType()){
+			case columnConstraint:
+				node.getColumnConstraint().accept(this);
+				break;
+			case dataAttribute:
+				node.getDatatypeAttribute().accept(this);
+				break;
+			case columnStorage:
+				node.getColumnStorage().accept(this);
+				break;
+		}
+
+		elementStack.pop();
+
 	}
 
 	public void preVisit(TColumnDefinitionList node) {
