@@ -1,14 +1,7 @@
 
 package demos.visitors;
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.EDeclareType;
-import gudusoft.gsqlparser.EExpressionType;
-import gudusoft.gsqlparser.EParameterMode;
-import gudusoft.gsqlparser.ETriggerDmlType;
-import gudusoft.gsqlparser.TBaseType;
-import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.TStatementList;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
@@ -32,10 +25,9 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWhereNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithMemberNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
-import gudusoft.gsqlparser.nodes.teradata.TDataConversion;
-import gudusoft.gsqlparser.nodes.teradata.TDataConversionItem;
-import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
-import gudusoft.gsqlparser.nodes.teradata.TRangeNFunctionItem;
+import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
+import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
+import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
@@ -101,11 +93,16 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
+import gudusoft.gsqlparser.stmt.snowflake.TSnowlflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.ACCESS_KEY;
+import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.CREDENTIALS;
 
 public class xmlVisitor extends TParseTreeVisitor {
 
@@ -1818,6 +1815,43 @@ public class xmlVisitor extends TParseTreeVisitor {
 			appendEndTag("tablehints");
 		}
 
+		if (node.getForXMLClause() != null){
+			node.getForXMLClause().accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TForXMLClause node) {
+		Element e_for_xml_clause = xmldoc.createElement("for_xml_clause");
+		e_for_xml_clause.setAttribute("type", node.getForXMLMode().toString());
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_for_xml_clause);
+		elementStack.push(e_for_xml_clause);
+		if (node.getElementName() != null){
+			addElementOfString("element_name",node.getElementName());
+		}
+		if (node.getForXMLItems() != null){
+			for(int i=0;i<node.getForXMLItems().size();i++){
+				node.getForXMLItems().get(i).accept(this);
+			}
+		}
+		elementStack.pop();
+
+	}
+
+	public void preVisit(TXMLCommonDirective node) {
+		Element e_common_directive = xmldoc.createElement("common_directive");
+		e_common_directive.setAttribute("type", node.getCommonDirectiveType().toString());
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_common_directive);
+		elementStack.push(e_common_directive);
+		if (node.getCommonDirectiveType() == TXMLCommonDirective.EXMLCommonDirectiveType.ROOT){
+			if (node.getRootName() != null){
+				addElementOfString("root_name",node.getRootName());
+			}
+		}
 		elementStack.pop();
 	}
 
@@ -2776,7 +2810,40 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
+		if (node.getDataDefinitions() != null){
+			Element e_dataDefinitions = xmldoc.createElement("data_definitions");
+			e_column.appendChild(e_dataDefinitions);
+			elementStack.push(e_dataDefinitions);
+			for(int i=0;i<node.getDataDefinitions().size();i++){
+				node.getDataDefinitions().get(i).accept(this);
+			}
+			elementStack.pop();
+		}
+
 		elementStack.pop();
+	}
+
+
+	public void preVisit(TDataDefinition node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_data_definition = xmldoc.createElement("data_definition");
+		e_parent.appendChild(e_data_definition);
+		elementStack.push(e_data_definition);
+
+		switch (node.getDataDefinitionType()){
+			case columnConstraint:
+				node.getColumnConstraint().accept(this);
+				break;
+			case dataAttribute:
+				node.getDatatypeAttribute().accept(this);
+				break;
+			case columnStorage:
+				node.getColumnStorage().accept(this);
+				break;
+		}
+
+		elementStack.pop();
+
 	}
 
 	public void preVisit(TColumnDefinitionList node) {
@@ -3657,21 +3724,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
-	public void preVisit(TStageLocation node) {
-		e_parent = (Element) elementStack.peek();
-		Element e_stage = xmldoc.createElement("stage_location");
-		e_stage.setAttribute("type", node.getStageLocationType().toString());
 
-		e_parent.appendChild(e_stage);
-		elementStack.push(e_stage);
-		if (node.getStageName() != null) {
-			addElementOfNode("stage_name", node.getStageName());
-		}
-		if (node.getNameSpace() != null) {
-			addElementOfNode("namespace", node.getNameSpace());
-		}
-		elementStack.pop();
-	}
 
 
 	public void preVisit(TDropIndexSqlStatement stmt) {
@@ -6416,5 +6469,85 @@ public class xmlVisitor extends TParseTreeVisitor {
 		sw.close( );
 		return result;
 	}
+
+
+	public void preVisit( TSnowlflakeCopyIntoStmt stmt )
+	{
+		Element e_copy_into = xmldoc.createElement( "copy_into" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_copy_into );
+		elementStack.push( e_copy_into );
+		if (stmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE){
+			e_copy_into.setAttribute( "target", "table" );
+		}else if (stmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_LOCATION){
+			e_copy_into.setAttribute( "target", "location" );
+		}
+		addElementOfNode("table_name",stmt.getTableName());
+		stmt.getStageLocation().accept(this);
+		elementStack.pop( );
+	}
+
+	public void preVisit(TStageLocation node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_stage = xmldoc.createElement("stage_location");
+		e_stage.setAttribute("type", node.getStageLocationType().toString());
+
+		e_parent.appendChild(e_stage);
+		elementStack.push(e_stage);
+		if (node.getStageName() != null) {
+			addElementOfNode("stage_name", node.getStageName());
+		}
+		if (node.getNameSpace() != null) {
+			addElementOfNode("namespace", node.getNameSpace());
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit( TRedshiftCopy stmt )
+	{
+		Element e_copy_into = xmldoc.createElement( "copy_from" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_copy_into );
+		elementStack.push( e_copy_into );
+		addElementOfNode("table_name",stmt.getTableName());
+		if (stmt.getColumnList() != null){
+			current_objectName_list_tag = "column_list";
+			stmt.getColumnList().accept(this);
+		}
+		addElementOfString("data_source",stmt.getFromSource());
+		if (stmt.getAuthorizationClause() != null){
+			stmt.getAuthorizationClause().accept(this);
+		}
+		elementStack.pop( );
+	}
+
+	public void preVisit( TAuthorizationClause node )
+	{
+		Element e_authorization = xmldoc.createElement( "authorization_clause" );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_authorization );
+		elementStack.push( e_authorization );
+		e_authorization.setAttribute("type",node.getAuthorizationType().toString());
+
+		switch (node.getAuthorizationType()){
+			case CREDENTIALS:
+				addElementOfString("credientials",node.getCredentials());
+				break;
+			case IAM_ROLE:
+				addElementOfString("iam_role",node.getIam_role());
+				break;
+			case ACCESS_KEY:
+				addElementOfString("access_key_id",node.getAccess_key_id());
+				addElementOfString("access_key_id",node.getSecret_access_key());
+				if (node.getSession_token() != null){
+					addElementOfString("session_token",node.getSession_token());
+				}
+				break;
+		}
+
+		elementStack.pop( );
+	}
+
+
 
 }

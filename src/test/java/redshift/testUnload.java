@@ -21,8 +21,6 @@ public class testUnload extends TestCase {
         TRedshiftUnload unload = (TRedshiftUnload) sqlparser.sqlstatements.get(0);
         assertTrue(unload.getSelectStmt().equalsIgnoreCase("'select * from venue'"));
         assertTrue(unload.getS3().equalsIgnoreCase("'s3://mybucket/venue_pipe_'"));
-        assertTrue(unload.getCredentials().equalsIgnoreCase("'aws_access_key_id=<access-key-id>;aws_secret_access_key=<secret-access-key>'"));
-
-
+        assertTrue(unload.getAuthorizationClause().getCredentials().equalsIgnoreCase("'aws_access_key_id=<access-key-id>;aws_secret_access_key=<secret-access-key>'"));
     }
 }
