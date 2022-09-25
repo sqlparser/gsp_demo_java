@@ -21,6 +21,7 @@ public class testCreateProcedure extends TestCase {
                 "  insert into va values ('END_PROC');\n" +
                 "  END;\n" +
                 "  END_PROC;";
+
         assertTrue(sqlparser.parse() == 0);
         TCreateProcedureStmt createProcedureStmt = (TCreateProcedureStmt)sqlparser.sqlstatements.get(0);
         assertTrue(createProcedureStmt.getProcedureName().toString().equalsIgnoreCase("test_p"));
