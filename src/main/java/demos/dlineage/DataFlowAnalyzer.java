@@ -213,8 +213,7 @@ public class DataFlowAnalyzer {
 				} else {
 					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
 					if (jsonFormat) {
-						Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
-						model.setDbvendor(vendor.name());
+						Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow, vendor);
 						result = JSON.toJSONString(model);
 					} else {
 						result = XML2Model.saveXML(dataflow);
@@ -231,8 +230,7 @@ public class DataFlowAnalyzer {
 					if (ignoreFunction) {
 						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
 					}
-					Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow);
-					model.setDbvendor(vendor.name());
+					Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow, vendor);
 					result = JSON.toJSONString(model);
 				} else if (traceView) {
 					result = dlineage.traceView();
