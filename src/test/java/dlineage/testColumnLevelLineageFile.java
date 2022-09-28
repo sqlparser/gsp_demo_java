@@ -97,7 +97,7 @@ public class testColumnLevelLineageFile extends TestCase {
     }
     
     public void test22() {
-        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.csv", EDbVendor.dbvmysql));
+        assertTrue(compare(common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.sql", common.gspCommon.BASE_SQL_DIR_PUBLIC + "lineage/insert-all.csv", EDbVendor.dbvpostgresql));
     }
     
     public void test23() {
