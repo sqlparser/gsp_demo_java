@@ -17,6 +17,15 @@ import gudusoft.gsqlparser.stmt.TUpdateSqlStatement;
 
 public class testTUpdateSqlStatement extends TestCase {
 
+    public void testSQLServerUpdateTableAlias(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "UPDATE p SET p.pname = u.uname FROM PTEST p INNER JOIN UTEST u on p.id = u.id";
+        assertTrue(sqlparser.parse() == 0);
+        TUpdateSqlStatement update = (TUpdateSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(update.getTargetTable().toString().equalsIgnoreCase("PTEST"));
+    }
+
     public void testSetColumns(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
