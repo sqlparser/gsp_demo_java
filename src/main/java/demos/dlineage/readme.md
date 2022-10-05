@@ -142,8 +142,8 @@ java -jar gudusoft.dlineage.jar /t oracle /f path_to_sql_file /env metadata.json
 
 You can always extract metadata from the database use the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) tool.
 
-## Relationship of the setting options in the SQLFlow and this demo
-[! sqlflow setting] (sqlflow-settings.png)
+## 5. Relationship of the setting options in the SQLFlow and this demo
+[sqlflow setting](./sqlflow-settings.png)
 
 ### direct dataflow (fdd), indirect dataflow (fdr)
 In this demo, there is no corresponding parameter. 
