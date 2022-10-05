@@ -142,6 +142,32 @@ java -jar gudusoft.dlineage.jar /t oracle /f path_to_sql_file /env metadata.json
 
 You can always extract metadata from the database use the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) tool.
 
+## Relationship of the setting options in the SQLFlow and this demo
+[! sqlflow setting] (sqlflow-settings.png)
+
+### direct dataflow (fdd), indirect dataflow (fdr)
+In this demo, there is no corresponding parameter. 
+You must filter out the relation types that you don't require because this dataflowAnalyzer demo will generate data lineage with all relation types, including fdd, fdr, join, and call.
+
+### args in count function
+related arg: `/treatArgumentsInCountFunctionAsDirectDataflow`
+
+### show intermediate recordset, show function
+The settings for "show intermediate recordset" and "show function" have no corresponding arguments in the demo
+But by using those args, you can get the same outcome:
+
+- don't specify any related args, this will output the same result as if you set `show intermediate recordset = true` and set `show function = true`
+- /if, this will output the same result as if you set `show intermediate recordset = true` and set `show function = false`
+- /i,  this will output the same result as if you set `show intermediate recordset = false` and set `show function = true` 
+- /topselectlist, this will output the same result as if you set `show intermediate recordset = false` and set `show function = false` 
+
+### show constant
+/showConstant
+
+### show transform
+/transform /coor
+
+
 ## Releases
 - [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
