@@ -168,11 +168,11 @@ But by using those args, you can get the same outcome:
 /transform /coor
 
 
-## Releases
+## 6. Releases
 - [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
 - [Ver2.1.0, 2021/07/11] Release gsp core 2.3.7.2
 
-## Links
+## 7. Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
