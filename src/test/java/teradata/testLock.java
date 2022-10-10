@@ -6,6 +6,7 @@ package teradata;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.nodes.teradata.TTeradataLockClause;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataLock;
 import junit.framework.TestCase;
@@ -25,9 +26,10 @@ public class testLock extends TestCase {
           assertTrue(sqlparser.parse() == 0);
           assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstteradatalock);
         TTeradataLock lock = (TTeradataLock)sqlparser.sqlstatements.get(0);
-        assertTrue(lock.getDatabase_table_view().toString().equalsIgnoreCase("TABLE"));
-        assertTrue(lock.getObjectName().toString().equalsIgnoreCase("dbc.TDWMExceptionLog"));
-        assertTrue(lock.getLockMode().toString().equalsIgnoreCase("ACCESS"));
+        TTeradataLockClause lockClause = lock.getLockClauses().get(0);
+        assertTrue(lockClause.getDatabase_table_view().toString().equalsIgnoreCase("TABLE"));
+        assertTrue(lockClause.getObjectName().toString().equalsIgnoreCase("dbc.TDWMExceptionLog"));
+        assertTrue(lockClause.getLockMode().toString().equalsIgnoreCase("ACCESS"));
         assertTrue(lock.getSqlRequest().sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement select = (TSelectSqlStatement)lock.getSqlRequest();
         assertTrue(select.getResultColumnList().size() == 24);
@@ -42,13 +44,36 @@ public class testLock extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstteradatalock);
         TTeradataLock lock = (TTeradataLock)sqlparser.sqlstatements.get(0);
-        assertTrue(lock.getDatabase_table_view().toString().equalsIgnoreCase("TABLE"));
-        assertTrue(lock.getObjectName().toString().equalsIgnoreCase("t1"));
-        assertTrue(lock.getLockMode().toString().equalsIgnoreCase("ACCESS"));
+        TTeradataLockClause lockClause = lock.getLockClauses().get(0);
+        assertTrue(lockClause.getDatabase_table_view().toString().equalsIgnoreCase("TABLE"));
+        assertTrue(lockClause.getObjectName().toString().equalsIgnoreCase("t1"));
+        assertTrue(lockClause.getLockMode().toString().equalsIgnoreCase("ACCESS"));
         assertTrue(lock.getSqlRequest().sqlstatementtype == ESqlStatementType.sstselect);
         TSelectSqlStatement select = (TSelectSqlStatement)lock.getSqlRequest();
         assertTrue(select.getResultColumnList().size() == 1);
         assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("t1"));
+
+    }
+
+    public void test3(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = " LOCKING TABLE schema1.table1 FOR READ\n" +
+                "LOCKING TABLE schema1.table1 FOR READ\n" +
+                "LOCKING TABLE schema1.table2 FOR READ\n" +
+                "LOCKING TABLE schema1.table3 FOR READ\n" +
+                "Select * from schema1.table1, schema1.table2;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstteradatalock);
+        TTeradataLock lock = (TTeradataLock)sqlparser.sqlstatements.get(0);
+        TTeradataLockClause lockClause = lock.getLockClauses().get(0);
+        assertTrue(lockClause.getDatabase_table_view().toString().equalsIgnoreCase("TABLE"));
+        assertTrue(lockClause.getObjectName().toString().equalsIgnoreCase("schema1.table1"));
+        assertTrue(lockClause.getLockMode().toString().equalsIgnoreCase("READ"));
+        assertTrue(lock.getSqlRequest().sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement select = (TSelectSqlStatement)lock.getSqlRequest();
+        assertTrue(select.getResultColumnList().size() == 1);
+        assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("schema1.table1"));
 
     }
 
