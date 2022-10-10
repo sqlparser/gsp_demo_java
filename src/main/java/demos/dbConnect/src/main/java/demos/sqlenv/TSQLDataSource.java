@@ -7,9 +7,9 @@ import demos.sqlenv.constant.DbTypeConstant;
 import demos.sqlenv.metadata.DDL;
 import demos.sqlenv.operation.DbOperationFactory;
 import demos.sqlenv.operation.DbOperationService;
-import demos.sqlenv.parser.TJSONSQLEnvParser;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import demos.sqlenv.util.JdbcUrlParser;
+import gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser;
 import gudusoft.gsqlparser.util.SQLUtil;
 
 import java.sql.Connection;
@@ -138,7 +138,10 @@ public class TSQLDataSource {
     public TSQLEnv exportSQLEnv() {
         String json = exportJSON();
         if (!SQLUtil.isEmpty(json)) {
-            return new TJSONSQLEnvParser().parseSQLEnv(vendor, json);
+            TSQLEnv[] envs =  new TJSONSQLEnvParser(null,null,null).parseSQLEnv(vendor, json);
+            if(envs!=null && envs.length>0) {
+                return envs[0];
+            }
         }
         return null;
     }
