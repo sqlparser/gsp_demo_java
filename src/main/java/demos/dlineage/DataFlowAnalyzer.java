@@ -155,8 +155,11 @@ public class DataFlowAnalyzer {
 		if (argList.indexOf("/env") != -1 && argList.size() > argList.indexOf("/env") + 1) {
 			File metadataFile = new File(args[argList.indexOf("/env") + 1]);
 			if (metadataFile.exists()) {
-				TJSONSQLEnvParser jsonSQLEnvParser = new TJSONSQLEnvParser();
-				sqlenv = jsonSQLEnvParser.parseSQLEnv(vendor, SQLUtil.getFileContent(metadataFile));
+				TJSONSQLEnvParser jsonSQLEnvParser = new TJSONSQLEnvParser(null, null, null);
+				TSQLEnv[] envs = jsonSQLEnvParser.parseSQLEnv(vendor, SQLUtil.getFileContent(metadataFile));
+				if(envs!=null && envs.length>0) {
+					sqlenv = envs[0];
+				}
 			}
 		}
 
