@@ -55,7 +55,8 @@ public class testCreateNode extends TestCase
 		TObjectName tableName = new TObjectName(new TSourceToken("ATable"), EDbObjectType.table);
 		assertTrue(tableName.toScript().equalsIgnoreCase("ATable"));
 
-		TObjectName columnName = new TObjectName(EDbObjectType.column,new TSourceToken("ATable"),new TSourceToken("AColumn"));
+		// TObjectName columnName = new TObjectName(EDbObjectType.column,new TSourceToken("ATable"),new TSourceToken("AColumn"));
+		TObjectName columnName = TObjectName.createObjectName (EDbVendor.dbvoracle, EDbObjectType.column,new TSourceToken("ATable"),new TSourceToken("AColumn"));
 		assertTrue(columnName.toScript().equalsIgnoreCase("ATable.AColumn"));
 
 		// use parseObjectName() method to create a three parts object name
