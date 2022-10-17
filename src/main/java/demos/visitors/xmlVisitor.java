@@ -942,6 +942,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case collection_constructor_multiset_t:
 			case collection_constructor_set_t:
 			case list_t:
+			case array_t:
 				e_expression = xmldoc.createElement(TAG_LIST_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
@@ -2921,6 +2922,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		// appendStartTag(node);
 		e_parent = (Element) elementStack.peek();
 		Element e_merge_insert_action = xmldoc.createElement("merge_insert_action");
+		e_merge_insert_action.setAttribute("insert_row",  ((node.getValuelist()==null)&&(node.getColumnList() == null))?"true":"false");
 		e_parent.appendChild(e_merge_insert_action);
 		elementStack.push(e_merge_insert_action);
 
