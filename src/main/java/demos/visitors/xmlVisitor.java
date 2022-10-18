@@ -101,6 +101,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import static gudusoft.gsqlparser.EExpressionType.*;
 import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.ACCESS_KEY;
 import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.CREDENTIALS;
 
@@ -942,7 +943,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case collection_constructor_multiset_t:
 			case collection_constructor_set_t:
 			case list_t:
-			case array_t:
 				e_expression = xmldoc.createElement(TAG_LIST_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
@@ -951,6 +951,36 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getExprList() != null) {
 					node.getExprList().accept(this);
 				}
+				elementStack.pop();
+				break;
+			case array_t:
+				e_expression = xmldoc.createElement("array_elements");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_expression);
+				elementStack.push(e_expression);
+
+				if (node.getTypeName() != null){
+					addElementOfNode("element_type",node.getTypeName());
+				}
+
+				if (node.getExprList() != null) {
+					for(int k=0;k<node.getExprList().size();k++){
+						TExpression expr = node.getExprList().getExpression(k);
+						Element arrayElement = xmldoc.createElement("element");
+						e_expression.appendChild(arrayElement);
+
+						if ((expr.getExpressionType() == parenthesis_t)||(expr.getExpressionType() == list_t)){
+							arrayElement.setAttribute("element_type","struct");
+						}else{
+							arrayElement.setAttribute("element_type","normal");
+						}
+						elementStack.push(arrayElement);
+						expr.accept(this);
+						elementStack.pop();
+					}
+					//node.getExprList().accept(this);
+				}
+
 				elementStack.pop();
 				break;
 			case pattern_matching_t:
@@ -1791,9 +1821,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getColumnDefinitions().accept(this);
 
 				elementStack.pop();
-				// sb.append(node.toString().replace(">","&#62;").replace("<","&#60;"));
 				break;
 			}
+			case unnest:
+				e_table_reference = xmldoc.createElement("unnest_table_reference");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_table_reference);
+				elementStack.push(e_table_reference);
+
+				node.getUnnestClause().accept(this);
+				elementStack.pop();
+
+				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
 				e_parent = (Element) elementStack.peek();
@@ -1827,6 +1866,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TUnnestClause node) {
+		Element e_unnest = xmldoc.createElement("unnest_clause");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_unnest);
+		elementStack.push(e_unnest);
+
+		node.getArrayExpr().accept(this);
+
+		if (node.getWithOffset() != null){
+			if (node.getWithOffsetAlais() != null){
+				addElementOfString("with_offset",node.getWithOffsetAlais().toString());
+			}else{
+				addElementOfString("with_offset","empty_value");
+			}
+		}
+
+		elementStack.pop();
+	}
 
 	public void preVisit(TForXMLClause node) {
 		Element e_for_xml_clause = xmldoc.createElement("for_xml_clause");
@@ -2786,6 +2844,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_value = xmldoc.createElement("value");
 		e_value.setTextContent(node.toString());
 		e_datatype.appendChild(e_value);
+
+		elementStack.push(e_datatype);
+		switch (node.getDataType()){
+			case struct_t:
+				addElementOfNode("element_list",node.getColumnDefList());
+				break;
+			default:
+				break;
+		}
+		elementStack.pop();
 
 	}
 

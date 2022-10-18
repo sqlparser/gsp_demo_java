@@ -327,6 +327,7 @@ public class TGetTableColumn{
     public boolean showTreeStructure = false;
     public boolean showBySQLClause = false;
     public boolean showJoin = false;
+    public boolean showCTE = false;
 
     private Stack<TStoredProcedureSqlStatement> spList;
 
@@ -365,6 +366,7 @@ public class TGetTableColumn{
         linkOrphanColumnToFirstTable = true;
         showDatatype = false;
         showIndex = false;
+        showCTE = false;
     }
 
     public void runText(String pQuery){
@@ -622,7 +624,7 @@ public class TGetTableColumn{
                 tableColumnList.append(","+tn);
 
                 if (!((lcTable.getTableType() == ETableSource.subquery)
-                        || (lcTable.isCTEName())
+                        || (lcTable.isCTEName()&&(!showCTE))
                         ||(lcTable.getTableType() == ETableSource.openquery)
                         ||(lcTable.getTableType() == ETableSource.function)) && lcTable.getTableName()!=null) {
                    if (lcTable.isLinkTable()){
@@ -633,6 +635,7 @@ public class TGetTableColumn{
                        tablelist.add(lcTable.getTableName().toString());
                    }
                 }
+
 
                 for (int j=0;j<stmt.tables.getTable(i).getLinkedColumns().size();j++){
                     lcColumn = stmt.tables.getTable(i).getLinkedColumns().getObjectName(j);
@@ -665,7 +668,7 @@ public class TGetTableColumn{
                         infos.append(numberOfSpace(pNest+3)+ lcColumn.getColumnNameOnly()+newline);
                     }
 
-                    if (!((lcTable.getTableType() == ETableSource.subquery)||(lcTable.isCTEName()))){
+                    if (!((lcTable.getTableType() == ETableSource.subquery)||(lcTable.isCTEName()&&(!showCTE)))){
                          if ((listStarColumn) || (!(lcColumn.getColumnNameOnly().equals("*")))){
                              if (lcTable.isLinkTable()){
                                  fieldlist.add(lcTable.getLinkTable().getTableName() + dotChar + cn );
