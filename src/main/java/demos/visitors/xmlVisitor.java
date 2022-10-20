@@ -27,6 +27,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
+import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
@@ -75,6 +76,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -3744,11 +3746,74 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
+		if (stmt.getTableProperties() != null){
+			addElementOfNode("table_properties", stmt.getTableProperties());
+		}
+
 		elementStack.pop();
 	}
 
+	public void preVisit(TTableProperties node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_table_properties = xmldoc.createElement("table_properties");
 
-	public void preVisit(TIndexDefinition node) {
+		e_parent.appendChild(e_table_properties);
+		elementStack.push(e_table_properties);
+
+		if (node.getTablePartition() != null) {
+			node.getTablePartition().accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TRangePartitions node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_partitions = xmldoc.createElement("range_paritions");
+
+		e_parent.appendChild(e_range_partitions);
+		elementStack.push(e_range_partitions);
+
+		addElementOfNode("partition_column_list", node.getColumnList());
+//		node.getColumnList().accept(this);
+
+        ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+        for(int i=0;i<items.size();i++){
+            items.get(i).accept(this);
+        }
+
+		elementStack.pop();
+	}
+
+    public void preVisit(TTablePartitionItem node) {
+        e_parent = (Element) elementStack.peek();
+        Element e_table_partition_item = xmldoc.createElement("table_partition_item");
+
+        e_parent.appendChild(e_table_partition_item);
+        elementStack.push(e_table_partition_item);
+
+        if (node.getPartitionName() != null){
+            addElementOfNode("partition_name",node.getPartitionName());
+        }
+
+        node.getRangeValueClause().accept(this);
+        elementStack.pop();
+    }
+
+    public void preVisit(TRangeValueClause node) {
+        e_parent = (Element) elementStack.peek();
+        Element e_range_value_clause = xmldoc.createElement("range_value_clause");
+
+        e_parent.appendChild(e_range_value_clause);
+        elementStack.push(e_range_value_clause);
+
+        node.getValueList().accept(this);
+
+        elementStack.pop();
+    }
+
+
+
+    public void preVisit(TIndexDefinition node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_index_definition = xmldoc.createElement("index_definition");
 		e_index_definition.setAttribute("primary", String.valueOf(node.isPrimary()));
