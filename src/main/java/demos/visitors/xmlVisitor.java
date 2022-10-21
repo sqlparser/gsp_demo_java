@@ -104,8 +104,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import static gudusoft.gsqlparser.EExpressionType.*;
-import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.ACCESS_KEY;
-import static gudusoft.gsqlparser.nodes.TAuthorizationClause.EAuthorizationType.CREDENTIALS;
 
 public class xmlVisitor extends TParseTreeVisitor {
 
@@ -3769,12 +3767,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 	public void preVisit(TRangePartitions node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_range_partitions = xmldoc.createElement("range_paritions");
+		e_range_partitions.setAttribute("type", node.getTablePartitionType().toString());
 
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
 		addElementOfNode("partition_column_list", node.getColumnList());
-//		node.getColumnList().accept(this);
 
         ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
         for(int i=0;i<items.size();i++){
@@ -3784,22 +3782,74 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(THashPartitions node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_hash_partitions = xmldoc.createElement("hash_paritions");
+		e_hash_partitions.setAttribute("type", node.getTablePartitionType().toString());
+
+		e_parent.appendChild(e_hash_partitions);
+		elementStack.push(e_hash_partitions);
+
+		addElementOfNode("partition_column_list", node.getColumnList());
+		if (node.getHashPartitionsByQuantity() != null){
+			node.getHashPartitionsByQuantity().accept(this);
+		}
+
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TListPartitions node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_partitions = xmldoc.createElement("list_paritions");
+		e_range_partitions.setAttribute("type", node.getTablePartitionType().toString());
+
+		e_parent.appendChild(e_range_partitions);
+		elementStack.push(e_range_partitions);
+
+		addElementOfNode("partition_column_list", node.getColumnList());
+
+		ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+		for(int i=0;i<items.size();i++){
+			items.get(i).accept(this);
+		}
+
+		elementStack.pop();
+	}
+
     public void preVisit(TTablePartitionItem node) {
         e_parent = (Element) elementStack.peek();
         Element e_table_partition_item = xmldoc.createElement("table_partition_item");
+        e_table_partition_item.setAttribute("type",node.getTablePartitionItemType().toString());
 
         e_parent.appendChild(e_table_partition_item);
         elementStack.push(e_table_partition_item);
 
-        if (node.getPartitionName() != null){
-            addElementOfNode("partition_name",node.getPartitionName());
-        }
+        switch (node.getTablePartitionItemType()){
+			case range:
+				if (node.getPartitionName() != null){
+					addElementOfNode("partition_name",node.getPartitionName());
+				}
+				node.getRangeValuesClause().accept(this);
+				break;
+			case hashByQuantity:
+				addElementOfNode("hash_partition_quantity",node.getHashPartitionQuantity());
+				if (node.getStoreInTablespaceList() != null){
+					addElementOfNode("store_in_tablespaces",node.getStoreInTablespaceList());
+				}
+				break;
+			case list:
+				if (node.getPartitionName() != null){
+					addElementOfNode("partition_name",node.getPartitionName());
+				}
+				node.getListValuesClause().accept(this);
+				break;
+		}
 
-        node.getRangeValueClause().accept(this);
         elementStack.pop();
     }
 
-    public void preVisit(TRangeValueClause node) {
+    public void preVisit(TRangeValuesClause node) {
         e_parent = (Element) elementStack.peek();
         Element e_range_value_clause = xmldoc.createElement("range_value_clause");
 
@@ -3811,27 +3861,61 @@ public class xmlVisitor extends TParseTreeVisitor {
         elementStack.pop();
     }
 
+	public void preVisit(TListValuesClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_list_value_clause = xmldoc.createElement("list_value_clause");
+
+		e_parent.appendChild(e_list_value_clause);
+		elementStack.push(e_list_value_clause);
+
+		node.getValueList().accept(this);
+
+		elementStack.pop();
+	}
 
 
     public void preVisit(TIndexDefinition node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_index_definition = xmldoc.createElement("index_definition");
-		e_index_definition.setAttribute("primary", String.valueOf(node.isPrimary()));
-		e_index_definition.setAttribute("unique", String.valueOf(node.isUnique()));
+		e_index_definition.setAttribute("type", node.getIndexType().toString());
+//		e_index_definition.setAttribute("primary", String.valueOf(node.isPrimary()));
+//		e_index_definition.setAttribute("unique", String.valueOf(node.isUnique()));
 		e_index_definition.setAttribute("all", String.valueOf(node.isAll()));
 		e_parent.appendChild(e_index_definition);
 		elementStack.push(e_index_definition);
+		switch (node.getIndexType()){
+			case partitionBy:
+				for(int i=0;i<node.getPartitioningLevels().size();i++){
+					node.getPartitioningLevels().get(i).accept(this);
+				}
+				break;
+			default:
+				if (node.getIndexName() != null) {
+					node.getIndexName().accept(this);
+				}
 
-		if (node.getIndexName() != null) {
-			node.getIndexName().accept(this);
+				if (node.getIndexColumns() != null) {
+					node.getIndexColumns().accept(this);
+				}
+				break;
 		}
 
-		if (node.getIndexColumns() != null) {
-			node.getIndexColumns().accept(this);
-		}
 
-		if (node.getPartitionExprList() != null) {
-			addElementOfNode("partion_clause", node.getPartitionExprList());
+//		if (node.getPartitionExprList() != null) {
+//			addElementOfNode("partion_clause", node.getPartitionExprList());
+//		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TPartitioningLevel node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_partition_level = xmldoc.createElement("partition_level");
+		e_parent.appendChild(e_partition_level);
+		elementStack.push(e_partition_level);
+
+		if (node.getPartitionExpression() != null){
+			node.getPartitionExpression().accept(this);
 		}
 
 		elementStack.pop();
@@ -4100,8 +4184,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_range_n_item = xmldoc.createElement("range_n_item");
 		e_parent.appendChild( e_range_n_item );
 		elementStack.push(e_range_n_item);
-		addElementOfNode("start_expression",node.getStartExpression());
-		addElementOfNode("end_expression",node.getEndExpression());
+   	    addElementOfNode("start_expression",node.getStartExpression());
+
+		if (node.getEndExpression() != null){
+			addElementOfNode("end_expression",node.getEndExpression());
+		}
+
+		if (node.getRangeSize() != null){
+			addElementOfNode("range_size",node.getRangeSize());
+		}
+
 		elementStack.pop();// e_overClause
 	}
 
@@ -4296,6 +4388,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				addElementOfNode("test_expression",node.getExpr1());
 
 				Element e_list = xmldoc.createElement( "range_n_items" );
+				e_list.setAttribute("count",String.valueOf(node.getRangeNFunctionItems().size()));
 				e_function.appendChild(e_list);
 				elementStack.push(e_list);
 

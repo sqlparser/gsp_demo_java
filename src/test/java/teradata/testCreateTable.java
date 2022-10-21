@@ -39,8 +39,11 @@ public class testCreateTable extends TestCase {
         assertTrue(!indexDefinition.isUnique());
         assertTrue(indexDefinition.getIndexColumns().size() == 1);
         assertTrue(indexDefinition.getIndexColumns().getObjectName(0).toString().equalsIgnoreCase("col1"));
-        assertTrue(indexDefinition.getPartitionExprList().size() == 1);
-        TExpression partitionExpr = indexDefinition.getPartitionExprList().getExpression(0);
+
+        TIndexDefinition indexDefinition1 = createTable.getIndexDefinitions().get(1);
+
+        assertTrue(indexDefinition1.getPartitioningLevels().size() == 1);
+        TExpression partitionExpr = indexDefinition1.getPartitioningLevels().get(0).getPartitionExpression();
         assertTrue(partitionExpr.getExpressionType() == EExpressionType.function_t);
         TFunctionCall functionCall = partitionExpr.getFunctionCall();
         assertTrue(functionCall.getFunctionType() == EFunctionType.case_n_t);
@@ -77,8 +80,12 @@ public class testCreateTable extends TestCase {
         assertTrue(indexDefinition.isUnique());
         assertTrue(indexDefinition.getIndexColumns().size() == 3);
         assertTrue(indexDefinition.getIndexColumns().getObjectName(0).toString().equalsIgnoreCase("storeid"));
-        assertTrue(indexDefinition.getPartitionExprList().size() == 3);
-        TExpression partitionExpr = indexDefinition.getPartitionExprList().getExpression(0);
+
+        TIndexDefinition indexDefinition1 = createTable.getIndexDefinitions().get(1);
+
+        assertTrue(indexDefinition1.getPartitioningLevels().size() == 3);
+        //assertTrue(indexDefinition.getPartitionExprList().size() == 3);
+        TExpression partitionExpr = indexDefinition1.getPartitioningLevels().get(0).getPartitionExpression();
         assertTrue(partitionExpr.getExpressionType() == EExpressionType.function_t);
         TFunctionCall functionCall = partitionExpr.getFunctionCall();
         assertTrue(functionCall.getFunctionType() == EFunctionType.range_n_t);
@@ -90,12 +97,6 @@ public class testCreateTable extends TestCase {
         assertTrue(rangeNFunctionItem.getStartExpression().toString().equalsIgnoreCase("DATE '2002-01-01'"));
         assertTrue(rangeNFunctionItem.getEndExpression().toString().equalsIgnoreCase("DATE '2008-12-31'"));
         assertTrue(rangeNFunctionItem.getRangeSize().toString().equalsIgnoreCase("INTERVAL '1' YEAR"));
-//        assertTrue(test_expression.getBetweenOperand().toString().equalsIgnoreCase("salesdate"));
-//        assertTrue(test_expression.getLeftOperand().toString().equalsIgnoreCase("DATE '2002-01-01'"));
-//        assertTrue(test_expression.getRightOperand().toString().equalsIgnoreCase("DATE '2008-12-31'"));
-//        TExpression rangSize = functionCall.getRangeSize();
-        //System.out.println(rangSize.toString());
-//        assertTrue(rangSize.toString().equalsIgnoreCase("INTERVAL '1' YEAR"));
     }
 
 
