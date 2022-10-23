@@ -1,13 +1,13 @@
 -injars       gudusoft.gsqlparser.jar
 -outjars      gudusoft.gsqlparser-new.jar
--libraryjars  /jre/lib/resources.jar
--libraryjars  /jre/lib/rt.jar
--libraryjars  /jre/lib/jsse.jar
--libraryjars  /jre/lib/jce.jar
--libraryjars  /jre/lib/charsets.jar
--libraryjars  /jre/lib/ext/dnsns.jar
--libraryjars  /jre/lib/ext/localedata.jar
--libraryjars  /jre/lib/ext/sunjce_provider.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/resources.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/rt.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/jsse.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/jce.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/charsets.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/ext/dnsns.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/ext/localedata.jar
+-libraryjars  /usr/lib/jvm/temurin-8-jdk-amd64/jre/lib/ext/sunjce_provider.jar
 -overloadaggressively
 -defaultpackage ''
 -allowaccessmodification
