@@ -234,6 +234,7 @@ public class runGetTableColumn
 		getTableColumn.showDatatype = true;
 		getTableColumn.listStarColumn = true;
 		getTableColumn.showTableEffect = false;
+		getTableColumn.showCTE = false;
 		//getTableColumn.setMetaDatabase( new sampleMetaDB());
 		
 		TSQLEnv sqlenv = null;

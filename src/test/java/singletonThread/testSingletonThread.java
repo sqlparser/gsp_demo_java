@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 class Thread1 extends Thread{
 
     public  void run(){
-        TObjectName table1 = new TObjectName(EDbVendor.dbvoracle, EDbObjectType.table);
+        TObjectName table1 = TObjectName.createObjectName (EDbVendor.dbvoracle, EDbObjectType.table);
         for(int i=0;i<100;i++){
             table1.setString("scott.emp"+i);
             //System.out.println (Thread.currentThread().getName()+": "+ i);
@@ -50,7 +50,7 @@ public class testSingletonThread extends TestCase {
         t2.start();
 
         for(int i=0;i<100;i++){
-            TObjectName table1 = new TObjectName(EDbVendor.dbvoracle, EDbObjectType.table);
+            TObjectName table1 = TObjectName.createObjectName (EDbVendor.dbvoracle, EDbObjectType.table);
             String newName = "scott.emp"+i;
             table1.setString(newName);
            // System.out.println (Thread.currentThread().getName()+": "+ i);

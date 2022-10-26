@@ -16,6 +16,7 @@ public class testCreateIndex extends TestCase {
                 "             (\"A\" ASC,\n" +
                 "             \"B\" ASC )\n" +
                 "             ALLOW REVERSE SCANS; --Error";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TCreateIndexSqlStatement createIndexSqlStatement = (TCreateIndexSqlStatement)sqlparser.sqlstatements.get(0);
