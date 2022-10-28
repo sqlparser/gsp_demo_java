@@ -29,7 +29,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv]] [/transform [/coor]] [/showConstant] [/treatArgumentsInCountFunctionAsDirectDataflow]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv [/delimeter <delimeter>]]] [/transform [/coor]] [/showConstant] [/treatArgumentsInCountFunctionAsDirectDataflow]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -47,8 +47,9 @@ public class DataFlowAnalyzer {
 					"/text: Optional, this option is valid only /s is used, output the column dependency in text mode.");
 			System.out.println("/json: Optional, print the json format output.");
 			System.out.println("/stat: Optional, output the analysis statistic information.");
-			System.out.println("/tableLineage [/csv]: Optional, output tabel level lineage.");
+			System.out.println("/tableLineage [/csv /delimiter]: Optional, output tabel level lineage.");
 			System.out.println("/csv: Optional, output column level lineage in csv format.");
+			System.out.println("/delimiter: Optional, the delimiter of output column level lineage in csv format.");
 			System.out.println("/t: Option, set the database type. "
 					+ "Support access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,\n"
 					+ "sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,\n"
@@ -145,6 +146,7 @@ public class DataFlowAnalyzer {
 
 		boolean tableLineage = argList.indexOf("/tableLineage") != -1;
 		boolean csv = argList.indexOf("/csv") != -1;
+		String delimiter = (argList.indexOf("/delimiter") != -1 && argList.size() > argList.indexOf("/delimiter") + 1) ? argList.get(argList.indexOf("/delimiter") + 1) : ",";
 		if (tableLineage) {
 			simple = false;
 			ignoreResultSets = false;
@@ -212,7 +214,7 @@ public class DataFlowAnalyzer {
 				dlineage.generateDataFlow();
 				dataflow originDataflow = dlineage.getDataFlow();
 				if (csv) {
-					result = ProcessUtility.generateTableLevelLineageCsv(dlineage, originDataflow);
+					result = ProcessUtility.generateTableLevelLineageCsv(dlineage, originDataflow, delimiter);
 				} else {
 					dataflow dataflow = ProcessUtility.generateTableLevelLineage(dlineage, originDataflow);
 					if (jsonFormat) {
@@ -226,7 +228,7 @@ public class DataFlowAnalyzer {
 				result = dlineage.generateDataFlow();
 				if (csv) {
 					dataflow originDataflow = dlineage.getDataFlow();
-					result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow);
+					result = ProcessUtility.generateColumnLevelLineageCsv(dlineage, originDataflow, delimiter);
 				}
 				else if (jsonFormat) {
 					dataflow dataflow = dlineage.getDataFlow();
