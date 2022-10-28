@@ -10,11 +10,23 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TJoin;
 import gudusoft.gsqlparser.nodes.TJoinItem;
 import gudusoft.gsqlparser.nodes.EHiveInsertType;
+import gudusoft.gsqlparser.nodes.TMultiTarget;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testInsert extends TestCase {
+
+    public void test0(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);
+        sqlparser.sqltext = " insert into TABLE empTableName values (1, 'Angel', 10000, 'F', '1990-12-30', TIMESTAMP '1990-12-30 00:00:00');";
+        assertTrue(sqlparser.parse() == 0);
+
+
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+        TMultiTarget multiTarget = insert.getValues().getMultiTarget(0);
+        assertTrue(multiTarget.getColumnList().size() == 6);
+    }
 
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvhive);

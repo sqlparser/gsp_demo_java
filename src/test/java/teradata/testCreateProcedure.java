@@ -7,7 +7,6 @@ import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlFetch;
 import gudusoft.gsqlparser.stmt.mssql.TMssqlOpen;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlSet;
 import junit.framework.TestCase;
 
 import static gudusoft.gsqlparser.ESqlStatementType.*;
