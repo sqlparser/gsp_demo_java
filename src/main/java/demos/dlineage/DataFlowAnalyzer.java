@@ -64,6 +64,11 @@ public class DataFlowAnalyzer {
 			System.out.println("/showImplicitSchema: Optional, show implicit schema.");
 			System.out.println("/showConstant: Optional, show constant table.");
 			System.out.println("/treatArgumentsInCountFunctionAsDirectDataflow: Optional, treat arguments in count function as direct dataflow.");
+			//add by grq 2022.10.25 issue=I5X3KO
+			System.out.println("/fromdb: Optional, specifies the database connection parameters.");
+			System.out.println("/exportonly: Optional, just export metadata.json, no further data analysis.");
+			System.out.println("/metadataoutput: Optional, specifies the metadata output directory and file name.");
+			//end by grq
 			return;
 		}
 
@@ -89,7 +94,23 @@ public class DataFlowAnalyzer {
 				System.out.println(sqlFiles + " is not a valid directory.");
 				return;
 			}
-		} else {
+		}
+		//add by grq 2022.10.25 issue=I5X3KO
+		else if (argList.indexOf("/fromdb") != -1 && argList.size() > argList.indexOf("/fromdb") + 1){
+			String metadataoutput = "metadata.json";
+			if(argList.indexOf("/metadataoutput") != -1 && argList.size() > argList.indexOf("/metadataoutput") + 1){
+				metadataoutput = args[argList.indexOf("/metadataoutput") + 1];
+			}
+			if(!SqlflowIngester.export(args[argList.indexOf("/fromdb") + 1].split(" "), metadataoutput)){
+				return;
+			}
+			if(argList.indexOf("/exportonly") != -1 ){
+				return;
+			}
+			sqlFiles = new File(metadataoutput );
+		}
+		//end by grq
+		else {
 			System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
 			return;
 		}
