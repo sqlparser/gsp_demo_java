@@ -106,22 +106,6 @@ for example:
 ```
 java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
 ```
-~~ [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) is a tool that extract metadata from various database,
-you can download the tool here:
-
-https://github.com/sqlparser/sqlflow_public/releases
-
-Under linux:
-```
-./exporter.sh -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save /tmp/sqlflow-ingester -dbVendor dbvoracle
-```
-
-Under windows:
-```
-exporter.bat -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save c:\tmp\sqlflow-ingester -dbVendor dbvoracle
-```
-
-After successfully export metadta from the database, you will get a metadata.json file. ~~
 
 ### 3.2 analyze metadata file
 
