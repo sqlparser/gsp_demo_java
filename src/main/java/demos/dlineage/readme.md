@@ -7,7 +7,7 @@ This tool is built from the scratch, it is the main part of the backend of [the 
 
 ## Quick start
 
-### 1. Analyze data linege from SQL files	
+### 1. Analyze data lineage from SQL files	
 
 Analyze demo.sql under sample directory and save the data lineage outpout in out.xml file.
 
@@ -15,7 +15,7 @@ Analyze demo.sql under sample directory and save the data lineage outpout in out
 java -jar gudusoft.dlineage.jar /t oracle /f ../sample/demo.sql /o out.xml
 ```
 
-### 2. Analyze data linege from a database
+### 2. Analyze data lineage from a database
 The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
 
 for example, connect to an Oracle database and analzye the data lineage, and save the data lineage in out.xml.
@@ -80,7 +80,7 @@ https://github.com/sqlparser/gsp_demo_java/releases/
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 	
-## 2. Analyze data linege from SQL files	
+## 2. Analyze data lineage from SQL files	
 Please use `/f` parameter to specify a single SQL file,
 or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
 
@@ -88,7 +88,7 @@ or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
 java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
 
-## 3. Analyze data linege from a database
+## 3. Analyze data lineage from a database
 The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
 
 
