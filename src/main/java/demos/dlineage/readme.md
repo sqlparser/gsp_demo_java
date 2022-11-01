@@ -20,7 +20,7 @@ The dlineage tool can connect to the database instance and analyze the metadata 
 
 for example, connect to an Oracle database and analzye the data lineage, and save the data lineage in out.xml.
 
-a metadata.json file that includes all metadata extracted from Oracle database also saved in the current directory.
+a metadata.json file that includes all metadata extracted from Oracle database will be saved to the current directory.
 
 ```
 java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
@@ -136,7 +136,7 @@ java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -por
 java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
 ```
 
-- MySQL
+- PostgreSQL
 ```
 java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
 ```
