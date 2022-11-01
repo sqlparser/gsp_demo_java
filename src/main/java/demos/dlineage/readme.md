@@ -1,12 +1,30 @@
 # DataFlowAnalyzer
-Collects the end-to-end column-level data lineage in the Data Warehouses environment 
-by analyzing SQL script especially stored procedure like PL/SQL.
+Collects the end-to-end column-level data lineage in the Data Warehouses environment by connecting to database or 
+analyzing SQL script especially stored procedure like PL/SQL.
 
-This tool introduces a new [data lineage model](sqlflow-data-lineage-model-reference.pdf) 
-that is compatible with the Apache Atlas type system to describle the data flow of table/columns. 
 
 This tool is built from the scratch, it is the main part of the backend of [the SQLFlow Cloud](https://sqlflow.gudusoft.com).
 
+## Quick start
+
+### 1. Analyze data linege from SQL files	
+
+Analyze demo.sql under sample directory and save the data lineage outpout in out.xml file.
+
+```
+java -jar gudusoft.dlineage.jar /t oracle /f ../sample/demo.sql /o out.xml
+```
+
+### 2. Analyze data linege from a database
+The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
+
+for example, connect to an Oracle database and analzye the data lineage, and save the data lineage in out.xml.
+
+a metadata.json file that includes all metadata extracted from Oracle database also saved in the current directory.
+
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
+```
 
 ## Usage
 ```
@@ -103,9 +121,26 @@ Please use `/fromdb` parameter to export metadta from the database.
 
 for example, connect to an Oracle database and analzye the data lineage.
 
+- Oracle
 ```
-java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger"
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o oracle.xml
 ```
+
+- SQL Server
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -port 1433 -db AdventureWorksDW2019 -user sa -pwd sa" /o sqlserver.xml
+```
+
+- MySQL
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
+```
+
+- MySQL
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
+```
+
 
 ### 3.2  Export the meatadata only 
 
@@ -113,7 +148,7 @@ You can also export the meatadata from database and analzye the metadata in two 
 
 - Only export the metadta
 ```
-java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
 ```
 
 the metadata.json exported in this step can also be used with `/env` paramter to resolve the ambiguous columns problem in SQL query.
@@ -204,7 +239,7 @@ But by using those args, you can get the same outcome:
 
 ## 8、List of Supported dbVendors
 
-| dbVendor      | 数据库     |
+| dbVendor      | databases     |
 |---------------| ---------- |
 | dbvoracle     | oracle     |
 | dbvredshift   | redshift   |
