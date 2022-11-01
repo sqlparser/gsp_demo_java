@@ -58,7 +58,7 @@ sybase,teradata,soql,vertica
 
 ## 1. Binary version
 https://github.com/sqlparser/gsp_demo_java/releases/ 
-> update date: 2022/10/05
+> update date: 2022/11/01
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 	
