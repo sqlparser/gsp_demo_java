@@ -71,11 +71,10 @@ java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
 
 ## 3. Analyze data linege from a database
-Since version 2.2.0, the dlineage tool no longer connect to the database to analyze
-the data lineage directly. Instead, it accepts a metadata json file which 
-includes all metadata of a database and analyze the data lineage from this json file.
+The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
 
-### 3.1 extract metdata from database
+
+### 3.1 connect and analyze data lineage
 Please use `/fromdb` parameter to export metadta from the database.
 
 `/fromdb` parameter:
@@ -102,14 +101,23 @@ Please use `/fromdb` parameter to export metadta from the database.
 
 `/metadataoutput` specifies the metadata output directory and file name.
 
-for example:
+for example, connect to an Oracle database and analzye the data lineage.
+
+```
+java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger"
+```
+
+### 3.2  Export the meatadata only 
+
+You can also export the meatadata from database and analzye the metadata in two steps:
+
+- Only export the metadta
 ```
 java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
 ```
 
-### 3.2 analyze metadata file
+- analyze the metadta that generated in the previous step
 
-After you get the metadata.json file, just analyze it like a normal sql file with `/f` parmeter:
 ```
 java -jar gudusoft.dlineage.jar /t oracle /f metadata.json
 ```
