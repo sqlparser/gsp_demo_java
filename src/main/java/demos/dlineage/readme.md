@@ -116,6 +116,8 @@ You can also export the meatadata from database and analzye the metadata in two 
 java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
 ```
 
+the metadata.json exported in this step can also be used with `/env` paramter to resolve the ambiguous columns problem in SQL query.
+
 - analyze the metadta that generated in the previous step
 
 ```
