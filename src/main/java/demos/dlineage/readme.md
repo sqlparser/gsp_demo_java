@@ -43,7 +43,9 @@ System.out.println("/coor: Optional, output the relation transform coordinate, b
 System.out.println("/defaultDatabase: Optional, specify the default schema.");
 System.out.println("/defaultSchema: Optional, specify the default schema.");
 System.out.println("/showImplicitSchema: Optional, show implicit schema.");
-
+System.out.println("/fromdb: Optional, specifies the database connection parameters.");
+System.out.println("/exportonly: Optional, just export metadata.json, no further data analysis.");
+System.out.println("/metadataoutput: Optional, specifies the metadata output directory and file name.");
 ```
 
 
@@ -74,8 +76,24 @@ the data lineage directly. Instead, it accepts a metadata json file which
 includes all metadata of a database and analyze the data lineage from this json file.
 
 ### 3.1 extract metdata from database
-
-[sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) is a tool that extract metadata from various database,
+Please use `/fromdb` parameter to export metadta from the database,
+`/fromdb` parameter:
+-dbVendor: Database type, Use colon to split dbVendor and version if specific version is required. (<dbVendor>:<version>, such as dbvmysql:5.7)
+-host: Database host name (ip address or domain name)
+-port: Port number
+-db: Database name
+-user: User name
+-pwd: User password
+-extractedDbsSchemas: Export metadata under the specific schema. Use comma to split if multiple schema required (such as <schema1>,<schema2>). We can use this flag to improve the export performance.
+-excludedDbsSchemas:  Exclude metadata under the specific schema during the export. Use comma to split if multiple schema required (such as <schema1>,<schema2>). We can use this flag to improve the export performance.
+-extractedViews: Export metadata under the specific view. Use comma to split if multiple views required (such as <view1>,<view2>). We can use this flag to improve the export performance.
+`/exportonly` just export metadata.json, no further data analysis.
+`/metadataoutput` specifies the metadata output directory and file name.
+for example:
+```
+java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput test666.json
+```
+~~ [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) is a tool that extract metadata from various database,
 you can download the tool here:
 
 https://github.com/sqlparser/sqlflow_public/releases
@@ -90,7 +108,7 @@ Under windows:
 exporter.bat -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger -save c:\tmp\sqlflow-ingester -dbVendor dbvoracle
 ```
 
-After successfully export metadta from the database, you will get a metadata.json file.
+After successfully export metadta from the database, you will get a metadata.json file. ~~
 
 ### 3.2 analyze metadata file
 
@@ -176,3 +194,21 @@ But by using those args, you can get the same outcome:
 
 ## 7. Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
+
+## 8、List of Supported dbVendors
+
+| dbVendor      | 数据库     |
+|---------------| ---------- |
+| dbvoracle     | oracle     |
+| dbvredshift   | redshift   |
+| dbvpostgresql | postgresql |
+| dbvmssql      | sqlserver  |
+| dbvmysql      | mysql      |
+| dbvazuresql   | azuresql   |
+| dbvgreenplum  | greenplum  |
+| dbvnetezza    | netezza    |
+| dbvsnowflake  | snowflake  |
+| dbvteradata   | teradata   |
+| dbvhive       | hive       |
+| dbvimpala     | impala     |
+| dbvdb2        | db2     |
