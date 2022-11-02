@@ -1,5 +1,8 @@
 #!/bin/bash
 
+pwd
+ls
+
 #source dir
 p1=$1
 
