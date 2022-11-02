@@ -15,6 +15,7 @@ steps:
     inputs:
       targetType: filePath
       filePath: './build_dlineage.sh'
+      
   - task: GitHubRelease@1
     inputs:
       gitHubConnection: 'shenhuan2021'
