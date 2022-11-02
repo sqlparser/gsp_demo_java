@@ -123,22 +123,22 @@ for example, connect to an Oracle database and analzye the data lineage.
 
 - Oracle
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o oracle.xml
+java -jar gudusoft.dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o oracle.xml
 ```
 
 - SQL Server
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -port 1433 -db AdventureWorksDW2019 -user sa -pwd sa" /o sqlserver.xml
+java -jar gudusoft.dlineage.jar /t mssql /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -port 1433 -db AdventureWorksDW2019 -user sa -pwd sa" /o sqlserver.xml
 ```
 
 - MySQL
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
+java -jar gudusoft.dlineage.jar /t mysql /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
 ```
 
 - PostgreSQL
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
+java -jar gudusoft.dlineage.jar /t postgresql /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
 ```
 
 
