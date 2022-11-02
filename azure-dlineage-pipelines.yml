@@ -14,8 +14,10 @@ steps:
     displayName: 'build'
     inputs:
       targetType: filePath
-      filePath: './build_dlineage.sh'
-      
+      script: 'sh build_dlineage.sh'
+      arguments: '{$(system.defaultworkingdirectory)}'
+      filePath: 'build_dlineage.sh'
+
   - task: GitHubRelease@1
     inputs:
       gitHubConnection: 'shenhuan2021'
