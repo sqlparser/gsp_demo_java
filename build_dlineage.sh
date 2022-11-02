@@ -13,7 +13,7 @@ version=$ps2
 
 echo 'start build'
 cd $p1
-git clone git@github.com:shenhuan2021/dlineage_base_base.git
+git clone https://github.com/shenhuan2021/dlineage_base.git
 sudo mkdir -p $p1/dlineage_base/lib/
 sudo mkdir -p $p1/dlineage_base/src/main/java/demos/lineage
 
