@@ -14,10 +14,10 @@ version=$ps2
 echo 'start build'
 cd $p1
 git clone https://shenhuan2021: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@github.com/sqlparser/dlineage.git
-sudo cp $p1/lib/*.jar $p1/dlineage/lib/gudusoft.gsqlparser.jar
-sudo cp $p1/external_lib/sqlflow-exporter.jar $p1/dlineage/lib/sqlflow-exporter.jar
-sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/dlineage/src/main/java/DataFlowAnalyzer.java
-sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/dlineage/src/main/java/SqlflowIngester.java
+sudo cp $p1/lib/*.jar $p1/dlineage/lib/
+sudo cp $p1/external_lib/sqlflow-exporter.jar $p1/dlineage/lib/
+sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/dlineage/src/main/java/
+sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/dlineage/src/main/java/
 cd dlineage
 chmod 777 maven.sh
 sh maven.sh
@@ -36,8 +36,8 @@ sudo cp $p1/dlineage/target/*.jar $p1/Dlineage/bin/
 sudo cp $p1/dlineage/script/start.sh $p1/Dlineage/script/
 sudo cp $p1/dlineage/script/start.bat $p1/Dlineage/script/
 sudo cp $p1/lib/*.jar $p1/Dlineage/lib/
-sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/Dlineage/src/DataFlowAnalyzer.java
-sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/Dlineage/src/SqlflowIngester.java
+sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/Dlineage/src/
+sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/Dlineage/src/
 sudo cp $p1/src/main/java/demos/dlineage/sample/*.sql $p1/Dlineage/sample/
 sudo cp $p1/dlineage/sqlflow-data-lineage-model-reference.pdf $p1/Dlineage/doc/
 sudo cp $p1/src/main/java/demos/dlineage/readme.md $p1/Dlineage/
