@@ -9,11 +9,21 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+steps:  
+  - task: Bash@3
+    displayName: 'build'
+    inputs:
+      targetType: filePath
+      filePath: './build_dlineage.sh'
+  - task: GitHubRelease@1
+    inputs:
+      gitHubConnection: 'shenhuan2021'
+      repositoryName: 'sqlparser/gsp_demo_java'
+      action: 'create'
+      target: '$(Build.SourceVersion)'
+      tagSource: 'gitTag'
+      title: 'gudusoft.dlineage'
+      releaseNotesFilePath: '$(system.defaultworkingdirectory)/dlienagezip/*.zip'
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'commitBased'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
