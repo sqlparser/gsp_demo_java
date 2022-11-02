@@ -14,6 +14,9 @@ version=$ps2
 echo 'start build'
 cd $p1
 git clone https://shenhuan2021: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@github.com/sqlparser/dlineage.git
+sudo mkdir -p $p1/dlineage/lib/
+sudo mkdir -p $p1/dlineage/src/main/java/
+
 sudo cp $p1/lib/*.jar $p1/dlineage/lib/
 sudo cp $p1/external_lib/sqlflow-exporter.jar $p1/dlineage/lib/
 sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/dlineage/src/main/java/
