@@ -23,7 +23,7 @@ for example, connect to an Oracle database and analzye the data lineage, and sav
 a metadata.json file that includes all metadata extracted from Oracle database will be saved to the current directory.
 
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
+java -jar gudusoft.dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
 ```
 
 ### 3.2  Export the meatadata from database only
@@ -240,6 +240,7 @@ But by using those args, you can get the same outcome:
 
 
 ## 6. Releases
+- [Ver3.0.1, 2022/11/01] Integrate sqlflow-ingester to dataflowAnalyzer tool.
 - [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
 - [Ver2.1.1, 2021/07/12] Update download, data lineage model document.
