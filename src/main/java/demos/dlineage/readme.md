@@ -189,21 +189,3 @@ But by using those args, you can get the same outcome:
 
 ## 7. Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
-
-## 8、List of Supported dbVendors
-
-| dbVendor      | 数据库     |
-|---------------| ---------- |
-| dbvoracle     | oracle     |
-| dbvredshift   | redshift   |
-| dbvpostgresql | postgresql |
-| dbvmssql      | sqlserver  |
-| dbvmysql      | mysql      |
-| dbvazuresql   | azuresql   |
-| dbvgreenplum  | greenplum  |
-| dbvnetezza    | netezza    |
-| dbvsnowflake  | snowflake  |
-| dbvteradata   | teradata   |
-| dbvhive       | hive       |
-| dbvimpala     | impala     |
-| dbvdb2        | db2     |
