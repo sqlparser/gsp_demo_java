@@ -20,8 +20,6 @@ sudo mkdir -p $p1/dlineage_base/src/main/java/demos/lineage
 sudo cp $p1/lib/*.jar $p1/dlineage_base/lib/
 cd $p1/dlineage_base/lib/
 echo 'cp gsp success'
-ls
-
 cd $p1
 sudo mv $p1/dlineage_base/lib/gudusoft.gsqlparser*.jar $p1/dlineage_base/lib/gudusoft.gsqlparser.jar
 sudo cp $p1/external_lib/sqlflow-exporter.jar $p1/dlineage_base/lib/
