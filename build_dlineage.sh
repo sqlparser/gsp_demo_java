@@ -17,7 +17,6 @@ git clone https://github.com/shenhuan2021/dlineage_base.git
 sudo mkdir -p $p1/dlineage_base/lib/
 sudo mkdir -p $p1/dlineage_base/src/main/java/demos/dlineage
 
-
 sudo cp $p1/lib/*.jar $p1/dlineage_base/lib/
 cd $p1/dlineage_base/lib/
 echo 'cp gsp success'
