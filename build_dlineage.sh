@@ -30,7 +30,6 @@ sudo chmod 777 maven.sh
 sh maven.sh
 echo 'maven dlineage_base jar success.'
 
-
 cd $p1
 sudo mkdir -p $p1/Dlineage/lib
 sudo mkdir -p $p1/Dlineage/src
