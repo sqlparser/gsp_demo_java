@@ -10,6 +10,7 @@ ps=(${jarpath//.jar/ })
 dirpath=${ps[0]}
 ps2=(${dirpath//gudusoft\.gsqlparser\./ })
 version=$ps2
+
 echo 'start build'
 cd $p1
 git clone https://github.com/shenhuan2021/dlineage_base.git
