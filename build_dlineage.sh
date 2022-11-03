@@ -15,7 +15,7 @@ echo 'start build'
 cd $p1
 git clone https://github.com/shenhuan2021/dlineage_base.git
 sudo mkdir -p $p1/dlineage_base/lib/
-sudo mkdir -p $p1/dlineage_base/src/main/java/demos/lineage
+sudo mkdir -p $p1/dlineage_base/src/main/java/demos/dlineage
 
 sudo cp $p1/lib/*.jar $p1/dlineage_base/lib/
 cd $p1/dlineage_base/lib/
@@ -23,8 +23,8 @@ echo 'cp gsp success'
 cd $p1
 sudo mv $p1/dlineage_base/lib/gudusoft.gsqlparser*.jar $p1/dlineage_base/lib/gudusoft.gsqlparser.jar
 sudo cp $p1/external_lib/sqlflow-exporter.jar $p1/dlineage_base/lib/
-sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/dlineage_base/src/main/java/demos/lineage/
-sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/dlineage_base/src/main/java/demos/lineage/
+sudo cp $p1/src/main/java/demos/dlineage/DataFlowAnalyzer.java $p1/dlineage_base/src/main/java/demos/dlineage/
+sudo cp $p1/src/main/java/demos/dlineage/SqlflowIngester.java $p1/dlineage_base/src/main/java/demos/dlineage/
 cd dlineage_base
 sudo chmod 777 maven.sh
 sh maven.sh
