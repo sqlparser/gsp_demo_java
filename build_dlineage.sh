@@ -3,7 +3,6 @@
 #source dir
 p1=$1
 
-
 cd $p1/lib
 jarpath=$(ls)
 echo 'zippath is '
