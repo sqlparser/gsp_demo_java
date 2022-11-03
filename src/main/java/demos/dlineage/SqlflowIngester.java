@@ -20,13 +20,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class SqlflowIngester {
-    public static boolean export(String[] args, String savePath){
+    public static boolean export(String dbVendor, String[] args, String savePath){
         if(args == null){
             System.out.println("error args");
             return false;
         }
         DataSource source = new DataSource();
-        String dbVendor = null;
         for (int i=0; i< args.length-1; i++){
             String arg = args[i];
             if("-host".equalsIgnoreCase(arg)){
@@ -43,11 +42,6 @@ public class SqlflowIngester {
             }
             else if("-pwd".equalsIgnoreCase(arg)){
                 source.setPassword(args[i+1]);
-            }
-            else if("-dbVendor".equalsIgnoreCase(arg)){
-                if(i<args.length-1){
-                    dbVendor = args[i+1];
-                }
             }
             else if("-extractedDbsSchemas".equalsIgnoreCase(arg)){
                 if(i<args.length-1){
