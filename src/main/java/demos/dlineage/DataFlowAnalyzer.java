@@ -76,6 +76,12 @@ public class DataFlowAnalyzer {
 
 		List<String> argList = Arrays.asList(args);
 
+		EDbVendor vendor = EDbVendor.dbvoracle;
+		int index = argList.indexOf("/t");
+		if (index != -1 && args.length > index + 1) {
+			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
+		}
+
 		if (argList.indexOf("/version") != -1) {
 			System.out.println("Version: " + gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getVersion());
 			System.out.println("Release Date: " + gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getReleaseDate());
@@ -101,7 +107,7 @@ public class DataFlowAnalyzer {
 			if(argList.indexOf("/metadataoutput") != -1 && argList.size() > argList.indexOf("/metadataoutput") + 1){
 				metadataoutput = args[argList.indexOf("/metadataoutput") + 1];
 			}
-			if(!SqlflowIngester.export(args[argList.indexOf("/fromdb") + 1].split(" "), metadataoutput)){
+			if(!SqlflowIngester.export(vendor.name(), args[argList.indexOf("/fromdb") + 1].split("\\s+"), metadataoutput)){
 				return;
 			}
 			if(argList.indexOf("/exportonly") != -1 ){
@@ -113,15 +119,6 @@ public class DataFlowAnalyzer {
 		else {
 			System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
 			return;
-		}
-		
-
-		EDbVendor vendor = EDbVendor.dbvoracle;
-
-		int index = argList.indexOf("/t");
-
-		if (index != -1 && args.length > index + 1) {
-			vendor = TGSqlParser.getDBVendorByName(args[index + 1]);
 		}
 
 		String outputFile = null;

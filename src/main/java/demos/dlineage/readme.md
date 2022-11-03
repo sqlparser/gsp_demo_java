@@ -80,8 +80,6 @@ Please use `/fromdb` parameter to export metadta from the database.
 
 `/fromdb` parameter:
 
--dbVendor: Database type, Use colon to split dbVendor and version if specific version is required. (<dbVendor>:<version>, such as dbvmysql:5.7)
-
 -host: Database host name (ip address or domain name)
 
 -port: Port number
@@ -104,7 +102,7 @@ Please use `/fromdb` parameter to export metadta from the database.
 
 for example:
 ```
-java -jar data_flow_analyzer.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+java -jar data_flow_analyzer.jar /t oracle /fromdb "-host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
 ```
 
 ### 3.2 analyze metadata file
