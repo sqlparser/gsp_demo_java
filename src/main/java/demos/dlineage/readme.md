@@ -1,11 +1,40 @@
 # DataFlowAnalyzer
-Collects the end-to-end column-level data lineage in the Data Warehouses environment 
-by analyzing SQL script especially stored procedure like PL/SQL.
+Collects the end-to-end column-level data lineage in the Data Warehouses environment by connecting to database or 
+analyzing SQL script especially stored procedure like PL/SQL.
 
-This tool introduces a new [data lineage model](sqlflow-data-lineage-model-reference.pdf) 
-that is compatible with the Apache Atlas type system to describle the data flow of table/columns. 
 
 This tool is built from the scratch, it is the main part of the backend of [the SQLFlow Cloud](https://sqlflow.gudusoft.com).
+
+## Quick start
+
+### 1. Analyze data lineage from SQL files	
+
+Analyze demo.sql under sample directory and save the data lineage outpout in out.xml file.
+
+```
+java -jar gudusoft.dlineage.jar /t oracle /f ../sample/demo.sql /o out.xml
+```
+
+### 2. Analyze data lineage from a database
+The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
+
+for example, connect to an Oracle database and analzye the data lineage, and save the data lineage in out.xml.
+
+a metadata.json file that includes all metadata extracted from Oracle database will be saved to the current directory.
+
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
+```
+
+### 3.2  Export the meatadata from database only
+
+You can also export the meatadata from database only use this tool and then upload this metadata to [the Gudu SQLFlow Cloud](https://sqlflow.gudusoft.com)
+to analyze the lineage.
+
+- Only export the metadta
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+```
 
 
 ## Usage
@@ -58,11 +87,11 @@ sybase,teradata,soql,vertica
 
 ## 1. Binary version
 https://github.com/sqlparser/gsp_demo_java/releases/ 
-> update date: 2022/10/05
+> update date: 2022/11/01
 
 In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
 	
-## 2. Analyze data linege from SQL files	
+## 2. Analyze data lineage from SQL files	
 Please use `/f` parameter to specify a single SQL file,
 or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
 
@@ -70,15 +99,16 @@ or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
 java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
 ```
 
-## 3. Analyze data linege from a database
-Since version 2.2.0, the dlineage tool no longer connect to the database to analyze
-the data lineage directly. Instead, it accepts a metadata json file which 
-includes all metadata of a database and analyze the data lineage from this json file.
+## 3. Analyze data lineage from a database
+The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
 
-### 3.1 extract metdata from database
+
+### 3.1 connect and analyze data lineage
 Please use `/fromdb` parameter to export metadta from the database.
 
 `/fromdb` parameter:
+
+-dbVendor: Database type, Use colon to split dbVendor and version if specific version is required. (<dbVendor>:<version>, such as dbvmysql:5.7)
 
 -host: Database host name (ip address or domain name)
 
@@ -100,14 +130,42 @@ Please use `/fromdb` parameter to export metadta from the database.
 
 `/metadataoutput` specifies the metadata output directory and file name.
 
-for example:
+for example, connect to an Oracle database and analzye the data lineage.
+
+- Oracle
 ```
-java -jar data_flow_analyzer.jar /t oracle /fromdb "-host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+java -jar gudusoft.dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o oracle.xml
 ```
 
-### 3.2 analyze metadata file
+- SQL Server
+```
+java -jar gudusoft.dlineage.jar /t mssql /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -port 1433 -db AdventureWorksDW2019 -user sa -pwd sa" /o sqlserver.xml
+```
 
-After you get the metadata.json file, just analyze it like a normal sql file with `/f` parmeter:
+- MySQL
+```
+java -jar gudusoft.dlineage.jar /t mysql /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
+```
+
+- PostgreSQL
+```
+java -jar gudusoft.dlineage.jar /t postgresql /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
+```
+
+
+### 3.2  Export the meatadata only 
+
+You can also export the meatadata from database and analzye the metadata in two steps:
+
+- Only export the metadta
+```
+java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+```
+
+the metadata.json exported in this step can also be used with `/env` paramter to resolve the ambiguous columns problem in SQL query.
+
+- analyze the metadta that generated in the previous step
+
 ```
 java -jar gudusoft.dlineage.jar /t oracle /f metadata.json
 ```
@@ -189,3 +247,21 @@ But by using those args, you can get the same outcome:
 
 ## 7. Links
 - [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
+
+## 8、List of Supported dbVendors
+
+| dbVendor      | databases     |
+|---------------| ---------- |
+| dbvoracle     | oracle     |
+| dbvredshift   | redshift   |
+| dbvpostgresql | postgresql |
+| dbvmssql      | sqlserver  |
+| dbvmysql      | mysql      |
+| dbvazuresql   | azuresql   |
+| dbvgreenplum  | greenplum  |
+| dbvnetezza    | netezza    |
+| dbvsnowflake  | snowflake  |
+| dbvteradata   | teradata   |
+| dbvhive       | hive       |
+| dbvimpala     | impala     |
+| dbvdb2        | db2     |
