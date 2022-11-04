@@ -1,9 +1,9 @@
 package postgresql;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.ESetStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.stmt.TCreateSchemaSqlStatement;
-import gudusoft.gsqlparser.stmt.postgresql.TSetSearchPathStmt;
+import gudusoft.gsqlparser.stmt.TSetStmt;
 import junit.framework.TestCase;
 
 public class testSetSearchPath extends TestCase {
@@ -13,8 +13,10 @@ public class testSetSearchPath extends TestCase {
         sqlparser.sqltext = "SET search_path = sqlflow, pg_catalog;";
         assertTrue(sqlparser.parse() == 0);
 
-        TSetSearchPathStmt searchPathStmt = (TSetSearchPathStmt) sqlparser.sqlstatements.get(0);
-        assertTrue(searchPathStmt.getSearchPathList().getObjectName(0).toString().equalsIgnoreCase("sqlflow"));
-        assertTrue(searchPathStmt.getSearchPathList().getObjectName(1).toString().equalsIgnoreCase("pg_catalog"));
+        TSetStmt setStmt = (TSetStmt)sqlparser.sqlstatements.get(0);
+        assertTrue(setStmt.getSetStatementType() == ESetStatementType.variable);
+        assertTrue(setStmt.getVariableName().toString().equalsIgnoreCase("search_path"));
+        assertTrue(setStmt.getVariableValueList().getExpression(0).toString().equalsIgnoreCase("sqlflow"));
+        assertTrue(setStmt.getVariableValueList().getExpression(1).toString().equalsIgnoreCase("pg_catalog"));
     }
 }
