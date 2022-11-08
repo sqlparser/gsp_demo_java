@@ -24,7 +24,7 @@ public class testDBLink extends TestCase {
                 " SOLIDATUS.HR_COUNTRIES@LD_PDB1_SOL.LOCALDOMAIN;\n" +
                 "end;";
 
-        //System.out.println(sql);
+        // System.out.println(sql);
         EDbVendor vendor = TGSqlParser.getDBVendorByName("oracle");
         DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(sql,
                 vendor, true);
