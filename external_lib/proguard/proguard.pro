@@ -20,3 +20,5 @@
 {
 public protected *;
 }
+-keep class gudusoft.gsqlparser.dlineage.metadata.**{*;}
+-keep class gudusoft.gsqlparser.dlineage.dataflow.model.**{*;}
