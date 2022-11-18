@@ -1,4 +1,4 @@
-package dlineage;
+package dlineage.solidatus;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -53,11 +53,12 @@ public class testDBLink extends TestCase {
         String rel2SourceParentId = rel2.getSources()[0].getParentId();
 
         // Relationships point to the correct Table object
-        Table dbLinkTableObject = dataFlow.getDbobjs().getServers().get(0).getSchemas().get(0).getTables().get(0);
+        Table dbLinkTableObject = dataFlow.getDbobjs().getServers().get(0).getDatabases().get(0).getSchemas().get(0).getTables().get(0);
         assertTrue(dbLinkTableObject.getId().equalsIgnoreCase(rel1SourceParentId));
         assertTrue(dbLinkTableObject.getId().equalsIgnoreCase(rel2SourceParentId));
         // DbLink table name should be consistent with the parent name
         assertTrue(dbLinkTableObject.getName().toString().equalsIgnoreCase("HR_COUNTRIES"));
+        assertTrue(dbLinkTableObject.getDbLink().toString().equalsIgnoreCase("LD_PDB1_SOL.LOCALDOMAIN"));
     }
 
 

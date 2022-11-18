@@ -1991,6 +1991,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getDblink() != null) {
 			addElementOfNode("db_link", node.getDblink());
 		}
+		if (node.getPath() != null){
+			node.getPath().accept(this);
+		}
 
 		if (node.getSourceTable() != null) {
 			String sourceTable = node.getSourceTable().getTableName().toString();
@@ -2023,6 +2026,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		for (int i = 0; i < node.size(); i++) {
 			node.getObjectName(i).accept(this);
 		}
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TPathSqlNode node) {
+		Element e_path = xmldoc.createElement("path");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_path);
+
+		elementStack.push(e_path);
+		current_objectName_list_tag = "path_list";
+		node.getPathList().accept(this);
 		elementStack.pop();
 	}
 
@@ -2410,6 +2425,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getBodyStatements().size() > 0) {
 			current_statement_list_tag = "body_statement_list";
 			node.getBodyStatements().accept(this);
+		}
+
+		if (node.getSqlExpression() != null){
+			addElementOfNode("sql_expression",node.getSqlExpression());
 		}
 
 		elementStack.pop();
@@ -2839,6 +2858,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		if (node.getScale() != null) {
 			e_datatype.setAttribute("scale", node.getScale().toString());
+		}
+		if (node.getLength() != null) {
+			e_datatype.setAttribute("length", node.getLength().toString());
 		}
 		e_parent.appendChild(e_datatype);
 		Element e_value = xmldoc.createElement("value");
@@ -6720,7 +6742,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_copy_into.setAttribute( "target", "location" );
 		}
 		addElementOfNode("table_name",stmt.getTableName());
-		stmt.getStageLocation().accept(this);
+		if (stmt.getStageLocation() != null){
+			stmt.getStageLocation().accept(this);
+		}
+		if (stmt.getSubQuery() != null){
+			addElementOfNode("source_query",stmt.getSubQuery());
+		}
+
 		elementStack.pop( );
 	}
 

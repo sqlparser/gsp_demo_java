@@ -22,7 +22,7 @@ public class testCreateExternalTable extends TestCase {
         assertTrue(createTableSqlStatement.getTableName().toString().equalsIgnoreCase("ext_twitter_feed"));
         TStageLocation stageLocation = createTableSqlStatement.getStageLocation();
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("mystage"));
-        assertTrue(stageLocation.getPath().getObjectName(0).toString().equalsIgnoreCase("daily"));
+        assertTrue(stageLocation.getPath().getPathList().getObjectName(0).toString().equalsIgnoreCase("daily"));
         assertTrue(createTableSqlStatement.getRegex_pattern().equalsIgnoreCase("'.*sales.*[.]parquet'"));
         assertTrue(createTableSqlStatement.getFileFormatType().equalsIgnoreCase("parquet"));
        // System.out.println(stageLocation.getStageName().toString());
@@ -43,7 +43,7 @@ public class testCreateExternalTable extends TestCase {
         assertTrue(createTableSqlStatement.getTableName().toString().equalsIgnoreCase("ext_twitter_feed"));
         TStageLocation stageLocation = createTableSqlStatement.getStageLocation();
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("mystage"));
-        assertTrue(stageLocation.getPath().getObjectName(0).toString().equalsIgnoreCase("daily"));
+        assertTrue(stageLocation.getPath().getPathList().getObjectName(0).toString().equalsIgnoreCase("daily"));
         assertTrue(createTableSqlStatement.getRegex_pattern().equalsIgnoreCase("'.*sales.*[.]parquet'"));
         assertTrue(createTableSqlStatement.getFileFormatType().equalsIgnoreCase("parquet"));
         // System.out.println(stageLocation.getStageName().toString());
@@ -71,7 +71,7 @@ public class testCreateExternalTable extends TestCase {
         assertTrue(createTableSqlStatement.getColumnList().getColumn(2).getColumnName().toString().equalsIgnoreCase("col2"));
         TStageLocation stageLocation = createTableSqlStatement.getStageLocation();
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("exttable_part_stage"));
-        assertTrue(stageLocation.getPath().getObjectName(0).toString().equalsIgnoreCase("logs"));
+        assertTrue(stageLocation.getPath().getPathList().getObjectName(0).toString().equalsIgnoreCase("logs"));
         assertTrue(createTableSqlStatement.getFileFormatType().equalsIgnoreCase("parquet"));
         assertTrue(createTableSqlStatement.getPartitionColumnList().getObjectName(0).toString().equalsIgnoreCase("date_part"));
         // System.out.println(stageLocation.getStageName().toString());
@@ -100,7 +100,7 @@ public class testCreateExternalTable extends TestCase {
         assertTrue(createTableSqlStatement.getColumnList().getColumn(2).getColumnName().toString().equalsIgnoreCase("col2"));
         TStageLocation stageLocation = createTableSqlStatement.getStageLocation();
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("exttable_part_stage"));
-        assertTrue(stageLocation.getPath().getObjectName(0).toString().equalsIgnoreCase("logs"));
+        assertTrue(stageLocation.getPath().getPathList().getObjectName(0).toString().equalsIgnoreCase("logs"));
         assertTrue(createTableSqlStatement.getFileFormatType().equalsIgnoreCase("parquet"));
         assertTrue(createTableSqlStatement.getPartitionColumnList().getObjectName(0).toString().equalsIgnoreCase("date_part"));
         // System.out.println(stageLocation.getStageName().toString());
@@ -119,7 +119,7 @@ public class testCreateExternalTable extends TestCase {
         assertTrue(createTableSqlStatement.getTableName().toString().equalsIgnoreCase("ext_table"));
         TStageLocation stageLocation = createTableSqlStatement.getStageLocation();
         assertTrue(stageLocation.getStageName().toString().equalsIgnoreCase("mystage"));
-        assertTrue(stageLocation.getPath().getObjectName(0).toString().equalsIgnoreCase("path1"));
+        assertTrue(stageLocation.getPath().getPathList().getObjectName(0).toString().equalsIgnoreCase("path1"));
         assertTrue(createTableSqlStatement.getFileFormatType().equalsIgnoreCase("json"));
         assertTrue(createTableSqlStatement.getAwsSnsTopic().equalsIgnoreCase("'arn:aws:sns:us-west-2:001234567890:s3_mybucket'"));
         // System.out.println(stageLocation.getStageName().toString());

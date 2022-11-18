@@ -41,8 +41,11 @@ public class testSubscript extends TestCase {
         assertTrue(objectName1.getColumnNameOnly().equalsIgnoreCase("arraycolumn1"));
         assertTrue(objectName1.toString().equalsIgnoreCase("mytable.arraycolumn1[40]"));
         assertTrue(objectName1.isSubscripts());
-        assertTrue(objectName1.getIndirection().toString().equalsIgnoreCase("[40]"));
-        assertTrue(objectName1.getIndirection().getIndices().getElement(0).getLowerSubscript().toString().equalsIgnoreCase("40"));
+        //System.out.println(objectName1.getIndirection().toString());
+        //assertTrue(objectName1.getIndirection().toString().equalsIgnoreCase("[40]"));
+       // assertTrue(objectName1.getIndirection().getIndices().getElement(0).getLowerSubscript().toString().equalsIgnoreCase("40"));
+        assertTrue(objectName1.getIndirection().getIndices().getElement(0).getAttributeName().toString().equalsIgnoreCase("arraycolumn1"));
+        assertTrue(objectName1.getIndirection().getIndices().getElement(1).getLowerSubscript().toString().equalsIgnoreCase("40"));
 
         //mytable.two_d_column[17][34]
         TResultColumn column2 = select.getResultColumnList().getResultColumn(2);
@@ -51,9 +54,11 @@ public class testSubscript extends TestCase {
         assertTrue(objectName2.getColumnNameOnly().equalsIgnoreCase("two_d_column"));
         assertTrue(objectName2.toString().equalsIgnoreCase("mytable.two_d_column[17][34]"));
         assertTrue(objectName2.isSubscripts());
-        assertTrue(objectName2.getIndirection().toString().equalsIgnoreCase("[17][34]"));
-        assertTrue(objectName2.getIndirection().getIndices().getElement(0).getLowerSubscript().toString().equalsIgnoreCase("17"));
-        assertTrue(objectName2.getIndirection().getIndices().getElement(1).getLowerSubscript().toString().equalsIgnoreCase("34"));
+        //assertTrue(objectName2.getIndirection().toString().equalsIgnoreCase("[17][34]"));
+        assertTrue(objectName2.getIndirection().getIndices().size() == 3);
+        assertTrue(objectName2.getIndirection().getIndices().getElement(0).getAttributeName().toString().equalsIgnoreCase("two_d_column"));
+        assertTrue(objectName2.getIndirection().getIndices().getElement(1).getLowerSubscript().toString().equalsIgnoreCase("17"));
+        assertTrue(objectName2.getIndirection().getIndices().getElement(2).getLowerSubscript().toString().equalsIgnoreCase("34"));
 
         //c[10:42]
         TResultColumn column3 = select.getResultColumnList().getResultColumn(3);
