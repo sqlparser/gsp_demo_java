@@ -46,8 +46,8 @@ public class testMultpleSqlFiles extends TestCase {
 		Pair<Integer, Integer> startPosition = positions.get(0);
 		Pair<Integer, Integer> endPosition = positions.get(1);
 		assertEquals(fileName, "2.sql");
-		assertEquals(startPosition, new Pair<Integer, Integer>(3, 18));
-		assertEquals(endPosition, new Pair<Integer, Integer>(3, 29));
+		assertEquals(startPosition, new Pair<Integer, Integer>(3, 1));
+		assertEquals(endPosition, new Pair<Integer, Integer>(5, 6));
 
 		DbObjectPosition procedureStatementPosition = helper.getSelectedDbObjectStatementInfo(EDbVendor.dbvmysql,
 				procedureCoordinates[0][0], procedureCoordinates[0][1]);
@@ -61,7 +61,7 @@ public class testMultpleSqlFiles extends TestCase {
 		endPosition = positions.get(1);
 		assertEquals(index, 1);
 		assertEquals(sql.trim(), stmt.trim());
-		assertEquals(startPosition, new Pair<Integer, Integer>(1, 18));
-		assertEquals(endPosition, new Pair<Integer, Integer>(1, 29));
+		assertEquals(startPosition, new Pair<Integer, Integer>(1, 1));
+		assertEquals(endPosition, new Pair<Integer, Integer>(3, 6));
 	}
 }
