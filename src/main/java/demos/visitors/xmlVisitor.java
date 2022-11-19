@@ -2041,6 +2041,56 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TDropTriggerSqlStatement stmt) {
+		Element e_drop_trigger = xmldoc.createElement("drop_trigger_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_trigger);
+		e_drop_trigger.setAttribute("trigger_name",stmt.getTriggerName().toString());
+
+		elementStack.push(e_drop_trigger);
+		elementStack.pop();
+	}
+
+	public void preVisit(TFunctionHeader node) {
+		Element e_function_header = xmldoc.createElement("function_header");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_function_header);
+
+		elementStack.push(e_function_header);
+		addElementOfNode("function_name",node.getFunctionName());
+		if (node.getArgs() != null){
+			node.getArgs().accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TDropFunctionStmt stmt) {
+		Element e_drop_function = xmldoc.createElement("drop_function_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_function);
+		e_drop_function.setAttribute("function_name",stmt.getFunctionName().toString());
+		elementStack.push(e_drop_function);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_function_list = xmldoc.createElement("function_list");
+				e_drop_function.appendChild(e_function_list);
+				elementStack.push(e_function_list);
+				for(int i=0;i<stmt.getFunctions().size();i++){
+					stmt.getFunctions().get(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+
+		elementStack.pop();
+	}
+
+
+
 	public void preVisit(TWhereClause node) {
 		// appendStartTag(node);
 		Element e_where = xmldoc.createElement("where_clause");
