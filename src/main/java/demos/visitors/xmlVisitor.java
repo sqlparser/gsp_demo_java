@@ -2046,6 +2046,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_trigger);
 		e_drop_trigger.setAttribute("trigger_name",stmt.getTriggerName().toString());
+		if (stmt.getTableName() != null){
+			addElementOfNode("table_name",stmt.getTableName());
+		}
 
 		elementStack.push(e_drop_trigger);
 		elementStack.pop();
@@ -2085,6 +2088,101 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 		}
 
+
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TDropProcedureStmt stmt) {
+		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_procedure);
+		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
+		elementStack.push(e_drop_procedure);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_procedure_list = xmldoc.createElement("procedure_list");
+				e_drop_procedure.appendChild(e_procedure_list);
+				elementStack.push(e_procedure_list);
+				for(int i=0;i<stmt.getProcedures().size();i++){
+					stmt.getProcedures().get(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropViewSqlStatement stmt) {
+		Element e_drop_view = xmldoc.createElement("drop_view_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_view);
+		e_drop_view.setAttribute("view_name",stmt.getViewName().toString());
+		elementStack.push(e_drop_view);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_view_list = xmldoc.createElement("view_list");
+				e_drop_view.appendChild(e_view_list);
+				elementStack.push(e_view_list);
+				for(int i=0;i<stmt.getViewNameList().size();i++){
+					stmt.getViewNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropSequenceStmt stmt) {
+		Element e_drop_sequence = xmldoc.createElement("drop_sequence_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_sequence);
+		e_drop_sequence.setAttribute("sequence_name",stmt.getSequenceName().toString());
+		elementStack.push(e_drop_sequence);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_sequence_list = xmldoc.createElement("sequence_list");
+				e_drop_sequence.appendChild(e_sequence_list);
+				elementStack.push(e_sequence_list);
+				for(int i=0;i<stmt.getSequenceNameList().size();i++){
+					stmt.getSequenceNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropIndexSqlStatement stmt) {
+		Element e_drop_index = xmldoc.createElement("drop_index_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_index);
+		e_drop_index.setAttribute("index_name",stmt.getIndexName().toString());
+		elementStack.push(e_drop_index);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_index_list = xmldoc.createElement("index_list");
+				e_drop_index.appendChild(e_index_list);
+				elementStack.push(e_index_list);
+				for(int i=0;i<stmt.getIndexNameList().size();i++){
+					stmt.getIndexNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
 
 		elementStack.pop();
 	}
@@ -3790,6 +3888,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case clone:
+				addElementOfNode("clone_table",stmt.getCloneSourceTable());
+				break;
+			case copy:
+				addElementOfNode("copy_table",stmt.getCloneSourceTable());
+				break;
 		}
 
 		if (stmt.getTableOptions() != null) {
@@ -4027,8 +4131,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 
 
-	public void preVisit(TDropIndexSqlStatement stmt) {
-	}
 
 	public void preVisit(TLeaveStmt stmt) {
 		e_parent = (Element) elementStack.peek();
@@ -4066,10 +4168,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
-	public void preVisit(TDropViewSqlStatement stmt) {
-		appendStartTagWithIntProperty(stmt, "name", stmt.getViewName()
-				.toString());
-	}
+
 
 	public void preVisit(TDeleteSqlStatement stmt) {
 		e_parent = (Element) elementStack.peek();
