@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
+import gudusoft.gsqlparser.stmt.TCreateMacro;
 
 
 public class TTraceColumn {
@@ -63,14 +63,14 @@ public class TTraceColumn {
                 processCreateView((TCreateViewSqlStatement)pStmt);
                 break;
             case sstteradatacreatemacro:
-                processCreateMacro((TTeradataCreateMacro)pStmt);
+                processCreateMacro((TCreateMacro)pStmt);
                 break;
             default:
                 break;
         }
     }
 
-    void processCreateMacro(TTeradataCreateMacro createMacro){
+    void processCreateMacro(TCreateMacro createMacro){
 
         for (int i=0;i<createMacro.getBodyStatements().size();i++){
             processStmt(createMacro.getBodyStatements().get(i));

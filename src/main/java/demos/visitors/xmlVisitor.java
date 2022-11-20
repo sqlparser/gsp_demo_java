@@ -98,7 +98,7 @@ import javax.xml.validation.Validator;
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.TSnowlflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
+import gudusoft.gsqlparser.stmt.TCreateMacro;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -3096,9 +3096,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit(TColumnDefinitionList node) {
 		appendStartTag(node);
+
+		e_parent = (Element) elementStack.peek();
+		Element e_merge_action = xmldoc.createElement("column_definition_list");
+		e_parent.appendChild(e_merge_action);
+		elementStack.push(e_merge_action);
+
 		for (int i = 0; i < node.size(); i++) {
 			node.getColumn(i).accept(this);
 		}
+
+		elementStack.pop();
 	}
 
 	public void preVisit(TMergeWhenClause node) {
@@ -5480,7 +5488,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
-	public void preVisit( TTeradataCreateMacro stmt ){
+	public void preVisit( TCreateMacro stmt ){
 		e_parent = (Element) elementStack.peek( );
 		Element e_create_macro = xmldoc.createElement( "create_macro_statement" );
 		e_parent.appendChild( e_create_macro );
@@ -5489,6 +5497,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		current_objectName_tag = "marco_name";
 		stmt.getMacroName().accept( this );
 
+		if (stmt.getParameterDeclarations() != null){
+			stmt.getParameterDeclarations().accept(this);
+		}
+
 
 		if ( stmt.getBodyStatements( ).size( ) > 0 )
 		{
@@ -5496,9 +5508,24 @@ public class xmlVisitor extends TParseTreeVisitor {
 			stmt.getBodyStatements( ).accept( this );
 		}
 
+		if (stmt.getExpr() != null){
+			stmt.getExpr().accept(this);
+		}
+
 
 		elementStack.pop( );
 
+	}
+
+	public void preVisit( TCreateTypeStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_type_stmt = xmldoc.createElement( "create_type_statement" );
+		e_parent.appendChild( e_create_type_stmt );
+		elementStack.push( e_create_type_stmt );
+		stmt.getTypeName().accept(this);
+		stmt.getAttributeList().accept(this);
+		elementStack.pop( );
 	}
 
 	public void preVisit( TAllocateStmt stmt )

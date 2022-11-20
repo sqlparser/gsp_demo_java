@@ -365,6 +365,8 @@ public class JoinConverterTest extends TestCase {
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
         assertTrue(joinConverter.convert() == 0);
 
+        //System.out.println(joinConverter.getQuery());
+
         assertTrue(joinConverter.getQuery()
                 .trim()
                 .equalsIgnoreCase("Select * from table_c v\n" +

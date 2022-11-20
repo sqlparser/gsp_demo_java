@@ -36,14 +36,17 @@ public class testValues extends TestCase {
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(select.joins.size() == 2 );
         TTable table2 = select.joins.getJoin(1).getTable();
-        assertTrue(table2.getTableType() == ETableSource.rowList);
+        //System.out.println(table2.getTableType());
+        assertTrue(table2.getTableType() == ETableSource.subquery);
+//        TValueClause valueClause = table2.getSubquery().getValueClause();
         assertTrue(table2.getAliasClause().getAliasName().toString().equalsIgnoreCase("t"));
         assertTrue(table2.getAliasClause().getColumns().getObjectName(0).toString().equalsIgnoreCase("studio"));
 
         //select = table2.getSubquery();
 
         TTable valueTable = select.getTables().getTable(1);
-        TValueClause valueClause = valueTable.getValueClause();
+        TValueClause valueClause = valueTable.getSubquery().getValueClause();
+
         assertTrue(valueTable.getAliasClause().getColumns().size() == 2);
         assertTrue(valueTable.getAliasClause().getColumns().getObjectName(0).toString().equalsIgnoreCase("studio"));
         assertTrue(valueClause.getRows().size() == 2);
