@@ -6,7 +6,7 @@ import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TParameterDeclaration;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
+import gudusoft.gsqlparser.stmt.TCreateMacro;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataLock;
 import junit.framework.TestCase;
 
@@ -21,7 +21,7 @@ public class testMacro extends TestCase {
                 "Sel col1,col2,col3 from table1,table2,table3;);";
         assertTrue(sqlparser.parse() == 0);
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstteradatacreatemacro);
-        TTeradataCreateMacro createMacro = (TTeradataCreateMacro)sqlparser.sqlstatements.get(0);
+        TCreateMacro createMacro = (TCreateMacro)sqlparser.sqlstatements.get(0);
         assertTrue(createMacro.getMacroName().toString().equalsIgnoreCase("macroName"));
         assertTrue(createMacro.getParameterDeclarations().size() == 3);
         TParameterDeclaration parameterDeclaration = createMacro.getParameterDeclarations().getParameterDeclarationItem(0);

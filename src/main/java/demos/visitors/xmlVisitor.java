@@ -98,7 +98,7 @@ import javax.xml.validation.Validator;
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.TSnowlflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCreateMacro;
+import gudusoft.gsqlparser.stmt.TCreateMacro;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -2041,6 +2041,154 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TDropTriggerSqlStatement stmt) {
+		Element e_drop_trigger = xmldoc.createElement("drop_trigger_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_trigger);
+		e_drop_trigger.setAttribute("trigger_name",stmt.getTriggerName().toString());
+		if (stmt.getTableName() != null){
+			addElementOfNode("table_name",stmt.getTableName());
+		}
+
+		elementStack.push(e_drop_trigger);
+		elementStack.pop();
+	}
+
+	public void preVisit(TFunctionHeader node) {
+		Element e_function_header = xmldoc.createElement("function_header");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_function_header);
+
+		elementStack.push(e_function_header);
+		addElementOfNode("function_name",node.getFunctionName());
+		if (node.getArgs() != null){
+			node.getArgs().accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TDropFunctionStmt stmt) {
+		Element e_drop_function = xmldoc.createElement("drop_function_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_function);
+		e_drop_function.setAttribute("function_name",stmt.getFunctionName().toString());
+		elementStack.push(e_drop_function);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_function_list = xmldoc.createElement("function_list");
+				e_drop_function.appendChild(e_function_list);
+				elementStack.push(e_function_list);
+				for(int i=0;i<stmt.getFunctions().size();i++){
+					stmt.getFunctions().get(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TDropProcedureStmt stmt) {
+		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_procedure);
+		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
+		elementStack.push(e_drop_procedure);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_procedure_list = xmldoc.createElement("procedure_list");
+				e_drop_procedure.appendChild(e_procedure_list);
+				elementStack.push(e_procedure_list);
+				for(int i=0;i<stmt.getProcedures().size();i++){
+					stmt.getProcedures().get(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropViewSqlStatement stmt) {
+		Element e_drop_view = xmldoc.createElement("drop_view_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_view);
+		e_drop_view.setAttribute("view_name",stmt.getViewName().toString());
+		elementStack.push(e_drop_view);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_view_list = xmldoc.createElement("view_list");
+				e_drop_view.appendChild(e_view_list);
+				elementStack.push(e_view_list);
+				for(int i=0;i<stmt.getViewNameList().size();i++){
+					stmt.getViewNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropSequenceStmt stmt) {
+		Element e_drop_sequence = xmldoc.createElement("drop_sequence_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_sequence);
+		e_drop_sequence.setAttribute("sequence_name",stmt.getSequenceName().toString());
+		elementStack.push(e_drop_sequence);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_sequence_list = xmldoc.createElement("sequence_list");
+				e_drop_sequence.appendChild(e_sequence_list);
+				elementStack.push(e_sequence_list);
+				for(int i=0;i<stmt.getSequenceNameList().size();i++){
+					stmt.getSequenceNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+		elementStack.pop();
+	}
+	public void preVisit(TDropIndexSqlStatement stmt) {
+		Element e_drop_index = xmldoc.createElement("drop_index_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_index);
+		e_drop_index.setAttribute("index_name",stmt.getIndexName().toString());
+		elementStack.push(e_drop_index);
+
+		switch (stmt.dbvendor){
+			case dbvpostgresql:
+				Element e_index_list = xmldoc.createElement("index_list");
+				e_drop_index.appendChild(e_index_list);
+				elementStack.push(e_index_list);
+				for(int i=0;i<stmt.getIndexNameList().size();i++){
+					stmt.getIndexNameList().getObjectName(i).accept(this);
+				}
+				elementStack.pop();
+				break;
+			default:
+				break;
+		}
+
+		elementStack.pop();
+	}
+
+
+
 	public void preVisit(TWhereClause node) {
 		// appendStartTag(node);
 		Element e_where = xmldoc.createElement("where_clause");
@@ -2948,9 +3096,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit(TColumnDefinitionList node) {
 		appendStartTag(node);
+
+		e_parent = (Element) elementStack.peek();
+		Element e_merge_action = xmldoc.createElement("column_definition_list");
+		e_parent.appendChild(e_merge_action);
+		elementStack.push(e_merge_action);
+
 		for (int i = 0; i < node.size(); i++) {
 			node.getColumn(i).accept(this);
 		}
+
+		elementStack.pop();
 	}
 
 	public void preVisit(TMergeWhenClause node) {
@@ -3740,6 +3896,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case clone:
+				addElementOfNode("clone_table",stmt.getCloneSourceTable());
+				break;
+			case copy:
+				addElementOfNode("copy_table",stmt.getCloneSourceTable());
+				break;
 		}
 
 		if (stmt.getTableOptions() != null) {
@@ -3977,8 +4139,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 
 
-	public void preVisit(TDropIndexSqlStatement stmt) {
-	}
 
 	public void preVisit(TLeaveStmt stmt) {
 		e_parent = (Element) elementStack.peek();
@@ -4016,10 +4176,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
-	public void preVisit(TDropViewSqlStatement stmt) {
-		appendStartTagWithIntProperty(stmt, "name", stmt.getViewName()
-				.toString());
-	}
+
 
 	public void preVisit(TDeleteSqlStatement stmt) {
 		e_parent = (Element) elementStack.peek();
@@ -5331,7 +5488,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
-	public void preVisit( TTeradataCreateMacro stmt ){
+	public void preVisit( TCreateMacro stmt ){
 		e_parent = (Element) elementStack.peek( );
 		Element e_create_macro = xmldoc.createElement( "create_macro_statement" );
 		e_parent.appendChild( e_create_macro );
@@ -5340,6 +5497,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		current_objectName_tag = "marco_name";
 		stmt.getMacroName().accept( this );
 
+		if (stmt.getParameterDeclarations() != null){
+			stmt.getParameterDeclarations().accept(this);
+		}
+
 
 		if ( stmt.getBodyStatements( ).size( ) > 0 )
 		{
@@ -5347,9 +5508,24 @@ public class xmlVisitor extends TParseTreeVisitor {
 			stmt.getBodyStatements( ).accept( this );
 		}
 
+		if (stmt.getExpr() != null){
+			stmt.getExpr().accept(this);
+		}
+
 
 		elementStack.pop( );
 
+	}
+
+	public void preVisit( TCreateTypeStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_type_stmt = xmldoc.createElement( "create_type_statement" );
+		e_parent.appendChild( e_create_type_stmt );
+		elementStack.push( e_create_type_stmt );
+		stmt.getTypeName().accept(this);
+		stmt.getAttributeList().accept(this);
+		elementStack.pop( );
 	}
 
 	public void preVisit( TAllocateStmt stmt )
