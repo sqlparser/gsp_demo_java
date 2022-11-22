@@ -96,7 +96,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
-import gudusoft.gsqlparser.stmt.snowflake.TSnowlflakeCopyIntoStmt;
+import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
 import org.w3c.dom.Document;
@@ -637,18 +637,36 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.isCombinedQuery()) {
 
 			Element e_binary_query_expression = xmldoc.createElement("binary_query_expression");
-			e_binary_query_expression.setAttribute("set_operator",
-					node.getSetOperatorType().toString());
-			e_binary_query_expression.setAttribute("is_all",
-					String.valueOf(node.isAll()));
 
-			e_query_expression.appendChild(e_binary_query_expression);
-			elementStack.push(e_binary_query_expression);
-			current_query_expression_tag = "first_query_expression";
-			node.getLeftStmt().accept(this);
-			current_query_expression_tag = "second_query_expression";
-			node.getRightStmt().accept(this);
-			elementStack.pop();
+			ArrayList<TSelectSqlStatement> flattenedSelects = node.getFlattenedSelects();
+			if (flattenedSelects.size()>100){
+				e_query_expression.appendChild(e_binary_query_expression);
+				elementStack.push(e_binary_query_expression);
+
+				Element e_select_list = xmldoc.createElement("select_in_set_operator");
+				e_select_list.setAttribute("count", String.valueOf(flattenedSelects.size()));
+				e_binary_query_expression.appendChild(e_select_list);
+				elementStack.push(e_select_list);
+				for(int i=0;i<flattenedSelects.size();i++){
+					flattenedSelects.get(i).accept(this);
+				}
+				elementStack.pop();
+
+				elementStack.pop();
+			}else{
+				e_binary_query_expression.setAttribute("set_operator",
+						node.getSetOperatorType().toString());
+				e_binary_query_expression.setAttribute("is_all",
+						String.valueOf(node.isAll()));
+
+				e_query_expression.appendChild(e_binary_query_expression);
+				elementStack.push(e_binary_query_expression);
+				current_query_expression_tag = "first_query_expression";
+				node.getLeftStmt().accept(this);
+				current_query_expression_tag = "second_query_expression";
+				node.getRightStmt().accept(this);
+				elementStack.pop();
+			}
 
 			if (node.getOrderbyClause() != null) {
 				node.getOrderbyClause().accept(this);
@@ -6906,15 +6924,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-	public void preVisit( TSnowlflakeCopyIntoStmt stmt )
+	public void preVisit( TSnowflakeCopyIntoStmt stmt )
 	{
 		Element e_copy_into = xmldoc.createElement( "copy_into" );
 		e_parent = (Element) elementStack.peek( );
 		e_parent.appendChild( e_copy_into );
 		elementStack.push( e_copy_into );
-		if (stmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_TABLE){
+		if (stmt.getCopyIntoType() == TSnowflakeCopyIntoStmt.COPY_INTO_TABLE){
 			e_copy_into.setAttribute( "target", "table" );
-		}else if (stmt.getCopyIntoType() == TSnowlflakeCopyIntoStmt.COPY_INTO_LOCATION){
+		}else if (stmt.getCopyIntoType() == TSnowflakeCopyIntoStmt.COPY_INTO_LOCATION){
 			e_copy_into.setAttribute( "target", "location" );
 		}
 		addElementOfNode("table_name",stmt.getTableName());
