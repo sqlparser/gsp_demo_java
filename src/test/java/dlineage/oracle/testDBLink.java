@@ -14,7 +14,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class testDBLink  extends TestCase {
-    public void test1() {
+
+    public void  test1(){
+        File file = new File(common.gspCommon.BASE_SQL_DIR_PRIVATE +"dataflow/oracle/mviewDblink.json");
+
+        // Create DataFlowAnalyzer
+        EDbVendor vendor = TGSqlParser.getDBVendorByName("oracle");
+        DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(file, vendor, true);
+
+        dataFlowAnalyzer.generateDataFlow();
+        dataflow flow = dataFlowAnalyzer.getDataFlow();
+        Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(vendor, flow, false);
+
+        Relationship dbLinkRel = Arrays.stream(dataFlow.getRelationships())
+                .filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().contains("@")))
+                .collect(Collectors.toList()).get(0);
+
+        //Parent ID = 71 in 2.6.1.6
+        assertTrue(dbLinkRel.getSources()[0].getParentName().equalsIgnoreCase("\"HR\".\"EMPLOYEES\"@\"LD_PDB1_SOL.LOCALDOMAIN\""));
+
+        //Parent ID = 66
+        assertTrue(dbLinkRel.getTarget().getParentName().equalsIgnoreCase("\"DB2\".\"LOCOMOTIVES\""));
+    }
+    public void test2() {
         File file = new File(common.gspCommon.BASE_SQL_DIR_PRIVATE +"dataflow/oracle/mviewDblink.json");
         EDbVendor vendor = TGSqlParser.getDBVendorByName("oracle");
         DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(file, vendor, true);
