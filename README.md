@@ -15,3 +15,11 @@ Java demos for the General SQL Parser library
   - [add/modify/remove a new join](src/test/java/scriptWriter/testModifySql.java)
   - [add/modify/remove filter condition](src/test/java/scriptWriter/testModifySql.java)
   - [add/modify/remove columns in select lis](src/test/java/scriptWriter/testModifySql.java)
+  
+  
+## master and dev branch  
+the master branch is updated only a new version of GSP is released on official webstie: 
+https://sqlparser.com/download.php
+
+while the dev branch is updated more frequently and may not compile using the gsp.jar 
+from the official site or the jar under /lib directory.
