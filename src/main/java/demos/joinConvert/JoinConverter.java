@@ -488,6 +488,19 @@ public class JoinConverter {
                             }
                             select.joins.getJoin(0).setString(str);
                         }
+                        else{
+                            // cross join
+                            String str = getFullNameWithAliasString(select.tables.getTable(0));
+                            for (int i = 1; i < select.tables.size(); i++) {
+                                str = str
+                                        + "\ncross join "
+                                        + getFullNameWithAliasString(select.tables.getTable(i));
+                            }
+                            for (int k = select.joins.size() - 1; k > 0; k--) {
+                                select.joins.removeJoin(k);
+                            }
+                            select.joins.getJoin(0).setString(str);
+                        }
                     }
                 } else {
 
