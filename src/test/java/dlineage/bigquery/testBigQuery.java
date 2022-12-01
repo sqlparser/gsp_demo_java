@@ -100,4 +100,22 @@ public class testBigQuery extends TestCase {
         assertTrue(v2Col.getSources()[0].getColumn().equalsIgnoreCase("ORDERNUM"));
         assertTrue(v2Col.getSources()[1].getColumn().contains("ORDERALTNUM"));
     }
+
+    public void  test3(){
+        //fix bugs: https://e.gitee.com/gudusoft/notifications/referer?issue=I61W7N
+        File file = new File(common.gspCommon.BASE_SQL_DIR_PRIVATE +"dataflow/bigquery/I61W7N.sql");
+
+        EDbVendor vendor = TGSqlParser.getDBVendorByName("bigquery");
+        Option option = new Option();
+        option.setVendor(vendor);
+        option.setSimpleOutput(true);
+        option.setShowConstantTable(true);
+
+        DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(file, option);
+
+        dataFlowAnalyzer.generateDataFlow();
+        dataflow flow = dataFlowAnalyzer.getDataFlow();
+        Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(vendor, flow, false);
+
+    }
 }
