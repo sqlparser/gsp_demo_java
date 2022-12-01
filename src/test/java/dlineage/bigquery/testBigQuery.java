@@ -37,4 +37,67 @@ public class testBigQuery extends TestCase {
                 .collect(Collectors.toList()).get(0);
         assertTrue(SQL_CONSTANTS.getSources()[0].getColumn().equalsIgnoreCase("[]"));
     }
+
+    public void test2() throws Exception {
+
+        String sql = "CREATE TABLE `proj.JDBC_test.Customers`\n" +
+                "(\n" +
+                " CUSTOMERNUMBER NUMERIC,\n" +
+                " CUSTOMERFNAME STRING,\n" +
+                " V1 FLOAT64,\n" +
+                " V2 FLOAT64\n" +
+                ");\n" +
+                "\n" +
+                "CREATE TABLE `proj.JDBC_test.Orders`\n" +
+                "(\n" +
+                " CUSTOMERNUMBER NUMERIC,\n" +
+                " ORDERNAME STRING,\n" +
+                " ORDERNUM FLOAT64,\n" +
+                " ORDERALTNUM FLOAT64\n" +
+                ");\n" +
+                "\n" +
+                "INSERT INTO `proj.JDBC_test.Customers ` WITH O as\n" +
+                " (SELECT CUSTOMERNUMBER,\n" +
+                " ORDERNAME,\n" +
+                " CASE\n" +
+                " WHEN ORDERNAME IN ('A', 'B')\n" +
+                " THEN ORDERNUM\n" +
+                " ELSE ORDERALTNUM\n" +
+                " END\n" +
+                " AS ORDERNUM,\n" +
+                " CASE\n" +
+                " WHEN ORDERNAME IN ('A', 'B')\n" +
+                " THEN ORDERALTNUM\n" +
+                " ELSE ORDERNUM\n" +
+                " END\n" +
+                " AS ORDERALTNUM\n" +
+                " FROM `proj.JDBC_test.Orders` as O)\n" +
+                "select * FROM O;";
+        EDbVendor vendor = TGSqlParser.getDBVendorByName("bigquery");
+        DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(sql,vendor,true);
+        dataFlowAnalyzer.generateDataFlow(true);
+        dataflow flow = dataFlowAnalyzer.getDataFlow();
+        flow.setRelationships(flow.getRelationships().stream().filter(t->"fdd".equals(t.getType())).collect(Collectors.toList()));
+        Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(flow, vendor);
+
+        assertTrue(dataFlow.getRelationships().length ==4);
+
+        Relationship v1Col = Arrays.stream(dataFlow.getRelationships())
+                .filter(r -> r.getTarget().getColumn().contains("V1"))
+                .collect(Collectors.toList())
+                .get(0);
+        assertTrue(v1Col.getSources().length==2);
+
+        assertTrue(v1Col.getSources()[0].getColumn().equalsIgnoreCase("ORDERALTNUM"));
+        assertTrue(v1Col.getSources()[1].getColumn().contains("ORDERNUM"));
+
+        Relationship v2Col = Arrays.stream(dataFlow.getRelationships())
+                .filter(r -> r.getTarget().getColumn().contains("V2"))
+                .collect(Collectors.toList())
+                .get(0);
+
+        assertTrue(v2Col.getSources().length==2);
+        assertTrue(v2Col.getSources()[0].getColumn().equalsIgnoreCase("ORDERNUM"));
+        assertTrue(v2Col.getSources()[1].getColumn().contains("ORDERALTNUM"));
+    }
 }
