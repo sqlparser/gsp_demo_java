@@ -30,6 +30,7 @@ import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
+import gudusoft.gsqlparser.stmt.databricks.TCreateExternalLocationStmt;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
 import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
@@ -5830,6 +5831,21 @@ public class xmlVisitor extends TParseTreeVisitor {
 			current_objectName_tag = "exception_name";
 			node.getExceptionName( ).accept( this );
 		}
+
+		if (node.getRaiseLevel() != null){
+			addElementOfString("raise_level", node.getRaiseLevel().toString());
+		}
+
+		if (node.getFormatString() != null){
+			addElementOfString("format_string",node.getFormatString().toString());
+			if (node.getExprList() != null){
+				addElementOfNode("format_string_values",node.getExprList());
+			}
+
+		}
+		if (node.getOptions() != null){
+			addElementOfNode("options:",node.getOptions());
+		}
 		elementStack.pop( );
 	}
 
@@ -5846,6 +5862,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		elementStack.pop( );
 	}
+
+	public void preVisit( TCreateExternalLocationStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_external_location_stmt = xmldoc.createElement( "create_external_location_statement" );
+		e_parent.appendChild( e_create_external_location_stmt );
+		e_create_external_location_stmt.setAttribute("loation_name", stmt.getLocation_name().toString());
+		elementStack.push( e_create_external_location_stmt );
+		addElementOfString("url",stmt.getUrl());
+
+		elementStack.pop( );
+	}
+
 
 	public void preVisit( TMssqlReturn node )
 	{
