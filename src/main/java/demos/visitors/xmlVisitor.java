@@ -5676,6 +5676,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_mode.setTextContent( node.getParameterMode( ).toString( ) );
 			e_parameter.appendChild( e_mode );
 		}
+
+		if (node.getDataConversions() != null){
+			for(int i=0;i<node.getDataConversions().size();i++){
+				node.getDataConversions().get(i).accept(this);
+			}
+		}
 		elementStack.pop( );
 	}
 

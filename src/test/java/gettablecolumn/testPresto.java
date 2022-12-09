@@ -14,7 +14,7 @@ public class testPresto extends TestCase {
         getTableColumn.showTreeStructure = false;
         getTableColumn.showDatatype = true;
         getTableColumn.runText(inputQuery);
-        // System.out.println(getTableColumn.outList.toString().trim());
+       // System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
