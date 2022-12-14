@@ -214,11 +214,12 @@ public class testColumnLevelLineageFile extends TestCase {
     }
 
     private List<String[]> resolver(String str) {
-        List<String[]> r = new ArrayList<>();
+    	List<String[]> r = new ArrayList<>();
         String[] vars = str.replace(";", ",").split("\n");
-        for (int i = 0; i < vars.length; i++) {
+        List<String> lines = new ArrayList(new TreeSet(Arrays.asList(vars)));
+        for (int i = 0; i < lines.size(); i++) {
             if (i == 0) {
-                r.add(vars[i].split(","));
+                r.add(lines.get(i).split(","));
                 continue;
             }
             r.add(vars[i].split(","));
