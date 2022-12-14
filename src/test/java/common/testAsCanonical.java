@@ -51,6 +51,8 @@ public class testAsCanonical extends TestCase {
                 "\t\"bill_add_countrycode\"\n" +
                 "FROM \"na_swr\".\"dim_growers\"";
         TBaseType.as_canonical_f_decrypt_replace_password = true;
+        TBaseType.clearCryptFunctions();
+        TBaseType.addToCryptFunctions("f_decrypt",2);
         assertTrue(sqlparser.parse() == 0);
         assertTrue (sqlparser.sqlstatements.get(0).asCanonical().trim().equalsIgnoreCase("SELECT recordtypeid,\n" +
                 "\tf_decrypt(\"name\", '***') as name,\n" +
@@ -71,6 +73,24 @@ public class testAsCanonical extends TestCase {
                 "\tf_decrypt(\"bill_add_latitude\", 'bkf897aj6cidi91829rk65i3') as \"bill_add_latitude\",\n" +
                 "\t\"bill_add_countrycode\"\n" +
                 "FROM \"na_swr\".\"dim_growers\""));
+    }
+
+    public void testReplaceFdecrypt2(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
+        sqlparser.sqltext = "select employee_guid, f_aes_decrypt_ecb_ctr(gender,'zxygd8yrabpwijs7') as gender,\n" +
+                "f_decrypt(name,'2ixu827uzuy88yx889rlv7vr') as accountname\n" +
+                "from public.mio037_group_hr_all_employees limit 10\n";
+        TBaseType.as_canonical_f_decrypt_replace_password = true;
+        TBaseType.clearCryptFunctions();
+        TBaseType.addToCryptFunctions("f_decrypt",2);
+        TBaseType.addToCryptFunctions("f_aes_decrypt_ecb_ctr",2);
+
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue (sqlparser.sqlstatements.get(0).asCanonical().trim().equalsIgnoreCase("select employee_guid, f_aes_decrypt_ecb_ctr(gender,'***') as gender,\n" +
+                "f_decrypt(name,'***') as accountname\n" +
+                "from public.mio037_group_hr_all_employees limit 10"));
+
+        assertTrue(sqlparser.sqlstatements.get(0).toString().trim().equalsIgnoreCase(sqlparser.sqltext.trim()));
     }
 
 }
