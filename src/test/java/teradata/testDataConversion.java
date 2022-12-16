@@ -1,9 +1,6 @@
 package teradata;
 
-import gudusoft.gsqlparser.EDataType;
-import gudusoft.gsqlparser.EDataTypeAttribute;
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TDatatypeAttribute;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TTypeName;
@@ -13,6 +10,31 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testDataConversion extends TestCase {
+
+    public void test5 (){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "SELECT hire_date (time(6)) FROM Schema.table_name;";
+
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TExpression expr = select.getResultColumnList().getResultColumn(0).getExpr();
+        assertTrue(expr.getExpressionType() == EExpressionType.simple_object_name_t);
+
+        // data conversion, only one conversion
+        assertTrue(expr.getDataConversions().size() == 1);
+        TDataConversion dataConversion = expr.getDataConversions().get(0);
+
+        // items in data conversion
+        assertTrue(dataConversion.getDataConversionItems().size() == 1);
+
+        // the first item in data conversion, here is the FORMAT data attribute
+        TDataConversionItem item = dataConversion.getDataConversionItems().get(0);
+        assertTrue(item.getDataConversionType() == TDataConversionItem.EDataConversionype.dataType);
+        TTypeName dataType = item.getDataType();
+        assertTrue(dataType.getDataType() == EDataType.time_t);
+    }
+
 
     public void test4 (){
 
