@@ -20,33 +20,32 @@ public class testFromSelect extends TestCase {
                 "  SELECT pv_users.age, count(DISTINCT pv_users.userid) \n" +
                 "  GROUP BY pv_users.age; \n" +
                 "  ";
+       // System.out.println(sqlparser.sqltext);
+
         assertTrue(sqlparser.parse() == 0);
 
-         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstselect);
 
-         TSelectSqlStatement select  = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstinsert);
+         TInsertSqlStatement insertSqlStatement = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+         assertTrue(insertSqlStatement.getHiveInsertType() == EHiveInsertType.overwriteTable);
+         assertTrue(insertSqlStatement.getTargetTable().getFullName().equalsIgnoreCase("pv_gender_sum"));
+
+         TSelectSqlStatement select  = insertSqlStatement.getSubQuery();
          TJoin join = select.joins.getJoin(0);
          assertTrue(join.getKind() == TBaseType.join_source_fake);
          assertTrue(join.getTable().getFullName().equalsIgnoreCase("pv_users"));
+         assertTrue(select.getGroupByClause().getItems().getGroupByItem(0).toString().equalsIgnoreCase("pv_users.gender"));
 
-         //quick way to access table
-         TTable t = select.tables.getTable(0);
-         assertTrue(t.getFullName().equalsIgnoreCase("pv_users"));
 
-         assertTrue(select.getHiveBodyList().size() == 2);
+         TInsertSqlStatement insertSqlStatement2 = insertSqlStatement.getMultiInsertStatements().get(0);
+         assertTrue(insertSqlStatement2.getHiveInsertType() == EHiveInsertType.overwriteDirectory);
+         assertTrue(insertSqlStatement2.getDirectoryName().toString().equalsIgnoreCase("'/user/facebook/tmp/pv_age_sum'"));
 
-         assertTrue(select.getHiveBodyList().get(0).sqlstatementtype == ESqlStatementType.sstinsert);
-         TInsertSqlStatement insert1 = (TInsertSqlStatement)select.getHiveBodyList().get(0);
-         assertTrue(insert1.getHiveInsertType() == EHiveInsertType.overwriteTable);
-         assertTrue(insert1.getTargetTable().getFullName().equalsIgnoreCase("pv_gender_sum"));
-         TSelectSqlStatement select1 = insert1.getSubQuery();
-         assertTrue(select1.getGroupByClause().getItems().getGroupByItem(0).toString().equalsIgnoreCase("pv_users.gender"));
-
-         insert1 = (TInsertSqlStatement)select.getHiveBodyList().get(1);
-         assertTrue(insert1.getHiveInsertType() == EHiveInsertType.overwriteDirectory);
-        // System.out.println(insert1.getDirectoryName().toString());
-        //assertTrue(insert1.getDirectoryName().getEndToken() != null);
-         assertTrue(insert1.getDirectoryName().toString().equalsIgnoreCase("'/user/facebook/tmp/pv_age_sum'"));
+         select  = insertSqlStatement2.getSubQuery();
+         join = select.joins.getJoin(0);
+         assertTrue(join.getKind() == TBaseType.join_source_fake);
+         assertTrue(join.getTable().getFullName().equalsIgnoreCase("pv_users"));
+         assertTrue(select.getGroupByClause().getItems().getGroupByItem(0).toString().equalsIgnoreCase("pv_users.age"));
 
     }
 
@@ -65,21 +64,17 @@ public class testFromSelect extends TestCase {
                "    AS date, count;" ;
 
 
-       System.out.println(sqlparser.sqltext);
+       //System.out.println(sqlparser.sqltext);
        assertTrue(sqlparser.parse() == 0);
 
-        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
 
-       assertTrue(select.getHiveBodyList().size() == 1);
-        TCustomSqlStatement sql = select.getHiveBodyList().get(0);
-        assertTrue(sql.sqlstatementtype == ESqlStatementType.sstinsert);
-        TInsertSqlStatement insert = (TInsertSqlStatement)sql;
         assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
         assertTrue(insert.tables.getTable(0).toString().equalsIgnoreCase("pv_users_reduced"));
 
-        TSelectSqlStatement reduce = insert.getSubQuery();
-        assertTrue(reduce.getTransformClause() != null);
-        THiveTransformClause transformClause = reduce.getTransformClause();
+        TSelectSqlStatement reduceSelect = insert.getSubQuery();
+        assertTrue(reduceSelect.getTransformClause() != null);
+        THiveTransformClause transformClause = reduceSelect.getTransformClause();
         assertTrue(transformClause.getTransformType() == THiveTransformClause.ETransformType.ettReduce);
         assertTrue(transformClause.getExpressionList().size() == 3);
         assertTrue(transformClause.getExpressionList().getExpression(0).toString().equalsIgnoreCase("map_output.c1"));
@@ -93,15 +88,25 @@ public class testFromSelect extends TestCase {
         assertTrue(aliasClause.getColumns().getObjectName(1).toString().equalsIgnoreCase("count"));
 
 
-        TTable table = select.tables.getTable(0);
-        assertTrue(table.getTableType() == ETableSource.subquery);
-        TSelectSqlStatement subquery = table.getSubquery();
-        assertTrue(subquery.getHiveBodyList().size() == 1);
+
+//        FROM (
+//                FROM pv_users
+//                MAP ( pv_users.userid, pv_users.date )
+//                USING 'map_script'
+//        AS c1, c2, c3
+//        DISTRIBUTE BY c2
+//        SORT BY c2, c1) map_output
+
+        // table is type of subquery of the above sql
+        TTable table = reduceSelect.tables.getTable(0);
         assertTrue(table.getAliasClause().toString().equalsIgnoreCase("map_output"));
 
-        sql = subquery.getHiveBodyList().get(0);
-        assertTrue(sql.sqlstatementtype == ESqlStatementType.sstselect);
-        TSelectSqlStatement select1 = (TSelectSqlStatement)sql;
+        assertTrue(table.getTableType() == ETableSource.subquery);
+        TSelectSqlStatement select1 = table.getSubquery();
+        TTable table1 = select1.tables.getTable(0);
+        assertTrue(table1.getTableName().toString().equalsIgnoreCase("pv_users"));
+
+
         assertTrue(select1.getTransformClause() != null);
         transformClause = select1.getTransformClause();
         assertTrue(transformClause.getTransformType() == THiveTransformClause.ETransformType.ettMap);
@@ -128,13 +133,6 @@ public class testFromSelect extends TestCase {
         assertTrue(sortBy.getItems().getOrderByItem(1).getSortKey().toString().equalsIgnoreCase("c1"));
         assertTrue(sortBy.getItems().getOrderByItem(0).getSortType() == TBaseType.srtNone);
 
-
-
-        TTable table1 = subquery.tables.getTable(0);
-        assertTrue(table1.getTableName().toString().equalsIgnoreCase("pv_users"));
-
-        //select = subquery.getHiveBodyList().get(0);
-
     }
 
     public void test3(){
@@ -152,18 +150,15 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-       TTable table = select.tables.getTable(0);
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
+        assertTrue(insert.tables.getTable(0).toString().equalsIgnoreCase("pv_users_reduced"));
+        TSelectSqlStatement subquery = insert.getSubQuery();
+
+
+       TTable table = subquery.tables.getTable(0);
        assertTrue(table.getAliasClause().toString().equalsIgnoreCase("map_output"));
 
-       assertTrue(select.getHiveBodyList().size() == 1);
-       TCustomSqlStatement sql = select.getHiveBodyList().get(0);
-        assertTrue(sql.sqlstatementtype == ESqlStatementType.sstinsert);
-
-      TInsertSqlStatement insert = (TInsertSqlStatement)sql;
-      assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
-      assertTrue(insert.tables.getTable(0).toString().equalsIgnoreCase("pv_users_reduced"));
-      TSelectSqlStatement subquery = insert.getSubQuery();
 
       assertTrue(subquery.getTransformClause() != null);
 
@@ -193,24 +188,26 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TInsertSqlStatement insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
+        //TInsertSqlStatement insert = (TInsertSqlStatement)select.getHiveBodyList().get(0);
+        assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
+        assertTrue(insert.tables.getTable(0).toString().equalsIgnoreCase("dest1"));
+        TSelectSqlStatement subquery = insert.getSubQuery();
+        assertTrue(subquery.getResultColumnList().size() == 2);
+        assertTrue(subquery.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("tkey"));
+        assertTrue(subquery.getResultColumnList().getResultColumn(1).toString().equalsIgnoreCase("tvalue"));
 
-       TTable table = select.tables.getTable(0);
+
+       TTable table = subquery.tables.getTable(0);
       assertTrue(table.getAliasClause().toString().equalsIgnoreCase("tmap"));
-      TInsertSqlStatement insert = (TInsertSqlStatement)select.getHiveBodyList().get(0);
-      assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
-      assertTrue(insert.tables.getTable(0).toString().equalsIgnoreCase("dest1"));
-      TSelectSqlStatement subquery = insert.getSubQuery();
-      assertTrue(subquery.getResultColumnList().size() == 2);
-      assertTrue(subquery.getResultColumnList().getResultColumn(0).toString().equalsIgnoreCase("tkey"));
-      assertTrue(subquery.getResultColumnList().getResultColumn(1).toString().equalsIgnoreCase("tvalue"));
+
 
       assertTrue(table.getTableType() == ETableSource.subquery);
       TSelectSqlStatement subquery1 = table.getSubquery();
       assertTrue(subquery1.tables.getTable(0).toString().equalsIgnoreCase("src"));
-      assertTrue(subquery1.getHiveBodyList().size() == 1);
 
-      TSelectSqlStatement select1 = (TSelectSqlStatement)subquery1.getHiveBodyList().get(0);
+      TSelectSqlStatement select1 = subquery1;
+
       assertTrue(select1.getTransformClause() != null);
       THiveTransformClause transformClause = select1.getTransformClause();
       assertTrue(transformClause.getTransformType() == THiveTransformClause.ETransformType.ettSelect);
@@ -245,18 +242,21 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-       assertTrue(select.tables.getTable(0).getTableName().toString().equalsIgnoreCase("page_view_stg"));
 
-       TInsertSqlStatement  insert = (TInsertSqlStatement)select.getHiveBodyList().get(0);
+       TInsertSqlStatement  insert = (TInsertSqlStatement)sqlparser.sqlstatements.get(0);
        assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
        TTable table =  insert.getTargetTable();
        TPartitionExtensionClause partition = table.getPartitionExtensionClause();
 
        assertTrue(table.getTableName().toString().equalsIgnoreCase("page_view"));
        assertTrue(partition.getKeyValues().getExpression(0).getLeftOperand().toString().equalsIgnoreCase("dt"));
+
        TSelectSqlStatement subquery = insert.getSubQuery();
        assertTrue(subquery.getResultColumnList().size() == 8);
+
+        //TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(subquery.tables.getTable(0).getTableName().toString().equalsIgnoreCase("page_view_stg"));
+
     }
 
      public void test6(){
@@ -269,14 +269,13 @@ public class testFromSelect extends TestCase {
 
        assertTrue(sqlparser.parse() == 0);
 
-         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-       assertTrue(select.tables.getTable(0).getTableName().toString().equalsIgnoreCase("pv_users"));
-       TSelectSqlStatement map = (TSelectSqlStatement)select.getHiveBodyList().get(0);
-       assertTrue(map.getTransformClause() != null);
-       THiveTransformClause transformClause = map.getTransformClause();
+       TSelectSqlStatement mapSelect = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+       assertTrue(mapSelect.tables.getTable(0).getTableName().toString().equalsIgnoreCase("pv_users"));
+       assertTrue(mapSelect.getTransformClause() != null);
+       THiveTransformClause transformClause = mapSelect.getTransformClause();
        assertTrue(transformClause.getTransformType() == THiveTransformClause.ETransformType.ettMap);
        assertTrue(transformClause.getExpressionList().getExpression(0).toString().equalsIgnoreCase("pv_users.userid"));
        assertTrue(transformClause.getUsingString().toString().equalsIgnoreCase("'map_script'"));
-       assertTrue(map.getClusterBy().getExpressionList().getExpression(0).toString().equalsIgnoreCase("dt"));
+       assertTrue(mapSelect.getClusterBy().getExpressionList().getExpression(0).toString().equalsIgnoreCase("dt"));
      }
 }

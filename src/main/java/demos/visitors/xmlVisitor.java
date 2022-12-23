@@ -4771,6 +4771,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		// stmt.getReturningClause().accept(this);
 		// }
 		elementStack.pop( );
+
+		if (stmt.getMultiInsertStatements().size() > 0){
+			for(int i=0;i<stmt.getMultiInsertStatements().size();i++){
+				stmt.getMultiInsertStatements().get(i).accept(this);
+			}
+		}
 	}
 
 	public void postVisit( TInsertSqlStatement stmt )

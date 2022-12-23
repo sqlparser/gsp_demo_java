@@ -19,15 +19,17 @@ public class testExplain extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         THiveExplain explain = (THiveExplain)sqlparser.sqlstatements.get(0);
-        assertTrue(explain.getStmt().sqlstatementtype == ESqlStatementType.sstselect);
-        TSelectSqlStatement fromQuery = (TSelectSqlStatement)explain.getStmt();
-        assertTrue(fromQuery.tables.getTable(0).getTableName().toString().equalsIgnoreCase("src"));
-        assertTrue(fromQuery.getHiveBodyList().size() == 1);
-        TInsertSqlStatement insert = (TInsertSqlStatement)fromQuery.getHiveBodyList().get(0);
+        assertTrue(explain.getStmt().sqlstatementtype == ESqlStatementType.sstinsert);
+        TInsertSqlStatement insert = (TInsertSqlStatement)explain.getStmt();
+//        TInsertSqlStatement insert = (TInsertSqlStatement)fromQuery.getHiveBodyList().get(0);
         assertTrue(insert.getHiveInsertType() == EHiveInsertType.overwriteTable);
         assertTrue(insert.getTargetTable().getTableName().toString().equalsIgnoreCase("dest_g1"));
-        TSelectSqlStatement select = (TSelectSqlStatement)insert.getSubQuery();
-        TGroupBy groupBy = select.getGroupByClause();
+        TSelectSqlStatement fromQuery = insert.getSubQuery();
+
+        assertTrue(fromQuery.tables.getTable(0).getTableName().toString().equalsIgnoreCase("src"));
+//        assertTrue(fromQuery.getHiveBodyList().size() == 1);
+//        TSelectSqlStatement select = (TSelectSqlStatement)insert.getSubQuery();
+        TGroupBy groupBy = fromQuery.getGroupByClause();
         assertTrue(groupBy.getItems().getGroupByItem(0).getExpr().toString().equalsIgnoreCase("src.key"));
     }
 
