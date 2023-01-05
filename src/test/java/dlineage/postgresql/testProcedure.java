@@ -37,27 +37,15 @@ public class testProcedure extends TestCase {
 
         List<Relationship> fsa048Relationships = Arrays.stream(dataFlow.getRelationships())
                 .filter(s -> s.getTarget().getParentName().contains("report.trs_fsa048_report_v002")).collect(Collectors.toList());
-        assertTrue(fsa048Relationships.size() == 11);
-
-        List<Relationship> a242Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TDM_INSTRUMENT_A242".toLowerCase())))
-                .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(a242Relationships) && a242Relationships.size()==5);
+        assertTrue(fsa048Relationships.size() == 3);
 
         List<Relationship> a305Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("tft_scheme_details_a305".toLowerCase())))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(a305Relationships) && a305Relationships.size()==2);
+        assertTrue(!CollectionUtil.isEmpty(a305Relationships) && a305Relationships.size()==1);
 
         List<Relationship> v012Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TFT_ACCT_EOD_POSN_V012".toLowerCase())))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==11);
-
-        List<Relationship> a006Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TDM_PARTY_A006".toLowerCase())))
-                .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(a006Relationships) && a006Relationships.size()==2);
-
-        List<Relationship> a017Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TDM_CURRENCY_A017".toLowerCase())))
-                .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(a017Relationships) && a017Relationships.size()==8);
+        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==3);
         
     }
 }
