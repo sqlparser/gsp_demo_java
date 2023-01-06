@@ -240,6 +240,7 @@ But by using those args, you can get the same outcome:
 
 
 ## 6. Releases
+- [Ver3.0.2, 2023/01/06] Fix a bug IDENTIFIER keyword can't be used in view column list.
 - [Ver3.0.1, 2022/11/01] Integrate sqlflow-ingester to dataflowAnalyzer tool.
 - [Ver2.2.0, 2022/07/21] Use /env parameter to provide metadata.
 - [Ver2.1.2, 2021/07/13] Update readme, illustrates how to connect to database instance in command line.
