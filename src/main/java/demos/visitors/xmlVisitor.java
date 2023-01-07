@@ -2437,6 +2437,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 	public void preVisit(TForUpdate node) {
+		Element e_for_update_clause = xmldoc.createElement("for_update_clause");
+		e_for_update_clause.setAttribute("wait",  node.isWait()?"true":"false");
+		e_for_update_clause.setAttribute("nowait",  node.isNowait()?"true":"false");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_for_update_clause);
+		elementStack.push(e_for_update_clause);
+
+		elementStack.pop();
+
 	}
 
 	public void preVisit(TStatementList node) {
