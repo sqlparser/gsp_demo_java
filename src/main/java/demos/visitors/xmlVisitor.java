@@ -6048,6 +6048,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			case TLoopStmt.for_loop :
 				e_stmt = xmldoc.createElement( "for_loop_statement" );
+				if (stmt.getLower_bound() != null){
+					e_stmt.setAttribute("lower_bound",stmt.getLower_bound().toString());
+				}
+				if (stmt.getUpper_bound() != null){
+					e_stmt.setAttribute("upper_bound",stmt.getUpper_bound().toString());
+				}
 				break;
 			case TLoopStmt.while_loop :
 				e_stmt = xmldoc.createElement( "while_statement" );
