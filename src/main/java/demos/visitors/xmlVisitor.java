@@ -1006,6 +1006,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_expression = xmldoc.createElement(TAG_LIKE_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
+				//add by grq 2023.01.10 issue=I69P61
+				e_expression.setAttribute("not",
+						(node.getNotToken() != null) ? "true" : "false");
+				//end by grq
 				elementStack.push(e_expression);
 				current_expression_tag = "first_expr";
 				node.getLeftOperand().accept(this);
@@ -1021,6 +1025,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_expression = xmldoc.createElement(TAG_BETWEEN_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
+				//add by grq 2023.01.10 issue=I69P61
+				e_expression.setAttribute("not",
+						(node.getNotToken() != null) ? "true" : "false");
+				//end by grq
 				elementStack.push(e_expression);
 				current_expression_tag = "first_expr";
 				node.getBetweenOperand().accept(this);
