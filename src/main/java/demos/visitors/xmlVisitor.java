@@ -3544,9 +3544,44 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_create_trigger);
 		elementStack.push(e_create_trigger);
 		addElementOfNode("trigger_name", stmt.getTriggerName());
+		stmt.getTriggeringClause().accept(this);
 		stmt.getBodyStatements().accept(this);
+		if (stmt.getFunctionCall() != null){
+			addElementOfNode("execute_function",stmt.getFunctionCall());
+		}
 		elementStack.pop();
 	}
+
+	public void preVisit(TDmlEventItem node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_trigger_dml_event = xmldoc.createElement("dml_event");
+		e_parent.appendChild(e_trigger_dml_event);
+		elementStack.push(e_trigger_dml_event);
+		e_trigger_dml_event.setAttribute("event_type",node.getDmlType().toString());
+		if (node.getColumnList() != null){
+			node.getColumnList().accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TSimpleDmlTriggerClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_trigger_clause = xmldoc.createElement("simple_dml_trigger_clause");
+		e_parent.appendChild(e_create_trigger_clause);
+		elementStack.push(e_create_trigger_clause);
+		e_create_trigger_clause.setAttribute("granularity",node.getGranularity().toString());
+		if (node.getEventClause() instanceof TDmlEventClause){
+			TDmlEventClause dmlEventClause = (TDmlEventClause)node.getEventClause();
+			e_create_trigger_clause.setAttribute("source_table",dmlEventClause.getTableName().toString());
+			for(int i=0;i<dmlEventClause.getEventItems().size();i++){
+				TDmlEventItem dmlEventItem = (TDmlEventItem)dmlEventClause.getEventItems().get(i);
+				dmlEventItem.accept(this);
+			}
+		}
+		elementStack.pop();
+	}
+
+
 
 	public void preVisit(TCreateVariableStmt stmt) {
 		e_parent = (Element) elementStack.peek();

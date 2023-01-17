@@ -18,6 +18,50 @@ public class testOracle extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
+    public static void testSubqueryWithSameColumn() {
+        doTest("SELECT A.PROJECT_ID\n" +
+                        "            , A.SQL_AUTO_PERF_CHECK_ID\n" +
+                        "         FROM SQL_AUTO_PERF_CHK A\n" +
+                        "            , (\n" +
+                        "               SELECT PROJECT_ID\n" +
+                        "                    , SQL_AUTO_PERF_CHECK_ID\n" +
+                        "                    , DBID\n" +
+                        "                    , EXEC_SEQ\n" +
+                        "                 FROM FILTER_PRED_EXEC\n" +
+                        "                WHERE ACCESS_PATH_TYPE = 'AUTOINDEX'\n" +
+                        "              ) B\n" +
+                        "            , (\n" +
+                        "               SELECT IDX_AD_NO\n" +
+                        "                    , DBID\n" +
+                        "                    , EXEC_SEQ\n" +
+                        "                 FROM IDX_AD_MST\n" +
+                        "              ) C\n" +
+                        "        WHERE A.PROJECT_ID = :project_id\n" +
+                        "          AND A.PERF_CHECK_EXEC_END_DT IS NOT NULL\n" +
+                        "          AND NVL(A.PERF_CHECK_FORCE_CLOSE_YN, 'N') <> 'Y'\n" +
+                        "          AND B.PROJECT_ID = A.PROJECT_ID\n" +
+                        "          AND B.SQL_AUTO_PERF_CHECK_ID = A.SQL_AUTO_PERF_CHECK_ID\n" +
+                        "          AND C.DBID = B.DBID",
+                "Tables:\n" +
+                        "FILTER_PRED_EXEC\n" +
+                        "IDX_AD_MST\n" +
+                        "SQL_AUTO_PERF_CHK\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "FILTER_PRED_EXEC.ACCESS_PATH_TYPE\n" +
+                        "FILTER_PRED_EXEC.DBID\n" +
+                        "FILTER_PRED_EXEC.EXEC_SEQ\n" +
+                        "FILTER_PRED_EXEC.PROJECT_ID\n" +
+                        "FILTER_PRED_EXEC.SQL_AUTO_PERF_CHECK_ID\n" +
+                        "IDX_AD_MST.DBID\n" +
+                        "IDX_AD_MST.EXEC_SEQ\n" +
+                        "IDX_AD_MST.IDX_AD_NO\n" +
+                        "SQL_AUTO_PERF_CHK.PERF_CHECK_EXEC_END_DT\n" +
+                        "SQL_AUTO_PERF_CHK.PERF_CHECK_FORCE_CLOSE_YN\n" +
+                        "SQL_AUTO_PERF_CHK.PROJECT_ID\n" +
+                        "SQL_AUTO_PERF_CHK.SQL_AUTO_PERF_CHECK_ID");
+    }
+
     public static void testInsertAll() {
         doTest(" INSERT ALL\n" +
                         "  WHEN id <= 3 THEN\n" +
