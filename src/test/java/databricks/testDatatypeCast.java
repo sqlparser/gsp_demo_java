@@ -15,7 +15,7 @@ public class testDatatypeCast extends TestCase {
         TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement) sqlparser.sqlstatements.get (0);
         TExpression expression = selectSqlStatement.getResultColumnList().getResultColumn(0).getExpr();
         assertTrue(expression.getExpressionType() == EExpressionType.typecast_datatype_t);
-        assertTrue(expression.getCastDatatype() == EDataType.bigint_t);
+        assertTrue(expression.getTypeName().getDataType() == EDataType.bigint_t);
         assertTrue(expression.getLeftOperand().toString().equalsIgnoreCase("current_timestamp"));
         //System.out.println(expression.getLeftOperand().getExpressionType());
     }

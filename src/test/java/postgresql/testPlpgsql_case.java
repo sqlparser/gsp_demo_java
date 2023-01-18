@@ -35,7 +35,7 @@ public class testPlpgsql_case extends TestCase {
         assertTrue(createFunction.getParameterDeclarations().size() == 1);
         TParameterDeclaration param = createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
         assertTrue(param.getDataType().getDataType() == EDataType.date_t);
-        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.int_t);
+        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.integer_t);
 
         assertTrue(createFunction.getBodyStatements().size() == 1);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
@@ -92,7 +92,7 @@ public class testPlpgsql_case extends TestCase {
         assertTrue(createFunction.getParameterDeclarations().size() == 1);
         TParameterDeclaration param = createFunction.getParameterDeclarations().getParameterDeclarationItem(0);
         assertTrue(param.getDataType().getDataType() == EDataType.date_t);
-        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.int_t);
+        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.integer_t);
 
         assertTrue(createFunction.getBodyStatements().size() == 1);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);

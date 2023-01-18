@@ -41,7 +41,7 @@ public class testPlpgsql_block extends TestCase {
 
         TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
 
-        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.int_t);
+        assertTrue(createFunction.getReturnDataType().getDataType() == EDataType.integer_t);
 
         assertTrue(createFunction.getBodyStatements().size() == 5);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
@@ -65,7 +65,7 @@ public class testPlpgsql_block extends TestCase {
         TVarDeclStmt declStmt = (TVarDeclStmt)block.getDeclareStatements().get(0);
         assertTrue(declStmt.getDeclareType() == EDeclareType.variable);
         assertTrue(declStmt.getElementName().toString().equalsIgnoreCase("quantity"));
-        assertTrue(declStmt.getDataType().getDataType() == EDataType.int_t);
+        assertTrue(declStmt.getDataType().getDataType() == EDataType.integer_t);
         assertTrue(declStmt.getDefaultValue().toString().equalsIgnoreCase("80"));
 
         assertTrue(block.getBodyStatements().size() == 2);
