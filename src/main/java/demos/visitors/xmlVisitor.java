@@ -28,6 +28,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
+import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.databricks.TCreateExternalLocationStmt;
@@ -1980,23 +1981,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_object_name.appendChild(e_server);
 			e_server.setTextContent(node.getServerToken().toString());
 		}
-		if ((node.getDatabaseToken() != null) || (node.getImplictDatabaseString() != null)) {
+
+		Boolean showImplicitDBOrSchema = false;
+
+		if ((node.getDatabaseToken() != null) || (showImplicitDBOrSchema && (node.getImplictDatabaseString() != null))) {
 			Element e_database = xmldoc.createElement("database_name");
 			e_object_name.appendChild(e_database);
 			if (node.getDatabaseToken() != null) {
 				e_database.setTextContent(node.getDatabaseToken().toString());
 			} else {
-				e_database.setTextContent(node.getImplictDatabaseString());
+				 e_database.setTextContent(node.getImplictDatabaseString());
 			}
 
 		}
-		if (((node.getSchemaToken() != null) && (!node.isImplicitSchema())) || (node.getImplictSchemaString() != null)) {
+		if (((node.getSchemaToken() != null) && (!node.isImplicitSchema())) || ( showImplicitDBOrSchema && (node.getImplictSchemaString() != null))) {
 			Element e_schema = xmldoc.createElement("schema_name");
 			e_object_name.appendChild(e_schema);
 			if ((node.getSchemaToken() != null) && (!node.isImplicitSchema())) {
 				e_schema.setTextContent(node.getSchemaToken().toString());
 			} else {
-				e_schema.setTextContent(node.getImplictSchemaString());
+				 e_schema.setTextContent(node.getImplictSchemaString());
 			}
 		}
 		if (node.getObjectToken() != null) {
@@ -2953,6 +2957,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 					node.getPartitionSpecList().get(i).accept(this);
 				}
 				break;
+			case attachPartition:
+				node.getPartitionName().accept(this);
+				node.getPartitionBoundSpec().accept(this);
+				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
 				e_alter_table_option.appendChild(e_option);
@@ -3890,7 +3898,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getSelectItemList().getElement(i).accept(this);
 		}
 		elementStack.pop();
-
 	}
 
 	public void preVisit(TCreateIndexSqlStatement stmt) {
@@ -3921,6 +3928,29 @@ public class xmlVisitor extends TParseTreeVisitor {
 			current_expression_tag = "column_expr";
 			orderByItem.getSortKey().accept(this);
 			elementStack.pop();
+		}
+
+		if (stmt.getWhereCondition() != null){
+			stmt.getWhereCondition().accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TPartitionBoundSpecSqlNode node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_partition_bound_spec = xmldoc.createElement("partition_bound_spec");
+		e_partition_bound_spec.setAttribute("type",node.getSpecType().toString());
+		e_parent.appendChild(e_partition_bound_spec);
+		elementStack.push(e_partition_bound_spec);
+		switch (node.getSpecType()){
+			case typeIn:
+				node.getPartition_bound_expr_list().accept(this);
+				break;
+			case typeFromTo:
+				node.getPartition_bound_expr_list_from().accept(this);
+				node.getPartition_bound_expr_list_to().accept(this);
+				break;
 		}
 
 		elementStack.pop();
@@ -3972,6 +4002,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			case copy:
 				addElementOfNode("copy_table",stmt.getCloneSourceTable());
+				break;
+			case partitionOf:
+				addElementOfNode("parent_table",stmt.getSuperTableName());
+				stmt.getPartitionBoundSpec().accept(this);
 				break;
 		}
 
