@@ -3,6 +3,7 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
+import gudusoft.gsqlparser.nodes.bigquery.TReplaceExprAsIdentifier;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
@@ -804,6 +805,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		appendEndTag(node);
 	}
 
+
+	public void preVisit(TReplaceExprAsIdentifier node) {
+		// appendStartTag(node);
+		e_parent = (Element) elementStack.peek();
+		Element e_expr_as_ident = xmldoc.createElement("expr_as_identifier");
+		e_parent.appendChild(e_expr_as_ident);
+		elementStack.push(e_expr_as_ident);
+		node.getExpr().accept(this);
+		node.getIdentifier().accept(this);
+		elementStack.pop();
+
+	}
+
 	public void preVisit(TResultColumn node) {
 		// appendStartTag(node);
 		e_parent = (Element) elementStack.peek();
@@ -818,6 +832,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		if (node.getExceptColumnList() != null){
 			addElementOfNode("except_columns",node.getExceptColumnList());
+		}
+
+		if (node.getReplaceExprAsIdentifiers() != null){
+			Element e_replace_clause = xmldoc.createElement("replace_clause");
+			e_result_column.appendChild(e_replace_clause);
+			elementStack.push(e_replace_clause);
+			for(int i=0;i<node.getReplaceExprAsIdentifiers().size();i++){
+				node.getReplaceExprAsIdentifiers().get(i).accept(this);
+			}
+			elementStack.pop();
 		}
 		elementStack.pop();
 	}
@@ -2583,6 +2607,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+
+	public void preVisit(TUnloadStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_unload_stmt = xmldoc.createElement("unload_stmt");
+		e_parent.appendChild(e_unload_stmt);
+		elementStack.push(e_unload_stmt);
+		if (stmt.getSelectSqlStatement() != null){
+			stmt.getSelectSqlStatement().accept(this);
+		}
+
+		if (stmt.getS3() != null){
+			addElementOfString("s3_path",stmt.getS3());
+		}
+
+
+		elementStack.pop();
+
+	}
+
 	public void preVisit(TCreateFunctionStmt node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_function = xmldoc.createElement("create_function_statement");
@@ -2610,7 +2653,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getParameterDeclarations().accept(this);
 		}
 
-		if (node.getBodyStatements().size() > 0) {
+		if (node.getBlockBody() != null){
+			node.getBlockBody().accept(this);
+		}
+		else if (node.getBodyStatements().size() > 0) {
 			current_statement_list_tag = "body_statement_list";
 			node.getBodyStatements().accept(this);
 		}
@@ -2889,6 +2935,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_alter_table_option.appendChild(e_option);
 				elementStack.push(e_option);
 				node.getColumnName().accept(this);
+				if (node.getNewDataType() != null){
+					node.getNewDataType().accept(this);
+				}
 				elementStack.pop();
 				break;
 			case ChangeColumn:
@@ -5668,12 +5717,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit( TBlockSqlNode node ) {
 		e_parent = (Element) elementStack.peek( );
-		Element e_begin_end = xmldoc.createElement( "plsql_block" );
+		Element e_plsql_block = xmldoc.createElement( "plsql_block" );
 		if (node.getLabelName() != null){
-			e_begin_end.setAttribute("label",node.getLabelNameStr());
+			e_plsql_block.setAttribute("label",node.getLabelNameStr());
 		}
-		e_parent.appendChild( e_begin_end );
-		elementStack.push( e_begin_end );
+		if (node.getParent() != null){
+			if (node.getParent() instanceof  TStoredProcedureSqlStatement){
+				TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)node.getParent();
+				e_plsql_block.setAttribute("parent_name",p.getStoredProcedureName().toString());
+			}
+		}
+		e_parent.appendChild( e_plsql_block );
+		elementStack.push( e_plsql_block );
 		if (node.getDeclareStatements().size() > 0){
 			current_statement_list_tag = "declare_statement_list";
 			node.getDeclareStatements().accept(this);

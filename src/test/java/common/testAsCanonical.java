@@ -93,4 +93,22 @@ public class testAsCanonical extends TestCase {
         assertTrue(sqlparser.sqlstatements.get(0).toString().trim().equalsIgnoreCase(sqlparser.sqltext.trim()));
     }
 
+    public void testReplaceFdecrypt3(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
+        sqlparser.sqltext = "select business_partner_type,bp_cid, f_decrypt(name,z9rmt42l85qkf8v3dec23tep) as name , \n" +
+                "name as encrypted_name, language_name,source_system \n" +
+                "from public.mio03_business_partner where bp_cid = 'placeholder_str';";
+        TBaseType.as_canonical_f_decrypt_replace_password = true;
+        TBaseType.clearCryptFunctions();
+        TBaseType.addToCryptFunctions("f_decrypt",2);
+
+        assertTrue(sqlparser.parse() == 0);
+//        System.out.println(sqlparser.sqlstatements.get(0).asCanonical().trim());
+
+        assertTrue (sqlparser.sqlstatements.get(0).asCanonical().trim().equalsIgnoreCase("select business_partner_type,bp_cid, f_decrypt(name,'***') as name , \n" +
+                "name as encrypted_name, language_name,source_system \n" +
+                "from public.mio03_business_partner where bp_cid = 'placeholder_str'"));
+    }
+
+
 }
