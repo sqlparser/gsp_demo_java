@@ -200,12 +200,6 @@ public class DataFlowAnalyzer {
 					sqlFiles, vendor, simple);
 
 			if (sqlenv != null) {
-				if (argList.indexOf("/defaultDatabase") != -1) {
-					sqlenv.setDefaultCatalogName(args[argList.indexOf("/defaultDatabase") + 1]);
-				}
-				if (argList.indexOf("/defaultSchema") != -1) {
-					sqlenv.setDefaultSchemaName(args[argList.indexOf("/defaultSchema") + 1]);
-				}
 				dlineage.setSqlEnv(sqlenv);
 			}
 
@@ -224,7 +218,14 @@ public class DataFlowAnalyzer {
 			
 			dlineage.setShowConstantTable(argList.indexOf("/showConstant")!=-1);
 			dlineage.setShowCountTableColumn(argList.indexOf("/treatArgumentsInCountFunctionAsDirectDataflow")!=-1);
-			
+
+			if (argList.indexOf("/defaultDatabase") != -1) {
+				dlineage.getOption().setDefaultDatabase(args[argList.indexOf("/defaultDatabase") + 1]);
+			}
+			if (argList.indexOf("/defaultSchema") != -1) {
+				dlineage.getOption().setDefaultSchema(args[argList.indexOf("/defaultSchema") + 1]);
+			}
+
 
 			if (simple && !jsonFormat) {
 				dlineage.setTextFormat(textFormat);
