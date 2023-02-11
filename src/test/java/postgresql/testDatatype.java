@@ -84,7 +84,7 @@ public class testDatatype extends TestCase {
         TCreateTableSqlStatement createTable = (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
         TColumnDefinition cd = createTable.getColumnList().getColumn(0);
         //System.out.println(cd.getDatatype().getDataType().toString());
-        assertTrue(cd.getDatatype().getDataType() == EDataType.char_t);
+        assertTrue(cd.getDatatype().getDataType() == EDataType.character_t);
     }
 
     public void test5(){

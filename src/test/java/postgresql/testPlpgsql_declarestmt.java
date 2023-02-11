@@ -45,7 +45,7 @@ public class testPlpgsql_declarestmt extends TestCase {
         TVarDeclStmt declStmt = (TVarDeclStmt)createFunction.getDeclareStatements().get(0);
         assertTrue(declStmt.getDeclareType() == EDeclareType.variable);
         assertTrue(declStmt.getElementName().toString().equalsIgnoreCase("quantity"));
-        assertTrue(declStmt.getDataType().getDataType() == EDataType.int_t);
+        assertTrue(declStmt.getDataType().getDataType() == EDataType.integer_t);
         assertTrue(declStmt.getDefaultValue().toString().equalsIgnoreCase("30"));
 
     }
@@ -93,7 +93,7 @@ public class testPlpgsql_declarestmt extends TestCase {
         cursorDeclStmt = (TCursorDeclStmt)stmt;
         assertTrue(cursorDeclStmt.getCursorName().toString().equalsIgnoreCase("curs3"));
         assertTrue(cursorDeclStmt.getCursorParameterDeclarations().getParameterDeclarationItem(0).getParameterName().toString().equalsIgnoreCase("key"));
-        assertTrue(cursorDeclStmt.getCursorParameterDeclarations().getParameterDeclarationItem(0).getDataType().getDataType() == EDataType.int_t);
+        assertTrue(cursorDeclStmt.getCursorParameterDeclarations().getParameterDeclarationItem(0).getDataType().getDataType() == EDataType.integer_t);
         select = cursorDeclStmt.getSubquery();
         assertTrue(select.tables.getTable(0).toString().equalsIgnoreCase("tenk1"));
 

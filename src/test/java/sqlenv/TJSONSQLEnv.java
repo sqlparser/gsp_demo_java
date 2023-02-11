@@ -58,10 +58,12 @@ class TJSONSQLEnv extends TSQLEnv {
                     String catalog = querys.getJSONObject(i).getString("database");
                     String procedureName = querys.getJSONObject(i).getString("name");
                     String sourceCode = querys.getJSONObject(i).getString("sourceCode");
-
                     TSQLSchema sqlSchema = getSQLSchema(catalog+"."+schema,true);
-                    TSQLProcedure procedure = sqlSchema.createProcedure(procedureName);
-                    if (procedure != null){
+
+                    String partOfCode = sourceCode.trim();
+                    partOfCode = partOfCode.substring(0, partOfCode.length()>20?20:partOfCode.length());
+                    if (partOfCode.indexOf("procedure")>0){
+                        TSQLProcedure procedure = sqlSchema.createProcedure(procedureName);
                         procedure.setDefinition(sourceCode);
                     }else{
                         // this script is used to create view
