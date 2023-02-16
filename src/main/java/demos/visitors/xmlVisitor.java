@@ -28,6 +28,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
+import gudusoft.gsqlparser.nodes.oracle.TJsonObjectFunction;
 import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
@@ -1681,6 +1682,44 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+
+	public void preVisit(TJsonObjectKeyValue node) {
+		Element e_json_object_key_value = xmldoc.createElement("json_object_key_value");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_json_object_key_value);
+		elementStack.push(e_json_object_key_value);
+		node.getKey().accept(this);
+		node.getValue().accept(this);
+
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TJsonObjectFunction node) {
+		Element e_json_object_function = xmldoc.createElement("json_object_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_json_object_function);
+		elementStack.push(e_json_object_function);
+		e_json_object_function.setAttribute("function_name",node.getFunctionName().toString());
+
+		for(int i=0;i<node.getKeyValues().size();i++){
+			node.getKeyValues().get(i).accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TOpenQuery node) {
+		Element e_open_query = xmldoc.createElement("open_query");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_open_query);
+		elementStack.push(e_open_query);
+		if (node.getSubquery() != null){
+			node.getSubquery().accept(this);
+		}
+		elementStack.pop();
+	}
+
 	public void preVisit(TTable node) {
 		// appendStartTagWithIntProperty(node,"type",node.getTableType().toString());
 		String tag_name = "table_reference";
@@ -2050,7 +2089,22 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getPath().accept(this);
 		}
 
-		if (node.getSourceTable() != null) {
+		if ((node.getSourceTableList() != null)&&(node.getSourceTableList().size()>0)){
+			Element e_source_table_list = xmldoc.createElement("source_table_list");
+			e_object_name.appendChild(e_source_table_list);
+			elementStack.push(e_source_table_list);
+
+
+			for(int i=0;i<node.getSourceTableList().size();i++){
+				TTable t = node.getSourceTableList().get(i);
+				String sourceTable = t.getTableName().toString();
+				if (t.getAliasClause() != null) {
+					sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
+				}
+				addElementOfString("source_table", sourceTable);
+			}
+			elementStack.pop();
+		} else if (node.getSourceTable() != null) {
 			String sourceTable = node.getSourceTable().getTableName().toString();
 			if (node.getSourceTable().getAliasClause() != null) {
 				sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
@@ -2058,6 +2112,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			}
 			addElementOfString("source_table", sourceTable);
 		}
+
 	}
 
 	public void postVisit(TObjectName node) {
