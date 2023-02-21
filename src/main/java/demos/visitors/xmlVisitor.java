@@ -3776,6 +3776,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+	public void preVisit(TRenameStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_rename_stmt = xmldoc.createElement("rename_statement");
+		e_parent.appendChild(e_rename_stmt);
+		elementStack.push(e_rename_stmt);
+
+		addElementOfNode("old_name",stmt.getOldName());
+		addElementOfNode("new_name",stmt.getNewName());
+
+		elementStack.pop();
+	}
+
+
 	public void preVisit(TMssqlExecute stmt) {
 		e_parent = (Element) elementStack.peek();
 		Element e_execute = xmldoc.createElement("execute_statement");
@@ -3793,6 +3807,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 								.accept(this);
 					}
 				}
+				break;
+			case TBaseType.metExecStringCmd:
+				for(int i=0;i<stmt.getStringValues().size();i++){
+					stmt.getStringValues().getExpression(i).accept(this);
+				}
+				if (stmt.getLinkServerName() != null){
+					addElementOfNode("link_server",stmt.getLinkServerName());
+				}
+
 				break;
 			default:
 				break;

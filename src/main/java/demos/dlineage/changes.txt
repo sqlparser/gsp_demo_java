@@ -1,5 +1,9 @@
 Gudu SQLFlow Dlineage tool changes:
 
+Dlineage 3.1.2(2023-2-21)
+	- [Dlineage/Hive] able to build relation between table and s3 location in alter table. 
+
+
 Dlineage 3.1.1(2023-2-20)
 	- [dlieange] bug fix for 0002679: SELECT * EXCEPT, AS CASE parse error
 	- [dlieange] bug fix for 0002677: Select star except select star script not parsed correctly
