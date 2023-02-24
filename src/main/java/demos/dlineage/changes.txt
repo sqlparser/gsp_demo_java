@@ -1,6 +1,7 @@
 Gudu SQLFlow Dlineage tool changes:
 
 Dlineage 3.1.3(2023-2-24)
+  - [Dlineage] 0002740: Analyze Error on SELECT STAR CREATE VIEW statements
   - [Dlineage] fix a bug can't link column in subqurey in the select to target table correctly if table table had metadata provided.
 
 Dlineage 3.1.2(2023-2-21)
