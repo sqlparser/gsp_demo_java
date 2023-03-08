@@ -4088,6 +4088,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_create_table = xmldoc.createElement("create_table_statement");
 		e_create_table.setAttribute("source_type", stmt.getTableSourceType().toString());
 		e_create_table.setAttribute("is_external", stmt.isExternal() ? "true" : "false");
+		e_create_table.setAttribute("table_kind", stmt.getTableKinds().toString());
 		e_parent.appendChild(e_create_table);
 		elementStack.push(e_create_table);
 		current_table_reference_tag = "table_name";
