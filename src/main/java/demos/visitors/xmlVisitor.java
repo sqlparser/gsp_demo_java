@@ -33,6 +33,7 @@ import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
+import gudusoft.gsqlparser.stmt.bigquery.TExportDataStmt;
 import gudusoft.gsqlparser.stmt.databricks.TCreateExternalLocationStmt;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
@@ -3168,6 +3169,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case struct_t:
 				addElementOfNode("element_list",node.getColumnDefList());
 				break;
+			case array_t:
+				node.getTypeOfList().accept(this);
+				break;
 			default:
 				break;
 		}
@@ -4080,6 +4084,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 		}
 
+		elementStack.pop();
+	}
+
+	public void preVisit(TExportDataStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_export_data = xmldoc.createElement("export_data");
+		e_parent.appendChild(e_export_data);
+		elementStack.push(e_export_data);
+		if (stmt.getConnectName() != null){
+			current_objectName_tag = "connection_name";
+		}
+		stmt.getSubQuery().accept(this);
 		elementStack.pop();
 	}
 
