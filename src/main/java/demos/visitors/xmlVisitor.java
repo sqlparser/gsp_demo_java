@@ -1965,7 +1965,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_unnest);
 		elementStack.push(e_unnest);
 
-		node.getArrayExpr().accept(this);
+		if (node.getArrayExpr() != null){
+			node.getArrayExpr().accept(this);
+		}else if (node.getColumns() != null){
+			node.getColumns().accept(this);
+		}
+
 
 		if (node.getWithOffset() != null){
 			if (node.getWithOffsetAlais() != null){
@@ -1973,6 +1978,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			}else{
 				addElementOfString("with_offset","empty_value");
 			}
+		}
+
+		if (node.getDerivedColumnList() != null){
+			addElementOfNode("derived_column_list",node.getDerivedColumnList());
 		}
 
 		elementStack.pop();
@@ -2112,6 +2121,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 			}
 			addElementOfString("source_table", sourceTable);
+		}
+
+		if (node.getParentObjectName() != null){
+			// this is usually attribute of a struct type,
+			//   create table absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED (
+			//	Emp_id INT64,Name STRING
+			//	,Address ARRAY<STRUCT<State STRING, City STRING, Zipcode INT64>> );
+			//
+			//INSERT INTO `absolute-runner-302907.gudu_sqlflow.INFO` (emp_id,name,state,city,zipcode)
+			//select emp_id,name,state,city,zipcode from `absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED`, UNNEST(address)
+
+			addElementOfString("parent_column",node.getParentObjectName().toString());
 		}
 
 	}
@@ -5816,9 +5837,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getLabelName() != null){
 			e_plsql_block.setAttribute("label",node.getLabelNameStr());
 		}
-		if (node.getParent() != null){
-			if (node.getParent() instanceof  TStoredProcedureSqlStatement){
-				TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)node.getParent();
+		if (node.getParentObjectName() != null){
+			if (node.getParentObjectName() instanceof  TStoredProcedureSqlStatement){
+				TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)node.getParentObjectName();
 				e_plsql_block.setAttribute("parent_name",p.getStoredProcedureName().toString());
 			}
 		}
