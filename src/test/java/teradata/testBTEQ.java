@@ -6,6 +6,17 @@ import junit.framework.TestCase;
 
 public class testBTEQ extends TestCase {
 
+    public void testLogon(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = ".Logon 127.0.0.1/Tduser \n" +
+                "\tPassword:\n" +
+                "\t\n" +
+                "select a from b;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.size() == 2);
+
+    }
+
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
         sqlparser.sqltext = ".HELP BTEQ\n" +
