@@ -104,6 +104,7 @@ import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -5424,6 +5425,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		node.getCursorName( ).accept( this );
 		elementStack.pop( );
 	}
+
+	public void preVisit( TTeradataSetSession stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_set_session_stmt = xmldoc.createElement( "set_session_statement" );
+		e_parent.appendChild( e_set_session_stmt );
+		elementStack.push( e_set_session_stmt );
+		e_set_session_stmt.setAttribute("type",stmt.getSetSessionType().toString());
+		elementStack.pop( );
+	}
+
+
+
 
 	public void postVisit( TCloseStmt node )
 	{
