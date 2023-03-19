@@ -668,6 +668,7 @@ public class testScriptGenerator extends TestCase
 				+ "from t";
 
 		sqlparser.parse();
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
 		assertTrue(verifyScript(EDbVendor.dbvoracle,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
 	}
 

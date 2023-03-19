@@ -33,6 +33,7 @@ import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
+import gudusoft.gsqlparser.stmt.bigquery.TExportDataStmt;
 import gudusoft.gsqlparser.stmt.databricks.TCreateExternalLocationStmt;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
@@ -103,6 +104,7 @@ import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCopyIntoStmt;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -1964,7 +1966,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_unnest);
 		elementStack.push(e_unnest);
 
-		node.getArrayExpr().accept(this);
+		if (node.getArrayExpr() != null){
+			node.getArrayExpr().accept(this);
+		}else if (node.getColumns() != null){
+			node.getColumns().accept(this);
+		}
+
 
 		if (node.getWithOffset() != null){
 			if (node.getWithOffsetAlais() != null){
@@ -1972,6 +1979,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			}else{
 				addElementOfString("with_offset","empty_value");
 			}
+		}
+
+		if (node.getDerivedColumnList() != null){
+			addElementOfNode("derived_column_list",node.getDerivedColumnList());
 		}
 
 		elementStack.pop();
@@ -2111,6 +2122,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 			}
 			addElementOfString("source_table", sourceTable);
+		}
+
+		if (node.getParentObjectName() != null){
+			// this is usually attribute of a struct type,
+			//   create table absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED (
+			//	Emp_id INT64,Name STRING
+			//	,Address ARRAY<STRUCT<State STRING, City STRING, Zipcode INT64>> );
+			//
+			//INSERT INTO `absolute-runner-302907.gudu_sqlflow.INFO` (emp_id,name,state,city,zipcode)
+			//select emp_id,name,state,city,zipcode from `absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED`, UNNEST(address)
+
+			addElementOfString("parent_column",node.getParentObjectName().toString());
 		}
 
 	}
@@ -3168,6 +3191,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case struct_t:
 				addElementOfNode("element_list",node.getColumnDefList());
 				break;
+			case array_t:
+				node.getTypeOfList().accept(this);
+				break;
 			default:
 				break;
 		}
@@ -4083,11 +4109,24 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TExportDataStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_export_data = xmldoc.createElement("export_data");
+		e_parent.appendChild(e_export_data);
+		elementStack.push(e_export_data);
+		if (stmt.getConnectName() != null){
+			current_objectName_tag = "connection_name";
+		}
+		stmt.getSubQuery().accept(this);
+		elementStack.pop();
+	}
+
 	public void preVisit(TCreateTableSqlStatement stmt) {
 		e_parent = (Element) elementStack.peek();
 		Element e_create_table = xmldoc.createElement("create_table_statement");
 		e_create_table.setAttribute("source_type", stmt.getTableSourceType().toString());
 		e_create_table.setAttribute("is_external", stmt.isExternal() ? "true" : "false");
+		e_create_table.setAttribute("table_kind", stmt.getTableKinds().toString());
 		e_parent.appendChild(e_create_table);
 		elementStack.push(e_create_table);
 		current_table_reference_tag = "table_name";
@@ -5387,6 +5426,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+	public void preVisit( TTeradataSetSession stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_set_session_stmt = xmldoc.createElement( "set_session_statement" );
+		e_parent.appendChild( e_set_session_stmt );
+		elementStack.push( e_set_session_stmt );
+		e_set_session_stmt.setAttribute("type",stmt.getSetSessionType().toString());
+		elementStack.pop( );
+	}
+
+
+
+
 	public void postVisit( TCloseStmt node )
 	{
 		appendEndTag( node );
@@ -5799,9 +5851,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getLabelName() != null){
 			e_plsql_block.setAttribute("label",node.getLabelNameStr());
 		}
-		if (node.getParent() != null){
-			if (node.getParent() instanceof  TStoredProcedureSqlStatement){
-				TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)node.getParent();
+		if (node.getParentObjectName() != null){
+			if (node.getParentObjectName() instanceof  TStoredProcedureSqlStatement){
+				TStoredProcedureSqlStatement p = (TStoredProcedureSqlStatement)node.getParentObjectName();
 				e_plsql_block.setAttribute("parent_name",p.getStoredProcedureName().toString());
 			}
 		}
