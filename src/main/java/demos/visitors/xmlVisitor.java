@@ -29,6 +29,8 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.oracle.TJsonObjectFunction;
+import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
+import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
@@ -4228,11 +4230,50 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.push(e_range_partitions);
 
 		addElementOfNode("partition_column_list", node.getColumnList());
+		if (node.getIntervalExpr() != null){
+			addElementOfNode("interval_expr",node.getIntervalExpr());
+		}
 
         ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
         for(int i=0;i<items.size();i++){
             items.get(i).accept(this);
         }
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TCompositeRangePartitions node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_partitions = xmldoc.createElement("composite_range_paritions");
+		e_range_partitions.setAttribute("type", node.getTablePartitionType().toString());
+
+		e_parent.appendChild(e_range_partitions);
+		elementStack.push(e_range_partitions);
+
+		addElementOfNode("partition_column_list", node.getColumnList());
+		if (node.getIntervalExpr() != null){
+			addElementOfNode("interval_expr",node.getIntervalExpr());
+		}
+
+		//
+		node.getSubPartitionByClause().accept(this);
+
+		ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+		for(int i=0;i<items.size();i++){
+			items.get(i).accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TSubPartitionByClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_subpartitions = xmldoc.createElement("subpartitions");
+		e_subpartitions.setAttribute("type", node.getSubPartitionByType().toString());
+		e_parent.appendChild(e_subpartitions);
+		elementStack.push(e_subpartitions);
+
+		node.getColumnList().accept(this);
 
 		elementStack.pop();
 	}
@@ -4250,6 +4291,38 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getHashPartitionsByQuantity().accept(this);
 		}
 
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TListSubpartitionDesc node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_partitions = xmldoc.createElement("list_subpartition_desc");
+
+		e_parent.appendChild(e_range_partitions);
+		elementStack.push(e_range_partitions);
+
+		if (node.getSubPartitionName() != null){
+			node.getSubPartitionName().accept(this);
+		}
+
+		node.getListValuesClause().accept(this);
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TRangeSubpartitionDesc node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_partitions = xmldoc.createElement("range_subpartition_desc");
+
+		e_parent.appendChild(e_range_partitions);
+		elementStack.push(e_range_partitions);
+
+		if (node.getSubPartitionName() != null){
+			node.getSubPartitionName().accept(this);
+		}
+
+		node.getRangeValuesClause().accept(this);
 
 		elementStack.pop();
 	}
@@ -4299,6 +4372,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				node.getListValuesClause().accept(this);
 				break;
+		}
+
+		if (node.getRangeSubpartitionDescs() != null){
+			for(int i=0;i<node.getRangeSubpartitionDescs().size();i++){
+				node.getRangeSubpartitionDescs().get(i).accept(this);
+			}
+		}else if (node.getListSubpartitionDescs() != null){
+			for(int i=0;i<node.getListSubpartitionDescs().size();i++){
+				node.getListSubpartitionDescs().get(i).accept(this);
+			}
 		}
 
         elementStack.pop();
