@@ -103,7 +103,10 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
+import gudusoft.gsqlparser.stmt.snowflake.TAlterTaskStmt;
+import gudusoft.gsqlparser.stmt.snowflake.TCreateStageStmt;
 import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCopyIntoStmt;
+import gudusoft.gsqlparser.stmt.snowflake.TUseSchema;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
@@ -3568,6 +3571,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		stmt.getSubquery().setDummyTag(TOP_STATEMENT);
 		stmt.getSubquery().accept(this);
+
+		if (stmt.getCommentClause() != null){
+			addElementOfString("comment",stmt.getCommentClause().getCommentToken().toString());
+		}
 		elementStack.pop();
 	}
 
@@ -4386,18 +4393,33 @@ public class xmlVisitor extends TParseTreeVisitor {
 
         elementStack.pop();
     }
+	public void preVisit(TRangeValuesClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_range_value_clause = xmldoc.createElement("range_value_clause");
 
-    public void preVisit(TRangeValuesClause node) {
+		e_parent.appendChild(e_range_value_clause);
+		elementStack.push(e_range_value_clause);
+
+		node.getValueList().accept(this);
+
+		elementStack.pop();
+	}
+
+
+    public void preVisit(TUseSchema stmt) {
         e_parent = (Element) elementStack.peek();
-        Element e_range_value_clause = xmldoc.createElement("range_value_clause");
+        Element e_use_schema = xmldoc.createElement("use_schema");
 
-        e_parent.appendChild(e_range_value_clause);
-        elementStack.push(e_range_value_clause);
+        e_parent.appendChild(e_use_schema);
+        elementStack.push(e_use_schema);
 
-        node.getValueList().accept(this);
+        stmt.getSchemaName().accept(this);
 
         elementStack.pop();
     }
+
+
+
 
 	public void preVisit(TListValuesClause node) {
 		e_parent = (Element) elementStack.peek();
@@ -5508,6 +5530,41 @@ public class xmlVisitor extends TParseTreeVisitor {
 		node.getCursorName( ).accept( this );
 		elementStack.pop( );
 	}
+
+	public void preVisit( TAlterTaskStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_close_stmt = xmldoc.createElement( "alter_task_statement" );
+		e_parent.appendChild( e_close_stmt );
+		elementStack.push( e_close_stmt );
+		current_objectName_tag = "task_name";
+		stmt.getTaskName( ).accept( this );
+		elementStack.pop( );
+	}
+
+	public void preVisit( TCreateStageStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_stage = xmldoc.createElement( "create_stage_statement" );
+		e_parent.appendChild( e_create_stage );
+		elementStack.push( e_create_stage );
+		current_objectName_tag = "stage_name";
+		stmt.getStageName( ).accept( this );
+		if (stmt.getExternalStageURL() != null){
+			addElementOfString("external_stage",stmt.getExternalStageURL());
+		}
+		if (stmt.getFileFormatName() != null){
+			addElementOfString("file_format",stmt.getFileFormatName());
+		}
+		if (stmt.getFileFormatType() != null){
+			addElementOfString("file_type",stmt.getFileFormatType());
+		}
+
+		elementStack.pop( );
+	}
+
+
+
 
 	public void preVisit( TTeradataSetSession stmt )
 	{
