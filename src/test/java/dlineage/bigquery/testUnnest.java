@@ -3,12 +3,16 @@ package dlineage.bigquery;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
+import gudusoft.gsqlparser.dlineage.dataflow.model.Option;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Relationship;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.RelationshipElement;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.util.json.JSON;
 import junit.framework.TestCase;
 
+import javax.xml.bind.util.JAXBSource;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +44,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.state"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.state"));
 
         //
         list = Arrays.stream(dataFlow.getRelationships())
@@ -57,7 +61,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.city"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.city"));
 
         //
         list = Arrays.stream(dataFlow.getRelationships())
@@ -74,7 +78,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.Zipcode"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.Zipcode"));
     }
 
     public void test2() throws Exception {
@@ -106,7 +110,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.state"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.state"));
 
         //
         list = Arrays.stream(dataFlow.getRelationships())
@@ -123,7 +127,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.city"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.city"));
 
         //
         list = Arrays.stream(dataFlow.getRelationships())
@@ -140,7 +144,7 @@ public class testUnnest  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.Zipcode"));
+        assertTrue(element.getParentName().equalsIgnoreCase("Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED") && element.getColumn().equalsIgnoreCase("Address.array.Zipcode"));
 
     }
 }
