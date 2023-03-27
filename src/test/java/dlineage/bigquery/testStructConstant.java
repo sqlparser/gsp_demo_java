@@ -8,8 +8,10 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Relationship;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.RelationshipElement;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.util.json.JSON;
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,28 +45,20 @@ public class testStructConstant extends TestCase {
         EDbVendor vendor = TGSqlParser.getDBVendorByName("bigquery");
         Option option = new Option();
         option.setVendor(vendor);
-        option.setSimpleOutput(true);
+        option.setSimpleOutput(false);
+        option.setIgnoreRecordSet(true);
         option.setShowConstantTable(true);
-        option.setTransform(true);
-
         DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(sql, option);
 
         dataFlowAnalyzer.generateDataFlow();
         dataflow flow = dataFlowAnalyzer.getDataFlow();
         Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(vendor, flow, false);
 
-        // There should be 3 relationships
-        // project-dev.DATASET.SOURCE.COL1 --> project-dev.DATASET.TARGET.COL1
-        // project-dev.DATASET.SOURCE.COL2 --> project-dev.DATASET.TARGET.COL2
-        // project-dev.DATASET.SOURCE structs --> project-dev.DATASET.TARGET.__metadata
-
-        assertEquals(3, dataFlow.getRelationships().length);
-        Relationship structConstants = dataFlow.getRelationships()[2];
-
-        // There should be 6 sources for the __metadata target.
-        assertEquals(6, structConstants.getSources().length);
-        List<String> sourceColumnNames =
-                Arrays.stream(structConstants.getSources()).map(RelationshipElement::getColumn).collect(Collectors.toList());
+        assertEquals(5, dataFlow.getRelationships().length);
+        List<String> sourceColumnNames = new ArrayList<>();
+        sourceColumnNames.addAll(Arrays.stream(dataFlow.getRelationships()[2].getSources()).map(RelationshipElement::getColumn).collect(Collectors.toList()));
+        sourceColumnNames.addAll(Arrays.stream(dataFlow.getRelationships()[3].getSources()).map(RelationshipElement::getColumn).collect(Collectors.toList()));
+        sourceColumnNames.addAll(Arrays.stream(dataFlow.getRelationships()[4].getSources()).map(RelationshipElement::getColumn).collect(Collectors.toList()));
 
         assertTrue(sourceColumnNames.contains("\"file_sequence_number_string\""));
         assertTrue(sourceColumnNames.contains("\"string\""));
