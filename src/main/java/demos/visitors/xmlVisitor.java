@@ -6047,6 +6047,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			}
 		}
 
+		if (node.getExceptionClause() != null){
+			node.getExceptionClause().accept(this);
+		}
+
 		elementStack.pop( );
 		elementStack.pop( );
 	}

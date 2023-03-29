@@ -26,7 +26,7 @@ static void parsefiles(EDbVendor db,String dir){
     SqlFileList sqlfiles = new SqlFileList(dir,true);
     for(int k=0;k < sqlfiles.sqlfiles.size();k++){
         sqlparser.sqlfilename = sqlfiles.sqlfiles.get(k).toString();
-         // System.out.printf("%s\n",sqlparser.sqlfilename);
+        //  System.out.printf("%s\n",sqlparser.sqlfilename);
         // boolean b = sqlparser.parse() == 0;
 
 //         assertTrue(sqlparser.parse() == 0);
