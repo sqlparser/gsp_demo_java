@@ -2210,6 +2210,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_function);
 		e_drop_function.setAttribute("function_name",stmt.getFunctionName().toString());
+		stmt.getFunctionName().accept(this);
 		elementStack.push(e_drop_function);
 
 		switch (stmt.dbvendor){
@@ -2236,6 +2237,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_procedure);
 		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
+		stmt.getProcedureName().accept(this);
 		elementStack.push(e_drop_procedure);
 
 		switch (stmt.dbvendor){
