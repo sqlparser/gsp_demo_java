@@ -10,15 +10,15 @@ public class DataTypeChecker
 	public static DataTypeCheckResult checkDataType( TTypeName type,
 			EDbVendor targetVendor )
 	{
-		if ( type.getGsqlparser( ).getDbVendor( ) == EDbVendor.dbvoracle )
+		if ( type.dbvendor == EDbVendor.dbvoracle )
 		{
 			return OracleDataTypeChecker.checkDataType( type, targetVendor );
 		}
-		else if ( type.getGsqlparser( ).getDbVendor( ) == EDbVendor.dbvmssql )
+		else if ( type.dbvendor == EDbVendor.dbvmssql )
 		{
 			return MssqlDataTypeChecker.checkDataType( type, targetVendor );
 		}
-		else if ( type.getGsqlparser( ).getDbVendor( ) == EDbVendor.dbvmysql )
+		else if ( type.dbvendor == EDbVendor.dbvmysql )
 		{
 			return MysqlDataTypeChecker.checkDataType( type, targetVendor );
 		}
