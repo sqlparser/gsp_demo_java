@@ -43,14 +43,6 @@ public class testStruct  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         RelationshipElement element = list.get(0).getSources()[0];
-        assertTrue(element.getColumn().equalsIgnoreCase("Address.state"));
-        RelationshipElement finalElement = element;
-        list = Arrays.stream(dataFlow.getRelationships())
-                .filter(r -> (r.getTarget().getParentName().equalsIgnoreCase(finalElement.getParentName())
-                        && r.getTarget().getColumn().equalsIgnoreCase(finalElement.getColumn())))
-                .collect(Collectors.toList());
-        assertTrue(list.size()==1 && list.get(0).getSources().length==1);
-        element = list.get(0).getSources()[0];
         assertTrue(element.getParentName().equalsIgnoreCase("solidatus-dev.JDBC_test.EMPLOYEE_ADDRESS") && element.getColumn().equalsIgnoreCase("Address.state"));
 
         //
@@ -60,28 +52,12 @@ public class testStruct  extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
-        assertTrue(element.getColumn().equalsIgnoreCase("Address.zipcode"));
-        RelationshipElement finalElement2 = element;
-        list = Arrays.stream(dataFlow.getRelationships())
-                .filter(r -> (r.getTarget().getParentName().equalsIgnoreCase(finalElement2.getParentName())
-                        && r.getTarget().getColumn().equalsIgnoreCase(finalElement2.getColumn())))
-                .collect(Collectors.toList());
-        assertTrue(list.size()==1 && list.get(0).getSources().length==1);
-        element = list.get(0).getSources()[0];
         assertTrue(element.getParentName().equalsIgnoreCase("solidatus-dev.JDBC_test.EMPLOYEE_ADDRESS") && element.getColumn().equalsIgnoreCase("Address.zipcode"));
 
         //
         list = Arrays.stream(dataFlow.getRelationships())
                 .filter(r -> (r.getTarget().getParentName().equalsIgnoreCase("solidatus-dev.JDBC_test.EMPLOYEE_INFO")
                         && r.getTarget().getColumn().equalsIgnoreCase("city")))
-                .collect(Collectors.toList());
-        assertTrue(list.size()==1 && list.get(0).getSources().length==1);
-        element = list.get(0).getSources()[0];
-        assertTrue(element.getColumn().equalsIgnoreCase("Address.city"));
-        RelationshipElement finalElement3 = element;
-        list = Arrays.stream(dataFlow.getRelationships())
-                .filter(r -> (r.getTarget().getParentName().equalsIgnoreCase(finalElement3.getParentName())
-                        && r.getTarget().getColumn().equalsIgnoreCase(finalElement3.getColumn())))
                 .collect(Collectors.toList());
         assertTrue(list.size()==1 && list.get(0).getSources().length==1);
         element = list.get(0).getSources()[0];
