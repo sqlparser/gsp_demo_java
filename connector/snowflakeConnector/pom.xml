@@ -28,7 +28,7 @@
 		<dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-			<version>3.12.9</version>
+			<version>3.13.29</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/snowflake-jdbc-3.12.9.jar</systemPath>
 		</dependency>
