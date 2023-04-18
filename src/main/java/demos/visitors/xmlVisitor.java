@@ -1268,6 +1268,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 				elementStack.pop();
 				break;
+			case unnest_t:
+				node.getLeftOperand().accept(this);
+				break;
 			default:
 				e_expression = xmldoc.createElement(TAG_UNKNOWN_EXPR);
 				e_parent = (Element) elementStack.peek();
@@ -6791,12 +6794,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_call_stmt = xmldoc.createElement( "call_statement" );
 		e_parent.appendChild( e_call_stmt );
 		elementStack.push( e_call_stmt );
-		current_objectName_tag = "routine_name";
-		stmt.getRoutineName( ).accept( this );
-		if ( stmt.getArgs( ) != null )
-		{
-			current_expression_list_tag = "parameter_list";
-			stmt.getArgs( ).accept( this );
+		if (stmt.getRoutineExpr() != null){
+			stmt.getRoutineExpr().accept(this);
+
+		}else{
+			current_objectName_tag = "routine_name";
+			stmt.getRoutineName( ).accept( this );
+			if ( stmt.getArgs( ) != null )
+			{
+				current_expression_list_tag = "parameter_list";
+				stmt.getArgs( ).accept( this );
+			}
 		}
 		elementStack.pop( );
 

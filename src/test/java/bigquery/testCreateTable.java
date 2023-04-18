@@ -27,8 +27,9 @@ public class testCreateTable extends TestCase {
 
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstcreatetable);
         TCreateTableSqlStatement createTableSqlStatement =  (TCreateTableSqlStatement)sqlparser.sqlstatements.get(0);
-        assertTrue(createTableSqlStatement.getTableName().toString().equalsIgnoreCase("`myproject.mydataset.mytable`"));
-        assertTrue(createTableSqlStatement.getCloneSourceTable().toString().equalsIgnoreCase("`myproject.mydataset.mytablesnapshot`"));
+       // System.out.println(createTableSqlStatement.getTableName().toString());
+        assertTrue(createTableSqlStatement.getTableName().toString().equalsIgnoreCase("`myproject`.`mydataset`.`mytable`"));
+        assertTrue(createTableSqlStatement.getCloneSourceTable().toString().equalsIgnoreCase("`myproject`.`mydataset`.`mytablesnapshot`"));
     }
     public void test2(){
 

@@ -40,7 +40,7 @@ public class testCreateProcedure extends TestCase {
         TCreateProcedureStmt createprocedure = (TCreateProcedureStmt) sqlparser.sqlstatements.get(0);
 
         TObjectName procedureName = createprocedure.getProcedureName();
-        assertTrue(procedureName.toString().equalsIgnoreCase("`#batch_project_id.subscriber_dtl.prc_subscriber_history`"));
+        assertTrue(procedureName.toString().equalsIgnoreCase("`#batch_project_id`.`subscriber_dtl`.`prc_subscriber_history`"));
         assertTrue(procedureName.getDatabaseString().equalsIgnoreCase("`#batch_project_id`"));
         assertTrue(procedureName.getSchemaString().equalsIgnoreCase("`subscriber_dtl`"));
         assertTrue(procedureName.getObjectString().equalsIgnoreCase("`prc_subscriber_history`"));
