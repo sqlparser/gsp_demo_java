@@ -32,6 +32,7 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
+%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\dlineage\SqlflowIngester.java
 %JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\dlineage\DataFlowAnalyzer.java
 
 echo Completed.

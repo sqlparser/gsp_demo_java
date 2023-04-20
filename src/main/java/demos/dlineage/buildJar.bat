@@ -9,7 +9,8 @@ SET qddemo=%cur_dir%
 IF EXIST %qddemo%\lib	RMDIR %qddemo%\lib
 IF NOT EXIST %qddemo%\lib  MKDIR %qddemo%\lib
 MKDIR %qddemo%\lib
-XCOPY  ..\..\..\..\..\lib\gudusoft.gsqlparser.jar  %qddemo%\lib
+XCOPY  ..\..\..\..\..\lib\*  %qddemo%\lib
+XCOPY  ..\..\..\..\..\external_lib\sqlflow-exporter.jar  %qddemo%\lib
 
 SET qddemo_bin=%qddemo%\lib
 SET qddemo_class=%qddemo%\class
@@ -31,7 +32,7 @@ XCOPY  %qddemo%\MANIFEST.MF  %qddemo_class%
 
 cd %cur_dir%
 
-    javac -d %qddemo_class% -encoding utf-8 -cp .;%qddemo_bin%\gudusoft.gsqlparser.jar; %JFILES%
+    javac -d %qddemo_class% -encoding utf-8 -cp .;%qddemo_bin%\*; %JFILES%
 
 cd %qddemo_class%
     jar -cvfm %qddemo%\data_flow_analyzer.jar %qddemo%\MANIFEST.MF *
