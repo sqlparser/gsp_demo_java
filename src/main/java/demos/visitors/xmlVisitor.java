@@ -4710,9 +4710,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_overClause.appendChild(e_partition);
 				elementStack.push(e_partition);
 				current_expression_list_tag = "partitions";
-				windowDef.getPartitionClause()
-						.getExpressionList()
-						.accept(this);
+				if (windowDef.getPartitionClause().getExpressionList() != null){
+					windowDef.getPartitionClause()
+							.getExpressionList()
+							.accept(this);
+				}
+				else if (windowDef.getPartitionClause().getSortedColumns() != null){
+					windowDef.getPartitionClause().getSortedColumns().accept(this);
+				}
 				elementStack.pop();
 			}
 
