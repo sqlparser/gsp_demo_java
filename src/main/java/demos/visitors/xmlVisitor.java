@@ -110,6 +110,7 @@ import gudusoft.gsqlparser.stmt.snowflake.TUseSchema;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataUsing;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -3252,6 +3253,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
+		if (node.getComment() != null){
+			node.getComment().accept(this);
+		}
+
 		elementStack.pop();
 	}
 
@@ -5586,6 +5591,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+
+	public void preVisit( TTeradataUsing stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_usingstmt = xmldoc.createElement( "teradata_using_statement" );
+		e_parent.appendChild( e_usingstmt );
+		elementStack.push( e_usingstmt );
+		stmt.getColumnDefinitionList().accept(this);
+		stmt.getSqlRequest().accept(this);
+		//e_usingstmt.setAttribute("type",stmt.getSetSessionType().toString());
+		elementStack.pop( );
+	}
 
 
 
