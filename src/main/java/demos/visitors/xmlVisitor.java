@@ -3,7 +3,7 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.bigquery.TReplaceExprAsIdentifier;
+import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
@@ -3501,6 +3501,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 						"default_constriant_type");
 				current_expression_tag = "default_value";
 				node.getDefaultExpression().accept(this);
+				if (node.getForObjectName() != null){
+					addElementOfNode("for_column",node.getForObjectName());
+				}
 				break;
 			default:
 				break;

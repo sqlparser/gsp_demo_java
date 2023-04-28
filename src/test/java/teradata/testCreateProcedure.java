@@ -13,6 +13,21 @@ import static gudusoft.gsqlparser.ESqlStatementType.*;
 
 public class testCreateProcedure extends TestCase {
 
+    public void testMultipleSQLs(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "CREATE PROCEDURE EMP_SCHEMA.SAMPLE_PROC ()\n" +
+                "BEGIN\n" +
+                "    SELECT * FROM ETL_DB.EMPLOYEE;\n" +
+                "END;\n" +
+                "SELECT * FROM ETL_DB.EMPLOYEE;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.size() == 2);
+
+
+    }
+
+
     public void testPrepare(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
