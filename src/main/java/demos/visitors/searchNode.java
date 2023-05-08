@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TLateralView;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
+import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,7 +111,7 @@ class nodeVisitor extends TParseTreeVisitor {
         }
     }
 
-    public void preVisit(TPlsqlExecImmeStmt node) {
+    public void preVisit(TExecImmeStmt node) {
         //System.out.println("\n"+(++stmtCount)+" Statement:\t"+node.sqlstatementtype);
         System.out.println(node.getDynamicSQL()+";\n");
     }

@@ -3,7 +3,7 @@ package common;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
+import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 import gudusoft.gsqlparser.stmt.TCommonBlock;
 
 
@@ -26,7 +26,7 @@ public class testExecImmeStmt extends TestCase {
                 "     'Drop table ap_temp_data_driver_6992095';";
         assertTrue(parser.parse() == 0);
         //System.out.println(parser.sqlstatements.get(0).sqlstatementtype);
-        TPlsqlExecImmeStmt stmt = (TPlsqlExecImmeStmt)parser.sqlstatements.get(0);
+        TExecImmeStmt stmt = (TExecImmeStmt)parser.sqlstatements.get(0);
         assertTrue(stmt.getDynamicStringExpr().toString().compareToIgnoreCase("'Drop table ap_temp_data_driver_6992095'") == 0);
 
         stmt = null;
@@ -48,7 +48,7 @@ public class testExecImmeStmt extends TestCase {
         assertTrue(parser.parse() == 0);
         //System.out.println(parser.sqlstatements.get(0).sqlstatementtype);
         TCommonBlock stmt1 = (TCommonBlock)parser.sqlstatements.get(0);
-        TPlsqlExecImmeStmt stmt2 = (TPlsqlExecImmeStmt)stmt1.getBodyStatements().get(1);
+        TExecImmeStmt stmt2 = (TExecImmeStmt)stmt1.getBodyStatements().get(1);
 
        // System.out.println(stmt2.getDynamicSQL());
        // System.out.println(stmt2.getDynamicStatements().size());
