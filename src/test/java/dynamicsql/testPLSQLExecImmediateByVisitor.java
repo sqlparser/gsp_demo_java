@@ -4,7 +4,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.TStatementList;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;
-import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
+import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 import junit.framework.TestCase;
 
 public class testPLSQLExecImmediateByVisitor extends TestCase {
@@ -258,7 +258,7 @@ public class testPLSQLExecImmediateByVisitor extends TestCase {
 class nodeVisitor extends TParseTreeVisitor {
     public int stmtCount = 0;
 
-    public void preVisit(TPlsqlExecImmeStmt node) {
+    public void preVisit(TExecImmeStmt node) {
         //System.out.println("\n"+(++stmtCount)+" Statement:\t"+node.sqlstatementtype);
         //System.out.println(node.getDynamicSQL());
 
@@ -275,7 +275,7 @@ class nodeVisitor extends TParseTreeVisitor {
 class getExecSQLTextVisitor extends TParseTreeVisitor {
     public String sqlText;
 
-    public void preVisit(TPlsqlExecImmeStmt node) {
+    public void preVisit(TExecImmeStmt node) {
         sqlText = node.getDynamicSQL();
     }
 }

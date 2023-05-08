@@ -66,7 +66,7 @@ import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateTrigger;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateType;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateTypeBody;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateType_Placeholder;
-import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
+import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlForallStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlGotoStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlNullStmt;
@@ -6558,7 +6558,21 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
-	public void preVisit( TPlsqlExecImmeStmt stmt )
+	public void preVisit( TBindArgument node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_using_bind_arg = xmldoc.createElement( "using_bind_arg" );
+		e_parent.appendChild( e_using_bind_arg );
+		elementStack.push( e_using_bind_arg );
+		node.getBindArgumentExpr().accept(this);
+
+		elementStack.pop( );
+
+	}
+
+
+
+	public void preVisit( TExecImmeStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_execute_immediate_stmt = xmldoc.createElement( "execute_immediate_statement" );
@@ -6584,6 +6598,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if ( stmt.getDynamicStatements( ) != null )
 		{
 			preVisit( stmt.getDynamicStatements( ) );
+		}
+
+		if (stmt.getIntoVariables() != null){
+			addElementOfNode("into_clause",stmt.getIntoVariables());
+		}
+
+		if (stmt.getBindArguments() != null){
+			for(TBindArgument argument:stmt.getBindArguments()){
+				argument.accept(this);
+			}
 		}
 
 		elementStack.pop( );
