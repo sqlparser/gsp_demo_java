@@ -503,13 +503,21 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_literal);
 		e_literal.setAttribute("type", node.getLiteralType().toString());
+		elementStack.push(e_literal);
 
 		Element e_value = xmldoc.createElement("value");
 		e_literal.appendChild(e_value);
 		e_value.setTextContent(node.toString());
-		// e_literal.
-		// appendStartTag(node);
-		// sb.append(node.toString());
+		switch (node.getLiteralType()){
+			case interval:
+				if (node.getInt64_expression() != null){ // bigquery
+					node.getInt64_expression().accept(this);
+				}
+				break;
+			default:
+				break;
+		}
+		elementStack.pop();
 	}
 
 	public void postVisit(TConstant node) {
