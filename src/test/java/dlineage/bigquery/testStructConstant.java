@@ -20,13 +20,13 @@ public class testStructConstant extends TestCase {
     public void test1() throws Exception {
 
         String sql = "CREATE TABLE\n" +
-                "    project-dev.DATASET.SOURCE (\n" +
+                "    `project-dev`.DATASET.SOURCE (\n" +
                 "    COL1 STRING,\n" +
                 "    COL2 STRING\n" +
                 "    );\n" +
                 "\n" +
                 "CREATE TABLE\n" +
-                "    project-dev.DATASET.TARGET (\n" +
+                "    `project-dev`.DATASET.TARGET (\n" +
                 "    COL1 STRING,\n" +
                 "    COL2 STRING,\n" +
                 "    __metadata ARRAY<STRUCT<attribute STRING,\n" +

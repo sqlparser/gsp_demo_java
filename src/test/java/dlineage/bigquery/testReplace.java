@@ -56,7 +56,7 @@ public class testReplace extends TestCase {
 
     public void test3() throws Exception {
 
-        String sql = "create table project-dev.TEST_BACKLOG.EMPLOYEE_MASTER\n" +
+        String sql = "create table `project-dev`.TEST_BACKLOG.EMPLOYEE_MASTER\n" +
                 "(\n" +
                 "    emp_id   INT64,\n" +
                 "    name     STRING,\n" +
@@ -68,7 +68,7 @@ public class testReplace extends TestCase {
                 "    state_cd INT64\n" +
                 ");\n" +
                 "\n" +
-                "create table project-dev.TEST_BACKLOG.EMPLOYEE_MASTER2\n" +
+                "create table `project-dev`.TEST_BACKLOG.EMPLOYEE_MASTER2\n" +
                 "(\n" +
                 "    emp_id   INT64,\n" +
                 "    name     STRING,\n" +
@@ -95,7 +95,7 @@ public class testReplace extends TestCase {
         assertTrue(Arrays.stream(dataFlow.getRelationships()).anyMatch(r -> (r.getTarget().getParentName().contains("INSERT-SELECT")
                 && r.getTarget().getColumn().equalsIgnoreCase("state_cd")
                 && (r.getSources().length==1 && r.getSources()[0].getColumn().equalsIgnoreCase("zipcode")
-                && r.getSources()[0].getParentName().equalsIgnoreCase("project-dev.TEST_BACKLOG.EMPLOYEE_MASTER2")))));
+                && r.getSources()[0].getParentName().equalsIgnoreCase("`project-dev`.TEST_BACKLOG.EMPLOYEE_MASTER2")))));
 
     }
 }
