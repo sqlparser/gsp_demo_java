@@ -238,10 +238,10 @@ public class ColumnImpact
 				{
 					func.getAgainstExpr( ).inOrderTraverse( this );
 				}
-				if ( func.getBetweenExpr( ) != null )
-				{
-					func.getBetweenExpr( ).inOrderTraverse( this );
-				}
+//				if ( func.getBetweenExpr( ) != null )
+//				{
+//					func.getBetweenExpr( ).inOrderTraverse( this );
+//				}
 				if ( func.getExpr1( ) != null )
 				{
 					func.getExpr1( ).inOrderTraverse( this );
@@ -294,10 +294,10 @@ public class ColumnImpact
 						}
 					}
 				}
-				if ( func.getRangeSize( ) != null )
-				{
-					func.getRangeSize( ).inOrderTraverse( this );
-				}
+//				if ( func.getRangeSize( ) != null )
+//				{
+//					func.getRangeSize( ).inOrderTraverse( this );
+//				}
 				if ( func.getXMLElementNameExpr( ) != null )
 				{
 					func.getXMLElementNameExpr( ).inOrderTraverse( this );

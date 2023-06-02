@@ -10,6 +10,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
+import gudusoft.gsqlparser.nodes.functions.TRangeNFunction;
 import gudusoft.gsqlparser.nodes.teradata.TIndexDefinition;
 import gudusoft.gsqlparser.nodes.teradata.TRangeNFunctionItem;
 import gudusoft.gsqlparser.stmt.TCreateTableSqlStatement;
@@ -87,13 +88,14 @@ public class testCreateTable extends TestCase {
         //assertTrue(indexDefinition.getPartitionExprList().size() == 3);
         TExpression partitionExpr = indexDefinition1.getPartitioningLevels().get(0).getPartitionExpression();
         assertTrue(partitionExpr.getExpressionType() == EExpressionType.function_t);
-        TFunctionCall functionCall = partitionExpr.getFunctionCall();
-        assertTrue(functionCall.getFunctionType() == EFunctionType.range_n_t);
-        TExpression test_expression = functionCall.getExpr1();
-        assertTrue(test_expression.toString().equalsIgnoreCase("salesdate"));
-        assertTrue(functionCall.getRangeNFunctionItems().size() == 1);
+        assertTrue(partitionExpr.getFunctionCall().getFunctionType() == EFunctionType.range_n_t);
+        TRangeNFunction rangeNFunciton = (TRangeNFunction) partitionExpr.getFunctionCall();
 
-        TRangeNFunctionItem rangeNFunctionItem = functionCall.getRangeNFunctionItems().get(0);
+        TExpression test_expression = rangeNFunciton.getExpr1();
+        assertTrue(test_expression.toString().equalsIgnoreCase("salesdate"));
+        assertTrue(rangeNFunciton.getRangeNFunctionItems().size() == 1);
+
+        TRangeNFunctionItem rangeNFunctionItem = rangeNFunciton.getRangeNFunctionItems().get(0);
         assertTrue(rangeNFunctionItem.getStartExpression().toString().equalsIgnoreCase("DATE '2002-01-01'"));
         assertTrue(rangeNFunctionItem.getEndExpression().toString().equalsIgnoreCase("DATE '2008-12-31'"));
         assertTrue(rangeNFunctionItem.getRangeSize().toString().equalsIgnoreCase("INTERVAL '1' YEAR"));

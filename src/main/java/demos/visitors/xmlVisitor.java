@@ -4,6 +4,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
+import gudusoft.gsqlparser.nodes.functions.TRangeNFunction;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
@@ -28,7 +29,7 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
-import gudusoft.gsqlparser.nodes.oracle.TJsonObjectFunction;
+import gudusoft.gsqlparser.nodes.functions.TJsonObjectFunction;
 import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
@@ -4778,6 +4779,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();// e_overClause
 	}
 
+	public void preVisit( TRangeNFunction node ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_functionCall = xmldoc.createElement( "range_n_function" );
+		e_parent.appendChild( e_functionCall );
+
+		elementStack.push( e_functionCall );
+
+		addElementOfNode("test_expression",node.getExpr1());
+		Element e_list = xmldoc.createElement( "range_n_items" );
+		e_list.setAttribute("count",String.valueOf(node.getRangeNFunctionItems().size()));
+		e_functionCall.appendChild(e_list);
+		elementStack.push(e_list);
+		for(TRangeNFunctionItem item : node.getRangeNFunctionItems()){
+			item.accept(this);
+		}
+		elementStack.pop();
+		addElementOfString("range_spec",node.getRangeSpec().toString());
+
+		elementStack.pop( );
+
+	}
+
 	public void preVisit( TFunctionCall node )
 	{
 		String tag_name = TAG_FUNCTIONCALL;
@@ -4962,25 +4985,24 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				elementStack.pop( );
 				break;
-			case range_n_t :
-				e_function = xmldoc.createElement( "range_n_function" );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				addElementOfNode("test_expression",node.getExpr1());
-
-				Element e_list = xmldoc.createElement( "range_n_items" );
-				e_list.setAttribute("count",String.valueOf(node.getRangeNFunctionItems().size()));
-				e_function.appendChild(e_list);
-				elementStack.push(e_list);
-
-				for(TRangeNFunctionItem item : node.getRangeNFunctionItems()){
-					item.accept(this);
-				}
-
-				elementStack.pop();
-
-				elementStack.pop( );
-				break;
+//			case range_n_t :
+//				e_function = xmldoc.createElement( "range_n_function" );
+//				e_functionCall.appendChild( e_function );
+//				elementStack.push( e_function );
+//				addElementOfNode("test_expression",node.getExpr1());
+//
+//				Element e_list = xmldoc.createElement( "range_n_items" );
+//				e_list.setAttribute("count",String.valueOf(node.getRangeNFunctionItems().size()));
+//				e_function.appendChild(e_list);
+//				elementStack.push(e_list);
+//
+//				for(TRangeNFunctionItem item : node.getRangeNFunctionItems()){
+//					item.accept(this);
+//				}
+//
+//				elementStack.pop();
+//				elementStack.pop( );
+//				break;
 			case position_t :
 			case xmlquery_t :
 			case xmlcast_t :

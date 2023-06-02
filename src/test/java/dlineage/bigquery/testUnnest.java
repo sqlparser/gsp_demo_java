@@ -24,6 +24,7 @@ public class testUnnest  extends TestCase {
                 "Address ARRAY<STRUCT<State STRING, City STRING, Zipcode INT64>> );\n" +
                 "INSERT INTO `Project-dev.TEST_BACKLOG.EMPLOYEE_INFO` (emp_id,name,state,city,zipcode)\n" +
                 "select emp_id,name,state,city,zipcode from `Project-dev.TEST_BACKLOG.EMPLOYEE_ADDRESS_NESTED`, UNNEST(address)";
+        //System.out.println(sql);
         EDbVendor vendor = TGSqlParser.getDBVendorByName("bigquery");
         DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(sql,vendor,true);
         dataFlowAnalyzer.generateDataFlow(true);
