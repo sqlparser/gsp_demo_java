@@ -926,7 +926,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
 				elementStack.push(e_expression);
-				node.getSubQuery().accept(this);
+				if (node.getSubQuery() != null){
+					node.getSubQuery().accept(this);
+				}else{
+					node.getLeftOperand().accept(this);
+					node.getRightOperand().accept(this);
+				}
+
 				elementStack.pop();
 				break;
 			case assignment_t:
