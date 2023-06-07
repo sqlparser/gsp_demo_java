@@ -16,8 +16,8 @@ public class testTimeStampExpr extends TestCase {
         String finalSql = select.toScript();
         finalSql = finalSql.replaceAll("\r\n", "").replaceAll(" ", "").toUpperCase();
         sql = sql.replaceAll("\r\n", "").replaceAll(" ", "").toUpperCase();
-        System.out.println(sql);
-        System.out.println(finalSql);
+        //System.out.println(sql);
+       //System.out.println(finalSql);
         assertTrue(finalSql.equals(sql));
     }
 
