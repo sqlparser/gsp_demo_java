@@ -15,6 +15,23 @@ import junit.framework.TestCase;
 
 public class testAlterTable extends TestCase {
 
+
+    public void testAddDefaultForColumn(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "ALTER TABLE testTable ADD  DEFAULT ('') FOR testColumn;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TAlterTableStatement alterTableStatement = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(alterTableStatement.getAlterTableOptionList().size() == 1);
+        TAlterTableOption ao = alterTableStatement.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(ao.getOptionType() == EAlterTableOptionType.AddConstraint);
+        TConstraint constraint = ao.getConstraintList().getConstraint(0);
+        assertTrue(constraint.getConstraint_type() == EConstraintType.default_value);
+        assertTrue(constraint.getForObjectName().toString().equalsIgnoreCase("testColumn"));
+    }
+
+
     public void test1(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);

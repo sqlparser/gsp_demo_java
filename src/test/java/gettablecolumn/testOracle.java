@@ -18,6 +18,22 @@ public class testOracle extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
+    public static void testJsonObject() {
+        doTest("SELECT JSON_OBJECT (\n" +
+                        "    KEY 'deptno' IS d.department_id2,\n" +
+                        "    KEY 'deptname' IS d.department_name \n" +
+                        "    ) \"Department Objects\"\n" +
+                        "  FROM departments d\n" +
+                        "  ORDER BY d.department_id;",
+                "Tables:\n" +
+                        "departments\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "departments.department_id\n" +
+                        "departments.department_id2\n" +
+                        "departments.department_name");
+    }
+
     public static void testSubqueryWithSameColumn() {
         doTest("SELECT A.PROJECT_ID\n" +
                         "            , A.SQL_AUTO_PERF_CHECK_ID\n" +

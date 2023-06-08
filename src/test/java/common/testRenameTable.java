@@ -2,6 +2,7 @@ package common;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.stmt.TRenameStmt;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
@@ -29,8 +30,22 @@ public class testRenameTable extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TRenameStmt renameStmt = (TRenameStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(renameStmt.getOldName().getSchemaString().equalsIgnoreCase("s1"));
+        assertTrue(renameStmt.getOldName().getDatabaseString().equalsIgnoreCase("s1"));
         assertTrue(renameStmt.getOldName().getTableString().equalsIgnoreCase("t1"));
+    }
+
+    public void testTableNameInFrom(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "select f from employee_schema__dm.employee ;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TTable table = sqlparser.sqlstatements.get(0).getTables().getTable(0);
+        TObjectName tableName = table.getTableName();
+        assertTrue(tableName.getDatabaseString().equalsIgnoreCase("employee_schema__dm"));
+        assertTrue(tableName.getTableString().equalsIgnoreCase("employee"));
+
+
     }
 
     public void testRenameList(){

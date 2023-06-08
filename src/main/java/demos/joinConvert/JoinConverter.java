@@ -564,13 +564,18 @@ public class JoinConverter {
                         tables.add(select.tables.getTable(i));
                     }
 
+                    List<TTable> parentTables = new ArrayList<TTable>();//add by grq 2023.05.07 issue=I70J7M
                     TCustomSqlStatement parentStmt = select;
                     while (parentStmt.getParentStmt() != null) {
                         parentStmt = parentStmt.getParentStmt();
                         if (parentStmt instanceof TSelectSqlStatement) {
                             TSelectSqlStatement temp = (TSelectSqlStatement) parentStmt;
                             for (int i = 0; i < temp.tables.size(); i++) {
-                                tables.add(temp.tables.getTable(i));
+                                //edit  by grq 2023.05.07 issue=I70J7M
+                                TTable tempTable = temp.tables.getTable(i);
+                                parentTables.add(tempTable);
+                                tables.add(tempTable);
+                                //end by grq
                             }
                         }
                     }
@@ -657,6 +662,34 @@ public class JoinConverter {
 
                                     if ((leftTable != null)
                                             && (rightTable != null)) {
+                                        //add by grq 2023.05.07 issue=I70J7M
+                                        if(parentTables.indexOf(leftTable)<0 && parentTables.indexOf(rightTable)>=0){
+                                            boolean aliasHave = false;
+                                            for (int k = 0; k < jrs.size(); k++) {
+                                                JoinCondition jc = jrs.get(k);
+                                                if (jc.used) {
+                                                    continue;
+                                                }
+                                                for(int kk = 0; kk < tables.size(); kk++){
+                                                    TTable t = tables.get(kk);
+                                                    if(parentTables.indexOf(t)<0){
+                                                        if(isNameOrAliasOfTable(t, jc.righttable)){
+                                                            if(tableUsed[kk]){
+                                                                aliasHave = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if(aliasHave){
+                                                    break;
+                                                }
+                                            }
+                                            if(aliasHave){
+                                                continue;
+                                            }
+                                        }
+                                        //end by grq
                                         ArrayList<JoinCondition> lcjrs = getJoinCondition(leftTable,
                                                 rightTable,
                                                 jrs);

@@ -58,7 +58,7 @@ public class testDBLink extends TestCase {
         assertTrue(dbLinkTableObject.getId().equalsIgnoreCase(rel2SourceParentId));
         // DbLink table name should be consistent with the parent name
         assertTrue(dbLinkTableObject.getName().toString().equalsIgnoreCase("HR_COUNTRIES"));
-        assertTrue(dbLinkTableObject.getDbLink().toString().equalsIgnoreCase("LD_PDB1_SOL.LOCALDOMAIN"));
+        assertTrue(dbLinkTableObject.getDbLink().toString().equalsIgnoreCase("\"LD_PDB1_SOL.LOCALDOMAIN\""));
     }
 
 

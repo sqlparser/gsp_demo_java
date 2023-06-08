@@ -9,6 +9,21 @@ import junit.framework.TestCase;
 
 public class testAlterTable extends TestCase {
 
+    public void testAppendFromTable() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
+        sqlparser.sqltext = "alter table DATAMAX_DMAX15246GRIFFINRS.STAGING.LINEAGE_ASTEST1 append from\n" +
+                "            DATAMAX_DMAX15246GRIFFINRS.STAGING.LINEAGE_ASTEST1_TEMP_newdata ignoreextra;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstaltertable);
+        TAlterTableStatement alterTableStmt = (TAlterTableStatement) sqlparser.sqlstatements.get(0);
+        assertTrue(alterTableStmt.getTableName().toString().equalsIgnoreCase("DATAMAX_DMAX15246GRIFFINRS.STAGING.LINEAGE_ASTEST1"));
+        assertTrue(alterTableStmt.getAlterTableOptionList().size() == 1);
+        TAlterTableOption option = alterTableStmt.getAlterTableOptionList().getAlterTableOption(0);
+        assertTrue(option.getOptionType() == EAlterTableOptionType.appendFrom);
+        assertTrue(option.getSourceTableName().toString().equalsIgnoreCase("DATAMAX_DMAX15246GRIFFINRS.STAGING.LINEAGE_ASTEST1_TEMP_newdata"));
+        //assertTrue(option.getColumnName().toString().endsWith("feedback_score"));
+    }
+
     public void testAddColumn() {
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
         sqlparser.sqltext = "alter table users\n" +

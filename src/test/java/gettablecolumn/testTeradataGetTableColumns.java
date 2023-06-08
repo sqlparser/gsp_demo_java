@@ -200,12 +200,12 @@ public class testTeradataGetTableColumns extends TestCase {
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         TExpression expr = select.getWhereClause().getCondition().getLeftOperand();
-        assertTrue(expr.getObjectOperand().getSchemaToken().toString().equalsIgnoreCase("DBC"));
+        assertTrue(expr.getObjectOperand().getDatabaseToken().toString().equalsIgnoreCase("DBC"));
         TTable sourceTable = expr.getObjectOperand().getSourceTable();
         assertTrue(sourceTable.toString().endsWith("A"));
         TObjectName tableName = sourceTable.getTableName();
-        assertTrue(tableName.getSchemaToken().toString().equalsIgnoreCase("DBC"));
-        assertTrue(sourceTable.getPrefixSchema().equalsIgnoreCase("DBC"));
+        assertTrue(tableName.getDatabaseToken().toString().equalsIgnoreCase("DBC"));
+        assertTrue(sourceTable.getPrefixDatabase().equalsIgnoreCase("DBC"));
 
     }
 

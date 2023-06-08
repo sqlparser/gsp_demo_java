@@ -7,9 +7,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TAlterViewStatement;
-import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import gudusoft.gsqlparser.stmt.oracle.TPlsqlExecImmeStmt;
+import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 import junit.framework.TestCase;
 
 public class testExecImmediate extends TestCase {
@@ -24,7 +22,7 @@ public class testExecImmediate extends TestCase {
 
        //System.out.println(sqlparser.sqlstatements.get(0).sqlstatementtype);
        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstplsql_execimmestmt);
-       TPlsqlExecImmeStmt execImmeStmt = (TPlsqlExecImmeStmt)sqlparser.sqlstatements.get(0);
+       TExecImmeStmt execImmeStmt = (TExecImmeStmt)sqlparser.sqlstatements.get(0);
        assertTrue(execImmeStmt.getIntoVariables().getExpression(0).toString().equalsIgnoreCase("var"));
      //  assertTrue(execImmeStmt.getDynamicStatements().get(0).sqlstatementtype == ESqlStatementType.sstselect);
        //TSelectSqlStatement select = (TSelectSqlStatement)execImmeStmt.getDynamicStatements().get(0);
@@ -40,7 +38,7 @@ public class testExecImmediate extends TestCase {
 
         //System.out.println(sqlparser.sqlstatements.get(0).sqlstatementtype);
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstplsql_execimmestmt);
-        TPlsqlExecImmeStmt execImmeStmt = (TPlsqlExecImmeStmt)sqlparser.sqlstatements.get(0);
+        TExecImmeStmt execImmeStmt = (TExecImmeStmt)sqlparser.sqlstatements.get(0);
         //System.out.println(execImmeStmt.getDynamicStatements().get(0).toString());
         //assertTrue(execImmeStmt.getIntoVariables().getExpression(0).toString().equalsIgnoreCase("var"));
         assertTrue(execImmeStmt.getDynamicStatements().get(0).sqlstatementtype == ESqlStatementType.sstalterview);
@@ -56,7 +54,7 @@ public class testExecImmediate extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstplsql_execimmestmt);
-        TPlsqlExecImmeStmt execImmeStmt = (TPlsqlExecImmeStmt) sqlparser.sqlstatements.get(0);
+        TExecImmeStmt execImmeStmt = (TExecImmeStmt) sqlparser.sqlstatements.get(0);
         //System.out.println(execImmeStmt.getDynamicSQL().toString());
         assertTrue(execImmeStmt.getDynamicSQL().toString().equalsIgnoreCase("INSERT INTO XXX VALUES ('AA', 'BB')"));
     }
@@ -68,7 +66,7 @@ public class testExecImmediate extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstplsql_execimmestmt);
-        TPlsqlExecImmeStmt execImmeStmt = (TPlsqlExecImmeStmt) sqlparser.sqlstatements.get(0);
+        TExecImmeStmt execImmeStmt = (TExecImmeStmt) sqlparser.sqlstatements.get(0);
         //System.out.println(execImmeStmt.getDynamicSQL().toString());
         assertTrue(execImmeStmt.getDynamicSQL().toString().equalsIgnoreCase("INSERT INTO XXX VALUES ('AA', 'BB')"));
     }

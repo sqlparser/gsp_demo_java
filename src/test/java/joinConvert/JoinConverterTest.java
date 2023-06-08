@@ -666,4 +666,58 @@ public class JoinConverterTest extends TestCase {
 
 
     }
+
+    public void testOracleCTESql() {
+
+        String sqltext = "WITH DB_PRIV AS\n" +
+                "      (\n" +
+                "          SELECT DBID\n" +
+                "               , DB_NAME\n" +
+                "               , ORDERING\n" +
+                "            FROM USER_DB_PRIVILEGE \n" +
+                "      )\n" +
+                "      , CHECK_ACT_DAY AS\n" +
+                "      (\n" +
+                "          SELECT B.DBID\n" +
+                "               , A.CHECK_SEQ\n" +
+                "               , A.CHECK_DT\n" +
+                "               , TO_CHAR(SYSDATE, 'YYYYMMDD') CHECK_DAY\n" +
+                "            FROM tablea A,\n" +
+                "                 DB_PRIV B\n" +
+                "           WHERE A.DBID(+) = B.DBID\n" +
+                "             AND A.CHECK_SEQ(+) = A.MAX_CHECK_SEQ(+)\n" +
+                "      )\n" +
+                "      SELECT A.DB_NAME\n" +
+                "           , B.CHECK_DAY\n" +
+                "        FROM DB_PRIV A\n" +
+                "           , CHECK_ACT_DAY B";
+
+        JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
+        assertTrue(converter.convert() == 0);
+        assertTrue(converter.getQuery()
+                .trim()
+                .equalsIgnoreCase("WITH DB_PRIV AS\n" +
+                        "      (\n" +
+                        "          SELECT DBID\n" +
+                        "               , DB_NAME\n" +
+                        "               , ORDERING\n" +
+                        "            FROM USER_DB_PRIVILEGE \n" +
+                        "      )\n" +
+                        "      , CHECK_ACT_DAY AS\n" +
+                        "      (\n" +
+                        "          SELECT B.DBID\n" +
+                        "               , A.CHECK_SEQ\n" +
+                        "               , A.CHECK_DT\n" +
+                        "               , TO_CHAR(SYSDATE, 'YYYYMMDD') CHECK_DAY\n" +
+                        "            FROM tablea A\n" +
+                        "right outer join DB_PRIV B on A.DBID = B.DBID\n" +
+                        "                 WHERE A.CHECK_SEQ = A.MAX_CHECK_SEQ\n" +
+                        "      )\n" +
+                        "      SELECT A.DB_NAME\n" +
+                        "           , B.CHECK_DAY\n" +
+                        "        FROM DB_PRIV A\n" +
+                        "cross join CHECK_ACT_DAY B"));
+
+
+    }
 }

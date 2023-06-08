@@ -56,7 +56,7 @@ public class testBigQuery extends TestCase {
                 " ORDERALTNUM FLOAT64\n" +
                 ");\n" +
                 "\n" +
-                "INSERT INTO `proj.JDBC_test.Customers ` WITH O as\n" +
+                "INSERT INTO `proj.JDBC_test.Customers` WITH O as\n" +
                 " (SELECT CUSTOMERNUMBER,\n" +
                 " ORDERNAME,\n" +
                 " CASE\n" +

@@ -123,11 +123,11 @@ public class testBigQuery extends TestCase {
                         "LEFT JOIN schema1.table2\n" +
                         "USING (id1)",
                 "Tables:\n" +
-                        "`schema1.table1`\n" +
+                        "`schema1`.`table1`\n" +
                         "schema1.table2\n" +
                         "\n" +
                         "Fields:\n" +
-                        "`schema1.table1`.id1\n" +
+                        "`schema1`.`table1`.id1\n" +
                         "schema1.table2.id1\n" +
                         "schema1.table2.id2");
     }
@@ -138,14 +138,14 @@ public class testBigQuery extends TestCase {
                         "LEFT JOIN `schema1.table2`\n" +
                         "USING (id1);\n",
                 "Tables:\n" +
-                        "`schema1.table1`\n" +
-                        "`schema1.table2`\n" +
+                        "`schema1`.`table1`\n" +
+                        "`schema1`.`table2`\n" +
                         "\n" +
                         "Fields:\n" +
-                        "`schema1.table1`.id1\n" +
-                        "`schema1.table1`.id2\n" +
-                        "`schema1.table2`.id1\n" +
-                        "`schema1.table2`.id3");
+                        "`schema1`.`table1`.id1\n" +
+                        "`schema1`.`table1`.id2\n" +
+                        "`schema1`.`table2`.id1\n" +
+                        "`schema1`.`table2`.id3");
     }
 
     public static void testExceptColumns() {

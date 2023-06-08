@@ -15,6 +15,19 @@ import junit.framework.TestCase;
 public class testScriptGenerator extends TestCase
 {
 
+
+
+	public void testsqlserverAlterTableForColumns( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
+		sqlparser.sqltext = "ALTER TABLE testTable ADD  DEFAULT ('') FOR testColumn";
+
+		assertTrue(sqlparser.parse( ) == 0);
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
 	public void testsqlserverOption( )
 	{
 		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
@@ -668,6 +681,7 @@ public class testScriptGenerator extends TestCase
 				+ "from t";
 
 		sqlparser.parse();
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
 		assertTrue(verifyScript(EDbVendor.dbvoracle,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
 	}
 
