@@ -1386,15 +1386,15 @@ class simplXmlVisitor extends TParseTreeVisitor {
                 case case_n_t:
                     node.getExprList().accept(this);
                     break;
-                case range_n_t:
-                    node.getBetweenExpr().accept(this);
-                    if (node.getExprList() != null){
-                        node.getExprList().accept(this);
-                    }
-                    if ( node.getRangeSize() != null){
-                        node.getRangeSize().accept(this);
-                    }
-                    break;
+//                case range_n_t:
+//                    node.getBetweenExpr().accept(this);
+//                    if (node.getExprList() != null){
+//                        node.getExprList().accept(this);
+//                    }
+//                    if ( node.getRangeSize() != null){
+//                        node.getRangeSize().accept(this);
+//                    }
+//                    break;
                 case position_t:
                     node.getExpr1().accept(this);
                     node.getExpr2().accept(this);

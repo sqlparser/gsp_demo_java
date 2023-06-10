@@ -70,7 +70,7 @@ public class testDBLink  extends TestCase {
 
         Table tableObject2 = dataFlow.getDbobjs().getServers().get(0).getDatabases().get(1).getSchemas().get(0).getTables().get(0);
         assertTrue(tableObject2.getId().equals(rel2SourceParentId));
-        assertTrue(tableObject2.getDisplayName().equalsIgnoreCase("\"HR\".\"EMPLOYEES\"@LD_PDB1_SOL.LOCALDOMAIN"));
-        assertTrue(tableObject2.getDbLink().equals("LD_PDB1_SOL.LOCALDOMAIN"));
+        assertTrue(tableObject2.getDisplayName().equalsIgnoreCase("\"HR\".\"EMPLOYEES\"@\"LD_PDB1_SOL.LOCALDOMAIN\""));
+        assertTrue(tableObject2.getDbLink().equals("\"LD_PDB1_SOL.LOCALDOMAIN\""));
     }
 }
