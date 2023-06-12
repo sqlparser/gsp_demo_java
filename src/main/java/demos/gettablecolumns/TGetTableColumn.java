@@ -654,6 +654,8 @@ public class TGetTableColumn{
                             if (datatype.getScale() != null){
                                 cn = cn+":"+datatype.getScale().toString();
                             }
+                        } else if (datatype.getDisplayLength() != null){
+                            cn = cn+":"+datatype.getDisplayLength().toString();
                         }
                     }
                     //System.out.println(numberOfSpace(pNest+2)+cn.getColumnNameOnly());
