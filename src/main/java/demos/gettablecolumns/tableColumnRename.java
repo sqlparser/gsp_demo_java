@@ -1,13 +1,10 @@
 
 package demos.gettablecolumns;
 
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.IMetaDatabase;
-import gudusoft.gsqlparser.TCustomSqlStatement;
-import gudusoft.gsqlparser.TGSqlParser;
-import gudusoft.gsqlparser.TSourceToken;
+import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,6 +21,8 @@ public class tableColumnRename
 	private String sourceTable, targetTable, sourceColumn, targetColumn,
 			sourceSchema, targetSchema;
 	private Map<String, List<String>> metaInfo;
+
+	private boolean parseSuccess = false;
 
 	public String getModifiedText( )
 	{
@@ -67,11 +66,11 @@ public class tableColumnRename
 	{
 		sqlparser = new TGSqlParser( vendor );
 		sqlparser.sqltext = sqltext;
-		this.metaInfo = metaInfo;
 		if ( metaInfo != null )
 		{
 			sqlparser.setMetaDatabase( new metaDB( ) );
 		}
+		this.metaInfo = metaInfo;
 	}
 
 	public int renameColumn( String sourceColumn, String targetColumn )
@@ -103,11 +102,14 @@ public class tableColumnRename
 			return -1;
 		}
 
-		int ret = sqlparser.parse( );
-		if ( ret != 0 )
-		{
-			msg = "syntax error: " + sqlparser.getErrormessage( );
-			return -1;
+		if(!parseSuccess){
+			int ret = sqlparser.parse( );
+			if ( ret != 0 )
+			{
+				msg = "syntax error: " + sqlparser.getErrormessage( );
+				return -1;
+			}
+			parseSuccess = true;
 		}
 
 		for ( int i = 0; i < sqlparser.getSqlstatements( ).size( ); i++ )
@@ -279,6 +281,10 @@ public class tableColumnRename
 							.replaceFirst( Pattern.quote( column.getSchemaString( )
 									+ "." ),
 									"" ) );
+					column.getSchemaToken().setString("");
+					if (column.getSchemaToken().getNextTokenInChain().astext.equals(".")){
+						column.getSchemaToken().getNextTokenInChain().setString("");
+					}
 
 					this.renamedObjectsNum++;
 				}
@@ -289,11 +295,10 @@ public class tableColumnRename
 					&& table.getTableName( ).getSchemaString( )
 							.equalsIgnoreCase( this.sourceSchema ) )
 			{
-				table.setString( table.toString( )
-						.replaceFirst( Pattern.quote( table.getTableName( )
-								.getSchemaString( )
-								+ "." ),
-								"" ) );
+				table.getTableName().getSchemaToken().setString("");
+				if (table.getTableName().getSchemaToken().getNextTokenInChain().astext.equals(".")){
+					table.getTableName().getSchemaToken().getNextTokenInChain().setString("");
+				}
 						
 				this.renamedObjectsNum++;
 			}
@@ -305,6 +310,34 @@ public class tableColumnRename
 		}
 	}
 
+	private boolean checkSubQuery(TSelectSqlStatement subquery){
+		boolean isThisTable = false;
+		for ( int i = 0; i < subquery.tables.size( ); i++ ){
+			TTable subTable = subquery.tables.getTable( i );
+			if ( subTable.getTableName( ) == null )
+				continue;
+			if(ETableSource.subquery.equals(subTable.getTableType()) && subTable.getSubquery() != null){
+				isThisTable = checkSubQuery(subTable.getSubquery());
+			}
+			else{
+				isThisTable = subTable.getTableName( ).getTableString( ).equalsIgnoreCase( this.sourceTable );
+				if(isThisTable){
+					boolean isThisColumn = false;
+					for ( int m = 0; m < subTable.getLinkedColumns( ).size( ); m++ ) {
+						TObjectName column = subTable.getLinkedColumns( ).getObjectName( m );
+						if ( column.getColumnToken( ) != null ) {
+							if ( column.getColumnNameOnly( ).equalsIgnoreCase( this.sourceColumn ) ) {
+								isThisColumn = true;
+								break;
+							}
+						}
+					}
+					isThisTable = isThisColumn;
+				}
+			}
+		}
+		return isThisTable;
+	}
 	private void modifyColumnName( TCustomSqlStatement stmt )
 	{
 
@@ -320,6 +353,13 @@ public class tableColumnRename
 			isThisTable = table.getTableName( )
 					.getTableString( )
 					.equalsIgnoreCase( this.sourceTable );
+
+			if ( !isThisTable )
+			{
+				if(ETableSource.subquery.equals(table.getTableType()) && table.getSubquery() != null){
+					isThisTable = checkSubQuery(table.getSubquery());
+				}
+			}
 			if ( !isThisTable )
 			{
 				continue;
@@ -380,13 +420,15 @@ public class tableColumnRename
 			return -1;
 		}
 
-		int ret = sqlparser.parse( );
-		if ( ret != 0 )
-		{
-			msg = "syntax error: " + sqlparser.getErrormessage( );
-			return -1;
+		if(!parseSuccess){
+			int ret = sqlparser.parse( );
+			if ( ret != 0 )
+			{
+				msg = "syntax error: " + sqlparser.getErrormessage( );
+				return -1;
+			}
+			parseSuccess = true;
 		}
-
 		for ( int i = 0; i < sqlparser.getSqlstatements( ).size( ); i++ )
 		{
 			TCustomSqlStatement sql = sqlparser.getSqlstatements( ).get( i );
@@ -458,48 +500,29 @@ public class tableColumnRename
 
 	public static void main( String[] args )
 	{
-		String text = "CREATE PROCEDURE [dbo].[Testprocedure_2]\n"
-				+ "        @BusinessID NVARCHAR(100)\n"
-				+ " AS\n"
-				+ " BEGIN\n"
-				+ "   SET NOCOUNT  ON;\n"
-				+
-
-				"   SELECT dbo.tb_Rentals.*,\n"
-				+ "          MinimalRentalID,\n"
-				+ "          SEA.Name,\n"
-				+ "          SEA.BeginDay,\n"
-				+ "          SEA.EndDay,\n"
-				+ "          dbo.tb_RentalTypes.Name AS TypeName\n"
-				+ "   FROM   dbo.tb_Rentals,\n"
-				+ "          dbo.tb_Seasons SEA,\n"
-				+ "          dbo.tb_RentalTypes,\n"
-				+ "          dbo.tb_RentalToSeason\n"
-				+ "   WHERE  dbo.tb_Rentals.BusinessID_XXX = SEA.BusinessID \n"
-				+ "          AND dbo.tb_Rentals.RentalTypeID = dbo.tb_RentalTypes.RentalTypeID\n"
-				+ "          AND dbo.tb_RentalToSeason.RentalID = dbo.tb_Rentals.RentalID\n"
-				+ "          AND dbo.tb_RentalToSeason.SeasonID = SEA.SeasonID\n"
-				+ "          AND dbo.tb_Rentals.BusinessID = @BusinessID \n"
-				+ "          AND @BusinessID IN (SELECT DISTINCT dbo.tb_Rentals.BusinessID_XXX\n"
-				+ "                              FROM   dbo.tb_Rentals\n"
-				+ "                              WHERE  dbo.tb_Rentals.BusinessID = @BusinessID)\n"
-				+ " END";
+//		String text = "SELECT SUM(product_price * product_quantity) as total_revenue\n" +
+//				"FROM (\n" +
+//				"  SELECT product_price, product_quantity\n" +
+//				"  FROM public.sales_information\n" +
+//				"  ORDER BY product_quantity DESC\n" +
+//				"  LIMIT 2\n" +
+//				") as top_products;";
+		String text ="select  public.tablea.col1 from public.tablea";
 		Map<String, List<String>> metaInfo = new HashMap<String, List<String>>( );
-		metaInfo.put( "dbo.tb_Seasons".toLowerCase( ),
+		metaInfo.put( "sales_information".toLowerCase( ),
 				Arrays.asList( new String[]{
-					"MinimalRentalID".toLowerCase( )
+					"product_price".toLowerCase( )
 				} ) );
-		tableColumnRename ro = new tableColumnRename( EDbVendor.dbvmssql,
+		tableColumnRename ro = new tableColumnRename( EDbVendor.dbvpostgresql,
 				text,
 				metaInfo );
-		int ret = ro.renameColumn( "dbo.tb_Seasons.MinimalRentalID",
-				"MinimalRentalID_xx" );
+		ro.removeSchema("public");
+		int ret = ro.renameColumn( "sales_information.product_price",
+				"price" );
 		System.out.println( "Message: " + ro.msg );
-		if ( ret > 0 )
-		{
-			System.out.println( "Result: " );
-			System.out.println( ro.getModifiedText( ) );
-		}
+
+		System.out.println( "Result: " );
+		System.out.println( ro.getModifiedText( ) );
 
 	}
 
