@@ -2,6 +2,7 @@ package scriptWriter;
 
 
 import gudusoft.gsqlparser.*;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testMySQL extends TestCase
@@ -110,5 +111,16 @@ public class testMySQL extends TestCase
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvmysql, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
     }
 
-
+    public void testSubStringFunction( ) {
+        String sql = "select SUBSTRING(description,LOCATE('MAC Address:', description) + LENGTH('MAC Address:'), 18) AS MAC_Address from testsuite where tsID = 21";
+        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvmysql);
+        sqlParser.sqltext = sql;
+        int ret = sqlParser.parse();
+        assertTrue(ret == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement) sqlParser.sqlstatements.get(0);
+        String finalSql = select.toScript();
+        finalSql = finalSql.replaceAll("\r\n", "").replaceAll("\n", "").replaceAll(" ", "").toUpperCase();
+        sql = sql.replaceAll("\r\n", "").replaceAll("\n", "").replaceAll(" ", "").toUpperCase();
+        assertTrue(finalSql.equals(sql));
+    }
 }
