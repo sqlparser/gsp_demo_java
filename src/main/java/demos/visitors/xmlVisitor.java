@@ -5237,6 +5237,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 			current_objectName_list_tag = "column_list";
 			node.getColumnList( ).accept( this );
 		}
+
+
 		if ( node.getSubquery( ) != null )
 		{
 			node.getSubquery( ).setDummyTag( TOP_STATEMENT );

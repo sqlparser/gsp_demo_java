@@ -72,4 +72,79 @@ public class testDatabricks extends TestCase
         sqlparser.parse( );
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
     }
+
+    public void test6( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = "SELECT *\n" +
+                "FROM table1 t6\n" +
+                "  JOIN table2 t7 ON ( (t6.ssn = t7.ssn))\n" +
+                "  LEFT OUTER JOIN table3 t8\n" +
+                "         ON ( (t6.ssn = t8.ssn\n" +
+                "        AND t6.scc = t8.scc\n" +
+                "        AND t6.sfy = t8.sfy\n" +
+                "        AND t6.sli = t8.sli\n" +
+                "        AND t6.sdn = t8.sdn)) LIMIT 10000";
+        sqlparser.parse( );
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void test7( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = "SELECT *\n" +
+                "FROM ((((((((table0 t0\n" +
+                "  JOIN table1 t1 ON ( (t0.ssn = t1.ssn)))\n" +
+                "  JOIN table2 t2 ON ( (CAST (t0.cd AS DATE) = t2.cd)))\n" +
+                "  JOIN table3 t3\n" +
+                "    ON ( (t0.phi = t3.phi\n" +
+                "   AND t0.ssn = t3.ssn)))\n" +
+                "  JOIN table4 t4\n" +
+                "    ON ( (t3.phi = t4.phi\n" +
+                "   AND t3.pli = t4.pli\n" +
+                "   AND t3.ssn = t4.ssn)))\n" +
+                "  JOIN table5 t5\n" +
+                "    ON ( (t0.oi = t5.oi\n" +
+                "   AND t0.ssn = t5.ssn)))\n" +
+                "  JOIN table6 t6\n" +
+                "    ON ( (t5.li = t6.li\n" +
+                "   AND t5.ssn = t6.ssn)))\n" +
+                "  LEFT JOIN table7 t7\n" +
+                "         ON ( (t0.vsi = t7.vsi\n" +
+                "        AND t0.ssn = t7.ssn)))\n" +
+                "  JOIN table8 xgcc\n" +
+                "    ON ( (t4.cci = xgcc.cci\n" +
+                "   AND t4.ssn = xgcc.ssn)))\n" +
+                "  LEFT JOIN table9 t9\n" +
+                "         ON ( (t0.terms_id = t9.term_id\n" +
+                "        AND t0.ssn = t9.ssn))\n" +
+                "  LEFT JOIN table10 t10\n" +
+                "         ON t0.ssn = t10.ssn\n" +
+                "        AND t0.vsi = t10.vsi";
+        sqlparser.parse( );
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void test8( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = "WITH base AS\n" +
+                "(\n" +
+                "  SELECT ccl1,\n" +
+                "         101 AS prev_year_value,\n" +
+                "         102 AS prev_qtr_value,\n" +
+                "         'Quarterly' AS period,\n" +
+                "         103 AS curr_value\n" +
+                "  FROM table0 hb\n" +
+                "  WHERE 1 = 1\n" +
+                ")\n" +
+                "SELECT ccl1,\n" +
+                "       base.curr_value AS curr_value,\n" +
+                "       IF (period LIKE 'Quarterly',COALESCE((base.curr_value - base.prev_qtr_value),0) /COALESCE(ABS(base.prev_qtr_value),1)*100,'-') AS VPQ,\n" +
+                "       IF (period IN ('Quarterly','YTD'),COALESCE((base.curr_value - base.prev_year_value),0) /COALESCE(ABS(base.prev_year_value),1)*100,'-') AS VPY\n" +
+                "FROM base\n" +
+                "WHERE 1 = 1";
+        sqlparser.parse( );
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
 }
