@@ -147,4 +147,12 @@ public class testDatabricks extends TestCase
         sqlparser.parse( );
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
     }
+	
+	public void test9( )
+    {
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+		sqlparser.sqltext = "select 3 ^ 5";
+        sqlparser.parse( );
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+	}
 }
