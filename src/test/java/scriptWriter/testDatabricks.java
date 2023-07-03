@@ -204,4 +204,96 @@ public class testDatabricks extends TestCase
         sqlparser.parse( );
         assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
     }
+    public void test11( )
+    {
+        String sql = "SELECT\n" +
+                "  'TOTAL' AS Week,\n" +
+                "  SUM(IF ((T2311468.usd_amount_ph IS NOT NULL AND (xdd.calendar_date BETWEEN to_date ('2022-01-01', 'yyyy-MM-dd') AND to_date ('2022-03-31', 'yyyy-MM-dd'))), T2311468.usd_amount_ph, 0)) AS current_year,\n" +
+                "  SUM(IF ((T2311468.usd_amount_ph IS NOT NULL AND (xdd.calendar_date BETWEEN to_date ('2022-01-01', 'yyyy-MM-dd') -INTERVAL 1 YEAR AND to_date ('2022-03-31', 'yyyy-MM-dd') -INTERVAL 1 YEAR)), T2311468.usd_amount_ph, 0)) AS prev_year\n" +
+                "FROM\n" +
+                "  table0 xdd\n" +
+                "INNER JOIN table1 T2311468 ON\n" +
+                "  xdd.calendar_date = T2311468.payment_date_ph\n" +
+                "LEFT OUTER JOIN table2 T2305475\n" +
+                "               ON\n" +
+                "  T2305475.invoice_id = T2311468.invoice_id\n" +
+                "  AND T2305475.ssn = T2311468.ssn\n" +
+                "INNER JOIN table3 xgcc\n" +
+                "          ON\n" +
+                "  xgcc.cci = T2311468.accts_pay_ccid_actual\n" +
+                "  AND xgcc.ssn = T2311468.ssn\n" +
+                "WHERE\n" +
+                "  1=1";
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = sql;
+        sqlparser.parse( );
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+
+    public void test12( )
+    {
+        String sql = "SELECT ds_ge_supplier_normalized_name AS vendor_name,\n" +
+                "        SUM(curr_value) AS dollar_value\n" +
+                "        FROM (SELECT ds_ge_supplier_normalized_name AS ds_ge_supplier_normalized_name,\n" +
+                "        SUM(PO_Remaining_amount) AS curr_value\n" +
+                "        FROM (SELECT COALESCE(t4.usd_amount_ordered,0) -(COALESCE(t4.usd_amount_billed,0) +COALESCE(t4.usd_amount_cancelled,0)) AS PO_Remaining_amount,\n" +
+                "        t0.creation_date,\n" +
+                "        t7.ge_supplier_normalized_name AS ds_ge_supplier_normalized_name\n" +
+                "        FROM ((((((((fdl_db_qa_dbr_consumption_inc.xx_po_headers_v t0\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_source_systems t1 ON ( (t0.source_system_name = t1.source_system_name)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_date_dim t2 ON ( (CAST (t0.creation_date AS DATE) = t2.calendar_date)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_po_lines_v t3\n" +
+                "        ON ( (t0.po_header_id = t3.po_header_id\n" +
+                "        AND t0.source_system_name = t3.source_system_name)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_po_distributions_v t4\n" +
+                "        ON ( (t3.po_header_id = t4.po_header_id\n" +
+                "        AND t3.po_line_id = t4.po_line_id\n" +
+                "        AND t3.source_system_name = t4.source_system_name)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_organizations t5\n" +
+                "        ON ( (t0.org_id = t5.organization_id\n" +
+                "        AND t0.source_system_name = t5.source_system_name)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_hr_locations t6\n" +
+                "        ON ( (t5.location_id = t6.location_id\n" +
+                "        AND t5.source_system_name = t6.source_system_name)))\n" +
+                "        LEFT JOIN fdl_db_qa_dbr_consumption_inc.xx_po_vendor_sites_v t7\n" +
+                "        ON ( (t0.vendor_site_id = t7.vendor_site_id\n" +
+                "        AND t0.source_system_name = t7.source_system_name)))\n" +
+                "        JOIN fdl_db_qa_dbr_consumption_inc.xx_gl_code_combinations xgcc\n" +
+                "        ON ( (t4.code_combination_id = xgcc.code_combination_id\n" +
+                "        AND t4.source_system_name = xgcc.source_system_name)))\n" +
+                "        LEFT JOIN fdl_db_qa_dbr_consumption_inc.xx_ap_terms t9\n" +
+                "        ON ( (t0.terms_id = t9.term_id\n" +
+                "        AND t0.source_system_name = t9.source_system_name))\n" +
+                "        LEFT JOIN fdl_db_qa_dbr_consumption_inc.xx_po_vendor_sites_v t10 /* DIM_PO_VENDOR_SITES_V */\n" +
+                "        ON t0.source_system_name = t10.source_system_name\n" +
+                "        AND t0.vendor_site_id = t10.vendor_site_id\n" +
+                "        WHERE t0.authorization_status IN ('02 - Active','03 - In release','05 - Release completed','APPROVED','IN PROCESS','PRE-APPROVED')\n" +
+                "        AND   t7.internal_external IN ('External','Unspecified')\n" +
+                "        AND   t0.closed_code = 'OPEN'\n" +
+                "        AND   t0.cancel_flag NOT IN ('Y')\n" +
+                "        AND   t3.cancel_flag NOT IN ('Y')\n" +
+                "        AND   (t5.attribute17 IS NULL OR t5.attribute17 != 'Buy Only')\n" +
+                "        AND   to_date(t0.creation_date,'YYYY-MM-DD') BETWEEN NOW() -INTERVAL '5' YEAR AND NOW()\n" +
+                "        AND   ((COALESCE(t4.usd_amount_ordered,0) -(COALESCE(t4.usd_amount_billed,0) +COALESCE(t4.usd_amount_cancelled,0))) != 0)\n" +
+                "        AND   t9.due_days < 30\n" +
+                "        AND   to_date(t0.creation_date,'YYYY-MM-DD') BETWEEN NOW() -INTERVAL '5' YEAR AND NOW()) s0\n" +
+                "        GROUP BY s0.ds_ge_supplier_normalized_name\n" +
+                "        ORDER BY curr_value DESC LIMIT 10)\n" +
+                "        GROUP BY ds_ge_supplier_normalized_name\n" +
+                "        ORDER BY dollar_value DESC";
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = sql;
+        int ret = sqlparser.parse( );
+        assertTrue(ret == 0);
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
+    public void test13( )
+    {
+        String sql = "select * from t where to_date ('2023-06-30','yyyy-MM-dd') = CURRENT_DATE()";
+        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvdatabricks);
+        sqlparser.sqltext = sql;
+        int ret = sqlparser.parse( );
+        assertTrue(ret == 0);
+        assertTrue(testScriptGenerator.verifyScript(EDbVendor.dbvdatabricks, sqlparser.sqlstatements.get(0).toString(), sqlparser.sqlstatements.get(0).toScript()));
+    }
 }
