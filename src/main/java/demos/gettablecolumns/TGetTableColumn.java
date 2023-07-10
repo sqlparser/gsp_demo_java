@@ -2,11 +2,10 @@ package demos.gettablecolumns;
 
 
 import gudusoft.gsqlparser.*;
-import gudusoft.gsqlparser.nodes.TColumnWithSortOrder;
-import gudusoft.gsqlparser.nodes.TObjectName;
-import gudusoft.gsqlparser.nodes.TTable;
-import gudusoft.gsqlparser.nodes.TTypeName;
+import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
+import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.Comparator;
 import java.util.Stack;
 
 import demos.joinRelationAnalyze.joinRelationAnalyze;
+import org.springframework.util.StringUtils;
 
 class myMetaDB implements IMetaDatabase {
 
@@ -681,7 +681,50 @@ public class TGetTableColumn{
                     }
                     tableColumnList.append(","+tn+dotChar+ cn);
                 }
+                //add by grq 2023.07.09 issue=I7ITBQ
+                if(stmt.sqlstatementtype.equals(ESqlStatementType.sstinsert)){
+                    TInsertSqlStatement insertStmt = (TInsertSqlStatement) stmt;
+                    if(insertStmt.getColumnList() == null || insertStmt.getColumnList().size()<=0){
+                        TSelectSqlStatement selectStmt = insertStmt.getSubQuery();
+                        if(selectStmt != null){
+                            for (int j=0;j<selectStmt.getResultColumnList().size();j++){
+                                TResultColumn rsColumn = selectStmt.getResultColumnList().getResultColumn(j);
+                                if(rsColumn.getLocation().equals(ESqlClause.unknown)){
+                                    rsColumn.setLocation(ESqlClause.selectList);
+                                }
+                                TInfoRecord columnRecord = new TInfoRecord(tableRecord,EDbObjectType.column);
+                                TObjectName objectCloumn = rsColumn.getAliasClause()==null? null: rsColumn.getAliasClause().getAliasName();
+                                if(objectCloumn == null){
+                                    objectCloumn = rsColumn.getColumnFullname();
+                                }
+                                columnRecord.setColumn(objectCloumn);
+                                infoList.add(columnRecord);
+                                cn = rsColumn.getColumnAlias();
+                                if(StringUtils.isEmpty(cn)){
+                                    cn = rsColumn.getColumnNameOnly();
+                                }
+                                if (showColumnLocation){
+                                    String  posStr = "";
+                                    infos.append(numberOfSpace(pNest+3)+ cn + posStr+"("+rsColumn.getLocation()+")"+newline);
+                                }else{
+                                    infos.append(numberOfSpace(pNest+3)+ cn + newline);
+                                }
 
+                                if (!((lcTable.getTableType() == ETableSource.subquery)||(lcTable.isCTEName()&&(!showCTE)))){
+                                    if ((listStarColumn) || (!(rsColumn.getColumnNameOnly().equals("*")))){
+                                        if (lcTable.isLinkTable()){
+                                            fieldlist.add(lcTable.getLinkTable().getTableName() + dotChar + cn );
+                                        }else{
+                                            fieldlist.add(tn + dotChar + cn );
+                                        }
+                                    }
+                                }
+                                tableColumnList.append(","+tn+dotChar+ cn);
+                            }
+                        }
+                    }
+                }
+                //end by grq
             //}
         }
 
