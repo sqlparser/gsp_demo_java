@@ -12,9 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
-
 import demos.joinRelationAnalyze.joinRelationAnalyze;
-import org.springframework.util.StringUtils;
 
 class myMetaDB implements IMetaDatabase {
 
@@ -700,7 +698,7 @@ public class TGetTableColumn{
                                 columnRecord.setColumn(objectCloumn);
                                 infoList.add(columnRecord);
                                 cn = rsColumn.getColumnAlias();
-                                if(StringUtils.isEmpty(cn)){
+                                if(null == cn || "".equals(cn)){
                                     cn = rsColumn.getColumnNameOnly();
                                 }
                                 if (showColumnLocation){
