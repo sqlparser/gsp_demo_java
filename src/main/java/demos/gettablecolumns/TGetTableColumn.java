@@ -12,9 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
-
 import demos.joinRelationAnalyze.joinRelationAnalyze;
-import org.springframework.util.StringUtils;
 
 class myMetaDB implements IMetaDatabase {
 
@@ -682,6 +680,7 @@ public class TGetTableColumn{
                     tableColumnList.append(","+tn+dotChar+ cn);
                 }
                 //add by grq 2023.07.09 issue=I7ITBQ
+
 //                if(stmt.sqlstatementtype.equals(ESqlStatementType.sstinsert)){
 //                    TInsertSqlStatement insertStmt = (TInsertSqlStatement) stmt;
 //                    if(insertStmt.getColumnList() == null || insertStmt.getColumnList().size()<=0){
