@@ -11,7 +11,7 @@ import gudusoft.gsqlparser.pp.para.styleenums.TCaseOption;
 import gudusoft.gsqlparser.pp.stmtformatter.FormatterFactory;
 import junit.framework.TestCase;
 
-public class testBigquery extends TestCase {
+public class testIssues extends TestCase {
 
     public static void testI7L1MP(){
     	String statement = "select * from isb-cgc-cbq.TARGET_versioned.vcf_hg38_gdc_r22;";
@@ -40,4 +40,33 @@ public class testBigquery extends TestCase {
         assertTrue(result.trim().equalsIgnoreCase("SELECT *\n"
         		+ "FROM   isb-cgc-cbq.TARGET_versioned.vcf_hg38_gdc_r22;"));
      }
+    
+    public static void testI7ODIZ(){
+        String statement = "SELECT * FROM test_query_ingestion.test1 WHERE test1_col3 > sysdate-2000;";
+        // Another sample query for db type = dbvansi - create table valib.paylist (IdNum char(4), Gender char(1), Jobcode char(3), Salary num, Birth num);
+        TGSqlParser gsp = new TGSqlParser(EDbVendor.dbvoracle);
+        gsp.setSqltext(statement);
+        int errorCode = gsp.parse();
+
+        GFmtOpt option = GFmtOptFactory.newInstance();
+        option.alignAliasInSelectList = false;
+        option.caseKeywords = TCaseOption.CoUppercase;
+        option.caseIdentifier = TCaseOption.CoNoChange;
+        option.caseFuncname = TCaseOption.CoUppercase;
+        option.caseDatatype = TCaseOption.CoUppercase;
+        option.caseWhenThenInSameLine = true;
+        // http://www.dpriver.com/ppv3/whitespace_padding.php
+        option.wsPaddingOperatorArithmetic = true;
+        option.wsPaddingParenthesesInFunction = false;
+        option.wsPaddingParenthesesInFunctionCall = false;
+        option.wsPaddingParenthesesOfSubQuery = false;
+        option.beStyleCreatetableLeftBEOnNewline = true;
+        option.beStyleBlockIndentSize = 0;
+
+        String result = FormatterFactory.pp(gsp, option);
+
+        assertTrue(result.trim().equalsIgnoreCase("SELECT *\n"
+        		+ "FROM   test_query_ingestion.test1\n"
+        		+ "WHERE  test1_col3 > SYSDATE - 2000;"));
+     }    
 }
