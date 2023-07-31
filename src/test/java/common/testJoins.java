@@ -230,7 +230,7 @@ public class testJoins extends TestCase {
                 "\t\t\t\tON (b.b1 = c.c1) AND (b.b2 = c.c2)) \n" +
                 "\tON (a.a1 = b.b3) AND (a.a2 = b.b4);";
         assertTrue(parser.parse() == 0);
-       // System.out.println(parser.sqltext);
+        //System.out.println(parser.sqltext);
         TJoin lcJoin = parser.sqlstatements.get(0).joins.getJoin(0);
         assertTrue(lcJoin.getKind() == TBaseType.join_source_table );
         assertTrue(lcJoin.getTable().toString().compareToIgnoreCase("a") == 0);

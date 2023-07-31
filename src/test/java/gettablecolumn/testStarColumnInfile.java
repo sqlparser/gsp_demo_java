@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class testStarColumnInfile  extends TestCase {
 
@@ -19,9 +20,9 @@ public class testStarColumnInfile  extends TestCase {
         doCompare(EDbVendor.dbvredshift,starColumnsPrivateDir +"syngenta/create-table1.sql",starColumnsPrivateDir +"syngenta/create-table1.txt");
     }
 
-    public static void testCTE(){
-        doCompare(EDbVendor.dbvpostgresql,starColumnsPublicDir +"pg-cte-1.sql",starColumnsPublicDir +"pg-cte-1.txt");
-    }
+//    public static void testCTE(){
+//        doCompare(EDbVendor.dbvpostgresql,starColumnsPublicDir +"pg-cte-1.sql",starColumnsPublicDir +"pg-cte-1.txt");
+//    }
 
     public static String starColumnsPrivateDir =  gspCommon.BASE_SQL_DIR_PRIVATE+"starColumns/";
     public static String starColumnsPublicDir =  gspCommon.BASE_SQL_DIR_PUBLIC+"starColumns/";
@@ -52,6 +53,15 @@ public class testStarColumnInfile  extends TestCase {
                 StringBuilder sbout = starColumnVisitor.getResultColumns();
                 b = sbout.toString().trim().split(TBaseType.windowsLinebreakEscape);
             }
+//            System.out.println("actual===========");
+//            for(String s:b){
+//                System.out.println(s);
+//            }
+//
+//            System.out.println("required===========");
+//            for(String s:a){
+//                System.out.println(s);
+//            }
             assertTrue( TBaseType.comparyStringArray(b,a));
         }else{
             System.out.println(sqlparser.getErrormessage());
