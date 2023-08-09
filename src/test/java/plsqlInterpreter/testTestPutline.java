@@ -10,6 +10,78 @@ import junit.framework.TestCase;
 
 public class testTestPutline extends TestCase {
 
+    public void testBlockLabel4() {
+        String expectedValue = "x = 0.0";
+        String inputSQL = "<<echo>>\n" +
+                "DECLARE\n" +
+                "x NUMBER := 5;\n" +
+                "\tPROCEDURE echo AS\n" +
+                "\t\tx NUMBER := 0;\n" +
+                "\tBEGIN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('echo.x = ' || echo.x);\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('x = ' || x);\n" +
+                "\tEND;\n" +
+                "BEGIN\n" +
+                "echo;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockLabel3() {
+        String expectedValue = "echo.x = 5.0";
+        String inputSQL = "<<echo>>\n" +
+                "DECLARE\n" +
+                "x NUMBER := 5;\n" +
+                "\tPROCEDURE echo AS\n" +
+                "\t\tx NUMBER := 0;\n" +
+                "\tBEGIN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('x = ' || x);\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('echo.x = ' || echo.x);\n" +
+                "\tEND;\n" +
+                "BEGIN\n" +
+                "echo;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockLabel2() {
+        String expectedValue = "Different Birthday19991909";
+        String inputSQL = "<<outer>> -- label\n" +
+                "DECLARE\n" +
+                "birthdate integer := 1909;\n" +
+                "BEGIN\n" +
+                "\tDECLARE\n" +
+                "\tbirthdate integer := 1999;\n" +
+                "\tBEGIN\n" +
+                "\t\tIF birthdate = outer.birthdate THEN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE ('Same Birthday'||birthdate||outer.birthdate);\n" +
+                "\t\tELSE\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE ('Different Birthday'||birthdate||outer.birthdate);\n" +
+                "\t\tEND IF;\n" +
+                "\tEND;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockLabel1() {
+        String expectedValue = "Same Birthday19991999";
+        String inputSQL = "<<outer>> -- label\n" +
+                "DECLARE\n" +
+                "birthdate integer := 1999;\n" +
+                "BEGIN\n" +
+                "\tDECLARE\n" +
+                "\tbirthdate integer := 1999;\n" +
+                "\tBEGIN\n" +
+                "\t\tIF birthdate = outer.birthdate THEN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE ('Same Birthday'||birthdate||outer.birthdate);\n" +
+                "\t\tELSE\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE ('Different Birthday'||birthdate||outer.birthdate);\n" +
+                "\t\tEND IF;\n" +
+                "\tEND;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
     public void testOperatorProcedence() {
         String expectedValue = "b+d=71.1";
         String inputSQL = "DECLARE\n" +
