@@ -10,6 +10,124 @@ import junit.framework.TestCase;
 
 public class testTestPutline extends TestCase {
 
+    public void testBlockNested2() {
+        String expectedValue = "Credit rating over limit (1.0). Rating: 3.0";
+        String inputSQL = "CREATE OR REPLACE PROCEDURE check_credit (credit_limit NUMBER) AS\n" +
+                "\trating NUMBER := 3;\n" +
+                "\tFUNCTION check_rating RETURN BOOLEAN IS\n" +
+                "\t\trating NUMBER := 1;\n" +
+                "\t\tover_limit BOOLEAN;\n" +
+                "\tBEGIN\n" +
+                "\t\tIF check_credit.rating <= credit_limit THEN -- reference global variable\n" +
+                "\t\t\tover_limit := FALSE;\n" +
+                "\t\t\tELSE\n" +
+                "\t\t\tover_limit := TRUE;\n" +
+                "\t\t\trating := credit_limit; -- reference local variable\n" +
+                "\t\tEND IF;\n" +
+                "\t\tRETURN over_limit;\n" +
+                "\tEND check_rating;\n" +
+                "\t\n" +
+                "BEGIN\n" +
+                "\tIF check_rating THEN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE\n" +
+                "\t\t('Credit rating over limit (' || TO_CHAR(credit_limit) || '). '\n" +
+                "\t\t|| 'Rating: ' || TO_CHAR(rating));\n" +
+                "\t\tELSE\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE\n" +
+                "\t\t('Credit rating OK. ' || 'Rating: ' || TO_CHAR(rating));\n" +
+                "\tEND IF;\n" +
+                "END;\n" +
+                "\n" +
+                "/\n" +
+                "BEGIN\n" +
+                "\tcheck_credit(1);\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockNested1() {
+        String expectedValue = "Credit rating OK. Rating: 3.0";
+        String inputSQL = "CREATE OR REPLACE PROCEDURE check_credit (credit_limit NUMBER) AS\n" +
+                "\trating NUMBER := 3;\n" +
+                "\tFUNCTION check_rating RETURN BOOLEAN IS\n" +
+                "\t\trating NUMBER := 1;\n" +
+                "\t\tover_limit BOOLEAN;\n" +
+                "\tBEGIN\n" +
+                "\t\tIF check_credit.rating <= credit_limit THEN -- reference global variable\n" +
+                "\t\t\tover_limit := FALSE;\n" +
+                "\t\t\tELSE\n" +
+                "\t\t\tover_limit := TRUE;\n" +
+                "\t\t\trating := credit_limit; -- reference local variable\n" +
+                "\t\tEND IF;\n" +
+                "\t\tRETURN over_limit;\n" +
+                "\tEND check_rating;\n" +
+                "\t\n" +
+                "BEGIN\n" +
+                "\tIF check_rating THEN\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE\n" +
+                "\t\t('Credit rating over limit (' || TO_CHAR(credit_limit) || '). '\n" +
+                "\t\t|| 'Rating: ' || TO_CHAR(rating));\n" +
+                "\t\tELSE\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE\n" +
+                "\t\t('Credit rating OK. ' || 'Rating: ' || TO_CHAR(rating));\n" +
+                "\tEND IF;\n" +
+                "END;\n" +
+                "\n" +
+                "/\n" +
+                "BEGIN\n" +
+                "\tcheck_credit(5);\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockLabel6() {
+        String expectedValue = "In procedure p, x = a";
+        String inputSQL = "DECLARE\n" +
+                "\tPROCEDURE p\n" +
+                "\tIS\n" +
+                "\t\tx VARCHAR2(1);\n" +
+                "\tBEGIN\n" +
+                "\t\tx := 'a'; -- Assign the value 'a' to x\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('In procedure p, x = ' || x);\n" +
+                "\tEND;\n" +
+                "\tPROCEDURE q\n" +
+                "\tIS\n" +
+                "\t\tx VARCHAR2(1);\n" +
+                "\tBEGIN\n" +
+                "\t\tx := 'b'; -- Assign the value 'b' to x\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('In procedure q, x = ' || x);\n" +
+                "\tEND;\n" +
+                "BEGIN\n" +
+                "\tq;\n" +
+                "\tp;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
+    public void testBlockLabel5() {
+        String expectedValue = "In procedure q, x = b";
+        String inputSQL = "DECLARE\n" +
+                "\tPROCEDURE p\n" +
+                "\tIS\n" +
+                "\t\tx VARCHAR2(1);\n" +
+                "\tBEGIN\n" +
+                "\t\tx := 'a'; -- Assign the value 'a' to x\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('In procedure p, x = ' || x);\n" +
+                "\tEND;\n" +
+                "\tPROCEDURE q\n" +
+                "\tIS\n" +
+                "\t\tx VARCHAR2(1);\n" +
+                "\tBEGIN\n" +
+                "\t\tx := 'b'; -- Assign the value 'b' to x\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('In procedure q, x = ' || x);\n" +
+                "\tEND;\n" +
+                "BEGIN\n" +
+                "\tp;\n" +
+                "\tq;\n" +
+                "END;";
+        assertTrue(doEvaluate(inputSQL,expectedValue));
+    }
+
     public void testBlockLabel4() {
         String expectedValue = "x = 0.0";
         String inputSQL = "<<echo>>\n" +
@@ -28,19 +146,20 @@ public class testTestPutline extends TestCase {
     }
 
     public void testBlockLabel3() {
-        String expectedValue = "echo.x = 5.0";
-        String inputSQL = "<<echo>>\n" +
+        String expectedValue = "echo1.x = 5.0";
+        String inputSQL = "<<echo1>>\n" +
                 "DECLARE\n" +
                 "x NUMBER := 5;\n" +
                 "\tPROCEDURE echo AS\n" +
                 "\t\tx NUMBER := 0;\n" +
                 "\tBEGIN\n" +
                 "\t\tDBMS_OUTPUT.PUT_LINE('x = ' || x);\n" +
-                "\t\tDBMS_OUTPUT.PUT_LINE('echo.x = ' || echo.x);\n" +
+                "\t\tDBMS_OUTPUT.PUT_LINE('echo1.x = ' || echo1.x);\n" +
                 "\tEND;\n" +
                 "BEGIN\n" +
                 "echo;\n" +
-                "END;";
+                "END;\n";
+       // System.out.println(inputSQL);
         assertTrue(doEvaluate(inputSQL,expectedValue));
     }
 
