@@ -185,7 +185,7 @@ public class ColumnDetail {
 	}
 
 	private void columnImpact(TSelectSqlStatement select) {
-		if (select.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+		if (select.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 			columnImpact(select.getLeftStmt());
 			columnImpact(select.getRightStmt());
 		} else {

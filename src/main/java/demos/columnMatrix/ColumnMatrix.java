@@ -919,7 +919,7 @@ public class ColumnMatrix
 		{
 			TSelectSqlStatement selectStmt = (TSelectSqlStatement) stmt;
 
-			if ( selectStmt.getSetOperator( ) != TSelectSqlStatement.setOperator_none )
+			if ( selectStmt.getSetOperator( ) != TSelectSqlStatement.SET_OPERATOR_NONE)
 			{
 				analyzeSqlStatement( selectStmt.getLeftStmt( ), false );
 				analyzeSqlStatement( selectStmt.getRightStmt( ), false );

@@ -801,7 +801,7 @@ public class getStmtTables
 	{
 
 		Set<String> tables = new LinkedHashSet<String>( );
-		if ( stmt.getSetOperator( ) != TSelectSqlStatement.setOperator_none )
+		if ( stmt.getSetOperator( ) != TSelectSqlStatement.SET_OPERATOR_NONE)
 		{
 			tables.addAll( analyzeSelectStatement( stmt.getLeftStmt( ) ) );
 			tables.addAll( analyzeSelectStatement( stmt.getRightStmt( ) ) );
