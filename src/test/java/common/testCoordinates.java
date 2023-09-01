@@ -152,7 +152,7 @@ public class testCoordinates extends TestCase {
                 "   RETURN NEW;\n" +
                 "END;\n" +
                 "$function$";
-        System.out.println(sqlparser.sqltext);
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         functionVisitor fv = new functionVisitor();

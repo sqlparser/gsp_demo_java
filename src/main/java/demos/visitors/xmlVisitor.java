@@ -612,6 +612,47 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TJoinExpr node) {
+		Element e_join = xmldoc.createElement("join");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_join);
+		elementStack.push(e_join);
+
+		e_join.setAttribute("type",node.getJointype().toString());
+
+		Element e_left_relation = xmldoc.createElement("left_relation");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_left_relation);
+		elementStack.push(e_left_relation);
+		node.getLeftTable().accept(this);
+		elementStack.pop();
+
+		Element e_right_relation = xmldoc.createElement("right_relation");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_right_relation);
+		elementStack.push(e_right_relation);
+		node.getRightTable().accept(this);
+		elementStack.pop();
+
+		if (node.onCondition != null){
+			Element e_on_condition = xmldoc.createElement("on_condition");
+			e_parent = (Element) elementStack.peek();
+			e_parent.appendChild(e_on_condition);
+			elementStack.push(e_on_condition);
+			node.onCondition.accept(this);
+			elementStack.pop();
+		}else if (node.usingColumns != null){
+			Element e_using_columns = xmldoc.createElement("using_columns");
+			e_parent = (Element) elementStack.peek();
+			e_parent.appendChild(e_using_columns);
+			elementStack.push(e_using_columns);
+			node.usingColumns.accept(this);
+			elementStack.pop();
+		}
+
+		elementStack.pop();
+	}
+
 	public void preVisit(TSelectSqlStatement node) {
 		// sb.append(String.format("<%s setOperator='%d'>"+crlf,getTagName(node),node.getSetOperator())
 		// );
@@ -754,13 +795,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getIntoClause().accept(this);
 		}
 
-		if (node.joins.size() > 0) {
+		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN){
 			Element e_from_clause = xmldoc.createElement("from_clause");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_from_clause);
 			elementStack.push(e_from_clause);
-			node.joins.accept(this);
+			for(TTable table:node.getRelations()){
+				table.accept(this);
+			}
 			elementStack.pop();
+		}else{
+			//  采用原来的遍历方法
+			if (node.joins.size() > 0) {
+				Element e_from_clause = xmldoc.createElement("from_clause");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_from_clause);
+				elementStack.push(e_from_clause);
+				node.joins.accept(this);
+				elementStack.pop();
+			}
 		}
 
 		if (node.getWhereClause() != null) {
@@ -1949,6 +2002,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case join:
+				node.getJoinExpr().accept(this);
+				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
 				e_parent = (Element) elementStack.peek();
@@ -2133,7 +2189,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 				TTable t = node.getSourceTableList().get(i);
 				String sourceTable = t.getTableName().toString();
 				if (t.getAliasClause() != null) {
-					sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
+					//sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
+					sourceTable = sourceTable + ", alias is: " + t.getAliasClause().toString();
 				}
 				addElementOfString("source_table", sourceTable);
 			}
