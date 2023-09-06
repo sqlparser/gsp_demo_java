@@ -773,7 +773,7 @@ public class ColumnImpact {
 			Map<TCustomSqlStatement, Boolean> stmts = accessMap.get(columnName);
 			stmts.put(select, false);
 		}
-		if (select.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+		if (select.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 			boolean left = findColumnInSubQuery(select.getLeftStmt(),
 					columnName, level, originLocation);
 			boolean right = findColumnInSubQuery(select.getRightStmt(),
@@ -1889,7 +1889,7 @@ public class ColumnImpact {
 
 	private void checkStmtTables(TSelectSqlStatement stmt,
 			List<TTable> tableList) {
-		if (stmt.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+		if (stmt.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 			checkStmtTables(stmt.getLeftStmt(), tableList);
 			checkStmtTables(stmt.getRightStmt(), tableList);
 		} else {
@@ -1945,7 +1945,7 @@ public class ColumnImpact {
 			int baseLevel) {
 		if (select instanceof TSelectSqlStatement) {
 			TSelectSqlStatement stmt = (TSelectSqlStatement) select;
-			if (stmt.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+			if (stmt.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 				impactSqlFromStatement(stmt.getLeftStmt(), baseLevel);
 				impactSqlFromStatement(stmt.getRightStmt(), baseLevel);
 			} else {
@@ -1979,7 +1979,7 @@ public class ColumnImpact {
 	private void impactSqlFromStatement(TCustomSqlStatement select) {
 		if (select instanceof TSelectSqlStatement) {
 			TSelectSqlStatement stmt = (TSelectSqlStatement) select;
-			if (stmt.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+			if (stmt.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 				impactSqlFromStatement(stmt.getLeftStmt());
 				impactSqlFromStatement(stmt.getRightStmt());
 			} else {
@@ -2355,7 +2355,7 @@ public class ColumnImpact {
 
 	private void getSelectSqlStatements(TSelectSqlStatement select,
 			List<TSelectSqlStatement> stmtList) {
-		if (select.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+		if (select.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 			getSelectSqlStatements(select.getLeftStmt(), stmtList);
 			getSelectSqlStatements(select.getRightStmt(), stmtList);
 		} else {

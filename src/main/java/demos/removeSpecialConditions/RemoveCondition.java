@@ -283,7 +283,7 @@ public class RemoveCondition
 		}
 
 		if ( stat instanceof TSelectSqlStatement
-				&& ( (TSelectSqlStatement) stat ).getSetOperator( ) != TSelectSqlStatement.setOperator_none )
+				&& ( (TSelectSqlStatement) stat ).getSetOperator( ) != TSelectSqlStatement.SET_OPERATOR_NONE)
 		{
 			TSelectSqlStatement select = ( (TSelectSqlStatement) stat );
 			getParserString( select.getLeftStmt( ), conditionList );

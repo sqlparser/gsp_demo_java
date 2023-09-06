@@ -104,10 +104,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
-import gudusoft.gsqlparser.stmt.snowflake.TAlterTaskStmt;
-import gudusoft.gsqlparser.stmt.snowflake.TCreateStageStmt;
-import gudusoft.gsqlparser.stmt.snowflake.TSnowflakeCopyIntoStmt;
-import gudusoft.gsqlparser.stmt.snowflake.TUseSchema;
+import gudusoft.gsqlparser.stmt.snowflake.*;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
@@ -615,6 +612,47 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TJoinExpr node) {
+		Element e_join = xmldoc.createElement("join");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_join);
+		elementStack.push(e_join);
+
+		e_join.setAttribute("type",node.getJointype().toString());
+
+		Element e_left_relation = xmldoc.createElement("left_relation");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_left_relation);
+		elementStack.push(e_left_relation);
+		node.getLeftTable().accept(this);
+		elementStack.pop();
+
+		Element e_right_relation = xmldoc.createElement("right_relation");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_right_relation);
+		elementStack.push(e_right_relation);
+		node.getRightTable().accept(this);
+		elementStack.pop();
+
+		if (node.onCondition != null){
+			Element e_on_condition = xmldoc.createElement("on_condition");
+			e_parent = (Element) elementStack.peek();
+			e_parent.appendChild(e_on_condition);
+			elementStack.push(e_on_condition);
+			node.onCondition.accept(this);
+			elementStack.pop();
+		}else if (node.usingColumns != null){
+			Element e_using_columns = xmldoc.createElement("using_columns");
+			e_parent = (Element) elementStack.peek();
+			e_parent.appendChild(e_using_columns);
+			elementStack.push(e_using_columns);
+			node.usingColumns.accept(this);
+			elementStack.pop();
+		}
+
+		elementStack.pop();
+	}
+
 	public void preVisit(TSelectSqlStatement node) {
 		// sb.append(String.format("<%s setOperator='%d'>"+crlf,getTagName(node),node.getSetOperator())
 		// );
@@ -679,6 +717,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 						node.getSetOperatorType().toString());
 				e_binary_query_expression.setAttribute("is_all",
 						String.valueOf(node.isAll()));
+				e_binary_query_expression.setAttribute("is_distinct",
+						String.valueOf(node.isSetOpDistinct()));
 
 				e_query_expression.appendChild(e_binary_query_expression);
 				elementStack.push(e_binary_query_expression);
@@ -755,13 +795,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getIntoClause().accept(this);
 		}
 
-		if (node.joins.size() > 0) {
+		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN){
 			Element e_from_clause = xmldoc.createElement("from_clause");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_from_clause);
 			elementStack.push(e_from_clause);
-			node.joins.accept(this);
+			for(TTable table:node.getRelations()){
+				table.accept(this);
+			}
 			elementStack.pop();
+		}else{
+			//  采用原来的遍历方法
+			if (node.joins.size() > 0) {
+				Element e_from_clause = xmldoc.createElement("from_clause");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_from_clause);
+				elementStack.push(e_from_clause);
+				node.joins.accept(this);
+				elementStack.pop();
+			}
 		}
 
 		if (node.getWhereClause() != null) {
@@ -1950,6 +2002,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case join:
+				node.getJoinExpr().accept(this);
+				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
 				e_parent = (Element) elementStack.peek();
@@ -2134,7 +2189,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 				TTable t = node.getSourceTableList().get(i);
 				String sourceTable = t.getTableName().toString();
 				if (t.getAliasClause() != null) {
-					sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
+					//sourceTable = sourceTable + ", alias is: " + node.getSourceTable().getAliasClause().toString();
+					sourceTable = sourceTable + ", alias is: " + t.getAliasClause().toString();
 				}
 				addElementOfString("source_table", sourceTable);
 			}
@@ -3153,6 +3209,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 			addElementOfNode("partition_location", node.getPartitionLocation());
 		}
 
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TAlterViewStatement stmt) {
+		Element e_alter_view = xmldoc.createElement("alter_view_statement");
+		e_parent = (Element) elementStack.peek();
+		e_alter_view.setAttribute("alter_option",stmt.getAlterViewOption().toString());
+		e_parent.appendChild(e_alter_view);
+		elementStack.push(e_alter_view);
+
+		current_objectName_tag = "view_name";
+		stmt.getViewName().accept(this);
+		if (stmt.getAlterViewOption() != null){
+			switch (stmt.getAlterViewOption()){
+				case rename:
+					stmt.getNewViewName().accept(this);
+					break;
+				default:
+					break;
+			}
+		}
 		elementStack.pop();
 	}
 
@@ -5056,6 +5134,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		{
 			node.getWindowDef( ).accept( this );
 		}
+
+		if (node.getWithinGroup() != null){
+			node.getWithinGroup().accept(this);
+		}
 		current_expression_list_tag = null;
 		elementStack.pop( );
 
@@ -5619,7 +5701,32 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+	public void preVisit( TCreateTaskStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_task = xmldoc.createElement( "create_task_statement" );
+		e_parent.appendChild( e_create_task );
+		elementStack.push( e_create_task );
+		current_objectName_tag = "task_name";
+		stmt.getTaskName( ).accept( this );
+		stmt.getSqlStatement().accept(this);
 
+		elementStack.pop( );
+	}
+
+	public void preVisit( TCreateStreamStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_stream = xmldoc.createElement( "create_stream_statement" );
+		e_parent.appendChild( e_create_stream );
+		elementStack.push( e_create_stream );
+		e_create_stream.setAttribute("create_on_object",stmt.getCreateOnObjectType().toString());
+		current_objectName_tag = "scream_name";
+		stmt.getStreamName( ).accept( this );
+		stmt.getTableName().accept(this);
+
+		elementStack.pop( );
+	}
 
 
 	public void preVisit( TTeradataSetSession stmt )

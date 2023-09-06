@@ -13,7 +13,8 @@ public class testCreateStage extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TCreateStageStmt createStageStmt = (TCreateStageStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getStageNameOnly().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("STAGING.stage_07020728_MOCK_DATA_2"));
         assertTrue(createStageStmt.getNameSpace().toString().equalsIgnoreCase("STAGING"));
         assertTrue(createStageStmt.getNameSpace().getSchemaToken().toString().equalsIgnoreCase("STAGING"));
     }
@@ -24,7 +25,8 @@ public class testCreateStage extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         TCreateStageStmt createStageStmt = (TCreateStageStmt)sqlparser.sqlstatements.get(0);
-        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getStageNameOnly().equalsIgnoreCase("stage_07020728_MOCK_DATA_2"));
+        assertTrue(createStageStmt.getStageName().toString().equalsIgnoreCase("DATAMAX_ETL.STAGING.stage_07020728_MOCK_DATA_2"));
         assertTrue(createStageStmt.getNameSpace().toString().equalsIgnoreCase("DATAMAX_ETL.STAGING"));
         assertTrue(createStageStmt.getNameSpace().getDatabaseToken().toString().equalsIgnoreCase("DATAMAX_ETL"));
         assertTrue(createStageStmt.getNameSpace().getSchemaToken().toString().equalsIgnoreCase("STAGING"));

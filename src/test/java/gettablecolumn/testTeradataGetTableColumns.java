@@ -24,6 +24,17 @@ public class testTeradataGetTableColumns extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
+
+//    public static void testDateColumn() {
+//        doTest("select  year(date),year(date1) from t",
+//                "Tables:\n" +
+//                        "t\n" +
+//                        "\n" +
+//                        "Fields:\n" +
+//                        "t.date\n" +
+//                        "t.date1");
+//    }
+
     public static void testEDate() {
         doTest("update table1 set col = 'value' where table1.id = table2.id2",
                 "Tables:\n" +

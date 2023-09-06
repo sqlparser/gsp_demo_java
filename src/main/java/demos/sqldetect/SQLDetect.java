@@ -75,7 +75,7 @@ public class SQLDetect {
 		if (queryModel.getModel() instanceof TSelectSqlStatement) {
 			TSelectSqlStatement stmt = (TSelectSqlStatement) queryModel
 					.getModel();
-			if (stmt.getSetOperator() != TSelectSqlStatement.setOperator_none) {
+			if (stmt.getSetOperator() != TSelectSqlStatement.SET_OPERATOR_NONE) {
 				detectSubQuery(queryModel, stmt.getLeftStmt());
 				detectSubQuery(queryModel, stmt.getRightStmt());
 			} else {

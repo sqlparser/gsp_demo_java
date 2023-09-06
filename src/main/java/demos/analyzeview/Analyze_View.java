@@ -579,7 +579,7 @@ public class Analyze_View
 		else if ( select instanceof TSelectSqlStatement )
 		{
 			TSelectSqlStatement stmt = (TSelectSqlStatement) select;
-			if ( stmt.getSetOperator( ) != TSelectSqlStatement.setOperator_none )
+			if ( stmt.getSetOperator( ) != TSelectSqlStatement.SET_OPERATOR_NONE)
 			{
 				impactSqlFromStatement( stmt.getLeftStmt( ) );
 				impactSqlFromStatement( stmt.getRightStmt( ) );
