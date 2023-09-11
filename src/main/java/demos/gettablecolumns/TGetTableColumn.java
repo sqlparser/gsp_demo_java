@@ -731,7 +731,9 @@ public class TGetTableColumn{
            // infos.append(numberOfSpace(pNest+1)+" orphan columns:"+newline);
             String oc = "";
             for (int k=0;k<stmt.getOrphanColumns().size();k++){
-                if (stmt.getOrphanColumns().getObjectName(k).getResolveStatus() == TBaseType.RESOLVED_AND_FOUND) continue;
+                if ((stmt.getOrphanColumns().getObjectName(k).getResolveStatus() == TBaseType.RESOLVED_AND_FOUND)
+                    ||(stmt.getOrphanColumns().getObjectName(k).getResolveStatus() == TBaseType.RESOLVED_BUT_AMBIGUOUS))
+                continue;
                 TInfoRecord columnRecord = new TInfoRecord(EDbObjectType.column);
                 columnRecord.setColumn(stmt.getOrphanColumns().getObjectName(k));
                 columnRecord.setFileName(this.sqlFileName);
