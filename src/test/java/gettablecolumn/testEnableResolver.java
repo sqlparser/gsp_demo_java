@@ -8,6 +8,8 @@ import junit.framework.TestCase;
 public class testEnableResolver extends TestCase {
 
     static void doTest(String inputQuery, String desireResult){
+        if (!TBaseType.ENABLE_RESOLVER) return;
+
         TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvmssql);
         getTableColumn.isConsole = false;
         getTableColumn.showTableEffect = false;

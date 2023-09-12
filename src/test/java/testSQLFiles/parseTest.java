@@ -26,10 +26,10 @@ static void parsefiles(EDbVendor db,String dir){
     SqlFileList sqlfiles = new SqlFileList(dir,true);
     for(int k=0;k < sqlfiles.sqlfiles.size();k++){
         sqlparser.sqlfilename = sqlfiles.sqlfiles.get(k).toString();
-        //  System.out.printf("%s\n",sqlparser.sqlfilename);
+        //System.out.printf("%s\n",sqlparser.sqlfilename);
         // boolean b = sqlparser.parse() == 0;
 
-//         assertTrue(sqlparser.parse() == 0);
+       //  assertTrue(sqlparser.parse() == 0);
 
         try{
             boolean b = sqlparser.parse() == 0;
@@ -38,9 +38,8 @@ static void parsefiles(EDbVendor db,String dir){
         }catch (Exception e){
             System.out.println("parsefiles error:"+e.getMessage()+" "+ sqlparser.sqlfilename);
             e.printStackTrace();
-            //throw new Exception("Exception message");
         }
-//
+
    }
 
 }
