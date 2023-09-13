@@ -19,8 +19,9 @@ public class testTeradataGetTableColumns extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.runText(inputQuery);
-       // System.out.println(inputQuery);
-       // System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(inputQuery);
+//        System.out.println(desireResult);
+//        System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 

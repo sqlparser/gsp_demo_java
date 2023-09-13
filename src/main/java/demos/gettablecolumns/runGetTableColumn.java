@@ -468,6 +468,13 @@ class TSQLServerEnv extends TSQLEnv{
 		//add a new table: cTab
 		TSQLTable ExecutionLogStorage = sqlSchema.createTable("ExecutionLogStorage");
 		ExecutionLogStorage.addColumn("UserName");
+
+		TSQLTable tab = sqlSchema.createTable("sysforeignkeys");
+		tab.addColumn("fkey");
+		tab.addColumn("fkeyid");
+		tab.addColumn("keyNo");
+		tab.addColumn("rkey");
+		tab.addColumn("rkeyid");
 	}
 }
 
