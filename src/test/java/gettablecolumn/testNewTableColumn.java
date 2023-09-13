@@ -6,6 +6,7 @@ package gettablecolumn;
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
@@ -190,16 +191,24 @@ public class testNewTableColumn extends TestCase {
        String strDesired,strActual;
        for(int k=0;k < sqlfiles.sqlfiles.size();k++){
           // System.out.println(sqlfiles.sqlfiles.get(k).toString());
-           getTableColumn.runFile(sqlfiles.sqlfiles.get(k).toString());
-           File f = new File(sqlfiles.sqlfiles.get(k).toString().replace(".sql",".outj"));
-           if(f.exists() && !f.isDirectory()) {
-               strDesired =  getDesiredTablesColumns(sqlfiles.sqlfiles.get(k).toString().replace(".sql",".outj"));
-           }else {
-               strDesired =  getDesiredTablesColumns(sqlfiles.sqlfiles.get(k).toString().replace(".sql",".out"));
+           String sqlFile = sqlfiles.sqlfiles.get(k).toString();
+           String desiredFile;
+           if (TBaseType.ENABLE_RESOLVER) {
+               desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".newAlgorithm.outj");
+           }else{
+               desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".outj");
            }
 
+           File f2 = new File(desiredFile);
+           if (!f2.exists()) {
+               desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".out");
+           }
+           System.out.println("Use desired file: "+desiredFile);
+
+           getTableColumn.runFile(sqlFile);
+           strDesired = getDesiredTablesColumns(desiredFile);
            strActual = getTableColumn.outList.toString();
-           assertTrue("\nfile:"+sqlfiles.sqlfiles.get(k).toString()+"\n\ndesired:\n"+strDesired+"\nActual:\n"+strActual
+           assertTrue("\nfile:"+sqlFile+"\n\ndesired:\n"+strDesired+"\nActual:\n"+strActual
                    ,strDesired.equalsIgnoreCase(strActual));
            //System.out.println(getTableColumn.outList.toString());
            //System.out.println(sqlfiles.sqlfiles.get(k).toString());
