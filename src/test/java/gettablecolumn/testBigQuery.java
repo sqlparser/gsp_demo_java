@@ -90,6 +90,7 @@ public class testBigQuery extends TestCase {
     }
 
     public static void testunnest() {
+
         doTest("CREATE TABLE schema1.table2 AS \n" +
                         "    (SELECT \n" +
                         "        (SELECT value FROM UNNEST(nested_attribute)\n" +

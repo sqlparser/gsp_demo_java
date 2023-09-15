@@ -21,7 +21,7 @@ public class testTObjectName extends TestCase {
         TResultColumn column = select.getResultColumnList().getResultColumn(0);
         TResultColumn column1 = select.getResultColumnList().getResultColumn(1);
 
-        TObjectNameList attributes = column.getExpr().getObjectOperand().getAttributes();
+        TObjectNameList attributes = column.getExpr().getObjectOperand().getColumnAttributes();
         TObjectName attribute1 = attributes.getObjectName(0);
         TObjectName attribute2 = attributes.getObjectName(1);
 

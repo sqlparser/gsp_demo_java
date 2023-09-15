@@ -195,15 +195,20 @@ public class testNewTableColumn extends TestCase {
            String desiredFile;
            if (TBaseType.ENABLE_RESOLVER) {
                desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".newAlgorithm.outj");
+               File f = new File(desiredFile);
+               if (!f.exists()) {
+                   desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".outj");
+               }
            }else{
                desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".outj");
            }
 
            File f2 = new File(desiredFile);
            if (!f2.exists()) {
+              // System.out.println("File not exists: "+desiredFile);
                desiredFile = sqlfiles.sqlfiles.get(k).toString().replace(".sql", ".out");
            }
-           System.out.println("Use desired file: "+desiredFile);
+          // System.out.println("Use desired file: "+desiredFile);
 
            getTableColumn.runFile(sqlFile);
            strDesired = getDesiredTablesColumns(desiredFile);

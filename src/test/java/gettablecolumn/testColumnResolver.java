@@ -5,12 +5,15 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import junit.framework.TestCase;
 
-public class testEnableResolver extends TestCase {
+public class testColumnResolver extends TestCase {
 
     static void doTest(String inputQuery, String desireResult){
+        doTest(EDbVendor.dbvmssql,inputQuery,desireResult);
+    }
+    static void doTest(EDbVendor dbVendor,String inputQuery, String desireResult){
         if (!TBaseType.ENABLE_RESOLVER) return;
 
-        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvmssql);
+        TGetTableColumn getTableColumn = new TGetTableColumn(dbVendor);
         getTableColumn.isConsole = false;
         getTableColumn.showTableEffect = false;
         getTableColumn.showColumnLocation = false;
@@ -213,7 +216,145 @@ public class testEnableResolver extends TestCase {
                         "table_b.col_b2\n" +
                         "table_c.col_c1\n" +
                         "table_c.col_c11");
+    }
 
+    public static void test8() {
 
+        doTest("    SELECT\n" +
+                        "      col_1,\n" +
+                        "      col_2\n" +
+                        "    FROM (\n" +
+                        "        SELECT * FROM table_1 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_2 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_3 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_4 WHERE day = '2000-01-01'\n" +
+                        "      ) Combined",
+                "Tables:\n" +
+                        "table_1\n" +
+                        "table_2\n" +
+                        "table_3\n" +
+                        "table_4\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table_1.*\n" +
+                        "table_1.col_1\n" +
+                        "table_1.col_2\n" +
+                        "table_1.day\n" +
+                        "table_2.*\n" +
+                        "table_2.col_1\n" +
+                        "table_2.col_2\n" +
+                        "table_2.day\n" +
+                        "table_3.*\n" +
+                        "table_3.col_1\n" +
+                        "table_3.col_2\n" +
+                        "table_3.day\n" +
+                        "table_4.*\n" +
+                        "table_4.col_1\n" +
+                        "table_4.col_2\n" +
+                        "table_4.day");
+    }
+
+    public static void test9() {
+
+        doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
+                        "    WITH\n" +
+                        "      Combined AS (\n" +
+                        "        SELECT * FROM table_1 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_2 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_3 WHERE day = '2000-01-01'\n" +
+                        "      )\n" +
+                        "    SELECT\n" +
+                        "      col_1,\n" +
+                        "      col_2\n" +
+                        "    FROM Combined\n" +
+                        ") outer_select_wrapper",
+                "Tables:\n" +
+                        "table_1\n" +
+                        "table_2\n" +
+                        "table_3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table_1.*\n" +
+                        "table_1.col_1\n" +
+                        "table_1.col_2\n" +
+                        "table_1.day\n" +
+                        "table_2.*\n" +
+                        "table_2.col_1\n" +
+                        "table_2.col_2\n" +
+                        "table_2.day\n" +
+                        "table_3.*\n" +
+                        "table_3.col_1\n" +
+                        "table_3.col_2\n" +
+                        "table_3.day");
+    }
+
+    public static void test10() {
+
+        doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
+                        "    WITH\n" +
+                        "      Combined1 AS (\n" +
+                        "        SELECT * FROM actor \n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM actor2 \n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM actor3\n" +
+                        "      )\n" +
+                        "       , Combined2 AS (\n" +
+                        "        SELECT * FROM  Combined1\n" +
+                        "      )\n" +
+                        "    SELECT\n" +
+                        "      actor_id,\n" +
+                        "      first_name\n" +
+                        "    FROM Combined2\n" +
+                        ") outer_select_wrapper",
+                "Tables:\n" +
+                        "actor\n" +
+                        "actor2\n" +
+                        "actor3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "actor.*\n" +
+                        "actor.actor_id\n" +
+                        "actor.first_name\n" +
+                        "actor2.*\n" +
+                        "actor2.actor_id\n" +
+                        "actor2.first_name\n" +
+                        "actor3.*\n" +
+                        "actor3.actor_id\n" +
+                        "actor3.first_name");
+    }
+
+    public static void test11() {
+
+        doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
+                        "    WITH\n" +
+                        "      Combined AS (\n" +
+                        "        SELECT * FROM table_1 WHERE day = '2000-01-01'\n" +
+                        "        UNION ALL\n" +
+                        "        SELECT * FROM table_2 WHERE day = '2000-01-01'\n" +
+                        "      )\n" +
+                        "    SELECT\n" +
+                        "      col_1,\n" +
+                        "      col_2\n" +
+                        "    FROM Combined\n" +
+                        ") outer_select_wrapper",
+                "Tables:\n" +
+                        "table_1\n" +
+                        "table_2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table_1.*\n" +
+                        "table_1.col_1\n" +
+                        "table_1.col_2\n" +
+                        "table_1.day\n" +
+                        "table_2.*\n" +
+                        "table_2.col_1\n" +
+                        "table_2.col_2\n" +
+                        "table_2.day");
     }
 }

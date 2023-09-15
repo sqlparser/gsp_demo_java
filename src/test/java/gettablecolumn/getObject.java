@@ -37,15 +37,15 @@ class getObject{
 
     String sqlserver_sqldir = gspCommon.BASE_SQL_DIR_PRIVATE +  "java/mssql/dbobject/";
     String[] sqlserver_sqlfiles = {
-        // "bigjoin1","shurleyjoin",
-//            "delete1","delete2","delete4","delete5",
-//            "update1","update2","update3","update4",
+         "bigjoin1","shurleyjoin",
+            "delete1","delete2","delete4","delete5",
+            "update1","update2","update3","update4",
             "createfunction1"
-//            ,"createprocedure1","createtrigger1",
-//            "createview1",
-//            "while1","keyword_not_column_name",
-//            "ogcmethod",
-//           "funcitonOnXMLColumn"
+            ,"createprocedure1","createtrigger1",
+            "createview1",
+            "while1","keyword_not_column_name",
+            "ogcmethod",
+           "funcitonOnXMLColumn"
 
     };
 
