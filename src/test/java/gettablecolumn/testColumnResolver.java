@@ -328,7 +328,6 @@ public class testColumnResolver extends TestCase {
                         "actor3.actor_id\n" +
                         "actor3.first_name");
     }
-
     public static void test11() {
 
         doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
@@ -357,4 +356,72 @@ public class testColumnResolver extends TestCase {
                         "table_2.col_2\n" +
                         "table_2.day");
     }
+
+    public static void test12() {
+
+        doTest(EDbVendor.dbvoracle,"SELECT T.OPERATE_OBJECT_ID,\n" +
+                        "        T.OPERATE_START_TIME,\n" +
+                        "        T.OPERATE_END_TIME,\n" +
+                        "        T.OPERATION,\n" +
+                        "        T.APPLICATION_NAME,\n" +
+                        "        T.MODULE\n" +
+                        "FROM (SELECT T.* \n" +
+                        "        FROM DWI_TREASURY_LOG_EVENT T\n" +
+                        "        WHERE T.MODULE = 'GuaranteeLedger Management'\n" +
+                        "          AND T.APPLICATION_NAME = 'etreasury') T,\n" +
+                        "      DWI_MD_CLASS C,\n" +
+                        "      DWI_TREASURY_GUARANTEE_LEDGER F\n" +
+                        "WHERE T.OPERATE_OBJECT_ID = F.GUARANTEE_LEDGER_ID(+)\n" +
+                        "  AND C.CLASS_TYPE_ID(+) = 500611\n" +
+                        "  AND C.SS_ID(+) = 2670\n" +
+                        "  AND UPPER(C.EN_NAME(+)) = T.LEDGER_STATUS;",
+                "Tables:\n" +
+                        "DWI_MD_CLASS\n" +
+                        "DWI_TREASURY_GUARANTEE_LEDGER\n" +
+                        "DWI_TREASURY_LOG_EVENT\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "DWI_MD_CLASS.CLASS_TYPE_ID\n" +
+                        "DWI_MD_CLASS.EN_NAME\n" +
+                        "DWI_MD_CLASS.SS_ID\n" +
+                        "DWI_TREASURY_GUARANTEE_LEDGER.GUARANTEE_LEDGER_ID\n" +
+                        "DWI_TREASURY_LOG_EVENT.*\n" +
+                        "DWI_TREASURY_LOG_EVENT.APPLICATION_NAME\n" +
+                        "DWI_TREASURY_LOG_EVENT.LEDGER_STATUS\n" +
+                        "DWI_TREASURY_LOG_EVENT.MODULE\n" +
+                        "DWI_TREASURY_LOG_EVENT.OPERATE_END_TIME\n" +
+                        "DWI_TREASURY_LOG_EVENT.OPERATE_OBJECT_ID\n" +
+                        "DWI_TREASURY_LOG_EVENT.OPERATE_START_TIME\n" +
+                        "DWI_TREASURY_LOG_EVENT.OPERATION");
+    }
+
+    public static void test13() {
+
+        doTest(EDbVendor.dbvoracle,"select * from \n" +
+                        "( \n" +
+                        "  select B.*, A.createtimefroma from A, B \n" +
+                        "  where A.ID(+) = B.ID \n" +
+                        "  and A.startDate(+) > B.startDate \n" +
+                        ") TEMP,C \n" +
+                        "where TEMP.namefromb = C.name(+) \n" +
+                        "and TEMP.createtimefromb < c.createtime(+);",
+                "Tables:\n" +
+                        "A\n" +
+                        "B\n" +
+                        "C\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "A.createtimefroma\n" +
+                        "A.ID\n" +
+                        "A.startDate\n" +
+                        "B.*\n" +
+                        "B.createtimefromb\n" +
+                        "B.ID\n" +
+                        "B.namefromb\n" +
+                        "B.startDate\n" +
+                        "C.*\n" +
+                        "C.createtime\n" +
+                        "C.name");
+    }
+
 }
