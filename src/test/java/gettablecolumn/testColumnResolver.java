@@ -426,4 +426,23 @@ public class testColumnResolver extends TestCase {
                         "C.name");
     }
 
+    public static void test14() {
+
+        doTest(EDbVendor.dbvoracle,"SELECT * FROM REGIONS r ,\n" +
+                        "(\n" +
+                        "\tSELECT *\n" +
+                        "\tFROM HR.DEPARTMENTS d,\n" +
+                        "\t(SELECT job_id,job_title FROM JOBS j ) a_subquery\n" +
+                        ") t_subquery",
+                "Tables:\n" +
+                        "HR.DEPARTMENTS\n" +
+                        "JOBS\n" +
+                        "REGIONS\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "HR.DEPARTMENTS.*\n" +
+                        "JOBS.job_id\n" +
+                        "JOBS.job_title\n" +
+                        "REGIONS.*");
+    }
 }
