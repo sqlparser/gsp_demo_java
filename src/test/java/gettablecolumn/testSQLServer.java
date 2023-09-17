@@ -21,6 +21,23 @@ public class testSQLServer extends TestCase {
     }
 
     public static void testSearchTopLevel() {
+        System.out.println("select\n" +
+                "    case\n" +
+                "        c.[SIZE] when 3 then (\n" +
+                "        select\n" +
+                "            name\n" +
+                "        from\n" +
+                "            (\n" +
+                "            select\n" +
+                "                ename as name\n" +
+                "            from\n" +
+                "                TestCatalog.TestSchema.TestTableEmployee tte\n" +
+                "            where\n" +
+                "                tte.[department id] = c.deptno ) a)\n" +
+                "        when 5 Then c.[Department Location]\n" +
+                "    end deptNameLoc\n" +
+                "from\n" +
+                "    TestCatalog.TestSchema.TestTableDept c");
         doTest("select\n" +
                         "    case\n" +
                         "        c.[SIZE] when 3 then (\n" +
@@ -225,35 +242,6 @@ public class testSQLServer extends TestCase {
 
 
     public static void testTableFunction() {
-//        System.out.println("CREATE VIEW [dbo].[ERRORS]\n" +
-//                "AS\n" +
-//                "WITH DESC_CTE\n" +
-//                "AS\n" +
-//                "    (\n" +
-//                "        SELECT  rid\n" +
-//                "               ,POS       = ID\n" +
-//                "               ,c_desc = LTRIM( RTRIM( value ))\n" +
-//                "          FROM  [dbo].[reasons]\n" +
-//                "          CROSS APPLY\n" +
-//                "                (\n" +
-//                "                    SELECT  ID = ROW_NUMBER() OVER (PARTITION BY reasons_ID1\n" +
-//                "                                                        ORDER BY\n" +
-//                "                                                   reasons_ID2\n" +
-//                "                                                   )\n" +
-//                "                           ,value\n" +
-//                "                      FROM  STRING_SPLIT(REPLACE(c_desc ,'|~|',CHAR(7)),CHAR(7)) PM\n" +
-//                "                ) CR\n" +
-//                "                                            WHERE [IsDeleted] ='0'\n" +
-//                "                                            )\n" +
-//                "SELECT [derid],\n" +
-//                "       POS =ISNULL(CR.[POS],1) ,\n" +
-//                "       [errorcode],\n" +
-//                "       [c_desc]= CAST(NULLIF(CR.c_desc,'') AS VARCHAR(300))\n" +
-//                "FROM dbo.d_errors CE\n" +
-//                "LEFT JOIN DESC_CTE CR\n" +
-//                "ON CR.reasons_ID =CE.errorcode\n" +
-//                "WHERE 1 = 1\n" +
-//                "      AND CE.IsDeleted = 0;");
         doTest("CREATE VIEW [dbo].[ERRORS]\n" +
                         "AS\n" +
                         "WITH DESC_CTE\n" +

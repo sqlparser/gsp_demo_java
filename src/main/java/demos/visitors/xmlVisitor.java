@@ -5895,11 +5895,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_object_type.appendChild( e_attribute_type );
 				elementStack.push( e_attribute_type );
 				current_objectName_tag = "attribute_name";
-				node.getAttributes( )
+				node.getTypeAttributes( )
 						.getAttributeItem( i )
 						.getAttributeName( )
 						.accept( this );
-				node.getAttributes( )
+				node.getTypeAttributes( )
 						.getAttributeItem( i )
 						.getDatatype( )
 						.accept( this );

@@ -29,6 +29,7 @@ public class testColumnResolver extends TestCase {
     }
 
     public static void test1() {
+
         doTest("SELECT col_1, col_11,col_2\n" +
                         "FROM (\n" +
                         "    select *\n" +
@@ -193,6 +194,7 @@ public class testColumnResolver extends TestCase {
     }
 
     public static void test7() {
+
 
         doTest("SELECT col_c1, col_c11,col_b2,col_a3\n" +
                         "FROM (\n" +

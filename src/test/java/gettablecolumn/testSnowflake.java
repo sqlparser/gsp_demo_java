@@ -36,6 +36,10 @@ public class testSnowflake extends TestCase {
     }
 
     public static void testUpdate() {
+        System.out.println("update t1\n" +
+                "set t1.number_column = t1.number_column + t2.number_column, t1.text_column = 'ASDF'\n" +
+                "from t2\n" +
+                "where t1.key_column = t2.t1_key and t1.number_column < 10;");
         doTest("update t1\n" +
                         "set t1.number_column = t1.number_column + t2.number_column, t1.text_column = 'ASDF'\n" +
                         "from t2\n" +

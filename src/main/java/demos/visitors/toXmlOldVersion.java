@@ -1647,8 +1647,8 @@ class simplXmlVisitor extends TParseTreeVisitor {
 
     public void preVisit(TPlsqlCreateType node){
         appendStartTagWithIntProperty(node,"type",node.getKind(),"name",node.getTypeName().toString());
-        if (node.getAttributes() != null){
-            node.getAttributes().accept(this);
+        if (node.getTypeAttributes() != null){
+            node.getTypeAttributes().accept(this);
         }
     }
 
