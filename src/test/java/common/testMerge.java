@@ -26,6 +26,7 @@ public class testMerge extends TestCase {
                 "(activity,description)\n" +
                 "VALUES (ac.activity,ac.description);";
 
+
         assertTrue(sqlparser.parse() == 0);
 
         TMergeSqlStatement mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);

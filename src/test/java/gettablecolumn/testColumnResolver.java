@@ -518,4 +518,30 @@ public class testColumnResolver extends TestCase {
                         "graph.id\n" +
                         "graph.link");
     }
+
+    public static void test18() {
+
+        doTest(EDbVendor.dbvdb2,"MERGE INTO archive ar\n" +
+                        "using (SELECT activity,\n" +
+                        "              description\n" +
+                        "       FROM   activities)ac\n" +
+                        "ON ( ar.activity = ac.activity )\n" +
+                        "WHEN matched THEN\n" +
+                        "  UPDATE SET description = ac.description\n" +
+                        "WHEN NOT matched THEN\n" +
+                        "  INSERT (activity,\n" +
+                        "          description)\n" +
+                        "  VALUES (ac.activity,\n" +
+                        "          ac.description); " ,
+                "Tables:\n" +
+                        "activities\n" +
+                        "archive\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "activities.activity\n" +
+                        "activities.description\n" +
+                        "archive.activity\n" +
+                        "archive.description");
+    }
+
 }
