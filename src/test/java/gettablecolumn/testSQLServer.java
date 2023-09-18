@@ -21,23 +21,6 @@ public class testSQLServer extends TestCase {
     }
 
     public static void testSearchTopLevel() {
-        System.out.println("select\n" +
-                "    case\n" +
-                "        c.[SIZE] when 3 then (\n" +
-                "        select\n" +
-                "            name\n" +
-                "        from\n" +
-                "            (\n" +
-                "            select\n" +
-                "                ename as name\n" +
-                "            from\n" +
-                "                TestCatalog.TestSchema.TestTableEmployee tte\n" +
-                "            where\n" +
-                "                tte.[department id] = c.deptno ) a)\n" +
-                "        when 5 Then c.[Department Location]\n" +
-                "    end deptNameLoc\n" +
-                "from\n" +
-                "    TestCatalog.TestSchema.TestTableDept c");
         doTest("select\n" +
                         "    case\n" +
                         "        c.[SIZE] when 3 then (\n" +
@@ -68,6 +51,7 @@ public class testSQLServer extends TestCase {
     }
 
     public static void testColumnInSubquery() {
+
         doTest("SELECT\n" +
                         "     [FacilityAccountID] = CAST(enc.FacilityAccountID AS VARCHAR(255))\n" +
                         "    ,[RowSourceDSC] = CAST('Cerner' AS VARCHAR(255))\n" +
@@ -242,6 +226,7 @@ public class testSQLServer extends TestCase {
 
 
     public static void testTableFunction() {
+
         doTest("CREATE VIEW [dbo].[ERRORS]\n" +
                         "AS\n" +
                         "WITH DESC_CTE\n" +
@@ -280,6 +265,7 @@ public class testSQLServer extends TestCase {
                         "[dbo].[reasons].[IsDeleted]\n" +
                         "[dbo].[reasons].c_desc\n" +
                         "[dbo].[reasons].reasons_ID\n" +
+                        "[dbo].[reasons].reasons_ID1\n" +
                         "[dbo].[reasons].reasons_ID2\n" +
                         "[dbo].[reasons].rid\n" +
                         "dbo.d_errors.[derid]\n" +

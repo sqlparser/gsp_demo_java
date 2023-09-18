@@ -445,4 +445,77 @@ public class testColumnResolver extends TestCase {
                         "JOBS.job_title\n" +
                         "REGIONS.*");
     }
+
+    public static void test15() {
+
+        doTest(EDbVendor.dbvoracle,"SELECT D.DEPTNO, D.DEPTNAME,\n" +
+                        "EMPINFO.AVGSAL, EMPINFO.EMPCOUNT\n" +
+                        "FROM DEPT D,\n" +
+                        "TABLE (SELECT AVG(E.SALARY) AS AVGSAL,\n" +
+                        "COUNT(*) AS EMPCOUNT\n" +
+                        "FROM EMP E\n" +
+                        "WHERE E.WORKDEPT = D.DEPTNO)\n" +
+                        "AS EMPINFO;",
+                "Tables:\n" +
+                        "DEPT\n" +
+                        "EMP\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "DEPT.DEPTNAME\n" +
+                        "DEPT.DEPTNO\n" +
+                        "EMP.*\n" +
+                        "EMP.SALARY\n" +
+                        "EMP.WORKDEPT");
+    }
+
+    public static void test16() {
+
+        doTest(EDbVendor.dbvsybase,"update titles\n" +
+                        "set total_sales = total_sales + qty\n" +
+                        "from titles, salesdetail, sales\n" +
+                        "where titles.title_id = salesdetail.title_id\n" +
+                        "and salesdetail.stor_id = sales.stor_id\n" +
+                        "and salesdetail.ord_num = sales.ord_num\n" +
+                        "and sales.date in\n" +
+                        "(select max (sales.date) from sales)",
+                "Tables:\n" +
+                        "sales\n" +
+                        "salesdetail\n" +
+                        "titles\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "sales.date\n" +
+                        "sales.ord_num\n" +
+                        "sales.stor_id\n" +
+                        "salesdetail.ord_num\n" +
+                        "salesdetail.stor_id\n" +
+                        "salesdetail.title_id\n" +
+                        "titles.qty\n" +
+                        "titles.title_id\n" +
+                        "titles.total_sales");
+    }
+
+    public static void test17() {
+
+        doTest(EDbVendor.dbvgreenplum,"WITH RECURSIVE search_graph(id, link, data, depth, path, cycle) AS (\n" +
+                        "        SELECT g.id, g.link, g.data, 1,\n" +
+                        "          ARRAY[g.id],\n" +
+                        "          false\n" +
+                        "        FROM graph g\n" +
+                        "      UNION ALL\n" +
+                        "        SELECT g.id, g.link, g.data, sg.depth + 1,\n" +
+                        "          path || g.id,\n" +
+                        "          g.id = ANY(path)\n" +
+                        "        FROM graph g, search_graph sg\n" +
+                        "        WHERE g.id = sg.link AND NOT cycle\n" +
+                        ")\n" +
+                        "SELECT * FROM search_graph;",
+                "Tables:\n" +
+                        "graph\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "graph.data\n" +
+                        "graph.id\n" +
+                        "graph.link");
+    }
 }

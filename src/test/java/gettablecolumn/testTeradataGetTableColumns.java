@@ -162,6 +162,7 @@ public class testTeradataGetTableColumns extends TestCase {
     }
 
     public static void testUpdate() {
+
         doTest("UPDATE DB51_CAD.CAD_FX\n" +
                         " SET fund_wlasne = DB51_CAD.TAB_FX_4.fund_wlasne\n" +
                         "WHERE CAD_FX.data_danych = date'2016-10-09'\n" +
