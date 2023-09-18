@@ -37,7 +37,7 @@ public class testProcedure extends TestCase {
 
         List<Relationship> fsa048Relationships = Arrays.stream(dataFlow.getRelationships())
                 .filter(s -> s.getTarget().getParentName().contains("report.trs_fsa048_report_v002")).collect(Collectors.toList());
-        assertTrue(fsa048Relationships.size() == 3);
+        assertTrue(fsa048Relationships.size() == 8);
 
         List<Relationship> a305Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("tft_scheme_details_a305".toLowerCase())))
                 .collect(Collectors.toList());
@@ -45,7 +45,7 @@ public class testProcedure extends TestCase {
 
         List<Relationship> v012Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TFT_ACCT_EOD_POSN_V012".toLowerCase())))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==3);
+        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==4);
         
     }
 }
