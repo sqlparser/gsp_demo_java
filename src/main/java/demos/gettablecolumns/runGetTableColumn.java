@@ -263,7 +263,7 @@ public class runGetTableColumn
 		}
 		
 		if (sqlenv == null) {
-			getTableColumn.setSqlEnv(new TSQLServerEnv());
+		//	getTableColumn.setSqlEnv(new TSQLServerEnv());
 //			TJSONSQLEnvParser jsonsqlEnvParser = new TJSONSQLEnvParser();
 //			String jsonText = SQLUtil.getFileContent("f:\\tmp\\meatdata.json");
 //
