@@ -4,8 +4,6 @@ package demos.gettablecolumns;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
-import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
-import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import gudusoft.gsqlparser.stmt.TStoredProcedureSqlStatement;
 
 import java.util.ArrayList;
@@ -304,7 +302,7 @@ public class TGetTableColumn{
 
     private ArrayList<TInfoRecord> infoList;
 
-    private ArrayList<String> fieldlist,tablelist,indexList;
+    private ArrayList<String> fieldlist,tablelist,indexList,cteList;
 
     private StringBuffer tableColumnList;
 
@@ -319,7 +317,8 @@ public class TGetTableColumn{
     public boolean showColumnLocation;
     public boolean showDatatype;
     public boolean showIndex;
-    public boolean linkOrphanColumnToFirstTable;
+    public boolean showColumnsOfCTE;
+        public boolean linkOrphanColumnToFirstTable;
     public boolean showDetail = false;
     public boolean showSummary = true;
     public boolean showTreeStructure = false;
@@ -343,6 +342,7 @@ public class TGetTableColumn{
         tablelist = new ArrayList<String>();
         fieldlist = new ArrayList<String>();
         indexList = new ArrayList<String>();
+        cteList = new ArrayList<String>();
         infoList = new ArrayList<TInfoRecord>();
 
         spList = new Stack<TStoredProcedureSqlStatement>();
@@ -365,6 +365,7 @@ public class TGetTableColumn{
         showDatatype = false;
         showIndex = false;
         showCTE = false;
+        showColumnsOfCTE = false;
     }
 
     public void runText(String pQuery){
@@ -406,6 +407,7 @@ public class TGetTableColumn{
         tablelist.clear();
         fieldlist.clear();
         indexList.clear();
+        cteList.clear();
 
         for(int i=0;i<sqlParser.sqlstatements.size();i++){
             analyzeStmt(sqlParser.sqlstatements.get(i),0);
@@ -428,12 +430,18 @@ public class TGetTableColumn{
             removeDuplicateAndSort(tablelist);
             removeDuplicateAndSort(fieldlist);
             removeDuplicateAndSort(indexList);
+            removeDuplicateAndSort(cteList);
 
             printArray("Tables:", tablelist);
             outputResult("");
             printArray("Fields:",fieldlist);
             if(showIndex && (indexList.size() > 0)){
                 printArray("Indexs:",indexList);
+            }
+
+            if(showColumnsOfCTE && (cteList.size() > 0)){
+                outputResult("");
+                printArray("Ctes:",cteList);
             }
         }
 
@@ -554,6 +562,11 @@ public class TGetTableColumn{
             //if  (stmt.tables.getTable(i).isBaseTable())
             //{
              lcTable = stmt.tables.getTable(i);
+             if (showColumnsOfCTE && lcTable.isCTEName()){
+                 for(TAttributeNode node:lcTable.getAttributes()){
+                     cteList.add(node.getName());
+                 }
+             }
              TInfoRecord tableRecord = new TInfoRecord(lcTable);
             tableRecord.setFileName(this.sqlFileName);
             if (spList.size() > 0){

@@ -1,10 +1,25 @@
 package gettablecolumn;
 
+import common.gspCommon;
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
 public class testBigQuery extends TestCase {
+
+    static void doTestShowCTEColumn(String inputFile, String desireResult){
+        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvbigquery);
+        getTableColumn.isConsole = false;
+        getTableColumn.showTableEffect = false;
+        getTableColumn.showColumnLocation = false;
+        getTableColumn.showTreeStructure = false;
+        getTableColumn.showDatatype = true;
+        getTableColumn.listStarColumn = true;
+        getTableColumn.showColumnsOfCTE = true;
+        getTableColumn.runFile(inputFile);
+        // System.out.println(getTableColumn.outList.toString().trim());
+        assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+    }
 
     static void doTestShowCTE(String inputQuery, String desireResult){
         TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvbigquery);
@@ -159,4 +174,100 @@ public class testBigQuery extends TestCase {
                         "dataset1.table1.column1\n" +
                         "dataset1.table1.column2");
     }
+
+
+    public static void testShowCTEColumns() {
+        doTestShowCTEColumn(  gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"bigquery\\solidatus\\cte_with_star_columns.sql",
+                "Tables:\n" +
+                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`\n" +
+                        "`solidatus-dev`.`data`.`RETAIL_PROD_REPAIR`\n" +
+                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.*\n" +
+                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.from_date\n" +
+                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.to_date\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.*\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.__metadata\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.__uuid\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.adjustment_info\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.entity_uuid\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.from_date\n" +
+                        "`data`.`RETAIL_PROD_SOURCE`.to_date\n" +
+                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Processing_Type:string\n" +
+                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Source_System_Type:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__metadata:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.adjustment_info:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.entity_uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.from_date:timestamp\n" +
+                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.to_date:timestamp\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__metadata:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.adjustment_info:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.entity_uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.from_date:timestamp\n" +
+                        "solidatus-dev.data.RETAIL_PROD_REPAIR.to_date:timestamp\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__metadata:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.adjustment_info:array\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.entity_uuid:string\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.from_date:timestamp\n" +
+                        "solidatus-dev.data.RETAIL_PROD_SOURCE.to_date:timestamp\n" +
+                        "\n" +
+                        "Ctes:\n" +
+                        "EXCEPTION_RETAIL_000100.__metadata\n" +
+                        "EXCEPTION_RETAIL_000100.__uuid\n" +
+                        "EXCEPTION_RETAIL_000100.adjustment_info\n" +
+                        "EXCEPTION_RETAIL_000100.entity_uuid\n" +
+                        "EXCEPTION_RETAIL_000100.from_date\n" +
+                        "EXCEPTION_RETAIL_000100.to_date\n" +
+                        "EXCEPTION_RETAIL_000130.__metadata\n" +
+                        "EXCEPTION_RETAIL_000130.__uuid\n" +
+                        "EXCEPTION_RETAIL_000130.adjustment_info\n" +
+                        "EXCEPTION_RETAIL_000130.entity_uuid\n" +
+                        "EXCEPTION_RETAIL_000130.from_date\n" +
+                        "EXCEPTION_RETAIL_000130.to_date\n" +
+                        "RETAIL_PROD_SOURCE_000100.__metadata\n" +
+                        "RETAIL_PROD_SOURCE_000100.__uuid\n" +
+                        "RETAIL_PROD_SOURCE_000100.adjustment_info\n" +
+                        "RETAIL_PROD_SOURCE_000100.entity_uuid\n" +
+                        "RETAIL_PROD_SOURCE_000100.from_date\n" +
+                        "RETAIL_PROD_SOURCE_000100.to_date\n" +
+                        "RETAIL_PROD_SOURCE_000200.__metadata\n" +
+                        "RETAIL_PROD_SOURCE_000200.__uuid\n" +
+                        "RETAIL_PROD_SOURCE_000200.adjustment_info\n" +
+                        "RETAIL_PROD_SOURCE_000200.entity_uuid\n" +
+                        "RETAIL_PROD_SOURCE_000200.from_date\n" +
+                        "RETAIL_PROD_SOURCE_000200.to_date\n" +
+                        "RETAIL_PROD_SOURCE_000300.__metadata\n" +
+                        "RETAIL_PROD_SOURCE_000300.__uuid\n" +
+                        "RETAIL_PROD_SOURCE_000300.adjustment_info\n" +
+                        "RETAIL_PROD_SOURCE_000300.entity_uuid\n" +
+                        "RETAIL_PROD_SOURCE_000300.from_date\n" +
+                        "RETAIL_PROD_SOURCE_000300.to_date\n" +
+                        "RETAIL_PROD_SOURCE_000400.__metadata\n" +
+                        "RETAIL_PROD_SOURCE_000400.__uuid\n" +
+                        "RETAIL_PROD_SOURCE_000400.adjustment_info\n" +
+                        "RETAIL_PROD_SOURCE_000400.entity_uuid\n" +
+                        "RETAIL_PROD_SOURCE_000400.from_date\n" +
+                        "RETAIL_PROD_SOURCE_000400.to_date\n" +
+                        "STAGE1.__metadata\n" +
+                        "STAGE1.__uuid\n" +
+                        "STAGE1.adjustment_info\n" +
+                        "STAGE1.entity_uuid\n" +
+                        "STAGE1.from_date\n" +
+                        "STAGE1.to_date\n" +
+                        "STAGE2.__metadata\n" +
+                        "STAGE2.__uuid\n" +
+                        "STAGE2.adjustment_info\n" +
+                        "STAGE2.entity_uuid\n" +
+                        "STAGE2.from_date\n" +
+                        "STAGE2.to_date");
+    }
+
 }
