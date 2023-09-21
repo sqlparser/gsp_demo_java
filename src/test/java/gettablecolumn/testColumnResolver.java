@@ -221,7 +221,6 @@ public class testColumnResolver extends TestCase {
     }
 
     public static void test8() {
-
         doTest("    SELECT\n" +
                         "      col_1,\n" +
                         "      col_2\n" +

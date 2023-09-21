@@ -40,7 +40,6 @@ public class testUpdate extends TestCase {
 
 
     public static void testUpdate2() {
-
         doTest(EDbVendor.dbvteradata,
                 "UPDATE b_rate_plan\n" +
                         "FROM \n" +

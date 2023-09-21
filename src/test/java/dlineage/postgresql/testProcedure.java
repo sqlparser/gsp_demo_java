@@ -37,6 +37,7 @@ public class testProcedure extends TestCase {
 
         List<Relationship> fsa048Relationships = Arrays.stream(dataFlow.getRelationships())
                 .filter(s -> s.getTarget().getParentName().contains("report.trs_fsa048_report_v002")).collect(Collectors.toList());
+        //System.out.println("fsa048Relationships.size():"+fsa048Relationships.size());
         assertTrue(fsa048Relationships.size() == 8);
 
         List<Relationship> a305Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("tft_scheme_details_a305".toLowerCase())))

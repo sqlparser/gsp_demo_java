@@ -2,6 +2,7 @@ package gettablecolumn;
 
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TObjectName;
@@ -48,6 +49,8 @@ public class testTeradataGetTableColumns extends TestCase {
     }
 
     public static void testAliasOfSubquery() {
+        int b = TBaseType.GUESS_COLUMN_STRATEGY;
+        TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_NEAREST;
         doTest("select id from (select * from A,B)ab, C where ab.id=C.id;",
                 "Tables:\n" +
                         "A\n" +
@@ -56,6 +59,7 @@ public class testTeradataGetTableColumns extends TestCase {
                         "\nFields:\n" +
                         "A.id\n" +
                         "C.id");
+        TBaseType.GUESS_COLUMN_STRATEGY = b;
     }
 
     public static void testTableOnlySelectList() {

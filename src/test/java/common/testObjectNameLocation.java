@@ -72,7 +72,7 @@ public class testObjectNameLocation extends TestCase {
                 "(select employee_sal\n" +
                 "from emp_history\n" +
                 "where employee_id = e.employee_id);";
-        System.out.println(sqlparser.sqltext);
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TDeleteSqlStatement delete = (TDeleteSqlStatement)sqlparser.sqlstatements.get(0);

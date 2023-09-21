@@ -2,6 +2,7 @@ package gettablecolumn;
 
 import demos.traceColumn.TTraceColumn;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import junit.framework.TestCase;
 
 
@@ -56,8 +57,15 @@ public class testTraceColumn extends TestCase {
                 "union \n" +
                 "select d, e-g from table2";
 
+
+        // (select b from table2 where table2.c=table1.a)  该查询中的 b 可用属于 table2， 也可以属于上层的 table1，有两个候选table
+        // 在这里选择使用 TBaseType.GUESS_COLUMN_STRATEGY_NEAREST
+        int b = TBaseType.GUESS_COLUMN_STRATEGY;
+        TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_NEAREST;
+
         TTraceColumn traceColumn = new TTraceColumn(EDbVendor.dbvoracle);
         traceColumn.runText(sqltext);
+
         assertTrue(traceColumn.getInfos().toString().trim().equalsIgnoreCase("col1\n" +
                 "col2\n" +
                 " -->a(expr)\n" +
@@ -70,6 +78,8 @@ public class testTraceColumn extends TestCase {
                 " -->e-g(expr)\n" +
                 "  -->table2.e\n" +
                 "  -->table2.g"));
+
+        TBaseType.GUESS_COLUMN_STRATEGY = b;
     }
 
 }
