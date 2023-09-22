@@ -1,11 +1,26 @@
 package gettablecolumn;
 
+import common.gspCommon;
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
 
 public class testSQLServer extends TestCase {
+
+    static void doTestFile(String inputFile, String desireResult){
+        TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvmssql);
+        getTableColumn.isConsole = false;
+        getTableColumn.showTableEffect = false;
+        getTableColumn.showColumnLocation = false;
+        getTableColumn.showTreeStructure = false;
+        getTableColumn.showDatatype = true;
+        getTableColumn.listStarColumn = true;
+        getTableColumn.showColumnsOfCTE = false;
+        getTableColumn.runFile(inputFile);
+        // System.out.println(getTableColumn.outList.toString().trim());
+        assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+    }
 
     static void doTest(String inputQuery, String desireResult){
         TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvmssql);
@@ -284,4 +299,31 @@ public class testSQLServer extends TestCase {
                         "T.C");
     }
 
+    public static void testFile1() {
+        doTestFile(gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"mssql\\column_resolver\\pivot.sql",
+                "Tables:\n" +
+                        "Imported.ADDRESS\n" +
+                        "Imported.STATES\n" +
+                        "p(piviot_table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(pivot-table:p(piviot_table)).[1]\n" +
+                        "(pivot-table:p(piviot_table)).[2]\n" +
+                        "(pivot-table:p(piviot_table)).[3]\n" +
+                        "(table-valued function:STRING_SPLIT).[value]\n" +
+                        "Imported.ADDRESS.[ADDRESS_ID]\n" +
+                        "Imported.ADDRESS.ADDRESS_ADD_DATE\n" +
+                        "Imported.ADDRESS.ADDRESS_CHANGE_DATE\n" +
+                        "Imported.ADDRESS.ADDRESS_ID\n" +
+                        "Imported.ADDRESS.ADDRESS_LINES\n" +
+                        "Imported.ADDRESS.CITY\n" +
+                        "Imported.ADDRESS.COUNTRY\n" +
+                        "Imported.ADDRESS.IsDeleted\n" +
+                        "Imported.ADDRESS.RESIDENTS\n" +
+                        "Imported.ADDRESS.STATE\n" +
+                        "Imported.ADDRESS.ZIP\n" +
+                        "Imported.STATES.IsDeleted\n" +
+                        "Imported.STATES.STATES_DESC\n" +
+                        "Imported.STATES.STATES_ID");
+    }
 }

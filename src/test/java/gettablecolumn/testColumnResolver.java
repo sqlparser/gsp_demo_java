@@ -543,4 +543,95 @@ public class testColumnResolver extends TestCase {
                         "archive.description");
     }
 
+    public static void test19() {
+        doTest(EDbVendor.dbvmssql,"SELECT [p].[ADDRESS_ID]\n" +
+                        "                      ,[p].[3] AS ADDRESS_LINE3\n" +
+                        "                      ,[p].[2] AS ADDRESS_LINE2\n" +
+                        "                      ,[p].[1] AS ADDRESS_LINE1 FROM [ADDRESS_LINES_CTE]\n" +
+                        "\t\t\t\tPIVOT(MAX(value) FOR id IN ([1],[2],[3])) p" ,
+                "Tables:\n" +
+                        "[ADDRESS_LINES_CTE]\n" +
+                        "p(piviot_table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(pivot-table:p(piviot_table)).[1]\n" +
+                        "(pivot-table:p(piviot_table)).[2]\n" +
+                        "(pivot-table:p(piviot_table)).[3]\n" +
+                        "[ADDRESS_LINES_CTE].id\n" +
+                        "[ADDRESS_LINES_CTE].value");
+    }
+
+    public static void test20Pivot() {
+
+        doTest(EDbVendor.dbvmssql,"SELECT [Date] AS 'Day',\n" +
+                        "[Sammich], [Pickle], [Apple], [Cake]\n" +
+                        "FROM (\n" +
+                        "    SELECT [Date], FoodName, AmountEaten FROM FoodEaten\n" +
+                        ") AS SourceTable\n" +
+                        "PIVOT (\n" +
+                        "    MAX(AmountEaten)\n" +
+                        "    FOR FoodName IN ([Sammich], [Pickle], [Apple], [Cake])\n" +
+                        ") AS PivotTable" ,
+                "Tables:\n" +
+                        "FoodEaten\n" +
+                        "PivotTable(piviot_table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(pivot-table:PivotTable(piviot_table)).[Apple]\n" +
+                        "(pivot-table:PivotTable(piviot_table)).[Cake]\n" +
+                        "(pivot-table:PivotTable(piviot_table)).[Pickle]\n" +
+                        "(pivot-table:PivotTable(piviot_table)).[Sammich]\n" +
+                        "FoodEaten.[Date]\n" +
+                        "FoodEaten.AmountEaten\n" +
+                        "FoodEaten.FoodName");
+    }
+
+    public static void test21Pivot() {
+
+        doTest(EDbVendor.dbvmssql,"SELECT dim_patient_bk\n" +
+                        "\t\t,FALNR\n" +
+                        "\t\t,tage_imc\t\t\t\t= [IMC]\n" +
+                        "\t\t,tage_ips\t\t\t\t= [IPS]\n" +
+                        "\t\t,tage_isolierstation\t= [Isolierstation]\n" +
+                        "\t\t,tage_bettenstation\t\t= [Bettenstation]\n" +
+                        "FROM (\n" +
+                        "\tSELECT dim_patient_bk\n" +
+                        "\t\t\t,FALNR\n" +
+                        "\t\t\t,stat_typ\n" +
+                        "\t\t\t,sum_days = SUM(day_diff)\n" +
+                        "\tFROM (\n" +
+                        "\t\tSELECT\tdim_patient_bk\n" +
+                        "\t\t\t\t,FALNR\n" +
+                        "\t\t\t\t,day_diff = DATEDIFF(DAY, BWIDT\n" +
+                        "\t\t\t\t\t, CASE BEWTY WHEN 2 THEN BWIDT ELSE ISNULL(LEAD(BWIDT)\n" +
+                        "\t\t\t\t\t\t\tOVER (PARTITION BY dim_patient_bk, FALNR ORDER BY BWIDT),CAST(GETDATE() AS DATE)) END)\n" +
+                        "\t\t\t\t,stat_typ = stellplatz_typ\n" +
+                        "\t\tFROM\tatl.covid_patient_bewegung\n" +
+                        "\t\tWHERE BEWTY <> 4\n" +
+                        "\t) AS b\n" +
+                        "\tGROUP BY b.dim_patient_bk\n" +
+                        "\t\t\t,b.FALNR\n" +
+                        "\t\t\t,b.stat_typ\n" +
+                        ") AS src\n" +
+                        "PIVOT\n" +
+                        "(\n" +
+                        "MAX(sum_days)\n" +
+                        "FOR stat_typ IN ([IMC], [IPS], [Isolierstation], [Bettenstation])\n" +
+                        ") AS bPivot" ,
+                "Tables:\n" +
+                        "atl.covid_patient_bewegung\n" +
+                        "bPivot(piviot_table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(pivot-table:bPivot(piviot_table)).[Bettenstation]\n" +
+                        "(pivot-table:bPivot(piviot_table)).[IMC]\n" +
+                        "(pivot-table:bPivot(piviot_table)).[IPS]\n" +
+                        "(pivot-table:bPivot(piviot_table)).[Isolierstation]\n" +
+                        "atl.covid_patient_bewegung.BEWTY\n" +
+                        "atl.covid_patient_bewegung.BWIDT\n" +
+                        "atl.covid_patient_bewegung.dim_patient_bk\n" +
+                        "atl.covid_patient_bewegung.FALNR\n" +
+                        "atl.covid_patient_bewegung.stellplatz_typ");
+    }
+
 }
