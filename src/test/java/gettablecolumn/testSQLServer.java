@@ -241,7 +241,6 @@ public class testSQLServer extends TestCase {
 
 
     public static void testTableFunction() {
-
         doTest("CREATE VIEW [dbo].[ERRORS]\n" +
                         "AS\n" +
                         "WITH DESC_CTE\n" +

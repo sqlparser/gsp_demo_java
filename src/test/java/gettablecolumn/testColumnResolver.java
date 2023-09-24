@@ -21,7 +21,7 @@ public class testColumnResolver extends TestCase {
         getTableColumn.listStarColumn = true;
         boolean b = TBaseType.ENABLE_RESOLVER;
         TBaseType.ENABLE_RESOLVER = true;
-        TBaseType.DUMP_RESOLVER_LOG = false;
+        TBaseType.DUMP_RESOLVER_LOG_TO_CONSOLE = false;
         getTableColumn.runText(inputQuery);
         //System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
@@ -544,6 +544,7 @@ public class testColumnResolver extends TestCase {
     }
 
     public static void test19() {
+
         doTest(EDbVendor.dbvmssql,"SELECT [p].[ADDRESS_ID]\n" +
                         "                      ,[p].[3] AS ADDRESS_LINE3\n" +
                         "                      ,[p].[2] AS ADDRESS_LINE2\n" +
