@@ -109,6 +109,7 @@ public class testMySQL extends TestCase {
     }
 
     public static void testColumnInSubQuery() {
+
         doTest("select \n" +
                         "`combi_actuals`.`date`\n" +
                         "from `combi_actuals`\n" +

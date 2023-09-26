@@ -545,6 +545,7 @@ public class testColumnResolver extends TestCase {
 
     public static void test19() {
 
+
         doTest(EDbVendor.dbvmssql,"SELECT [p].[ADDRESS_ID]\n" +
                         "                      ,[p].[3] AS ADDRESS_LINE3\n" +
                         "                      ,[p].[2] AS ADDRESS_LINE2\n" +
@@ -558,6 +559,7 @@ public class testColumnResolver extends TestCase {
                         "(pivot-table:p(piviot_table)).[1]\n" +
                         "(pivot-table:p(piviot_table)).[2]\n" +
                         "(pivot-table:p(piviot_table)).[3]\n" +
+                        "[ADDRESS_LINES_CTE].[ADDRESS_ID]\n" +
                         "[ADDRESS_LINES_CTE].id\n" +
                         "[ADDRESS_LINES_CTE].value");
     }
@@ -633,6 +635,28 @@ public class testColumnResolver extends TestCase {
                         "atl.covid_patient_bewegung.dim_patient_bk\n" +
                         "atl.covid_patient_bewegung.FALNR\n" +
                         "atl.covid_patient_bewegung.stellplatz_typ");
+    }
+
+    public static void test22Pivot() {
+
+        doTest(EDbVendor.dbvbigquery,"INSERT INTO `dev.TEST_BACKLOG.EMPLOYEE_INEO_EXCEPT`\n" +
+                        "SELECT emp_id, name as Test_Name, LONDON as Test_Dept_Id\n" +
+                        "FROM `dev.TEST_BACKLOG.EMPLOYEE_INFO`\n" +
+                        "PIVOT (MAX(dept_id) FOR city IN (\"SINGAPORE\",\"LONDON\",\"HOUSTON\"))" ,
+                "Tables:\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INEO_EXCEPT`\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`\n" +
+                        "pivot_alias(piviot_table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(pivot-table:pivot_alias(piviot_table)).\"HOUSTON\"\n" +
+                        "(pivot-table:pivot_alias(piviot_table)).\"LONDON\"\n" +
+                        "(pivot-table:pivot_alias(piviot_table)).\"SINGAPORE\"\n" +
+                        "(pivot-table:pivot_alias(piviot_table)).LONDON\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.city\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.dept_id\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.emp_id\n" +
+                        "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.name");
     }
 
 }
