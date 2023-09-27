@@ -2135,7 +2135,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_server.setTextContent(node.getServerToken().toString());
 		}
 
-		Boolean showImplicitDBOrSchema = false;
+		Boolean showImplicitDBOrSchema = true;
 
 		if ((node.getDatabaseToken() != null) || (showImplicitDBOrSchema && (node.getImplictDatabaseString() != null))) {
 			Element e_database = xmldoc.createElement("database_name");
