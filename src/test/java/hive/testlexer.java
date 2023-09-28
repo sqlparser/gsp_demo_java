@@ -29,7 +29,7 @@ public class testlexer extends TestCase {
 
         sqlparser.sqltext = "A<=>B";
         sqlparser.tokenizeSqltext();
-        assertTrue(sqlparser.sourcetokenlist.get(1).tokencode == TBaseType.hive_equal_ns);
+        assertTrue(sqlparser.sourcetokenlist.get(1).tokencode == TBaseType.safe_equal);
         assertTrue(sqlparser.sourcetokenlist.get(1).toString().equalsIgnoreCase("<=>"));
 
         sqlparser.sqltext = "123L=123S=123Y";   //big/small/tiny int
