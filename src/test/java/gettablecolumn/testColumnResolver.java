@@ -659,4 +659,37 @@ public class testColumnResolver extends TestCase {
                         "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.name");
     }
 
+    public static void test23CTE() {
+
+        doTest(EDbVendor.dbvnetezza,"WITH manager (mgr_id, mgr_name, mgr_dept) AS\n" +
+                        "\t(SELECT id, name, grp\n" +
+                        "\tFROM emp_copy\n" +
+                        "\tWHERE mgr = id AND grp != 'gone'),\n" +
+                        "employee (emp_id, emp_name, emp_mgr) AS\n" +
+                        "\t(SELECT id2, name2, mgr_id2\n" +
+                        "\tFROM emp_copy JOIN manager ON grp = mgr_dept),\n" +
+                        "mgr_cnt (mgr_id, mgr_reports) AS\n" +
+                        "\t(SELECT mgr, COUNT (*)\n" +
+                        "\tFROM emp_copy\n" +
+                        "\tWHERE mgr != id\n" +
+                        "\tGROUP BY mgr)\n" +
+                        "SELECT *\n" +
+                        "FROM employee JOIN manager ON emp_mgr = mgr_id \n" +
+                        "\tJOIN mgr_cnt ON emp_mgr = mgr_id \n" +
+                        "WHERE emp_id != mgr_id\n" +
+                        "ORDER BY mgr_dept;" ,
+                "Tables:\n" +
+                        "emp_copy\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "emp_copy.*\n" +
+                        "emp_copy.grp\n" +
+                        "emp_copy.id\n" +
+                        "emp_copy.id2\n" +
+                        "emp_copy.mgr\n" +
+                        "emp_copy.mgr_id2\n" +
+                        "emp_copy.name\n" +
+                        "emp_copy.name2");
+    }
+
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.TLog;
 import gudusoft.gsqlparser.sqlenv.TGreenplumSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMssqlSQLDataSource;
 import gudusoft.gsqlparser.sqlenv.TMysqlSQLDataSource;
@@ -221,6 +222,7 @@ public class runGetTableColumn
 
 		System.out.println("Processing "+vendor.toString()+"...");
 
+		//TLog.REPORT_LEVEL = TLog.ERROR;
 
 		TGetTableColumn getTableColumn = new TGetTableColumn( vendor );
 		getTableColumn.showDetail = false;
