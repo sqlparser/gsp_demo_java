@@ -25,6 +25,7 @@ public class testProcedure extends TestCase {
         option.setSimpleOutput(true);
         option.setShowCallRelation(true);
         option.setShowConstantTable(true);
+        option.setLinkOrphanColumnToFirstTable(true);
 
         DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(file, option);
         dataFlowAnalyzer.setShowConstantTable(true);
@@ -46,7 +47,7 @@ public class testProcedure extends TestCase {
 
         List<Relationship> v012Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TFT_ACCT_EOD_POSN_V012".toLowerCase())))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==4);
+        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==6);
         
     }
 }
