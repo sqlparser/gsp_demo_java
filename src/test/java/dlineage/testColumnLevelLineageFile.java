@@ -215,14 +215,15 @@ public class testColumnLevelLineageFile extends TestCase {
 
     private List<String[]> resolver(String str) {
     	List<String[]> r = new ArrayList<>();
-        String[] vars = str.replace(";", ",").split("\n");
-        List<String> lines = new ArrayList(new TreeSet(Arrays.asList(vars)));
+        String[] vars = str.replaceAll("\\d+", "").replace(";", ",").split("\n");
+        List<String> lines = new ArrayList(Arrays.asList(vars));
+        Collections.sort(lines);
         for (int i = 0; i < lines.size(); i++) {
             if (i == 0) {
                 r.add(lines.get(i).split(","));
                 continue;
             }
-            r.add(vars[i].split(","));
+            r.add(lines.get(i).split(","));
         }
         return r;
     }
