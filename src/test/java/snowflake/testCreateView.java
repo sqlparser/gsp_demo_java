@@ -2,6 +2,7 @@ package snowflake;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.nodes.TViewAliasItem;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.snowflake.TCreateStreamStmt;
 import junit.framework.TestCase;
@@ -180,6 +181,50 @@ public class testCreateView extends TestCase {
 //        assertTrue(createStreamStmt.getStreamName().toString().equalsIgnoreCase("mystream"));
 //        assertTrue(createStreamStmt.getTableName().toString().equalsIgnoreCase("mytable"));
     }
+
+
+    public void test2Comment() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE VIEW defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V comment = 'COMMENT'\n" +
+                "AS ((select EMPLOYEE_ID,FULL_NAME,FIRST_NAME from defaultdatabase.SF_DML.trimmed_employee_SF_Testing))";
+        sqlparser.parse();
+        assertTrue(sqlparser.sqlstatements.size() == 1);
+        TCreateViewSqlStatement createViewSqlStatement = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createViewSqlStatement.getViewName().toString().equalsIgnoreCase("defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V"));
+        assertTrue(createViewSqlStatement.getComment().toString().equalsIgnoreCase("'COMMENT'"));
+    }
+
+    public void test3Comment() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE VIEW defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V\n" +
+                "AS (select EMPLOYEE_ID,FULL_NAME,FIRST_NAME from defaultdatabase.SF_DML.trimmed_employee_SF_Testing) comment = 'COMMENT'";
+        sqlparser.parse();
+        assertTrue(sqlparser.sqlstatements.size() == 1);
+        TCreateViewSqlStatement createViewSqlStatement = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createViewSqlStatement.getViewName().toString().equalsIgnoreCase("defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V"));
+        assertTrue(createViewSqlStatement.getComment().toString().equalsIgnoreCase("'COMMENT'"));
+    }
+
+    public void test4Comment() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "create or replace view defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V\n" +
+                "( ADMIN1 COMMENT 'COLUMN 1',\n" +
+                "ADMIN2 COMMENT 'COLUMN 2',\n" +
+                "ADMIN3 COMMENT 'COLUMN 3') COMMENT='COMMENT'\n" +
+                "as (select EMPLOYEE_ID,FULL_NAME,FIRST_NAME from defaultdatabase.SF_DML.trimmed_employee_SF_Testing);";
+        sqlparser.parse();
+        assertTrue(sqlparser.sqlstatements.size() == 1);
+        TCreateViewSqlStatement createViewSqlStatement = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
+        assertTrue(createViewSqlStatement.getViewName().toString().equalsIgnoreCase("defaultdatabase.SF_DML.trimmed_employee_SF_Testing_V"));
+        assertTrue(createViewSqlStatement.getComment().toString().equalsIgnoreCase("'COMMENT'"));
+
+        TViewAliasItem viewAliasItem = createViewSqlStatement.getViewAliasClause()
+                .getViewAliasItemList()
+                .getViewAliasItem(0);
+        assertTrue(viewAliasItem.getAlias().toString().equalsIgnoreCase("ADMIN1"));
+        assertTrue(viewAliasItem.getComment().toString().equalsIgnoreCase("'COLUMN 1'"));
+    }
+
 }
 
 

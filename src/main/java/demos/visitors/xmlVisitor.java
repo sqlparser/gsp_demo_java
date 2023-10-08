@@ -3658,6 +3658,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		current_objectName_tag = "view_name";
 		stmt.getViewName().accept(this);
+		if (stmt.getComment() != null){
+			stmt.getComment().accept(this);
+		}
 
 		if (stmt.getViewAliasClause() != null) {
 			Element e_column_list = xmldoc.createElement("column_list");
@@ -3678,9 +3681,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		stmt.getSubquery().setDummyTag(TOP_STATEMENT);
 		stmt.getSubquery().accept(this);
 
-		if (stmt.getCommentClause() != null){
-			addElementOfString("comment",stmt.getCommentClause().getCommentToken().toString());
-		}
+
 		elementStack.pop();
 	}
 

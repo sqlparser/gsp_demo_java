@@ -44,7 +44,7 @@ public class testCreateTableOption extends TestCase {
         ArrayList<TCreateTableOption> createTableOptions = createTableSqlStatement.getTableOptions();
         TCreateTableOption createTableOption = createTableOptions.get(0);
         assertTrue(createTableOption.getCreateTableOptionType() == etoComment);
-        assertTrue(createTableOption.getCommentToken().toString().equalsIgnoreCase("'Table comment'"));
+        assertTrue(createTableOption.getComment().toString().equalsIgnoreCase("'Table comment'"));
         assertTrue(createTableSqlStatement.getTableComment().toString().equalsIgnoreCase("'Table comment'"));
         TColumnDefinition cd = createTableSqlStatement.getColumnList().getColumn(0);
         assertTrue(cd.getComment().toString().equalsIgnoreCase("'Test comment.'"));
