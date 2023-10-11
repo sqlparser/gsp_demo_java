@@ -3170,6 +3170,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getPartitionName().accept(this);
 				node.getPartitionBoundSpec().accept(this);
 				break;
+			case exchangePartition:
+				node.getPartitionName().accept(this);
+				node.getNewTableName().accept(this);
+				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
 				e_alter_table_option.appendChild(e_option);
