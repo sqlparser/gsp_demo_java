@@ -20,8 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import demos.columnImpact.ColumnImpact;
-import demos.columnImpact.ColumnImpact.TColumn;
+import demos.antiSQLInjection.columnImpact.ColumnImpact;
+import demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
 
 public class ColumnAnalyze
 {

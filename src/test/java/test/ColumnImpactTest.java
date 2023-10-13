@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import common.SqlFileList;
-import demos.columnImpact.ColumnImpact;
+import demos.antiSQLInjection.columnImpact.ColumnImpact;
 
 public class ColumnImpactTest extends TestCase
 {

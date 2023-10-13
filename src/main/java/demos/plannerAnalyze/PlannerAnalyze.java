@@ -33,8 +33,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import demos.columnImpact.ColumnImpact;
-import demos.columnImpact.ColumnImpact.TColumn;
+import demos.antiSQLInjection.columnImpact.ColumnImpact;
+import demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
 
 class PlanFileList
 {
