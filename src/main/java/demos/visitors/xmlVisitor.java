@@ -1820,8 +1820,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				current_objectName_tag = "table_name";
 				node.getTableName().accept(this);
 				current_objectName_tag = null;
-
 				elementStack.pop();
+				if (node.getPartitionExtensionClause() != null){
+					node.getPartitionExtensionClause().accept(this);
+				}
 				// sb.append(node.toString().replace(">","&#62;").replace("<","&#60;"));
 				break;
 			}
@@ -2135,27 +2137,42 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_server.setTextContent(node.getServerToken().toString());
 		}
 
-		Boolean showImplicitDBOrSchema = true;
 
-		if ((node.getDatabaseToken() != null) || (showImplicitDBOrSchema && (node.getImplictDatabaseString() != null))) {
+
+		if ((node.getAnsiCatalogName() != null) && (node.getAnsiCatalogName().length() >0)){
 			Element e_database = xmldoc.createElement("database_name");
 			e_object_name.appendChild(e_database);
-			if (node.getDatabaseToken() != null) {
-				e_database.setTextContent(node.getDatabaseToken().toString());
-			} else {
-				 e_database.setTextContent(node.getImplictDatabaseString());
-			}
-
+			e_database.setTextContent(node.getAnsiCatalogName().toString());
 		}
-		if (((node.getSchemaToken() != null) && (!node.isImplicitSchema())) || ( showImplicitDBOrSchema && (node.getImplictSchemaString() != null))) {
+
+
+		if ((node.getAnsiSchemaName() != null) && (node.getAnsiSchemaName().length() >0)){
 			Element e_schema = xmldoc.createElement("schema_name");
 			e_object_name.appendChild(e_schema);
-			if ((node.getSchemaToken() != null) && (!node.isImplicitSchema())) {
-				e_schema.setTextContent(node.getSchemaToken().toString());
-			} else {
-				 e_schema.setTextContent(node.getImplictSchemaString());
-			}
+			e_schema.setTextContent(node.getAnsiSchemaName().toString());
 		}
+
+		// Boolean showImplicitDBOrSchema = true;
+//		if ((node.getDatabaseToken() != null) || (showImplicitDBOrSchema && (node.getImplictDatabaseString() != null))) {
+//			Element e_database = xmldoc.createElement("database_name");
+//			e_object_name.appendChild(e_database);
+//			if (node.getDatabaseToken() != null) {
+//				e_database.setTextContent(node.getDatabaseToken().toString());
+//			} else {
+//				 e_database.setTextContent(node.getImplictDatabaseString());
+//			}
+//
+//		}
+//		if (((node.getSchemaToken() != null) && (!node.isImplicitSchema())) || ( showImplicitDBOrSchema && (node.getImplictSchemaString() != null))) {
+//			Element e_schema = xmldoc.createElement("schema_name");
+//			e_object_name.appendChild(e_schema);
+//			if ((node.getSchemaToken() != null) && (!node.isImplicitSchema())) {
+//				e_schema.setTextContent(node.getSchemaToken().toString());
+//			} else {
+//				 e_schema.setTextContent(node.getImplictSchemaString());
+//			}
+//		}
+
 		if (node.getObjectToken() != null) {
 			Element e_object = xmldoc.createElement("object_name");
 			e_object_name.appendChild(e_object);
@@ -3174,6 +3191,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getPartitionName().accept(this);
 				node.getNewTableName().accept(this);
 				break;
+			case RenameTable:
+				node.getNewTableName().accept(this);
+				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
 				e_alter_table_option.appendChild(e_option);
@@ -3203,8 +3223,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 			for (int i = 0; i < node.getKeyValues().size(); i++) {
 				TExpression e = node.getKeyValues().getExpression(i);
 				//addElementOfNode("column_name",e.getLeftOperand());
-				addElementOfString("column_name", e.getLeftOperand().toString());
-				addElementOfString("column_value", e.getRightOperand().toString());
+				if (e.getExpressionType() == assignment_t){
+					addElementOfString("column_name", e.getLeftOperand().toString());
+					addElementOfString("column_value", e.getRightOperand().toString());
+
+				}else{
+					addElementOfString("column_name", e.toString());
+				}
+
 			}
 			elementStack.pop();
 		}

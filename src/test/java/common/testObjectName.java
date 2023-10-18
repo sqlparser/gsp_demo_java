@@ -2,13 +2,32 @@ package common;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.nodes.TAlterTableOption;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.stmt.TAlterTableStatement;
 import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testObjectName extends TestCase {
+
+    public void test1QaulifiedName(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "alter table catalog1.schema1.testtable__tmp rename to catalog2.schema2.testtable";
+        assertTrue(sqlparser.parse() == 0);
+
+        TAlterTableStatement altertable = (TAlterTableStatement)sqlparser.sqlstatements.get(0);
+        TAlterTableOption option = altertable.getAlterTableOptionList().getAlterTableOption(0);
+        TObjectName newTableName = option.getNewTableName();
+
+
+        assertTrue(newTableName.getTableString().equalsIgnoreCase("testtable"));
+        assertTrue(newTableName.getSchemaString().equalsIgnoreCase("schema2"));
+        assertTrue(newTableName.getDatabaseString().equalsIgnoreCase("catalog2"));
+    }
+
 
     public void testInformixPrefixDatabase(){
 
