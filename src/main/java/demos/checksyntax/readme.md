@@ -7,7 +7,7 @@ SQL Parser library.
 
 Only SQL filename ended with .sql extentsion will be processed.
 
-## MVN 
+## Maven usage 
 
 1. In the lib directory to execute the command
 ```mvn
