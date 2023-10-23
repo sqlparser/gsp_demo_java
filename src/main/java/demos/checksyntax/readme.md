@@ -7,3 +7,29 @@ SQL Parser library.
 
 Only SQL filename ended with .sql extentsion will be processed.
 
+## Maven usage 
+
+1. In the lib directory to execute the command
+```mvn
+   mvn install:install-file -Dfile=gudusoft.gsqlparser-x.x.x.x.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar
+````
+
+2.Configure parameters for the checksyntax class in the pom.xml.
+```pom
+<configuration>
+    <mainClass>demos.checksyntax.checksyntax</mainClass>
+
+    <!-- Parameters of the checksyntax class, eg: -->
+    <arguments>
+        <argument>/f</argument>
+        <argument>d:\sql.sql</argument>
+        <argument>/t</argument>
+        <argument>oracle</argument>
+    </arguments>
+</configuration>
+```
+
+3.Compile and run
+```mvn
+mvn clean compile exec:java
+```
