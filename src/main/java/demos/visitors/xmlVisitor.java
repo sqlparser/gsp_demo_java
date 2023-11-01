@@ -3315,6 +3315,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getLength() != null) {
 			e_datatype.setAttribute("length", node.getLength().toString());
 		}
+		if (node.getCharsetName() != null){
+			e_datatype.setAttribute("character_set", node.getCharsetName());
+		}
+		if (node.getCollationName() != null){
+			e_datatype.setAttribute("collation_name", node.getCollationName());
+		}
 		e_parent.appendChild(e_datatype);
 		Element e_value = xmldoc.createElement("value");
 		e_value.setTextContent(node.toString());
@@ -3341,7 +3347,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_column);
 		elementStack.push(e_column);
-		e_column.setAttribute("explict_nullable", String.valueOf(node.isNull()));
+		e_column.setAttribute("explicit_nullable", String.valueOf(node.isNull()));
+		if (node.getCollationName() != null){
+			e_column.setAttribute("collation_name", node.getCollationName());
+		}
 		current_objectName_tag = "column_name";
 		node.getColumnName().accept(this);
 
@@ -5752,6 +5761,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild( e_create_stream );
 		elementStack.push( e_create_stream );
 		e_create_stream.setAttribute("create_on_object",stmt.getCreateOnObjectType().toString());
+		if (stmt.getAppend_only() != TBaseType.BOOL_VALUE_NOT_SET){
+			e_create_stream.setAttribute("append_only",stmt.getAppend_only() == TBaseType.BOOL_VALUE_FALSE?"false":"true");
+		}
+		if (stmt.getInsert_only() != TBaseType.BOOL_VALUE_NOT_SET){
+			e_create_stream.setAttribute("insert_only",stmt.getInsert_only() == TBaseType.BOOL_VALUE_FALSE?"false":"true");
+		}
 		current_objectName_tag = "scream_name";
 		stmt.getStreamName( ).accept( this );
 		stmt.getTableName().accept(this);
