@@ -6179,6 +6179,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+
+	public void preVisit( TCreatePipeStmt stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_create_pipe_stmt = xmldoc.createElement( "create_pipe_statement" );
+		e_parent.appendChild( e_create_pipe_stmt );
+		elementStack.push( e_create_pipe_stmt );
+		stmt.getPipeName().accept(this);
+		stmt.getCopyIntoStmt().accept(this);
+		elementStack.pop( );
+	}
+
+
+
 	public void preVisit( TAllocateStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
