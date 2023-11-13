@@ -2037,6 +2037,27 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getForXMLClause().accept(this);
 		}
 
+		if (node.getLateralViewList() != null){
+			for(TLateralView lv:node.getLateralViewList()){
+				lv.accept(this);
+			}
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TLateralView node) {
+		Element e_lateral_view = xmldoc.createElement("lateral_view");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_lateral_view);
+		elementStack.push(e_lateral_view);
+		node.getUdtf().accept(this);
+		if (node.getTableAlias() != null){
+			node.getTableAlias().accept(this);
+		}
+		node.getColumnAliasList().accept(this);
+
 		elementStack.pop();
 	}
 

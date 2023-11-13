@@ -3,6 +3,8 @@ package gettablecolumn;
 import common.gspCommon;
 import demos.gettablecolumns.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 
@@ -324,5 +326,20 @@ public class testSQLServer extends TestCase {
                         "Imported.STATES.IsDeleted\n" +
                         "Imported.STATES.STATES_DESC\n" +
                         "Imported.STATES.STATES_ID");
+    }
+
+    public static void testTempTable() {
+        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlParser.sqltext = "SELECT Emplid, SUBSTRING(RTRIM(Name),LEN(RTRIM(Name))-6, 7)  AS Other_ID\n" +
+                "\t\tINTO #DupNames\n" +
+                "\t\tFROM [SnapShot].UAHEPRD.PS_NAMES\n" +
+                "\t\tWHERE (First_Name LIKE '%DUPLICATE%ID%' OR First_Name = 'DUPLICATE')\n" +
+                "\t\t\tAND Last_Name = 'CANCEL'\n" +
+                "\t\t\tAND NAME_TYPE = 'PRI'";
+        int i = sqlParser.parse();
+        assertTrue(i == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement) sqlParser.sqlstatements.get(0);
+        assertTrue(select.getSyntaxHints().size() == 0);
+
     }
 }
