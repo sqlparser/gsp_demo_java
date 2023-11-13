@@ -4,8 +4,8 @@ source and target table columns.
 With this data lineage model, we can look into the impact of changing the content or meaning of some data column
 inside a lineage (forward analysis) or find sources of some data field (backward analysis).
 
-This demo generates the same result when [columnImpact](../columnImpact) using the /s /c option.
-The difference is the result of this demo is in XML format while the result of [columnImpact](../columnImpact) is in the plain text.
+This demo generates the same result when [columnImpact](../antiSQLInjection/columnImpact) using the /s /c option.
+The difference is the result of this demo is in XML format while the result of [columnImpact](../antiSQLInjection/columnImpact) is in the plain text.
 
 ```sql
 create view v1 as

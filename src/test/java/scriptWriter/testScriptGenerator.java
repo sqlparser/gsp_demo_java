@@ -14,8 +14,33 @@ import junit.framework.TestCase;
 
 public class testScriptGenerator extends TestCase
 {
+	public void testsqlserverDatetime2( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
+		sqlparser.sqltext = "CREATE TABLE test(\n" +
+				"id int NOT NULL IDENTITY(1,1),\n" +
+				"ModifiedDate datetime2(0) NOT NULL\n" +
+				")";
 
+		assertTrue(sqlparser.parse( ) == 0);
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
 
+		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
+
+	public void testsqlserverDatetime( )
+	{
+		TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql);
+		sqlparser.sqltext = "CREATE TABLE test(\n" +
+				"id int NOT NULL IDENTITY(1,1),\n" +
+				"ModifiedDate datetime(0) NOT NULL\n" +
+				")";
+
+		assertTrue(sqlparser.parse( ) == 0);
+		//System.out.println(sqlparser.sqlstatements.get(0).toScript());
+
+		assertTrue(verifyScript(EDbVendor.dbvmssql,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+	}
 
 	public void testsqlserverAlterTableForColumns( )
 	{

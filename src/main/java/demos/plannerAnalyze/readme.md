@@ -48,7 +48,7 @@ these 2 files will be saved under the directory `peak_techniques_output/puredata
 * -debug, which will generate a file with name: debug.log that including all file names that doesn't generate any output.  
 
 ## Related demo
-This tool will call the [columnImpact\ColumnImpact.java](../columnImpact) to do further analysis.
+This tool will call the [columnImpact\ColumnImpact.java](../antiSQLInjection/columnImpact) to do further analysis.
 
 ## Changes
 * [First version(2014-02-14)](https://github.com/sqlparser/wings/issues/255) 

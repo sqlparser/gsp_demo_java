@@ -13,26 +13,26 @@ public class testGetStmts extends TestCase {
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
         sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create function.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
-        assertTrue(sqlparser.getSqlstatements().size() == 31);
+        assertTrue(sqlparser.getSqlstatements().size() == 29);
         assertTrue(sqlparser.sqlstatements.get(1) instanceof TCreateFunctionStmt);
         assertTrue(sqlparser.sqlstatements.get(1).getStartToken().lineNo == 13);
-        assertTrue(sqlparser.sqlstatements.get(25) instanceof TCreateFunctionStmt);
-        assertTrue(sqlparser.sqlstatements.get(25).getStartToken().lineNo == 112);
-        assertTrue(sqlparser.sqlstatements.get(26) instanceof TCommonBlock);
-        assertTrue(sqlparser.sqlstatements.get(26).getStartToken().lineNo == 131);
+        assertTrue(sqlparser.sqlstatements.get(23) instanceof TCreateFunctionStmt);
+        assertTrue(sqlparser.sqlstatements.get(23).getStartToken().lineNo == 104);
+        assertTrue(sqlparser.sqlstatements.get(28) instanceof TCommonBlock);
+        assertTrue(sqlparser.sqlstatements.get(28).getStartToken().lineNo == 162);
     }
 
     public void testCreatePackage(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
         sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create package.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
-        assertTrue(sqlparser.getSqlstatements().size() == 10);
+        assertTrue(sqlparser.getSqlstatements().size() == 9);
         assertTrue(sqlparser.sqlstatements.get(1) instanceof TPlsqlCreatePackage);
         assertTrue(sqlparser.sqlstatements.get(1).getStartToken().lineNo == 7);
         assertTrue(sqlparser.sqlstatements.get(3) instanceof TPlsqlCreatePackage);
         assertTrue(sqlparser.sqlstatements.get(3).getStartToken().lineNo == 14);
-        assertTrue(sqlparser.sqlstatements.get(8) instanceof TCommonBlock);
-        assertTrue(sqlparser.sqlstatements.get(8).getStartToken().lineNo == 36);
+        assertTrue(sqlparser.sqlstatements.get(7) instanceof TCommonBlock);
+        assertTrue(sqlparser.sqlstatements.get(7).getStartToken().lineNo == 36);
     }
 
     public void testCreateProcedure(){
