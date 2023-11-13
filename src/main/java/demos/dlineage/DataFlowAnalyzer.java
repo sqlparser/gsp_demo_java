@@ -269,7 +269,7 @@ public class DataFlowAnalyzer {
 				else if (jsonFormat) {
 					dataflow dataflow = dlineage.getDataFlow();
 					if (ignoreFunction) {
-						dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+						dataflow = new RemoveDataflowFunction().removeFunction(dataflow, vendor);
 					}
 					Dataflow model = gudusoft.gsqlparser.dlineage.DataFlowAnalyzer.getSqlflowJSONModel(dataflow, vendor);
 					result = JSON.toJSONString(model);
@@ -277,7 +277,7 @@ public class DataFlowAnalyzer {
 					result = dlineage.traceView();
 				} else if (ignoreFunction && result.trim().startsWith("<?xml")) {
 					dataflow dataflow = dlineage.getDataFlow();
-					dataflow = new RemoveDataflowFunction().removeFunction(dataflow);
+					dataflow = new RemoveDataflowFunction().removeFunction(dataflow, vendor);
 					try {
 						result = XML2Model.saveXML(dataflow);
 					}catch (Exception e) {
