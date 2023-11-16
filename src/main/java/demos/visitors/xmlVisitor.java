@@ -647,6 +647,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_parent.appendChild(e_using_columns);
 			elementStack.push(e_using_columns);
 			node.usingColumns.accept(this);
+			if (node.getJoin_using_alias() != null){
+				node.getJoin_using_alias().accept(this);
+			}
 			elementStack.pop();
 		}
 
@@ -2037,6 +2040,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getForXMLClause().accept(this);
 		}
 
+		if (node.getFlashback() != null){
+			node.getFlashback().accept(this);
+		}
+
 		if (node.getLateralViewList() != null){
 			for(TLateralView lv:node.getLateralViewList()){
 				lv.accept(this);
@@ -2045,6 +2052,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
+	public void preVisit(TFlashback node) {
+		Element e_flash_back = xmldoc.createElement("flashback");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_flash_back);
+		elementStack.push(e_flash_back);
+		elementStack.pop();
+	}
+
 
 	public void preVisit(TLateralView node) {
 		Element e_lateral_view = xmldoc.createElement("lateral_view");
@@ -2345,13 +2361,34 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
+
+	public void preVisit(TTableFunction node) {
+		Element e_table_function = xmldoc.createElement("table_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_table_function);
+		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		elementStack.push(e_table_function);
+		switch (node.getFunctionType()){
+			case struct_t:
+				if (node.getFieldValues() != null){
+					node.getFieldValues().accept(this);
+				}
+				if (node.getFieldDefs() != null){
+					node.getFieldDefs().accept(this);
+				}
+				break;
+
+		}
+		elementStack.pop();
+
+	}
 	public void preVisit(TDropProcedureStmt stmt) {
 		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_procedure);
 		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
-		stmt.getProcedureName().accept(this);
 		elementStack.push(e_drop_procedure);
+		stmt.getProcedureName().accept(this);
 
 		switch (stmt.dbvendor){
 			case dbvpostgresql:
@@ -2365,6 +2402,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			default:
 				break;
+		}
+
+		if (stmt.getParameterDeclarations() != null){
+			stmt.getParameterDeclarations().accept(this);
 		}
 
 
