@@ -4,6 +4,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
+import gudusoft.gsqlparser.nodes.functions.TFlattenFunction;
 import gudusoft.gsqlparser.nodes.functions.TRangeNFunction;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
@@ -32,7 +33,7 @@ import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.functions.TJsonObjectFunction;
 import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
-import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
+import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
@@ -2361,6 +2362,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
+	public void preVisit(TFlattenFunction node) {
+		Element e_table_function = xmldoc.createElement("flatten_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_table_function);
+		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		elementStack.push(e_table_function);
+		node.getArgs().accept(this);
+		elementStack.pop();
+
+	}
 
 	public void preVisit(TTableFunction node) {
 		Element e_table_function = xmldoc.createElement("table_function");
@@ -2382,6 +2393,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 
 	}
+
 	public void preVisit(TDropProcedureStmt stmt) {
 		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
 		e_parent = (Element) elementStack.peek();
@@ -4438,21 +4450,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit(TRangePartitions node) {
 		e_parent = (Element) elementStack.peek();
-		Element e_range_partitions = xmldoc.createElement("range_paritions");
+		Element e_range_partitions = xmldoc.createElement("range_partitions");
 		e_range_partitions.setAttribute("type", node.getTablePartitionType().toString());
 
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		addElementOfNode("partition_column_list", node.getColumnList());
-		if (node.getIntervalExpr() != null){
-			addElementOfNode("interval_expr",node.getIntervalExpr());
+		switch (node.dbvendor){
+			case dbvpostgresql:
+				node.getPartitionColumnExprs().accept(this);
+				break;
+			default:
+				addElementOfNode("partition_column_list", node.getColumnList());
+				if (node.getIntervalExpr() != null){
+					addElementOfNode("interval_expr",node.getIntervalExpr());
+				}
+
+				ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+				for(int i=0;i<items.size();i++){
+					items.get(i).accept(this);
+				}
 		}
 
-        ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-        for(int i=0;i<items.size();i++){
-            items.get(i).accept(this);
-        }
 
 		elementStack.pop();
 	}
