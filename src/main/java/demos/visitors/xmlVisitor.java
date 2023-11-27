@@ -1343,6 +1343,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case unnest_t:
 				node.getLeftOperand().accept(this);
 				break;
+			case fieldselection_t:
+				if (node.getLeftOperand() != null){
+					node.getLeftOperand().accept(this);
+				}else if (node.getFunctionCall() != null){
+					node.getFunctionCall().accept(this);
+				}
+				node.getFieldName().accept(this);
+				break;
 			default:
 				e_expression = xmldoc.createElement(TAG_UNKNOWN_EXPR);
 				e_parent = (Element) elementStack.peek();

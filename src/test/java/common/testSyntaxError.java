@@ -34,7 +34,7 @@ public class testSyntaxError extends TestCase {
                 "  INSERT(product, quantity, supply_constrained)\n" +
                 "  VALUES(product, quantity, false)\n" +
                 ";";
-        System.out.println(sqlparser.sqltext);
+       // System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TMergeSqlStatement mergeSqlStatement = (TMergeSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(mergeSqlStatement.getErrorCount() == 0);
@@ -72,6 +72,8 @@ public class testSyntaxError extends TestCase {
                 "            ) AS [x]\n" +
                 "        ON c.[CustomerKey] = x.[CustomerKey]"
                 ;
+
+       // System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TSelectSqlStatement SqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
         assertTrue(SqlStatement.getErrorCount() == 0);
