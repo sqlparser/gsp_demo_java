@@ -2267,6 +2267,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 			addElementOfString("source_table", sourceTable);
 		}
 
+		if (node.getSourceColumn() != null){
+			addElementOfString("source_column", node.getSourceColumn().toString()
+					+String.format("(%d,%d)",node.getSourceColumn().getStartToken().lineNo,node.getSourceColumn().getStartToken().columnNo));
+		}
+
 		if (node.getParentObjectName() != null){
 			// this is usually attribute of a struct type,
 			//   create table absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED (
