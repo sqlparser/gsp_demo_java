@@ -28,11 +28,11 @@ public class testODBC  extends TestCase {
                 TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
                 TExpression e = select.getWhereClause().getCondition();//.getRightOperand();
                 TSourceToken st = e.getEndToken();
-                assertTrue(st.tokentype == ETokenType.ttkeyword);
 
-//                if ((st.tokentype != ETokenType.ttkeyword)){
-//                    System.out.println(st.toString() +":"+ st.tokentype);
-//                }
+                // GSP Java version 2.8.3.4(2023-11-30)
+                //  - [General] change tokentype to ETokenType.ttidentifier if this is a column.
+                // 2023/11/30 做了上面调整后，下面的 assertTrue() 不再成立
+//                assertTrue(st.tokentype == ETokenType.ttkeyword);
             }
         }
 

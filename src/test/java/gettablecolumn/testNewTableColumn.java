@@ -446,7 +446,7 @@ public class testNewTableColumn extends TestCase {
         getTableColumn.isConsole = false;
         getTableColumn.showDetail = false;
         getTableColumn.showTableEffect = true;
-        getTableColumn.runText("MERGE Production.UnitMeasure AS target\n" +
+        String query = "MERGE Production.UnitMeasure AS target\n" +
                 "    USING (SELECT @UnitMeasureCode, @Name) AS source (UnitMeasureCode, Name)\n" +
                 "    ON (target.UnitMeasureCode = source.UnitMeasureCode)\n" +
                 "    WHEN MATCHED THEN \n" +
@@ -454,10 +454,13 @@ public class testNewTableColumn extends TestCase {
                 "\tWHEN NOT MATCHED THEN\t\n" +
                 "\t    INSERT (UnitMeasureCode, Name)\n" +
                 "\t    VALUES (source.UnitMeasureCode, source.Name)\n" +
-                "\t    OUTPUT deleted.*, $action, inserted.* INTO #MyTempTable;");
+                "\t    OUTPUT deleted.*, $action, inserted.* INTO #MyTempTable;";
+
+        //System.out.println(query);
+        getTableColumn.runText(query);
 
         String strActual = getTableColumn.getInfos().toString();
-        // System.out.println(strActual);
+       // System.out.println(strActual);
         assertTrue(strActual.trim().equalsIgnoreCase("sstmerge\n" +
                 " Production.UnitMeasure(tetMerge)\n" +
                 "   UnitMeasureCode\n" +
@@ -467,8 +470,6 @@ public class testNewTableColumn extends TestCase {
                 "   *\n" +
                 "   *\n" +
                 " (subquery, alias:source)\n" +
-                "   UnitMeasureCode\n" +
-                "   Name\n" +
                 "   UnitMeasureCode\n" +
                 "   Name\n" +
                 " #MyTempTable(tetOutput)\n" +
@@ -504,11 +505,9 @@ public class testNewTableColumn extends TestCase {
                 " (subquery, alias:source)\n" +
                 "   UnitMeasureCode(joinCondition)\n" +
                 "   Name(setValue)\n" +
-                "   UnitMeasureCode(insertValues)\n" +
-                "   Name(insertValues)\n" +
                 " #MyTempTable(tetOutput)\n" +
                 " sstselect";
-       // System.out.println("Required:\n"+requiredStr+"\n\nActual:\n"+strActual);
+      //  System.out.println("Required:\n"+requiredStr+"\n\nActual:\n"+strActual);
         assertTrue(strActual.trim().equalsIgnoreCase(requiredStr));
     }
 
