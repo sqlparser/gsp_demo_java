@@ -650,6 +650,7 @@ public class TGetTableColumn{
 
                 for (int j=0;j<stmt.tables.getTable(i).getLinkedColumns().size();j++){
                     lcColumn = stmt.tables.getTable(i).getLinkedColumns().getObjectName(j);
+                    if (lcColumn.getValidate_column_status() == TBaseType.MARKED_NOT_A_COLUMN_IN_COLUMN_RESOLVER) continue;
                     TInfoRecord columnRecord = new TInfoRecord(tableRecord,EDbObjectType.column);
                     columnRecord.setColumn(lcColumn);
                     infoList.add(columnRecord);

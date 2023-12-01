@@ -295,4 +295,13 @@ public class testBigQuery extends TestCase {
                         "EMP3.dept");
     }
 
+    public static void testBuiltinFunctionKeywordsInArgs() {
+        doTest("SELECT TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), date, SECOND) AS seconds_since FROM table_3;",
+                "Tables:\n" +
+                        "table_3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table_3.date");
+    }
+
 }
