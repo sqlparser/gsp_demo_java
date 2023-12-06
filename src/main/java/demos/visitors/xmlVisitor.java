@@ -3476,6 +3476,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getComment().accept(this);
 		}
 
+		if (node.getColumnGeneratedClause() != null){
+			addElementOfString ("generated_clause",node.getColumnGeneratedClause().toString());
+		}
+
 		elementStack.pop();
 	}
 
@@ -3727,6 +3731,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			default:
 				break;
 		}
+
 
 		elementStack.pop();
 	}
