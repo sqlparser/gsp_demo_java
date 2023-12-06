@@ -12,6 +12,7 @@ Only SQL filename ended with .sql extentsion will be processed.
 1. In the lib directory to execute the command
 ```mvn
    mvn install:install-file -Dfile=gudusoft.gsqlparser-x.x.x.x.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar
+   mvn install:install-file -Dfile=gudusoft.gsqlparser-2.8.3.8.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar
 ````
 
 2.Configure parameters for the checksyntax class in the pom.xml.
