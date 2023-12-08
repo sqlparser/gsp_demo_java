@@ -4258,6 +4258,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_merge);
 		elementStack.push(e_merge);
 
+		if (stmt.getUsingVariableList() != null){
+			Element e_using_vars = xmldoc.createElement("using_variable_list");
+			e_merge.appendChild(e_using_vars);
+			elementStack.push(e_using_vars);
+			stmt.getUsingVariableList().accept(this);
+			elementStack.pop();
+
+		}
+
 		if (stmt.getCteList() != null) {
 			stmt.getCteList().accept(this);
 		}
