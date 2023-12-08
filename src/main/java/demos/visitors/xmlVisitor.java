@@ -43,21 +43,7 @@ import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
 import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
 import gudusoft.gsqlparser.stmt.mdx.TMdxSelect;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlBlock;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCommit;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateFunction;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateProcedure;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateTrigger;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateXmlSchemaCollectionStmt;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlExecute;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlGo;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlIfElse;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlPrint;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlReturn;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlRollback;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlSaveTran;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlSet;
+import gudusoft.gsqlparser.stmt.mssql.*;
 import gudusoft.gsqlparser.stmt.mysql.TMySQLDeallocatePrepareStmt;
 import gudusoft.gsqlparser.stmt.oracle.TBasicStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlContinue;
@@ -4297,6 +4283,32 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TMssqlDropSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_drop_security_policy = xmldoc.createElement("drop_security_policy");
+		e_parent.appendChild(e_drop_security_policy);
+		elementStack.push(e_drop_security_policy);
+		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		elementStack.pop();
+	}
+
+	public void preVisit(TMssqlCreateSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_security_policy = xmldoc.createElement("create_security_policy");
+		e_parent.appendChild(e_create_security_policy);
+		elementStack.push(e_create_security_policy);
+		e_create_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		elementStack.pop();
+	}
+
+	public void preVisit(TMssqlAlterSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_security_policy = xmldoc.createElement("alter_security_policy");
+		e_parent.appendChild(e_alter_security_policy);
+		elementStack.push(e_alter_security_policy);
+		e_alter_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		elementStack.pop();
+	}
 
 	public void preVisit(TOutputClause node) {
 		e_parent = (Element) elementStack.peek();
