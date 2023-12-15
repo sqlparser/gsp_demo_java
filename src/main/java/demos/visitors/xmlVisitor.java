@@ -4289,6 +4289,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_drop_security_policy);
 		elementStack.push(e_drop_security_policy);
 		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TMssqlAlterSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_drop_security_policy = xmldoc.createElement("alter_security_policy");
+		e_parent.appendChild(e_drop_security_policy);
+		elementStack.push(e_drop_security_policy);
+		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
 		elementStack.pop();
 	}
 
@@ -4298,17 +4309,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_create_security_policy);
 		elementStack.push(e_create_security_policy);
 		e_create_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
 		elementStack.pop();
 	}
 
-	public void preVisit(TMssqlAlterSecurityPolicy stmt) {
-		e_parent = (Element) elementStack.peek();
-		Element e_alter_security_policy = xmldoc.createElement("alter_security_policy");
-		e_parent.appendChild(e_alter_security_policy);
-		elementStack.push(e_alter_security_policy);
-		e_alter_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
-		elementStack.pop();
-	}
+
 
 	public void preVisit(TOutputClause node) {
 		e_parent = (Element) elementStack.peek();
