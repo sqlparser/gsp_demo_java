@@ -210,6 +210,9 @@ public class DataFlowAnalyzer {
 			dlineage.setTransformCoordinate(transformCoordinate);
 			dlineage.setShowJoin(showJoin);
 			dlineage.setIgnoreRecordSet(ignoreResultSets);
+			if(ignoreResultSets && !ignoreFunction) {
+				dlineage.setSimpleShowFunction(true);
+			}
 			dlineage.setLinkOrphanColumnToFirstTable(linkOrphanColumnToFirstTable);
 			dlineage.setIgnoreCoordinate(ignoreCoordinate);
 			dlineage.setSimpleShowTopSelectResultSet(topselectlist);
