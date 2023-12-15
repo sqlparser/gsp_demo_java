@@ -387,4 +387,28 @@ public class testTeradataGetTableColumns extends TestCase {
                         "table5.col2");
     }
 
+    public static void testMergeUsingTable() {
+        doTest("USING (empno INTEGER,\n" +
+                        "name VARCHAR(50),\n" +
+                        "salary INTEGER)\n" +
+                        "MERGE INTO employee AS t\n" +
+                        "USING VALUES (:empno, :name, :salary) AS s(empno, name, salary)\n" +
+                        "ON t.empno=s.empno\n" +
+                        "WHEN MATCHED THEN UPDATE\n" +
+                        "SET salary=s.salary\n" +
+                        "WHEN NOT MATCHED THEN INSERT (empno, name, salary)\n" +
+                        "VALUES (s.empno, s.name, s.salary);",
+                "Tables:\n" +
+                        "(values_table)\n" +
+                        "employee\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(values_table).empno\n" +
+                        "(values_table).name\n" +
+                        "(values_table).salary\n" +
+                        "employee.empno\n" +
+                        "employee.name\n" +
+                        "employee.salary");
+    }
+
 }

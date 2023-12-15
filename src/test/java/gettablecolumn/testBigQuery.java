@@ -270,4 +270,38 @@ public class testBigQuery extends TestCase {
                         "STAGE2.to_date");
     }
 
+    public static void testMergeInsertValues() {
+        doTest("MERGE INTO EMP1 D USING (\n" +
+                        "  SELECT E2.* FROM EMP2 E2, EMP3 E3 WHERE E3.dept = 'prod'\n" +
+                        ") S\n" +
+                        "ON (D.id = S.id)\n" +
+                        "WHEN MATCHED THEN\n" +
+                        "  UPDATE SET joining_date = current_date\n" +
+                        "WHEN NOT MATCHED THEN\n" +
+                        "  INSERT (id, name, joining_date) VALUES (id, TRIM(name2), joining_date);",
+                "Tables:\n" +
+                        "EMP1\n" +
+                        "EMP2\n" +
+                        "EMP3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "EMP1.id\n" +
+                        "EMP1.joining_date\n" +
+                        "EMP1.name\n" +
+                        "EMP2.*\n" +
+                        "EMP2.id\n" +
+                        "EMP2.joining_date\n" +
+                        "EMP2.name2\n" +
+                        "EMP3.dept");
+    }
+
+    public static void testBuiltinFunctionKeywordsInArgs() {
+        doTest("SELECT TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), date, SECOND) AS seconds_since FROM table_3;",
+                "Tables:\n" +
+                        "table_3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table_3.date");
+    }
+
 }

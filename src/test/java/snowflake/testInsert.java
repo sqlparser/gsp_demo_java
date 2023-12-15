@@ -4,6 +4,7 @@ package snowflake;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EInsertSource;
+import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TInsertCondition;
 import gudusoft.gsqlparser.nodes.TInsertIntoValue;
@@ -243,6 +244,19 @@ public class testInsert extends TestCase {
         //System.out.println(table1.getTableName().toString());
 
 
+    }
+
+    public void testColumnsInInsertAll() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "insert overwrite all\n" +
+                "  into t1\n" +
+                "  into t1 (c1, c2, c3) values (n2, n1, default)\n" +
+                "  into t2 (c1, c2, c3)\n" +
+                "  into t2 values (n3, n2, n1)\n" +
+                "select n1, n2, n3 from src;";
+        assertTrue(sqlparser.parse() == 0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstinsert);
+        assertTrue(sqlparser.sqlstatements.get(0).getSyntaxHints().size() == 0);
     }
 
 }

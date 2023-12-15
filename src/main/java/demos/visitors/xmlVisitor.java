@@ -4,6 +4,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
+import gudusoft.gsqlparser.nodes.functions.TFlattenFunction;
 import gudusoft.gsqlparser.nodes.functions.TRangeNFunction;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
@@ -32,7 +33,7 @@ import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.functions.TJsonObjectFunction;
 import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
-import gudusoft.gsqlparser.nodes.oracle.TTableProperties;
+import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
@@ -42,21 +43,7 @@ import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
 import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
 import gudusoft.gsqlparser.stmt.mdx.TMdxSelect;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlBlock;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCommit;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateFunction;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateProcedure;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateTrigger;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlCreateXmlSchemaCollectionStmt;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlDeclare;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlExecute;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlGo;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlIfElse;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlPrint;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlReturn;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlRollback;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlSaveTran;
-import gudusoft.gsqlparser.stmt.mssql.TMssqlSet;
+import gudusoft.gsqlparser.stmt.mssql.*;
 import gudusoft.gsqlparser.stmt.mysql.TMySQLDeallocatePrepareStmt;
 import gudusoft.gsqlparser.stmt.oracle.TBasicStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlContinue;
@@ -647,6 +634,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			e_parent.appendChild(e_using_columns);
 			elementStack.push(e_using_columns);
 			node.usingColumns.accept(this);
+			if (node.getJoin_using_alias() != null){
+				node.getJoin_using_alias().accept(this);
+			}
 			elementStack.pop();
 		}
 
@@ -1338,6 +1328,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			case unnest_t:
 				node.getLeftOperand().accept(this);
+				break;
+			case fieldselection_t:
+				if (node.getLeftOperand() != null){
+					node.getLeftOperand().accept(this);
+				}else if (node.getFunctionCall() != null){
+					node.getFunctionCall().accept(this);
+				}
+				node.getFieldName().accept(this);
 				break;
 			default:
 				e_expression = xmldoc.createElement(TAG_UNKNOWN_EXPR);
@@ -2037,6 +2035,40 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getForXMLClause().accept(this);
 		}
 
+		if (node.getFlashback() != null){
+			node.getFlashback().accept(this);
+		}
+
+		if (node.getLateralViewList() != null){
+			for(TLateralView lv:node.getLateralViewList()){
+				lv.accept(this);
+			}
+		}
+
+		elementStack.pop();
+	}
+	public void preVisit(TFlashback node) {
+		Element e_flash_back = xmldoc.createElement("flashback");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_flash_back);
+		elementStack.push(e_flash_back);
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TLateralView node) {
+		Element e_lateral_view = xmldoc.createElement("lateral_view");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_lateral_view);
+		elementStack.push(e_lateral_view);
+		node.getUdtf().accept(this);
+		if (node.getTableAlias() != null){
+			node.getTableAlias().accept(this);
+		}
+		node.getColumnAliasList().accept(this);
+
 		elementStack.pop();
 	}
 
@@ -2221,6 +2253,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 			addElementOfString("source_table", sourceTable);
 		}
 
+		if (node.getSourceColumn() != null){
+			addElementOfString("source_column", node.getSourceColumn().toString()
+					+String.format("(%d,%d)",node.getSourceColumn().getStartToken().lineNo,node.getSourceColumn().getStartToken().columnNo));
+		}
+
 		if (node.getParentObjectName() != null){
 			// this is usually attribute of a struct type,
 			//   create table absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED (
@@ -2324,13 +2361,45 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
+	public void preVisit(TFlattenFunction node) {
+		Element e_table_function = xmldoc.createElement("flatten_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_table_function);
+		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		elementStack.push(e_table_function);
+		node.getArgs().accept(this);
+		elementStack.pop();
+
+	}
+
+	public void preVisit(TTableFunction node) {
+		Element e_table_function = xmldoc.createElement("table_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_table_function);
+		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		elementStack.push(e_table_function);
+		switch (node.getFunctionType()){
+			case struct_t:
+				if (node.getFieldValues() != null){
+					node.getFieldValues().accept(this);
+				}
+				if (node.getFieldDefs() != null){
+					node.getFieldDefs().accept(this);
+				}
+				break;
+
+		}
+		elementStack.pop();
+
+	}
+
 	public void preVisit(TDropProcedureStmt stmt) {
 		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_procedure);
 		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
-		stmt.getProcedureName().accept(this);
 		elementStack.push(e_drop_procedure);
+		stmt.getProcedureName().accept(this);
 
 		switch (stmt.dbvendor){
 			case dbvpostgresql:
@@ -2344,6 +2413,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			default:
 				break;
+		}
+
+		if (stmt.getParameterDeclarations() != null){
+			stmt.getParameterDeclarations().accept(this);
 		}
 
 
@@ -3389,6 +3462,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getComment().accept(this);
 		}
 
+		if (node.getColumnGeneratedClause() != null){
+			addElementOfString ("generated_clause",node.getColumnGeneratedClause().toString());
+		}
+
 		elementStack.pop();
 	}
 
@@ -3640,6 +3717,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			default:
 				break;
 		}
+
 
 		elementStack.pop();
 	}
@@ -4166,6 +4244,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_merge);
 		elementStack.push(e_merge);
 
+		if (stmt.getUsingVariableList() != null){
+			Element e_using_vars = xmldoc.createElement("using_variable_list");
+			e_merge.appendChild(e_using_vars);
+			elementStack.push(e_using_vars);
+			stmt.getUsingVariableList().accept(this);
+			elementStack.pop();
+
+		}
+
 		if (stmt.getCteList() != null) {
 			stmt.getCteList().accept(this);
 		}
@@ -4195,6 +4282,37 @@ public class xmlVisitor extends TParseTreeVisitor {
 		// stmt.getErrorLoggingClause().accept(this);
 		elementStack.pop();
 	}
+
+	public void preVisit(TMssqlDropSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_drop_security_policy = xmldoc.createElement("drop_security_policy");
+		e_parent.appendChild(e_drop_security_policy);
+		elementStack.push(e_drop_security_policy);
+		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TMssqlAlterSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_drop_security_policy = xmldoc.createElement("alter_security_policy");
+		e_parent.appendChild(e_drop_security_policy);
+		elementStack.push(e_drop_security_policy);
+		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TMssqlCreateSecurityPolicy stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_security_policy = xmldoc.createElement("create_security_policy");
+		e_parent.appendChild(e_create_security_policy);
+		elementStack.push(e_create_security_policy);
+		e_create_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		stmt.getPolicyName().accept(this);
+		elementStack.pop();
+	}
+
 
 
 	public void preVisit(TOutputClause node) {
@@ -4376,21 +4494,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit(TRangePartitions node) {
 		e_parent = (Element) elementStack.peek();
-		Element e_range_partitions = xmldoc.createElement("range_paritions");
+		Element e_range_partitions = xmldoc.createElement("range_partitions");
 		e_range_partitions.setAttribute("type", node.getTablePartitionType().toString());
 
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		addElementOfNode("partition_column_list", node.getColumnList());
-		if (node.getIntervalExpr() != null){
-			addElementOfNode("interval_expr",node.getIntervalExpr());
+		switch (node.dbvendor){
+			case dbvpostgresql:
+				node.getPartitionColumnExprs().accept(this);
+				break;
+			default:
+				addElementOfNode("partition_column_list", node.getColumnList());
+				if (node.getIntervalExpr() != null){
+					addElementOfNode("interval_expr",node.getIntervalExpr());
+				}
+
+				ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+				for(int i=0;i<items.size();i++){
+					items.get(i).accept(this);
+				}
 		}
 
-        ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-        for(int i=0;i<items.size();i++){
-            items.get(i).accept(this);
-        }
 
 		elementStack.pop();
 	}

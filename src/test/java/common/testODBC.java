@@ -24,15 +24,15 @@ public class testODBC  extends TestCase {
         String[] keywords = keywordStr.split( "," );
         for(int i=0;i<keywords.length;i++){
             sqlparser.sqltext = "select * from t1 where c1 = "+keywords[i];
-            if (sqlparser.parse() == 0){
-                TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-                TExpression e = select.getWhereClause().getCondition();//.getRightOperand();
-                TSourceToken st = e.getEndToken();
+            if (sqlparser.getrawsqlstatements() == 0){
+                TSourceToken st = sqlparser.sourcetokenlist.get(sqlparser.sourcetokenlist.size()-1);
                 assertTrue(st.tokentype == ETokenType.ttkeyword);
 
-//                if ((st.tokentype != ETokenType.ttkeyword)){
-//                    System.out.println(st.toString() +":"+ st.tokentype);
-//                }
+
+                // GSP Java version 2.8.3.4(2023-11-30)
+                //  - [General] change tokentype to ETokenType.ttidentifier if this is a column.
+                // 2023/11/30 做了上面调整后， sqlparser.parse() 后， 下面的 assertTrue() 不再成立
+//                assertTrue(st.tokentype == ETokenType.ttkeyword);
             }
         }
 

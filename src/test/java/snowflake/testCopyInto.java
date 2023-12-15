@@ -127,5 +127,22 @@ public class testCopyInto extends TestCase {
         assertTrue(copyIntoStmt.getStageLocation().getExternalLocation().toString().equalsIgnoreCase("'s3://mybucket/unload/'"));
     }
 
+    public void testStage(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "copy into \"IT\".\"SHARED_SOURCE\".\"AWS_S3_IT_SHARED_SOURCE_SOURCE_JIRA_RISK\"\n" +
+                "from\n" +
+                "  (\n" +
+                "    SELECT\n" +
+                "      $1 AS RAW,\n" +
+                "      METADATA$FILENAME AS FILE_NAME,\n" +
+                "      CURRENT_TIMESTAMP() AS ETL_LOAD_TIMESTAMP,\n" +
+                "      METADATA$FILE_LAST_MODIFIED AS S3_ARRIVAL_TIMESTAMP\n" +
+                "    FROM\n" +
+                "      @ \"IT\".\"SHARED_SOURCE\".\"AWS_S3_IT_SHARED_SOURCE_SOURCE_JIRA_RISK\" /\n" +
+                "  ) file_format = (TYPE = JSON COMPRESSION = NONE) pattern = '.*.json'";
+        assertTrue(sqlparser.parse() == 0);
+
+    }
+
 
 }
