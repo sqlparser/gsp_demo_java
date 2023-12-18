@@ -30,7 +30,7 @@ public class DataFlowAnalyzer {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(
-					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] [/withTemporaryTable]] [/i] [/showResultSetTypes <resultset_types>] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv [/delimeter <delimeter>]]] [/transform [/coor]] [/showConstant] [/treatArgumentsInCountFunctionAsDirectDataflow]");
+					"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] [/withTemporaryTable]] [/i] [/showResultSetTypes <resultset_types>] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv [/delimeter <delimeter>]]] [/transform [/coor]] [/showConstant] [/treatArgumentsInCountFunctionAsDirectDataflow] [/filterRelationTypes <relationTypes>]");
 			System.out.println("/f: Optional, the full path to SQL file.");
 			System.out.println("/d: Optional, the full path to the directory includes the SQL files.");
 			System.out.println("/j: Optional, return the result including the join relation.");
@@ -73,6 +73,7 @@ public class DataFlowAnalyzer {
 			System.out.println("/exportonly: Optional, just export metadata.json, no further data analysis.");
 			System.out.println("/metadataoutput: Optional, specifies the metadata output directory and file name.");
 			//end by grq
+			System.out.println("/filterRelationTypes: Optional, support fdd, fdr, join, call, er, multiple relatoin types separated by commas");
 			return;
 		}
 
@@ -237,6 +238,10 @@ public class DataFlowAnalyzer {
 				if(resultSetTypes!=null) {
 					dlineage.getOption().showResultSetTypes(resultSetTypes.split(","));
 				}
+			}
+			
+			if (argList.indexOf("/filterRelationTypes") != -1) {
+				dlineage.getOption().filterRelationTypes(args[argList.indexOf("/filterRelationTypes") + 1]);
 			}
 
 			if (simple && !jsonFormat) {
