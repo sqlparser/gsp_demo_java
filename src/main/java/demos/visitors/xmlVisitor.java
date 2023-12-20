@@ -499,11 +499,36 @@ public class xmlVisitor extends TParseTreeVisitor {
 					node.getInt64_expression().accept(this);
 				}
 				break;
+			case etJson:
+				Element e1 = xmldoc.createElement("json_content");
+				e_literal.appendChild(e1);
+				elementStack.push(e1);
+				for(TKeyValueSqlNode n:node.getKeyValues()){
+					n.accept(this);
+				}
+
+				elementStack.pop();
+
+				break;
 			default:
 				break;
 		}
 		elementStack.pop();
 	}
+
+
+
+	public void preVisit(TKeyValueSqlNode node) {
+		Element e_key_value = xmldoc.createElement("key_value");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_key_value);
+		elementStack.push(e_key_value);
+		node.getKey().accept(this);
+		node.getValue().accept(this);
+
+		elementStack.pop();
+	}
+
 
 	public void postVisit(TConstant node) {
 		appendEndTag(node);
