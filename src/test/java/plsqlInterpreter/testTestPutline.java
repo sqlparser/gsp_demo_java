@@ -42,6 +42,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "\tcheck_credit(1);\n" +
                 "END;";
+
         assertTrue(doEvaluate(inputSQL,expectedValue));
     }
 
