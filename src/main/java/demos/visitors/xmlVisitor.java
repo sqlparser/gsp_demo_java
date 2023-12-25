@@ -470,11 +470,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (stmt.getVariableName() != null) {
 			stmt.getVariableName().accept(this);
 		}
-		if (stmt.getVariableNameList() != null) {
-			stmt.getVariableNameList().accept(this);
-		}
 		if (stmt.getVariableValue() != null) {
 			stmt.getVariableValue().accept(this);
+		}
+
+		if (stmt.getVariableNameList() != null) {
+			stmt.getVariableNameList().accept(this);
 		}
 		if (stmt.getVariableValueList() != null) {
 			stmt.getVariableValueList().accept(this);
@@ -760,6 +761,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getComputeClause().accept(this);
 			}
 
+			if (node.getQualifyClause() != null){
+				node.getQualifyClause().accept(this);
+			}
+
+			if (node.getWindowClause() != null){
+				node.getWindowClause().accept(this);
+			}
+
 			// this.postVisit(node);
 			elementStack.pop();
 
@@ -863,8 +872,27 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getComputeClause().accept(this);
 		}
 
+		if (node.getQualifyClause() != null){
+			node.getQualifyClause().accept(this);
+		}
+
+		if (node.getWindowClause() != null){
+			node.getWindowClause().accept(this);
+		}
+
 		elementStack.pop(); // query specification
 		elementStack.pop(); // query expression
+
+	}
+
+	public void preVisit(TQualifyClause node) {
+		// appendStartTag(node);
+		e_parent = (Element) elementStack.peek();
+		Element e_qualify_clause = xmldoc.createElement("qualify_clause");
+		e_parent.appendChild(e_qualify_clause);
+		elementStack.push(e_qualify_clause);
+		node.getSearchConditoin().accept(this);
+		elementStack.pop();
 
 	}
 
