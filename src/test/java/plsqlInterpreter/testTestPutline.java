@@ -434,7 +434,6 @@ public class testTestPutline extends TestCase {
         String retValue = astEvaluator.eval();
         //System.out.println("Return value from evaluator:\t"+astEvaluator.eval());
         return retValue.equalsIgnoreCase(expectedValue);
-
     }
 
 }
