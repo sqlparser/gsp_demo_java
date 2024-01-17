@@ -2,6 +2,7 @@ package bigquery;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TExpression;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
@@ -9,6 +10,22 @@ import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 public class testIdentifier extends TestCase {
+
+    public void testMultipleParts(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);
+        sqlparser.sqltext = "select * from orbital-eon-20511-3.QLI_AUTOMATION_DO_NOT_TOUCH.books where book_id > 0 ;";
+        assertTrue(sqlparser.parse() == 0);
+
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstselect);
+        TSelectSqlStatement selectSqlStatement = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TTable table = selectSqlStatement.getTables().getTable(0);
+        TObjectName tableName = table.getTableName();
+        assertTrue(tableName.getDatabaseToken().toString().equalsIgnoreCase("orbital-eon-20511-3"));
+        assertTrue(tableName.getSchemaToken().toString().equalsIgnoreCase("QLI_AUTOMATION_DO_NOT_TOUCH"));
+        assertTrue(tableName.getTableToken().toString().equalsIgnoreCase("books"));
+
+    }
+
     public void test1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);
         sqlparser.sqltext = "INSERT INTO `solidatus-dev`.JDBC_test.Customers";
