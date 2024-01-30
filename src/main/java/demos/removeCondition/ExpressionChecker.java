@@ -1,6 +1,8 @@
 
 package demos.removeCondition;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -326,15 +328,47 @@ public class ExpressionChecker implements IExpressionVisitor
 			}
 		}
 
+	
 		if ( expression.getLeftOperand( ) == null )
 		{
-			if ( !checkCondition( expression ) )
-			{
-				expression.removeMe();
+			if (expression.getExpressionType() == EExpressionType.list_t) {
+				int size = expression.getExprList().size();
+				List<TExpression> removeItems = new ArrayList<TExpression>();
+				boolean needRemoveAfterComma = false;
+				for (int i = size - 1; i >= 0; i--) {
+					TExpression item = expression.getExprList().getExpression(i);
+					if (!checkCondition(item)) {
+						if (i >= 1) {
+							TParseTreeNode.removeTokensBetweenNodes(expression.getExprList().getExpression(i - 1),
+									item);
+						}
+						if (needRemoveAfterComma && i < size - 1) {
+							TParseTreeNode.removeTokensBetweenNodes(expression.getExprList().getExpression(i),
+									expression.getExprList().getExpression(i + 1));
+						}
+						removeItems.add(item);
+						needRemoveAfterComma = false;
+					}
+					else {
+						needRemoveAfterComma = true;
+					}
+				}
+				for(TExpression item:removeItems) {
+					item.removeMe();
+				}
+				
+				if (toExprString(expression.toString()) == null) {
+					expression.removeMe();
+				}
 			}
-			
-			if(expression.getExpressionType() == EExpressionType.parenthesis_t){
-				expression.removeMe();
+			else {
+				if (!checkCondition(expression)) {
+					expression.removeMe();
+				}
+
+				if (expression.getExpressionType() == EExpressionType.parenthesis_t) {
+					expression.removeMe();
+				}
 			}
 		}
 		
