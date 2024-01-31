@@ -7,6 +7,7 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.Option;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Relationship;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.dlineage.util.XML2Model;
 import junit.framework.TestCase;
 import java.io.File;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class testBigQuery extends TestCase {
         Relationship SQL_CONSTANTS = Arrays.stream(dataFlow.getRelationships())
                 .filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().contains("SQL_CONSTANTS")))
                 .collect(Collectors.toList()).get(0);
-        assertTrue(SQL_CONSTANTS.getSources()[0].getColumn().equalsIgnoreCase("[]"));
+        assertTrue(Arrays.stream(SQL_CONSTANTS.getSources()).filter(s -> s.getParentName().contains("SQL_CONSTANTS")).findFirst().get().getColumn().equalsIgnoreCase("[]"));
     }
 
     public void test2() throws Exception {
