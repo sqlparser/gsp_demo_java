@@ -106,6 +106,7 @@ public class TestCreateProcedure extends TestCase {
                 "  SELECT count(*) INTO out_var  from my_etl;\n" +
                 "END;\n" +
                 "$$ LANGUAGE plpgsql;";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
         assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
