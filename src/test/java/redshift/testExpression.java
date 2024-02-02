@@ -147,6 +147,7 @@ public class testExpression extends TestCase {
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvredshift);
         sqlparser.sqltext = "select distinct city from users\n" +
                 "where city ~ '.*E.*|.*H.*' order by city;";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TExpression expression =((TSelectSqlStatement)sqlparser.sqlstatements.get(0)).getWhereClause().getCondition();
         //  System.out.println(expression.getExpressionType());
@@ -163,7 +164,7 @@ public class testExpression extends TestCase {
                 "where city !~ '.*E.*|.*H.*' order by city;";
         assertTrue(sqlparser.parse() == 0);
         TExpression expression =((TSelectSqlStatement)sqlparser.sqlstatements.get(0)).getWhereClause().getCondition();
-        assertTrue(expression.getNotToken().toString().endsWith("!"));
+        assertTrue(expression.getNotToken().toString().endsWith("!~"));
         assertTrue(expression.getExpressionType() == EExpressionType.pattern_matching_t);
         TExpression left = expression.getLeftOperand();
         TExpression right = expression.getRightOperand();
