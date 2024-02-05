@@ -1,7 +1,9 @@
 package plsqlInterpreter;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.TLog;
 import gudusoft.gsqlparser.compiler.TASTEvaluator;
 import gudusoft.gsqlparser.compiler.TGlobalScope;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
@@ -82,7 +84,8 @@ public class testTestPutline extends TestCase {
     }
 
     public void testBlockLabel6() {
-        String expectedValue = "In procedure p, x = a";
+        String expectedValue = "In procedure q, x = b\n" +
+                "In procedure p, x = a";
         String inputSQL = "DECLARE\n" +
                 "\tPROCEDURE p\n" +
                 "\tIS\n" +
@@ -106,7 +109,8 @@ public class testTestPutline extends TestCase {
     }
 
     public void testBlockLabel5() {
-        String expectedValue = "In procedure q, x = b";
+        String expectedValue = "In procedure p, x = a\n" +
+                "In procedure q, x = b";
         String inputSQL = "DECLARE\n" +
                 "\tPROCEDURE p\n" +
                 "\tIS\n" +
@@ -130,7 +134,8 @@ public class testTestPutline extends TestCase {
     }
 
     public void testBlockLabel4() {
-        String expectedValue = "x = 0.0";
+        String expectedValue = "echo.x = 0.0\n" +
+                "x = 0.0";
         String inputSQL = "<<echo>>\n" +
                 "DECLARE\n" +
                 "x NUMBER := 5;\n" +
@@ -147,7 +152,8 @@ public class testTestPutline extends TestCase {
     }
 
     public void testBlockLabel3() {
-        String expectedValue = "echo1.x = 5.0";
+        String expectedValue = "x = 0.0\n" +
+                "echo1.x = 5.0";
         String inputSQL = "<<echo1>>\n" +
                 "DECLARE\n" +
                 "x NUMBER := 5;\n" +
@@ -216,7 +222,9 @@ public class testTestPutline extends TestCase {
     }
 
     public void testNestScope() {
-        String expectedValue = "outer d=66.6";
+        String expectedValue = "a+c=5.2\n" +
+                "inner d=78.9\n" +
+                "outer d=66.6";
         String inputSQL = "-- Outer block:\n" +
                 "DECLARE\n" +
                 "a CHAR; -- Scope of a (CHAR) begins\n" +
@@ -256,7 +264,8 @@ public class testTestPutline extends TestCase {
     }
 
     public void testCreateProcedure() {
-        String expectedValue = "Table updated? Yes, bonus = 125.0.";
+        String expectedValue = "Table updated? No, bonus = 0.0.\n" +
+                "Table updated? Yes, bonus = 125.0.";
         String inputSQL = "DECLARE\n" +
                 "PROCEDURE p (\n" +
                 "sales NUMBER,\n" +
@@ -364,7 +373,9 @@ public class testTestPutline extends TestCase {
     }
 
     public void testToChar() {
-        String expectedValue = "b = 9";
+        String expectedValue = "3\n" +
+                "a = 3\n" +
+                "b = 9";
         String inputSQL = "DECLARE\n" +
                 "a INTEGER := 1+2;\n" +
                 "b INTEGER := (1+2)**2;\n" +
@@ -430,10 +441,15 @@ public class testTestPutline extends TestCase {
         }
 
 
+        TLog.clearLogs();
+        TLog.enableInterpreterLogOnly();
+        TLog.setOutputSimpleMode(true);
+
         TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
-        String retValue = astEvaluator.eval();
-        //System.out.println("Return value from evaluator:\t"+astEvaluator.eval());
-        return retValue.equalsIgnoreCase(expectedValue);
+        astEvaluator.eval();
+
+        String retValue =  TBaseType.dumpLogsToString();
+        return  TBaseType.compareStringsLineByLine(retValue,expectedValue);
     }
 
 }

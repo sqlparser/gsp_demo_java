@@ -3163,25 +3163,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 	public void preVisit(TCommonBlock node) {
-		e_parent = (Element) elementStack.peek();
-		Element e_block_stmt = xmldoc.createElement("plsql_block_statement");
-		e_parent.appendChild(e_block_stmt);
-		elementStack.push(e_block_stmt);
-		if (node.getLabelName() != null) {
-			current_objectName_tag = "label_name";
-			node.getLabelName().accept(this);
-		}
-		// doDeclare_Body_Exception(node);
-		current_statement_list_tag = "declaration_section";
-		if (node.getDeclareStatements().size() > 0)
-			node.getDeclareStatements().accept(this);
-		current_statement_list_tag = "body_section";
-		if (node.getBodyStatements().size() > 0)
-			node.getBodyStatements().accept(this);
-
-		if (node.getExceptionClause() != null)
-			node.getExceptionClause().accept(this);
-		elementStack.pop();
+		node.getBlockBody().accept(this);
+//		e_parent = (Element) elementStack.peek();
+//		Element e_block_stmt = xmldoc.createElement("plsql_block_statement");
+//		e_parent.appendChild(e_block_stmt);
+//		elementStack.push(e_block_stmt);
+//		if (node.getLabelName() != null) {
+//			current_objectName_tag = "label_name";
+//			node.getLabelName().accept(this);
+//		}
+//		// doDeclare_Body_Exception(node);
+//		current_statement_list_tag = "declaration_section";
+//		if (node.getDeclareStatements().size() > 0)
+//			node.getDeclareStatements().accept(this);
+//		current_statement_list_tag = "body_section";
+//		if (node.getBodyStatements().size() > 0)
+//			node.getBodyStatements().accept(this);
+//
+//		if (node.getExceptionClause() != null)
+//			node.getExceptionClause().accept(this);
+//		elementStack.pop();
 
 	}
 
