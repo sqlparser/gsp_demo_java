@@ -17,8 +17,19 @@ public class expressionTraverser  {
 
     public static void main(String args[])
      {
-         oracleStringConcate();
-         // oracleWhereCondition();
+         String inputSql = "SELECT * FROM Customers\n" +
+                 "WHERE Country='Germany' AND City='Berlin';";
+
+        String pgSql = "SELECT SUM (d.amt)\n" +
+                "FROM summit.cntrb_detail d\n" +
+                "WHERE 1=1\n" +
+                "AND col_name = '$col_name$'\n" +
+                "AND col_name2 LIKE '$col_name2$'\n" +
+                "AND col_name3 LIKE '$col_name3$'\n" +
+                "GROUP BY d.id;";
+
+         //oracleStringConcate();
+          traverseWhereCondition(EDbVendor.dbvpostgresql,pgSql);
         //  sqlServerSelectList();
         // functionArg();
      }
@@ -72,12 +83,11 @@ public class expressionTraverser  {
         }
     }
 
-    static void oracleWhereCondition(){
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+    static void traverseWhereCondition(EDbVendor dbVendor, String inputSQL){
+        TGSqlParser sqlparser = new TGSqlParser(dbVendor);
 
         //sqlparser.sqltext = "select col1, col2,sum(col3) from table1, table2 where col4 > col5 and col6= 1000 or c1 = 1 and not sal";
-        sqlparser.sqltext = "SELECT * FROM Customers\n" +
-                "WHERE Country='Germany' AND City='Berlin';";
+        sqlparser.sqltext = inputSQL;
 
 
         int ret = sqlparser.parse();

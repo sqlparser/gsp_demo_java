@@ -1308,7 +1308,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_parent.appendChild(e_expression);
 				if (node.getOperatorToken() != null) {
 					e_expression.setAttribute("operator",
-							node.getOperatorToken().toString());
+							node.getOperatorToken().toString()+"("+node.getOperatorToken().lineNo+","+node.getOperatorToken().columnNo+")");
 				}
 				elementStack.push(e_expression);
 				current_expression_tag = "first_expr";
@@ -1858,6 +1858,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		Element e_table_reference = xmldoc.createElement(tag_name);
 		e_table_reference.setAttribute("type", node.getTableType().toString());
+		if (node.getEffectType() != null){
+			e_table_reference.setAttribute("effect_type", node.getEffectType().toString());
+		}
+
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_table_reference);
 		elementStack.push(e_table_reference);
@@ -4953,13 +4957,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 					.accept(this);
 		}
 
-		if (stmt.joins.size() > 0) {
+		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN){
 			Element e_from_clause = xmldoc.createElement("from_clause");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_from_clause);
 			elementStack.push(e_from_clause);
-			stmt.joins.accept(this);
+			for(TTable table:stmt.getRelations()){
+				if ((table.getEffectType() != null)&&(table.getEffectType() == ETableEffectType.tetUpdate)) continue;
+				table.accept(this);
+			}
 			elementStack.pop();
+		}else{
+			if (stmt.joins.size() > 0) {
+				Element e_from_clause = xmldoc.createElement("from_clause");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_from_clause);
+				elementStack.push(e_from_clause);
+				stmt.joins.accept(this);
+				elementStack.pop();
+			}
 		}
 
 		if (stmt.getWhereClause() != null) {
