@@ -43,4 +43,21 @@ public class testTeradata extends TestCase {
                 .collect(Collectors.toList());
         assertTrue(!CollectionUtil.isEmpty(updateRelationships) && updateRelationships.size()==26);
     }
+    
+    public void  testJoin(){
+        //https://e.gitee.com/gudusoft/issues/table?issue=I620EV
+        File file = new File(common.gspCommon.BASE_SQL_DIR_PRIVATE +"dataflow/teradata/I8ZWLD.sql");
+
+        EDbVendor vendor = TGSqlParser.getDBVendorByName("teradata");
+        Option option = new Option();
+        option.setVendor(vendor);
+        option.setSimpleOutput(false);
+        option.setShowJoin(true);
+        DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(file, option);
+
+        dataFlowAnalyzer.generateDataFlow();
+        dataflow flow = dataFlowAnalyzer.getDataFlow();
+        long count = flow.getErrors().stream().filter(t->t.getErrorMessage().contains("NullPointerException")).count();
+        assertTrue(count == 0L);
+    }
 }
