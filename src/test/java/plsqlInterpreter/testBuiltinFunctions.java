@@ -1,7 +1,9 @@
 package plsqlInterpreter;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.TLog;
 import gudusoft.gsqlparser.compiler.TASTEvaluator;
 import gudusoft.gsqlparser.compiler.TGlobalScope;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
@@ -300,11 +302,13 @@ public class testBuiltinFunctions extends TestCase {
             return false;
         }
 
-
+        TLog.clearLogs();
+        TLog.enableInterpreterLogOnly();
+        TLog.setOutputSimpleMode(true);
         TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
-        String retValue = astEvaluator.eval();
-        //System.out.println("Return value from evaluator:\t"+astEvaluator.eval());
-        return retValue.equalsIgnoreCase(expectedValue);
+        astEvaluator.eval();
+        String retValue =  TBaseType.dumpLogsToString();
+        return  TBaseType.compareStringsLineByLine(retValue,expectedValue);
 
     }
 }
