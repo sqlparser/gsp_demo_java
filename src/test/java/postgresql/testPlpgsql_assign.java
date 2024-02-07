@@ -38,7 +38,7 @@ public class testPlpgsql_assign extends TestCase {
 
             assertTrue(createFunction.getBodyStatements().size() == 5);
             TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
-            assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstl_raisestmt);
+            assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_raisestmt);
             TRaiseStmt raiseStmt = (TRaiseStmt)stmt;
             assertTrue(raiseStmt.getRaiseLevel() == ERaiseLevel.notice);
             assertTrue(raiseStmt.getFormatString().toString().equalsIgnoreCase("'Quantity here is %'"));

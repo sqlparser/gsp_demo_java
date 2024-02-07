@@ -45,7 +45,7 @@ public class testPlpgsql_block extends TestCase {
 
         assertTrue(createFunction.getBodyStatements().size() == 5);
         TCustomSqlStatement stmt = createFunction.getBodyStatements().get(0);
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstl_raisestmt);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_raisestmt);
         TRaiseStmt raiseStmt = (TRaiseStmt)stmt;
         assertTrue(raiseStmt.getRaiseLevel() == ERaiseLevel.notice);
         assertTrue(raiseStmt.getFormatString().toString().equalsIgnoreCase("'Quantity here is %'"));
@@ -70,7 +70,7 @@ public class testPlpgsql_block extends TestCase {
 
         assertTrue(block.getBodyStatements().size() == 2);
         stmt = block.getBodyStatements().get(1);
-        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sstl_raisestmt);
+        assertTrue(stmt.sqlstatementtype == ESqlStatementType.sst_raisestmt);
         raiseStmt = (TRaiseStmt)stmt;
         assertTrue(raiseStmt.getRaiseLevel() == ERaiseLevel.notice);
         assertTrue(raiseStmt.getFormatString().toString().equalsIgnoreCase("'Outer quantity here is %'"));

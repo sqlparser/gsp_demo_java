@@ -42,6 +42,7 @@ public class toXml
 		}
 		System.out.println( "Selected SQL dialect: " + dbVendor.toString( ) );
 
+		//TBaseType.ENABLE_INTERPRETER = true;
 		TGSqlParser sqlparser = new TGSqlParser( dbVendor );
 		sqlparser.sqlfilename = args[0];
 		String xmlFile = args[0] + ".xml";

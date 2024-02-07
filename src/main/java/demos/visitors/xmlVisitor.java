@@ -7031,10 +7031,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 					current_expression_list_tag = "module_parameters";
 					stmt.getParameters().accept(this);
 				}
+
 				break;
 			default:
 				break;
 		}
+
+		if (stmt.getPreparedSqlText() != null){
+			addElementOfString("preparedSqlText",stmt.getPreparedSqlText());
+		}
+
 
 		if ( stmt.getStmt( ) != null )
 		{
