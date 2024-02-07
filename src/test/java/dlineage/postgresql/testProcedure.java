@@ -39,7 +39,8 @@ public class testProcedure extends TestCase {
         List<Relationship> fsa048Relationships = Arrays.stream(dataFlow.getRelationships())
                 .filter(s -> s.getTarget().getParentName().contains("report.trs_fsa048_report_v002")).collect(Collectors.toList());
         //System.out.println("fsa048Relationships.size():"+fsa048Relationships.size());
-        assertTrue(fsa048Relationships.size() == 8);
+        //metadata.json有些问题，NOMINAL_VALUE 只属于 trs_fsa050_report_v004 表，但是select语句里的几个table没有包含trs_fsa050_report_v004，因此simple模式，是没有8个关系的，只有3个关系
+        assertTrue(fsa048Relationships.size() == 3);
 
         List<Relationship> a305Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("tft_scheme_details_a305".toLowerCase())))
                 .collect(Collectors.toList());
@@ -47,7 +48,7 @@ public class testProcedure extends TestCase {
 
         List<Relationship> v012Relationships = fsa048Relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().toLowerCase().contains("TFT_ACCT_EOD_POSN_V012".toLowerCase())))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==6);
+        assertTrue(!CollectionUtil.isEmpty(v012Relationships) && v012Relationships.size()==2);
         
     }
 }
