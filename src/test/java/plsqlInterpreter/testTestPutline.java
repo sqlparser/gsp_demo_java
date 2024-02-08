@@ -10,7 +10,7 @@ import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import junit.framework.TestCase;
 
 
-public class testTestPutline extends TestCase {
+public class testTestPutline extends testInterpreterBase {
 
     public void testBlockNested2() {
         String expectedValue = "Credit rating over limit (1.0). Rating: 3.0";
@@ -45,7 +45,7 @@ public class testTestPutline extends TestCase {
                 "\tcheck_credit(1);\n" +
                 "END;";
 
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockNested1() {
@@ -80,7 +80,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "\tcheck_credit(5);\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel6() {
@@ -105,7 +105,7 @@ public class testTestPutline extends TestCase {
                 "\tq;\n" +
                 "\tp;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel5() {
@@ -130,7 +130,7 @@ public class testTestPutline extends TestCase {
                 "\tp;\n" +
                 "\tq;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel4() {
@@ -148,7 +148,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "echo;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel3() {
@@ -167,7 +167,7 @@ public class testTestPutline extends TestCase {
                 "echo;\n" +
                 "END;\n";
        // System.out.println(inputSQL);
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel2() {
@@ -186,7 +186,7 @@ public class testTestPutline extends TestCase {
                 "\t\tEND IF;\n" +
                 "\tEND;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testBlockLabel1() {
@@ -205,7 +205,7 @@ public class testTestPutline extends TestCase {
                 "\t\tEND IF;\n" +
                 "\tEND;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testOperatorProcedence() {
@@ -218,7 +218,7 @@ public class testTestPutline extends TestCase {
                 "\td := 66.6;\n" +
                 "\tDBMS_OUTPUT.PUT_LINE ('b+d='||(b+d)); \n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testNestScope() {
@@ -260,7 +260,7 @@ public class testTestPutline extends TestCase {
                 "\t-- Visible: a (CHAR), b\n" +
                 "\tDBMS_OUTPUT.PUT_LINE ('outer d='||to_char(d));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testCreateProcedure() {
@@ -291,7 +291,7 @@ public class testTestPutline extends TestCase {
                 "\tp(10500, 10000, 121);\n" +
                 "END;\n" +
                 "/";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
 
@@ -310,7 +310,7 @@ public class testTestPutline extends TestCase {
                 "\tdone := TRUE;\n" +
                 "END LOOP;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testIfElse() {
@@ -324,7 +324,7 @@ public class testTestPutline extends TestCase {
                 "\t    DBMS_OUTPUT.PUT_LINE('less' || sales);\n" +
                 "\tEND IF;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testIfThen() {
@@ -338,7 +338,7 @@ public class testTestPutline extends TestCase {
                 "\t    DBMS_OUTPUT.PUT_LINE('less' || sales);\n" +
                 "\tEND IF;\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testDiv() {
@@ -350,7 +350,7 @@ public class testTestPutline extends TestCase {
                 "bonus := (10 - quota)/4;\n" +
                 "DBMS_OUTPUT.PUT_LINE(bonus);\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
     public void testNestedParenthesis() {
         String expectedValue = "a = 3";
@@ -359,7 +359,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE('a = ' || TO_CHAR(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testUminus() {
@@ -369,7 +369,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(a);\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testToChar() {
@@ -384,7 +384,7 @@ public class testTestPutline extends TestCase {
                 "DBMS_OUTPUT.PUT_LINE('a = ' || TO_CHAR(a));\n" +
                 "DBMS_OUTPUT.PUT_LINE('b = ' || TO_CHAR(b));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void test1() {
@@ -397,7 +397,7 @@ public class testTestPutline extends TestCase {
                 "  --DBMS_OUTPUT.PUT_LINE('surname=' || surname);\n" +
                 "  --DBMS_OUTPUT.PUT_LINE('chr=' || chr(65));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testCHR() {
@@ -408,7 +408,7 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "  DBMS_OUTPUT.PUT_LINE('chr=' || chr(65));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testCONCAT() {
@@ -419,37 +419,37 @@ public class testTestPutline extends TestCase {
                 "BEGIN\n" +
                 "  DBMS_OUTPUT.PUT_LINE('name=' || concat(name,surname));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
-    boolean doEvaluate(String inputSQL, String expectedValue){
-        EDbVendor dbVendor = EDbVendor.dbvoracle;
-        TSQLEnv sqlEnv = new TSQLEnv(dbVendor) {
-            @Override
-            public void initSQLEnv() {
-            }
-        };
-
-        TGlobalScope globalScope = new TGlobalScope(sqlEnv);
-        TGSqlParser sqlParser = new TGSqlParser(dbVendor);
-        sqlParser.sqltext = inputSQL;
-
-        int ret = sqlParser.parse();
-        if (ret != 0){
-            System.out.println(sqlParser.getErrormessage());
-            return false;
-        }
-
-
-        TLog.clearLogs();
-        TLog.enableInterpreterLogOnly();
-        TLog.setOutputSimpleMode(true);
-
-        TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
-        astEvaluator.eval();
-
-        String retValue =  TBaseType.dumpLogsToString();
-        return  TBaseType.compareStringsLineByLine(retValue,expectedValue);
-    }
+//    boolean doEvaluate(String inputSQL, String expectedValue){
+//        EDbVendor dbVendor = EDbVendor.dbvoracle;
+//        TSQLEnv sqlEnv = new TSQLEnv(dbVendor) {
+//            @Override
+//            public void initSQLEnv() {
+//            }
+//        };
+//
+//        TGlobalScope globalScope = new TGlobalScope(sqlEnv);
+//        TGSqlParser sqlParser = new TGSqlParser(dbVendor);
+//        sqlParser.sqltext = inputSQL;
+//
+//        int ret = sqlParser.parse();
+//        if (ret != 0){
+//            System.out.println(sqlParser.getErrormessage());
+//            return false;
+//        }
+//
+//
+//        TLog.clearLogs();
+//        TLog.enableInterpreterLogOnly();
+//        TLog.setOutputSimpleMode(true);
+//
+//        TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
+//        astEvaluator.eval();
+//
+//        String retValue =  TBaseType.dumpLogsToString();
+//        return  TBaseType.compareStringsLineByLine(retValue,expectedValue);
+//    }
 
 }

@@ -19,7 +19,8 @@ public class testInterpreterBase extends TestCase {
         TGSqlParser sqlParser = new TGSqlParser(dbVendor);
         sqlParser.sqltext = inputSQL;
 
-
+        boolean enableInterpreter = TBaseType.ENABLE_INTERPRETER;
+        TBaseType.ENABLE_INTERPRETER = true;
         int ret = sqlParser.parse();
         if (ret != 0){
             System.out.println(sqlParser.getErrormessage());
@@ -32,6 +33,7 @@ public class testInterpreterBase extends TestCase {
 
         TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
         String retValue = astEvaluator.eval();
+        TBaseType.ENABLE_INTERPRETER = enableInterpreter;
 
         return TBaseType.compareStringsLineByLine(expectedValue,TBaseType.dumpLogsToString());
 

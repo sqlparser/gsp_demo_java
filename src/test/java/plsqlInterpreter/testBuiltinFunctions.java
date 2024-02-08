@@ -9,7 +9,7 @@ import gudusoft.gsqlparser.compiler.TGlobalScope;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import junit.framework.TestCase;
 
-public class testBuiltinFunctions extends TestCase {
+public class testBuiltinFunctions extends testInterpreterBase {
     public void testABS() {
         String expectedValue = "100";
         String inputSQL = "DECLARE\n" +
@@ -17,7 +17,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ABS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "100.543";
         inputSQL = "DECLARE\n" +
@@ -25,7 +25,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ABS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "6";
         inputSQL = "DECLARE\n" +
@@ -33,7 +33,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ABS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "0";
         inputSQL = "DECLARE\n" +
@@ -41,7 +41,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ABS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testACOS() {
@@ -51,7 +51,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ACOS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testSIN() {
@@ -61,7 +61,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SIN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testSUBSTR() {
@@ -71,14 +71,14 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,3,4));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         inputSQL = "DECLARE\n" +
                 "  a  VARCHAR(25) := 'ABCDEFG';\n" +
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,-5,4));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "ABCD";
         inputSQL = "DECLARE\n" +
@@ -86,14 +86,14 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,1,4));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         inputSQL = "DECLARE\n" +
                 "  a  VARCHAR(25) := 'ABCDEFG';\n" +
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,0,4));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "CDEFG";
         inputSQL = "DECLARE\n" +
@@ -101,14 +101,14 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,3));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         inputSQL = "DECLARE\n" +
                 "  a  VARCHAR(25) := 'ABCDEFG';\n" +
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SUBSTR(a,-5));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testTRIM() {
@@ -118,7 +118,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(TRIM(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testUPPER() {
@@ -128,7 +128,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(UPPER(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testLOWER() {
@@ -138,7 +138,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(LOWER(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testMOD() {
@@ -149,7 +149,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(MOD(a, b));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "11";
         inputSQL = "DECLARE\n" +
@@ -158,7 +158,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(MOD(a, b));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     //REPLACE
@@ -171,7 +171,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(REPLACE(a, b, c));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     //SIGN
@@ -182,7 +182,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SIGN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "0";
         inputSQL = "DECLARE\n" +
@@ -190,7 +190,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SIGN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "-1";
         inputSQL = "DECLARE\n" +
@@ -198,7 +198,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(SIGN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testROUND() {
@@ -208,7 +208,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ROUND(a, 1));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "0.0";
         inputSQL = "DECLARE\n" +
@@ -216,7 +216,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ROUND(a, 6));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "20.0";
         inputSQL = "DECLARE\n" +
@@ -224,7 +224,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ROUND(a, -1));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "16.0";
         inputSQL = "DECLARE\n" +
@@ -232,7 +232,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(ROUND(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testTAN() {
@@ -242,7 +242,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(TAN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
 
         expectedValue = "-1.0";
         inputSQL = "DECLARE\n" +
@@ -250,7 +250,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(TAN(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testLOG() {
@@ -261,7 +261,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(LOG(a, b));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testCOS() {
@@ -271,7 +271,7 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(COS(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
     public void testCOSH() {
@@ -281,34 +281,8 @@ public class testBuiltinFunctions extends TestCase {
                 "BEGIN\n" +
                 "DBMS_OUTPUT.PUT_LINE(COSH(a));\n" +
                 "END;";
-        assertTrue(doEvaluate(inputSQL,expectedValue));
+        assertTrue(doEvaluate(EDbVendor.dbvoracle,inputSQL,expectedValue));
     }
 
-    boolean doEvaluate(String inputSQL, String expectedValue){
-        EDbVendor dbVendor = EDbVendor.dbvoracle;
-        TSQLEnv sqlEnv = new TSQLEnv(dbVendor) {
-            @Override
-            public void initSQLEnv() {
-            }
-        };
 
-        TGlobalScope globalScope = new TGlobalScope(sqlEnv);
-        TGSqlParser sqlParser = new TGSqlParser(dbVendor);
-        sqlParser.sqltext = inputSQL;
-
-        int ret = sqlParser.parse();
-        if (ret != 0){
-            System.out.println(sqlParser.getErrormessage());
-            return false;
-        }
-
-        TLog.clearLogs();
-        TLog.enableInterpreterLogOnly();
-        TLog.setOutputSimpleMode(true);
-        TASTEvaluator astEvaluator = new TASTEvaluator(sqlParser.sqlstatements,globalScope);
-        astEvaluator.eval();
-        String retValue =  TBaseType.dumpLogsToString();
-        return  TBaseType.compareStringsLineByLine(retValue,expectedValue);
-
-    }
 }
