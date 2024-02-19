@@ -1861,6 +1861,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getEffectType() != null){
 			e_table_reference.setAttribute("effect_type", node.getEffectType().toString());
 		}
+		e_table_reference.setAttribute("is_cte", node.isCTEName()?"yes":"no");
 
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_table_reference);
