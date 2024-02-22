@@ -3326,6 +3326,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case RenameTable:
 				node.getNewTableName().accept(this);
 				break;
+			case AddConstraintUnique:
+				if (node.getConstraintName() != null){
+					addElementOfNode("constraint_name",node.getConstraintName());
+				}
+				if (node.getIndexCols() != null){
+					addElementOfNode("column_list",node.getIndexCols());
+				}else if (node.getColumnNameList() != null){
+					addElementOfNode("column_list",node.getColumnNameList());
+				}
+
+				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
 				e_alter_table_option.appendChild(e_option);
@@ -5855,6 +5866,41 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void addElementOfNode( String tagName, TParseTreeNodeList <TParseTreeNode> nodeList )
+	{
+		Element e_element = xmldoc.createElement( tagName );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_element );
+		elementStack.push(e_element);
+		for(TParseTreeNode node:nodeList){
+			node.accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void addElementOfNode( String tagName, TPTNodeList <TColumnWithSortOrder> nodeList )
+	{
+		Element e_element = xmldoc.createElement( tagName );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_element );
+		elementStack.push(e_element);
+		for(int i=0;i<nodeList.size();i++){
+			nodeList.getElement(i).accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void addElementOfNode( String tagName, TObjectNameList nodeList )
+	{
+		Element e_element = xmldoc.createElement( tagName );
+		e_parent = (Element) elementStack.peek( );
+		e_parent.appendChild( e_element );
+		elementStack.push(e_element);
+		for(TObjectName node:nodeList){
+			node.accept(this);
+		}
+		elementStack.pop();
+	}
 
 	public void preVisit( TMySQLDeallocatePrepareStmt node ) {
 		e_parent = (Element) elementStack.peek();
@@ -6388,7 +6434,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-
+	public void preVisit( TColumnWithSortOrder node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_allocate_stmt = xmldoc.createElement( "column" );
+		e_parent.appendChild( e_allocate_stmt );
+		elementStack.push( e_allocate_stmt );
+		node.getColumnName().accept(this);
+		elementStack.pop( );
+	}
 	public void preVisit( TAllocateStmt stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
