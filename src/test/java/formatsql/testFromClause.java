@@ -92,8 +92,8 @@ public class testFromClause extends TestCase {
                 "WHERE  s.name LIKE @product \n" +
                 "       AND p.listprice < @maxprice;";
 
-
-        sqlparser.parse();
+        //System.out.println(sqlparser.sqltext);
+        assertTrue(sqlparser.parse() == 0);
         option.selectFromclauseJoinOnInNewline = false;
         String result = FormatterFactory.pp(sqlparser, option);
         assertTrue(result.trim().equalsIgnoreCase("SELECT p.name      AS product,\n" +
@@ -103,7 +103,7 @@ public class testFromClause extends TestCase {
                 "       JOIN production.productsubcategory s ON p.productsubcategoryid = s.productsubcategoryid\n" +
                 "WHERE  s.name LIKE @product\n" +
                 "       AND p.listprice < @maxprice;"));
-        //System.out.println(result);
+
 
     }
 
@@ -123,9 +123,10 @@ public class testFromClause extends TestCase {
                 "       AND p.listprice < @maxprice;";
 
 
-        sqlparser.parse();
+        assertTrue(sqlparser.parse() == 0);
         option.alignJoinWithFromKeyword = true;
         String result = FormatterFactory.pp(sqlparser, option);
+        //System.out.println(result);
         assertTrue(result.trim().equalsIgnoreCase("SELECT p.name      AS product,\n" +
                 "       p.listprice AS 'List Price',\n" +
                 "       p.discount  AS 'discount'\n" +
@@ -134,8 +135,6 @@ public class testFromClause extends TestCase {
                 "       ON p.productsubcategoryid = s.productsubcategoryid\n" +
                 "WHERE  s.name LIKE @product\n" +
                 "       AND p.listprice < @maxprice;"));
-        //System.out.println(result);
-
     }
 
 }
