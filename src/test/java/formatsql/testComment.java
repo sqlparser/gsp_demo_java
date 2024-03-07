@@ -25,7 +25,7 @@ public class testComment extends TestCase {
          sqlparser.parse();
          String result = FormatterFactory.pp(sqlparser, option);
         assertTrue(result.trim().equalsIgnoreCase("SELECT   department_id,\n" +
-                "         Min(salary) \n" +
+                "         Min(salary)\n" +
                 "FROM     employees\n" +
                 "GROUP BY department_id"));
         //assertTrue("remove_comment is not supported",false);
