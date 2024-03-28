@@ -10,7 +10,7 @@ public class testGaussDBFiles extends TestCase {
 
     public  void testGaussDB(){
         parsefiles(EDbVendor.dbvgaussdb, gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb");
-        //parsefiles(EDbVendor.dbvbigquery, gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"gaussdb/");
+        parsefiles(EDbVendor.dbvgaussdb, gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"gaussdb");
     }
 
 }
