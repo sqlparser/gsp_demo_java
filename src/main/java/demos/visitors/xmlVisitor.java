@@ -5492,9 +5492,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case values_oracle_record :
 				// stmt.getRecordName().accept(this);
 				break;
-			case set_column_value :
-				// stmt.getSetColumnValues().accept(this);
-				break;
 			case execute :
 				Element e_insert_execute = xmldoc.createElement( "insert_execute" );
 				e_parent = (Element) elementStack.peek( );
@@ -5502,6 +5499,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.push( e_insert_execute );
 				stmt.getExecuteStmt( ).accept( this );
 				elementStack.pop( );
+				break;
+			case value_table:
+				addElementOfNode("source_table",stmt.getSourceValueTable());
+				break;
+			case set_column_value:
+				addElementOfNode("set_columns",stmt.getSetColumnValues());
 				break;
 			default :
 				break;
