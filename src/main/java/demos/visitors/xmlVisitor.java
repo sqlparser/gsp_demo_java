@@ -3247,6 +3247,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getNewDataType() != null){
 					node.getNewDataType().accept(this);
 				}
+
+
+				switch (node.getAlterColumnSubType()){
+					case Comment:
+						addElementOfString("comment",node.getComment());
+						break;
+				}
+
 				elementStack.pop();
 				break;
 			case ChangeColumn:
@@ -3475,7 +3483,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				addElementOfNode("element_list",node.getColumnDefList());
 				break;
 			case array_t:
-				node.getTypeOfList().accept(this);
+				if (node.getTypeOfList() != null){
+					node.getTypeOfList().accept(this);
+				}
+
 				break;
 			default:
 				break;
