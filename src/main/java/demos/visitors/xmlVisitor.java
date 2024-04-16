@@ -1880,6 +1880,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getPartitionExtensionClause() != null){
 					node.getPartitionExtensionClause().accept(this);
 				}
+//				if (node.getPartitionClause() != null){
+//					node.getPartitionClause().accept(this);
+//				}
 				// sb.append(node.toString().replace(">","&#62;").replace("<","&#60;"));
 				break;
 			}
@@ -3356,6 +3359,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+
+	public void preVisit(TPartitionClause node) {
+		Element e_partition = xmldoc.createElement("partition_clause");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_partition);
+		elementStack.push(e_partition);
+		if (node.getExpressionList()!=null){
+			node.getExpressionList().accept(this);
+		}
+		elementStack.pop();
+	}
 
 	public void preVisit(TPartitionExtensionClause node) {
 
