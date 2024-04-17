@@ -1880,6 +1880,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getPartitionExtensionClause() != null){
 					node.getPartitionExtensionClause().accept(this);
 				}
+//				if (node.getPartitionClause() != null){
+//					node.getPartitionClause().accept(this);
+//				}
 				// sb.append(node.toString().replace(">","&#62;").replace("<","&#60;"));
 				break;
 			}
@@ -3247,6 +3250,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getNewDataType() != null){
 					node.getNewDataType().accept(this);
 				}
+
+
+				switch (node.getAlterColumnSubType()){
+					case Comment:
+						addElementOfString("comment",node.getComment());
+						break;
+				}
+
 				elementStack.pop();
 				break;
 			case ChangeColumn:
@@ -3348,6 +3359,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+
+	public void preVisit(TPartitionClause node) {
+		Element e_partition = xmldoc.createElement("partition_clause");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_partition);
+		elementStack.push(e_partition);
+		if (node.getExpressionList()!=null){
+			node.getExpressionList().accept(this);
+		}
+		elementStack.pop();
+	}
 
 	public void preVisit(TPartitionExtensionClause node) {
 
@@ -3475,7 +3498,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				addElementOfNode("element_list",node.getColumnDefList());
 				break;
 			case array_t:
-				node.getTypeOfList().accept(this);
+				if (node.getTypeOfList() != null){
+					node.getTypeOfList().accept(this);
+				}
+
 				break;
 			default:
 				break;
@@ -5492,9 +5518,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case values_oracle_record :
 				// stmt.getRecordName().accept(this);
 				break;
-			case set_column_value :
-				// stmt.getSetColumnValues().accept(this);
-				break;
 			case execute :
 				Element e_insert_execute = xmldoc.createElement( "insert_execute" );
 				e_parent = (Element) elementStack.peek( );
@@ -5502,6 +5525,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.push( e_insert_execute );
 				stmt.getExecuteStmt( ).accept( this );
 				elementStack.pop( );
+				break;
+			case value_table:
+				addElementOfNode("source_table",stmt.getSourceValueTable());
+				break;
+			case set_column_value:
+				addElementOfNode("set_columns",stmt.getSetColumnValues());
 				break;
 			default :
 				break;

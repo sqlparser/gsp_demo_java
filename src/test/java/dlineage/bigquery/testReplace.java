@@ -8,6 +8,7 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import junit.framework.TestCase;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class testReplace extends TestCase {
     public void test1() throws Exception {
