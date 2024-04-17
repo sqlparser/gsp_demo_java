@@ -33,7 +33,7 @@ public class testTeradata extends TestCase {
         String json = JSON.toJSONString(dataFlow);
         List<Relationship> relationships = Arrays.stream(dataFlow.getRelationships())
                 .filter(s -> s.getTarget().getParentName().contains("EDW_SIT_SEM_DATA.FISCAL_CALENDAR")).collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(relationships) && relationships.size()==56);
+        assertTrue(!CollectionUtil.isEmpty(relationships) && relationships.size()==57);
 
         List<Relationship> insertRelationships = relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().contains("INSERT-")))
                 .collect(Collectors.toList());
@@ -41,7 +41,7 @@ public class testTeradata extends TestCase {
 
         List<Relationship> updateRelationships = relationships.stream().filter(r -> Arrays.stream(r.getSources()).anyMatch(s -> s.getParentName().contains("UPDATE-")))
                 .collect(Collectors.toList());
-        assertTrue(!CollectionUtil.isEmpty(updateRelationships) && updateRelationships.size()==26);
+        assertTrue(!CollectionUtil.isEmpty(updateRelationships) && updateRelationships.size()==27);
     }
     
     public void  testJoin(){
