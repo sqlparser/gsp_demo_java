@@ -3348,6 +3348,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 
 				break;
+			case partition:
+				node.getTablePartition().accept(this);
+				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
 				e_alter_table_option.appendChild(e_option);
@@ -3408,6 +3411,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TAlterMaterializedViewStmt stmt) {
+		Element e_alter_view = xmldoc.createElement("alter_materialized_view_statement");
+		e_parent = (Element) elementStack.peek();
+		e_alter_view.setAttribute("alter_option",stmt.getAlterViewOption().toString());
+		e_parent.appendChild(e_alter_view);
+		elementStack.push(e_alter_view);
+
+		current_objectName_tag = "view_name";
+		stmt.getMaterializedViewName().accept(this);
+		if (stmt.getAlterViewOption() != null){
+			switch (stmt.getAlterViewOption()){
+				case setComment:
+					addElementOfString("comment",stmt.getComment());
+					break;
+				default:
+					break;
+			}
+		}
+		elementStack.pop();
+	}
 
 	public void preVisit(TAlterViewStatement stmt) {
 		Element e_alter_view = xmldoc.createElement("alter_view_statement");
@@ -3422,6 +3445,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			switch (stmt.getAlterViewOption()){
 				case rename:
 					stmt.getNewViewName().accept(this);
+					break;
+				case setComment:
+					addElementOfString("comment",stmt.getComment());
 					break;
 				default:
 					break;
@@ -4572,6 +4598,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			addElementOfNode("table_properties", stmt.getTableProperties());
 		}
 
+		if (stmt.getTablePartition() != null){
+			addElementOfNode("table_partition",stmt.getTablePartition());
+		}
+
 		elementStack.pop();
 	}
 
@@ -4588,6 +4618,25 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TPartitionDefinition node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_partition_definition = xmldoc.createElement("partition_definition");
+		e_partition_definition.setAttribute("value_type", node.getTablePartitionType().toString());
+
+		e_parent.appendChild(e_partition_definition);
+		elementStack.push(e_partition_definition);
+		node.getPartitionName().accept(this);
+		switch (node.getTablePartitionType()){
+			case range:
+				node.getLessThanValueList().accept(this);
+				break;
+			case list:
+				node.getInValueList().accept(this);
+				break;
+		}
+
+		elementStack.pop();
+	}
 	public void preVisit(TRangePartitions node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_range_partitions = xmldoc.createElement("range_partitions");
@@ -4600,8 +4649,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case dbvpostgresql:
 				node.getPartitionColumnExprs().accept(this);
 				break;
+			case dbvmysql:
+				if (node.getColumnList() != null){
+					addElementOfNode("partition_column_list", node.getColumnList());
+				}else if (node.getRangeExpr() != null){
+					addElementOfNode("range_expr",node.getRangeExpr());
+				}
+
+				Element e_partition_def_list = xmldoc.createElement("partition_def_list");
+				e_range_partitions.appendChild(e_partition_def_list);
+				elementStack.push(e_partition_def_list);
+
+				if (node.getPartitionDefinitions() != null){
+					for(TPartitionDefinition pd:node.getPartitionDefinitions()){
+						pd.accept(this);
+					}
+				}
+				elementStack.pop();
+
+				break;
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
+
 				if (node.getIntervalExpr() != null){
 					addElementOfNode("interval_expr",node.getIntervalExpr());
 				}
@@ -4652,6 +4721,27 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TKeyPartitions node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_hash_partitions = xmldoc.createElement("key_partitions");
+		e_hash_partitions.setAttribute("type", node.getTablePartitionType().toString());
+
+		e_parent.appendChild(e_hash_partitions);
+		elementStack.push(e_hash_partitions);
+
+		if (node.getColumnList() != null){
+			addElementOfNode("partition_column_list", node.getColumnList());
+		}
+
+		if (node.getPartitionNum() != null){
+			addElementOfNode("partitions_num",node.getPartitionNum());
+		}
+
+
+		elementStack.pop();
+	}
+
+
 	public void preVisit(THashPartitions node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_hash_partitions = xmldoc.createElement("hash_paritions");
@@ -4660,12 +4750,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_hash_partitions);
 		elementStack.push(e_hash_partitions);
 
-		addElementOfNode("partition_column_list", node.getColumnList());
+		if (node.getColumnList() != null){
+			addElementOfNode("partition_column_list", node.getColumnList());
+		}
+
 		if (node.getHashPartitionsByQuantity() != null){
 			node.getHashPartitionsByQuantity().accept(this);
 		}
+		if (node.getHashExpr() != null){
+			addElementOfNode("hash_expr",node.getHashExpr());
+		}
 
-
+		if (node.getPartitionNum() != null){
+			addElementOfNode("partitions_num",node.getPartitionNum());
+		}
 		elementStack.pop();
 	}
 
@@ -4709,11 +4807,33 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		addElementOfNode("partition_column_list", node.getColumnList());
+		switch (node.dbvendor){
+			case dbvmysql:
+				if (node.getColumnList() != null){
+					addElementOfNode("partition_column_list", node.getColumnList());
+				}else if (node.getListExpr() != null){
+					addElementOfNode("list_expr",node.getListExpr());
+				}
 
-		ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-		for(int i=0;i<items.size();i++){
-			items.get(i).accept(this);
+				Element e_partition_def_list = xmldoc.createElement("partition_def_list");
+				e_range_partitions.appendChild(e_partition_def_list);
+				elementStack.push(e_partition_def_list);
+
+				if (node.getPartitionDefinitions() != null){
+					for(TPartitionDefinition pd:node.getPartitionDefinitions()){
+						pd.accept(this);
+					}
+				}
+				elementStack.pop();
+
+				break;
+			default:
+				addElementOfNode("partition_column_list", node.getColumnList());
+
+				ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
+				for(int i=0;i<items.size();i++){
+					items.get(i).accept(this);
+				}
 		}
 
 		elementStack.pop();
