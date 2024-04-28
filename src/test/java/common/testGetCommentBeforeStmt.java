@@ -15,8 +15,10 @@ public class testGetCommentBeforeStmt extends TestCase {
                 "FROM   scott.emp ";
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
-        assertTrue(sqlStatement.getCommentBeforeNode().equalsIgnoreCase("-- comment " + TBaseType.newline +
-                "/* fafaf */"));
+        System.out.println(sqlStatement.getCommentBeforeNode());
+        String desiredOut = "-- comment \n" +
+                "/* fafaf */";
+        assertTrue(sqlStatement.getCommentBeforeNode().equalsIgnoreCase(desiredOut));
     }
 
     public void test1(){
@@ -30,8 +32,11 @@ public class testGetCommentBeforeStmt extends TestCase {
                 "FROM   scott.emp ";
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
-        assertTrue(sqlStatement.getCommentBeforeNode().equalsIgnoreCase("/* fafaf */" + TBaseType.newline +
-                "-- comment "));
+
+        String disiredOut = "/* fafaf */\n" +
+                "\n" +
+                "-- comment";
+        assertTrue(sqlStatement.getCommentBeforeNode().trim().equalsIgnoreCase(disiredOut));
     }
 
     public void test2(){
@@ -46,8 +51,10 @@ public class testGetCommentBeforeStmt extends TestCase {
                 "FROM   scott.emp";
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
-        assertTrue(sqlStatement.getCommentBeforeNode().equalsIgnoreCase("/* fafaf */" + TBaseType.newline +
-                "-- comment "));
+       // System.out.println(sqlStatement.getCommentBeforeNode());
+        String desiredOut = "/* fafaf */\n" +
+                "-- comment";
+        assertTrue(sqlStatement.getCommentBeforeNode().trim().equalsIgnoreCase(desiredOut));
     }
 
 }

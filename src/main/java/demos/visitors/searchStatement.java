@@ -55,6 +55,12 @@ public class searchStatement {
             for(int i=0;i<sqlparser.sqlstatements.size();i++){
                 sqlStatement = sqlparser.sqlstatements.get(i);
                 System.out.println(sqlStatement.sqlstatementtype);
+//                if (sqlStatement.getCommentBeforeNode() != null){
+//                    System.out.println("Found comment before statement:\n"+sqlStatement.getCommentBeforeNode());
+//                }
+//                if (sqlStatement.getCommentAfterNode() != null){
+//                    System.out.println("Found comment after statement:\n"+sqlStatement.getCommentAfterNode());
+//                }
                 sqlStatement.acceptChildren(fv);
             }
 
