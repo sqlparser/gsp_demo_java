@@ -41,6 +41,7 @@ import gudusoft.gsqlparser.stmt.bigquery.TExportDataStmt;
 import gudusoft.gsqlparser.stmt.databricks.TCreateExternalLocationStmt;
 import gudusoft.gsqlparser.stmt.db2.TCreateVariableStmt;
 import gudusoft.gsqlparser.stmt.db2.TDb2HandlerDeclaration;
+
 import gudusoft.gsqlparser.stmt.db2.TDb2SetVariableStmt;
 import gudusoft.gsqlparser.stmt.mdx.TMdxSelect;
 import gudusoft.gsqlparser.stmt.mssql.*;
@@ -5807,6 +5808,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		stmt.getExpr( ).accept( this );
 		elementStack.pop( );
 	}
+
+
 
 	public void preVisit( TIfStmt node )
 	{
