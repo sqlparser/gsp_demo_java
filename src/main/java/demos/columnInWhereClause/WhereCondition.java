@@ -3,6 +3,7 @@ package demos.columnInWhereClause;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.nodes.IExpressionVisitor;
 import gudusoft.gsqlparser.nodes.TExpression;
+import gudusoft.gsqlparser.nodes.TObjectName;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
 
 public class WhereCondition implements IExpressionVisitor
@@ -32,8 +33,13 @@ public class WhereCondition implements IExpressionVisitor
 		if ( is_compare_condition( lcexpr.getExpressionType( ) ) )
 		{
 			TExpression leftExpr = (TExpression) lcexpr.getLeftOperand( );
-
-			System.out.println( "column: " + leftExpr.toString( ) );
+			TObjectName objectName = leftExpr.getObjectOperand();
+			if(objectName != null){
+				System.out.println( "column: " + objectName.getSourceTable().getTableName() + "." + objectName.getColumnNameOnly());
+			}
+			else{
+				System.out.println( "column: " + leftExpr.toString( ) );
+			}
 			if ( lcexpr.getComparisonOperator( ) != null )
 			{
 				System.out.println( "Operator: "
@@ -43,8 +49,15 @@ public class WhereCondition implements IExpressionVisitor
 			if ( rightExpr.getExpressionType() == EExpressionType.subquery_t){
 				System.out.println( "value: (subquery)");
 			}else{
-				System.out.println( "value: "
-						+ rightExpr.toString( ) );
+				objectName = rightExpr.getObjectOperand();
+				if(objectName != null){
+					System.out.println( "value: " + objectName.getSourceTable().getTableName() + "." +   objectName.getColumnNameOnly());
+				}
+				else{
+					System.out.println( "value: "
+							+ rightExpr.toString( ) );
+				}
+
 			}
 			System.out.println( "" );
 		}
