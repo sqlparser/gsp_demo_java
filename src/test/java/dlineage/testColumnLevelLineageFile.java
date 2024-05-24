@@ -4,6 +4,7 @@ import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.dlineage.util.ProcessUtility;
+import gudusoft.gsqlparser.util.SQLUtil;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -199,7 +200,14 @@ public class testColumnLevelLineageFile extends TestCase {
         List<String[]> c2 = resolver(result);
 
         if (c1.isEmpty() || c2.isEmpty() || c1.size() != c2.size()) {
-            return false;
+//        	try {
+//				SQLUtil.writeToFile(rf, result);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//          return true;
+        	return false;
         }
         boolean r = true;
         for (int i = 0; i < c1.size(); i++) {
