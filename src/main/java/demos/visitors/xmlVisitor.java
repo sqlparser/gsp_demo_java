@@ -4180,14 +4180,30 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		switch (stmt.getExecType()) {
 			case TBaseType.metExecSp:
-				current_objectName_tag = "module_name";
-				stmt.getModuleName().accept(this);
-				if (stmt.getParameters() != null) {
-					for (int i = 0; i < stmt.getParameters().size(); i++) {
-						stmt.getParameters()
-								.getExecParameter(i)
-								.accept(this);
-					}
+				switch (stmt.getExecuteType()){
+					case module:
+						current_objectName_tag = "module_name";
+						stmt.getModuleName().accept(this);
+						if (stmt.getParameters() != null) {
+							for (int i = 0; i < stmt.getParameters().size(); i++) {
+								stmt.getParameters()
+										.getExecParameter(i)
+										.accept(this);
+							}
+						}
+						break;
+					case expr:
+						stmt.getPreparedValue().accept(this);
+						if (stmt.getIntoVariable() != null){
+							current_objectName_tag = "into_variable";
+							stmt.getIntoVariable().accept(this);
+						}
+						if (stmt.getUsingVariables()!=null){
+							stmt.getUsingVariables().accept(this);
+						}
+						break;
+					default:
+						break;
 				}
 				break;
 			case TBaseType.metExecStringCmd:
