@@ -881,6 +881,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getWindowClause().accept(this);
 		}
 
+		if (node.getOffsetClause() != null){
+			node.getOffsetClause().accept(this);
+		}
+
+		if (node.getFetchFirstClause() != null){
+			node.getFetchFirstClause().accept(this);
+		}
+
 		elementStack.pop(); // query specification
 		elementStack.pop(); // query expression
 
@@ -896,6 +904,34 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 
 	}
+
+	public void preVisit(TFetchFirstClause node) {
+		// appendStartTag(node);
+		e_parent = (Element) elementStack.peek();
+		Element e_fetch_clause = xmldoc.createElement("fetch_clause");
+		e_parent.appendChild(e_fetch_clause);
+		elementStack.push(e_fetch_clause);
+		if (node.getFetchValue() != null){
+			node.getFetchValue().accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TOffsetClause node) {
+		// appendStartTag(node);
+		e_parent = (Element) elementStack.peek();
+		Element e_fetch_clause = xmldoc.createElement("offset_clause");
+		e_parent.appendChild(e_fetch_clause);
+		elementStack.push(e_fetch_clause);
+		if (node.getSelectOffsetValue() != null){
+			node.getSelectOffsetValue().accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+
 
 	public void postVisit(TSelectSqlStatement node) {
 		if (node.getDummyTag() == TOP_STATEMENT) {
