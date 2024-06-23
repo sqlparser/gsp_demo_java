@@ -9,6 +9,38 @@ import junit.framework.TestCase;
 
 public class TestCreateProcedure  extends TestCase {
 
+    public void testPlSQL3(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE EDM_REFINED_DEV.DW_APPL.sp_GetLData_Hcm_Hires()\n" +
+                "RETURNS STRING\n" +
+                "language sql\n" +
+                "as\n" +
+                "$$\n" +
+                "----Create Stage\n" +
+                "CREATE OR REPLACE STAGE EDM_REFINED_DEV.DW_APPL.HCM_LD_FILE_STAGE\n" +
+                "  storage_integration = STORAGE_absitdsdevwusseddw001\n" +
+                "  url = 'itds-dev-direct-feeds/COE_Diversity/DataIn/'\n" +
+                "  file_format = (type = 'CSV');\n" +
+                "----Create Stream\n" +
+                "CREATE OR REPLACE STREAM DM_EAGLE.\"PUBLIC\".EMPLOYEES_STREAM ON\n" +
+                "TABLE DM_EAGLE.\"PUBLIC\".EMPLOYEES;\n" +
+                "----Create Pipe\n" +
+                "CREATE OR REPLACE PIPE database.schema.mypipe as COPY INTO DM_PRODUCT.PUBLIC.PRODUCT_SALES\n" +
+                "FROM @DM_PRODUCT.PUBLIC.my_ext_stage/tutorials/dataloading/sales.json;\n" +
+                "SELECT * FROM selectTable;\n" +
+                "$$;";
+        //System.out.println(sqlparser.sqltext);
+
+        assertTrue(sqlparser.parse() == 0);
+        TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
+        assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreateprocedure);
+        TCreateProcedureStmt createProcedure = (TCreateProcedureStmt)sqlStatement;
+        assertTrue(createProcedure.getProcedureName().toString().equalsIgnoreCase("EDM_REFINED_DEV.DW_APPL.sp_GetLData_Hcm_Hires"));
+        assertTrue(createProcedure.getRoutineLanguage().equalsIgnoreCase("sql"));
+        assertTrue(createProcedure.getBodyStatements().size() == 4);
+
+    }
+
     public void testPlSQL1(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlparser.sqltext = "CREATE OR REPLACE PROCEDURE COVID19.\"PUBLIC\".INSERT_CDC_DATA()\n" +
@@ -76,7 +108,7 @@ public class TestCreateProcedure  extends TestCase {
                 "  return 'Done.';\n" +
                 "  $$;\n" +
                 "  ;";
-        //System.out.println(sqlparser.sqltext);
+       // System.out.println(sqlparser.sqltext);
 
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);

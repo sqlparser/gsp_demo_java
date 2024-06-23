@@ -95,6 +95,7 @@ import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.*;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
 import gudusoft.gsqlparser.stmt.TCreateMacro;
+import gudusoft.gsqlparser.stmt.teradata.TTeradataCollectStatistics;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataUsing;
 import org.w3c.dom.Document;
@@ -1932,6 +1933,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				current_expression_tag = "table_expr";
 				node.getTableExpr().accept(this);
 
+				if (node.getColumnDefinitions() != null){
+					node.getColumnDefinitions().accept(this);
+				}
+
 				elementStack.pop();
 				break;
 			}
@@ -3462,6 +3467,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 				case setComment:
 					addElementOfString("comment",stmt.getComment());
 					break;
+				case rename:
+					addElementOfNode("new_view_name",stmt.getNewViewName());
 				default:
 					break;
 			}
@@ -5213,6 +5220,23 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+
+
+	public void preVisit(TLimitClause node) {
+		Element e_parentNode = (Element) elementStack.peek();
+		Element e_limit = xmldoc.createElement("limit_clause");
+		e_parentNode.appendChild(e_limit);
+		elementStack.push(e_limit);
+		if (node.getRow_count() != null){
+			node.getRow_count().accept(this);
+		}
+		if (node.getOffset() != null){
+			node.getOffset().accept(this);
+		}
+
+		elementStack.pop();
+
+	}
 	public void preVisit(TWithinGroup withinGroup) {
 		Element e_functionCall = (Element) elementStack.peek();
 		Element e_within_group = xmldoc.createElement("within_group");
@@ -6241,6 +6265,34 @@ public class xmlVisitor extends TParseTreeVisitor {
 		stmt.getColumnDefinitionList().accept(this);
 		stmt.getSqlRequest().accept(this);
 		//e_usingstmt.setAttribute("type",stmt.getSetSessionType().toString());
+		elementStack.pop( );
+	}
+
+	public void preVisit( TTeradataCollectStatistics stmt )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_collect_stats = xmldoc.createElement( "teradata_collect_stats_statement" );
+		e_parent.appendChild( e_collect_stats );
+		elementStack.push( e_collect_stats );
+		stmt.getTableName().accept(this);
+		if (stmt.getColumnIndexList() != null){
+			for(int i=0;i<stmt.getColumnIndexList().size();i++){
+				stmt.getColumnIndexList().get(i).accept(this);
+			}
+		}
+
+		//e_usingstmt.setAttribute("type",stmt.getSetSessionType().toString());
+		elementStack.pop( );
+	}
+
+	public void preVisit( TCollectColumnIndex node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_column_indexs = xmldoc.createElement( "teradata_column_index" );
+		e_parent.appendChild( e_column_indexs );
+		elementStack.push( e_column_indexs );
+		node.getColumnNameList().accept(this);
+
 		elementStack.pop( );
 	}
 

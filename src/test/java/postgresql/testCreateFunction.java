@@ -39,6 +39,7 @@ public class testCreateFunction extends TestCase {
                 "  id_b = s2sphere.CellId(int.from_bytes(b.to_bytes(8, 'big', signed=True), 'big', signed=False))\n" +
                 "  return id_a.contains(id_b)\n" +
                 "$function$";
+       // System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TCreateFunctionStmt createFunction = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);

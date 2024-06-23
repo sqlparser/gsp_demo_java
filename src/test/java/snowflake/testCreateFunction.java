@@ -114,6 +114,7 @@ public class testCreateFunction extends TestCase {
                 "    select 3, 4\n" +
                 "  $$\n" +
                 "  ;";
+        //System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
         TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(0);
         assertTrue(sqlStatement.sqlstatementtype == ESqlStatementType.sstcreatefunction);

@@ -30,10 +30,10 @@ public class testCollectStatistics extends TestCase {
         TTeradataCollectStatistics collectStatistics = (TTeradataCollectStatistics)sqlparser.sqlstatements.get(0);
         assertTrue(collectStatistics.getTableName().toString().equalsIgnoreCase("db.sampletable"));
         assertTrue(collectStatistics.getColumnIndexList().size() == 2);
-        TCollectColumnIndex collectColumnIndex = collectStatistics.getColumnIndexList().getElement(0);
+        TCollectColumnIndex collectColumnIndex = collectStatistics.getColumnIndexList().get(0);
         assertTrue(collectColumnIndex.isIndex());
         assertTrue(collectColumnIndex.getColumnNameList().getObjectName(0).toString().equalsIgnoreCase("member"));
-        collectColumnIndex = collectStatistics.getColumnIndexList().getElement(1);
+        collectColumnIndex = collectStatistics.getColumnIndexList().get(1);
         assertTrue(collectColumnIndex.isColumn());
         assertTrue(collectColumnIndex.getColumnNameList().getObjectName(0).toString().equalsIgnoreCase("dateyymmdd"));
 
@@ -48,7 +48,7 @@ public class testCollectStatistics extends TestCase {
         assertTrue(collectStatistics.getTableName().toString().equalsIgnoreCase("dwh.stg_fact_example"));
 
         assertTrue(collectStatistics.getColumnIndexList().size() == 1);
-        TCollectColumnIndex collectColumnIndex = collectStatistics.getColumnIndexList().getElement(0);
+        TCollectColumnIndex collectColumnIndex = collectStatistics.getColumnIndexList().get(0);
         assertTrue(collectColumnIndex.isColumn());
         assertTrue(collectColumnIndex.getColumnNameList().getObjectName(0).toString().equalsIgnoreCase("partition"));
 
