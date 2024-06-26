@@ -50,25 +50,25 @@ public class testBlankLines extends TestCase {
          option.emptyLines = TEmptyLinesOption.EloMergeIntoOne;
         option.insertBlankLineInBatchSqls = false;
          String result = FormatterFactory.pp(sqlparser, option);
-        assertTrue(result.trim().equalsIgnoreCase("CREATE FUNCTION dbo.Isoweek (@DATE DATETIME\n"
-        		+ ") \n"
-        		+ "RETURNS INT WITH EXECUTE AS caller \n"
-        		+ "AS \n"
-        		+ "  BEGIN \n"
-        		+ "    DECLARE @ISOweek INT \n"
-        		+ "\n"
-        		+ "    SET @ISOweek= Datepart(wk,@DATE) + 1 - Datepart(wk,Cast(Datepart(yy,@DATE) AS CHAR(4)) + '0104') \n"
-        		+ "\n"
-        		+ "--Special cases: Jan 1-3 may belong to the previous year \n"
-        		+ "    IF ( @ISOweek = 0 ) SET @ISOweek=dbo.Isoweek(Cast(Datepart(yy,@DATE) - 1 AS CHAR(4)) + '12' + Cast(24 + Datepart(DAY,@DATE) AS CHAR(2))) + 1 \n"
-        		+ "\n"
-        		+ "--Special case: Dec 29-31 may belong to the next year \n"
-        		+ "    IF ( ( Datepart(mm,@DATE) = 12 )\n"
-        		+ "         AND ( ( Datepart(dd,@DATE) - Datepart(dw,@DATE) ) >= 28 ) ) SET @ISOweek=1 \n"
-        		+ "\n"
-        		+ "    RETURN(@ISOweek) \n"
-        		+ "  END;\n"
-        		+ "GO"));
+        assertTrue(result.trim().equalsIgnoreCase("CREATE FUNCTION dbo.Isoweek (@DATE DATETIME\n" +
+                ") \n" +
+                "RETURNS INT WITH EXECUTE AS caller \n" +
+                "AS \n" +
+                "  BEGIN \n" +
+                "    DECLARE @ISOweek INT \n" +
+                "\n" +
+                "    SET @ISOweek= Datepart(wk,@DATE) + 1 - Datepart(wk,Cast(Datepart(yy,@DATE) AS CHAR(4)) + '0104')  \n" +
+                "\n" +
+                "--Special cases: Jan 1-3 may belong to the previous year\n" +
+                "    IF ( @ISOweek = 0 ) SET @ISOweek=dbo.Isoweek(Cast(Datepart(yy,@DATE) - 1 AS CHAR(4)) + '12' + Cast(24 + Datepart(DAY,@DATE) AS CHAR(2))) + 1  \n" +
+                "\n" +
+                "--Special case: Dec 29-31 may belong to the next year\n" +
+                "    IF ( ( Datepart(mm,@DATE) = 12 )\n" +
+                "         AND ( ( Datepart(dd,@DATE) - Datepart(dw,@DATE) ) >= 28 ) ) SET @ISOweek=1 \n" +
+                "\n" +
+                "    RETURN(@ISOweek) \n" +
+                "  END;\n" +
+                "GO"));
 //        assertTrue(result.trim().equalsIgnoreCase("CREATE FUNCTION dbo.Isoweek (@DATE DATETIME\n" +
 //                ") \n" +
 //                "RETURNS INT WITH EXECUTE AS caller \n" +
@@ -239,27 +239,27 @@ public class testBlankLines extends TestCase {
         option.emptyLines = TEmptyLinesOption.EloPreserve;
         //option.insertBlankLineInBatchSqls = true;
          String result = FormatterFactory.pp(sqlparser, option);
-        assertTrue(result.trim().equalsIgnoreCase("CREATE FUNCTION dbo.Isoweek (@DATE DATETIME\n"
-        		+ ") \n"
-        		+ "RETURNS INT WITH EXECUTE AS caller \n"
-        		+ "AS \n"
-        		+ "  BEGIN \n"
-        		+ "    DECLARE @ISOweek INT \n"
-        		+ "\n"
-        		+ "    SET @ISOweek= Datepart(wk,@DATE) + 1 - Datepart(wk,Cast(Datepart(yy,@DATE) AS CHAR(4)) + '0104') \n"
-        		+ "\n"
-        		+ "--Special cases: Jan 1-3 may belong to the previous year \n"
-        		+ "    IF ( @ISOweek = 0 ) SET @ISOweek=dbo.Isoweek(Cast(Datepart(yy,@DATE) - 1 AS CHAR(4)) + '12' + Cast(24 + Datepart(DAY,@DATE) AS CHAR(2))) + 1 \n"
-        		+ "--Special case: Dec 29-31 may belong to the next year \n"
-        		+ "    IF ( ( Datepart(mm,@DATE) = 12 )\n"
-        		+ "         AND ( ( Datepart(dd,@DATE) - Datepart(dw,@DATE) ) >= 28 ) ) SET @ISOweek=1 \n"
-        		+ "\n"
-        		+ "\n"
-        		+ "\n"
-        		+ "\n"
-        		+ "    RETURN(@ISOweek) \n"
-        		+ "  END;\n"
-        		+ "GO"));
+        assertTrue(result.trim().equalsIgnoreCase("CREATE FUNCTION dbo.Isoweek (@DATE DATETIME\n" +
+                ") \n" +
+                "RETURNS INT WITH EXECUTE AS caller \n" +
+                "AS \n" +
+                "  BEGIN \n" +
+                "    DECLARE @ISOweek INT \n" +
+                "\n" +
+                "    SET @ISOweek= Datepart(wk,@DATE) + 1 - Datepart(wk,Cast(Datepart(yy,@DATE) AS CHAR(4)) + '0104')  \n" +
+                "\n" +
+                "--Special cases: Jan 1-3 may belong to the previous year\n" +
+                "    IF ( @ISOweek = 0 ) SET @ISOweek=dbo.Isoweek(Cast(Datepart(yy,@DATE) - 1 AS CHAR(4)) + '12' + Cast(24 + Datepart(DAY,@DATE) AS CHAR(2))) + 1  \n" +
+                "--Special case: Dec 29-31 may belong to the next year\n" +
+                "    IF ( ( Datepart(mm,@DATE) = 12 )\n" +
+                "         AND ( ( Datepart(dd,@DATE) - Datepart(dw,@DATE) ) >= 28 ) ) SET @ISOweek=1 \n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "    RETURN(@ISOweek) \n" +
+                "  END;\n" +
+                "GO"));
  //       System.out.println(result);
     }
 

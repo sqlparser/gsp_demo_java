@@ -81,8 +81,8 @@ public class testComment extends TestCase {
 
         sqlparser.parse();
         String result = FormatterFactory.pp(sqlparser, option);
-       assertTrue(result.trim().equalsIgnoreCase("SELECT OWNAMT  AS OWNAMT1--comment1   ,\n"
-       		+ "       CMPYAMT AS CMPYAMT1 --comment2  ,\n"
+       assertTrue(result.trim().equalsIgnoreCase("SELECT OWNAMT  AS OWNAMT1,--comment1   \n"
+       		+ "       CMPYAMT AS CMPYAMT1, --comment2  \n"
        		+ "       INSUAMT AS INSUAMT1--comment3  \n"
        		+ "FROM   AST.APADGNRL GNRL,\n"
        		+ "       AST.APAMACPT ACPT\n"
