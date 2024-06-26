@@ -41,10 +41,12 @@ public class testDataflow extends TestCase {
 			for (int j = 0; j < sqlfiles.length; j++) {
 				DataFlowAnalyzer analyzer = new DataFlowAnalyzer(sqlfiles[j], vendor, false);
 				analyzer.setShowConstantTable(true);
+				analyzer.getOption().setTraceProcedure(true);
 				String dataflow = analyzer.generateDataFlow();
 				File dataflowFile = new File(sqlfiles[j].getParentFile(),
 						sqlfiles[j].getName().replace(".sql", ".xml"));
-				if (!dataflowFile.exists()) {
+				if (!dataflowFile.exists()) 
+				{
 					try {
 						SQLUtil.writeToFile(dataflowFile, dataflow);
 					} catch (IOException e) {
