@@ -12,6 +12,23 @@ import junit.framework.TestCase;
 
 public class testObjectName extends TestCase {
 
+    public void testSchemaName(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
+        sqlparser.sqltext = "CREATE VIEW schema_name2.foo AS SELECT value FROM foo;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateViewSqlStatement createView = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
+        TObjectName viewName = createView.getViewName();
+        TObjectName tableName = createView.getSubquery().getRelations().get(0).getTableName();
+        assertTrue(viewName.getSchemaToken().toString().equalsIgnoreCase("schema_name2"));
+        assertTrue(viewName.getTableToken().toString().equalsIgnoreCase("foo"));
+        assertTrue(tableName.getSchemaToken() == null);
+        assertTrue(tableName.getImplictSchemaString().equalsIgnoreCase("schema_name2"));
+        assertTrue(tableName.getTableToken().toString().equalsIgnoreCase("foo"));
+
+    }
+
     public void test1QaulifiedName(){
 
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);

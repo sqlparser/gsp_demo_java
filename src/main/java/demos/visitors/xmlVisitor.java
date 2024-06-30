@@ -458,6 +458,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TResetStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_set_assignment = xmldoc.createElement("reset_statement");
+		e_parent.appendChild(e_set_assignment);
+		elementStack.push(e_set_assignment);
+		if (stmt.getVariableName() != null){
+			stmt.getVariableName().accept(this);
+		}
+		elementStack.pop();
+	}
+
+
+
 	public void preVisit(TSetStmt stmt) {
 		e_parent = (Element) elementStack.peek();
 		Element e_set_assignment = xmldoc.createElement("set_statement");
@@ -5085,7 +5098,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_drop);
 		elementStack.push(e_drop);
 		current_objectName_tag = "table_name";
-		stmt.getTableName().accept(this);
+		//stmt.getTableName().accept(this);
+		stmt.getTargetTable().accept(this);
 		elementStack.pop();
 	}
 
@@ -5095,7 +5109,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_truncate);
 		elementStack.push(e_truncate);
 		current_objectName_tag = "table_name";
-		stmt.getTableName().accept(this);
+		//stmt.getTableName().accept(this);
+		stmt.getTables().getTable(0).accept(this);
 		elementStack.pop();
 	}
 
