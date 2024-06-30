@@ -90,5 +90,93 @@ public class testComment extends TestCase {
        //assertTrue("remove_comment is not supported",false);
        // System.out.println(result);
    }
+    
+    
+	public static void testComment1() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
 
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvbigquery);
+		sqlparser.sqltext = "select /* multi line comment */ * from t;";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("SELECT /* multi line comment */ *\nFROM   t;"));
+	}
+	
+	public static void testComment2() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+		sqlparser.sqltext = "select a, f(b, 'c') d, e from Schema.Table where /*guid = 'aaaaaaaaaaaaaaaaaaaa' AND*/ start_dt >= 1140310;";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("SELECT a,\n"
+				+ "       F(b, 'c') d,\n"
+				+ "       e\n"
+				+ "FROM   SCHEMA.Table\n"
+				+ "WHERE  /*guid = 'aaaaaaaaaaaaaaaaaaaa' AND*/ start_dt >= 1140310;"));
+	}
+	
+	public static void testComment3() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+		sqlparser.sqltext = "create or replace view view_set(RTRACE_HMY, RTRACE_KEY, RTRACE_RIP_FLAG)\n"
+				+ "as (\n"
+				+ "--===================================================\n"
+				+ "--== Resident Tracebility Staging ==\n"
+				+ "-- Created By : Ketan Goel\n"
+				+ "-- Description : This procedure is to create resident\n"
+				+ "-- tracebility union of Transer and non\n"
+				+ "-- transfer tenants and roommates.\n"
+				+ "-- Story : R360-351\n"
+				+ "--===================================================\n"
+				+ "select * from PARSER_AUTOMATION_DO_NOT_TOUCH.PUBLIC.EMPLOYEE1\n"
+				+ "union\n"
+				+ "select * from PARSER_AUTOMATION_DO_NOT_TOUCH.PUBLIC.EMPLOYEE2);";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("CREATE OR REPLACE VIEW view_set(RTRACE_HMY,\n"
+				+ "                                RTRACE_KEY,\n"
+				+ "                                RTRACE_RIP_FLAG) \n"
+				+ "AS \n"
+				+ "  ( SELECT *        \n"
+				+ "--===================================================\n"
+				+ "--== Resident Tracebility Staging ==\n"
+				+ "-- Created By : Ketan Goel\n"
+				+ "-- Description : This procedure is to create resident\n"
+				+ "-- tracebility union of Transer and non\n"
+				+ "-- transfer tenants and roommates.\n"
+				+ "-- Story : R360-351\n"
+				+ "--===================================================\n"
+				+ "    FROM   PARSER_AUTOMATION_DO_NOT_TOUCH.PUBLIC.EMPLOYEE1\n"
+				+ "    UNION\n"
+				+ "    SELECT *\n"
+				+ "    FROM   PARSER_AUTOMATION_DO_NOT_TOUCH.PUBLIC.EMPLOYEE2);"));
+	}
+	
+	public static void testComment4() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+		sqlparser.sqltext = "select /* tt1 */ ss1.ca_county /* tt2 */, /* tt3 */ss1.d_year from source_table ss1";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("SELECT /* tt1 */ ss1.ca_county /* tt2 */,/* tt3 */\n"
+				+ "                 ss1.d_year\n"
+				+ "FROM   source_table ss1"));
+	}
+	
+	
 }
