@@ -178,5 +178,92 @@ public class testComment extends TestCase {
 				+ "FROM   source_table ss1"));
 	}
 	
+	public static void testComment5() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+		sqlparser.sqltext = "CREATE or REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants as (select * from GOLDMAN.PUBLIC.TABLE2) -- single-line comment\n;";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("CREATE OR REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants AS (SELECT * FROM GOLDMAN.PUBLIC.TABLE2) ; -- single-line comment"));
+	}
+	
+	public static void testComment6() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+		sqlparser.sqltext = "CREATE or REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants as (select * from GOLDMAN.PUBLIC.TABLE2) -- single-line comment;";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("CREATE OR REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants AS (SELECT * FROM GOLDMAN.PUBLIC.TABLE2) -- single-line comment;"));
+	}
+	
+	public static void testComment7() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+		sqlparser.sqltext = "-- singlie-line at the beginning \n select top 4 col1 --single-line comment in middle \n from testschema.testtable;";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase("-- singlie-line at the beginning \n"
+				+ "SELECT top 4 col1 FROM testschema.testtable; --single-line comment in middle"));
+	}
+	
+	public static void testComment8() {
+		GFmtOpt option = GFmtOptFactory.newInstance(new Exception().getStackTrace()[0].getClassName() + "."
+				+ new Exception().getStackTrace()[0].getMethodName());
+		option.removeComment = false;
+
+		TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvoracle);
+		sqlparser.sqltext = "with person as ( -- reference query 7\n"
+				+ " select c.id as person_id, c.name as -- reference query 8\n"
+				+ " full_name from hive.extended_comments_test_db_hive2.Contacts as c -- reference query 8\n"
+				+ " where -- reference query 8\n"
+				+ " c.name like -- reference query 8\n"
+				+ " 's%' -- reference query 6\n"
+				+ " and ( -- reference query 8\n"
+				+ " c.age > 18 -- reference query 8\n"
+				+ " or -- reference query 8\n"
+				+ " c.age < 12 -- reference query 8\n"
+				+ " ) and c.id <= 122321213 union all -- reference query 8\n"
+				+ " select l.id -- reference query 8\n"
+				+ " as person_id,-- reference query 8\n"
+				+ " l.name as fullname -- reference query 8\n"
+				+ " from hive.extended_comments_test_db_hive2.Leads as l where l.name like 's%' ) -- reference query 9\n"
+				+ " select person_id, full_name -- reference query 10\n"
+				+ " from person where full_name like 's%' order by full_name; -- reference query 11";
+
+		sqlparser.parse();
+		String result = FormatterFactory.pp(sqlparser, option);
+		assertTrue(result.trim().equalsIgnoreCase(
+				  "WITH person\n"
+				+ "     AS ( SELECT c.id   AS person_id,-- reference query 7\n"
+				+ "                c.name AS full_name -- reference query 8\n"
+				+ "         FROM   hive.extended_comments_test_db_hive2.Contacts AS c -- reference query 8\n"
+				+ "         WHERE  c.name LIKE 's%'   -- reference query 8 -- reference query 8 -- reference query 6\n"
+				+ "                AND (  c.age > 18 -- reference query 8 -- reference query 8\n"
+				+ "                      OR  c.age < 12 ) -- reference query 8 -- reference query 8\n"
+				+ "                AND c.id <= 122321213\n"
+				+ "         UNION ALL -- reference query 8\n"
+				+ "         SELECT l.id   AS person_id,  -- reference query 8 -- reference query 8\n"
+				+ "                l.name AS fullname -- reference query 8\n"
+				+ "         FROM   hive.extended_comments_test_db_hive2.Leads AS l\n"
+				+ "         WHERE  l.name LIKE 's%')  -- reference query 9\n"
+				+ "  SELECT   person_id,\n"
+				+ "           full_name -- reference query 10\n"
+				+ "  FROM     person\n"
+				+ "  WHERE    full_name LIKE 's%'\n"
+				+ "  ORDER BY full_name; -- reference query 11"));
+	}
+	
 	
 }
