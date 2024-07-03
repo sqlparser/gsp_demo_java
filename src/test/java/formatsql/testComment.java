@@ -148,7 +148,7 @@ public class testComment extends TestCase {
 				+ "                                RTRACE_KEY,\n"
 				+ "                                RTRACE_RIP_FLAG) \n"
 				+ "AS \n"
-				+ "  ( SELECT *        \n"
+				+ "  (         \n"
 				+ "--===================================================\n"
 				+ "--== Resident Tracebility Staging ==\n"
 				+ "-- Created By : Ketan Goel\n"
@@ -157,6 +157,7 @@ public class testComment extends TestCase {
 				+ "-- transfer tenants and roommates.\n"
 				+ "-- Story : R360-351\n"
 				+ "--===================================================\n"
+				+ "            SELECT *\n"
 				+ "    FROM   PARSER_AUTOMATION_DO_NOT_TOUCH.PUBLIC.EMPLOYEE1\n"
 				+ "    UNION\n"
 				+ "    SELECT *\n"
@@ -188,7 +189,8 @@ public class testComment extends TestCase {
 
 		sqlparser.parse();
 		String result = FormatterFactory.pp(sqlparser, option);
-		assertTrue(result.trim().equalsIgnoreCase("CREATE OR REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants AS (SELECT * FROM GOLDMAN.PUBLIC.TABLE2) ; -- single-line comment"));
+		assertTrue(result.trim().equalsIgnoreCase("CREATE OR REPLACE VIEW GOLDMAN.PUBLIC.testview2 copy grants AS (SELECT * FROM GOLDMAN.PUBLIC.TABLE2)  -- single-line comment\n"
+				+ "                                                                                                      ;"));
 	}
 	
 	public static void testComment6() {
@@ -215,7 +217,8 @@ public class testComment extends TestCase {
 		sqlparser.parse();
 		String result = FormatterFactory.pp(sqlparser, option);
 		assertTrue(result.trim().equalsIgnoreCase("-- singlie-line at the beginning \n"
-				+ "SELECT top 4 col1 FROM testschema.testtable; --single-line comment in middle"));
+				+ "SELECT top 4 col1  --single-line comment in middle \n"
+				+ "                   FROM testschema.testtable;"));
 	}
 	
 	public static void testComment8() {
@@ -246,23 +249,30 @@ public class testComment extends TestCase {
 		String result = FormatterFactory.pp(sqlparser, option);
 		assertTrue(result.trim().equalsIgnoreCase(
 				  "WITH person\n"
-				+ "     AS ( SELECT c.id   AS person_id,-- reference query 7\n"
-				+ "                c.name AS full_name -- reference query 8\n"
-				+ "         FROM   hive.extended_comments_test_db_hive2.Contacts AS c -- reference query 8\n"
-				+ "         WHERE  c.name LIKE 's%'   -- reference query 8 -- reference query 8 -- reference query 6\n"
-				+ "                AND (  c.age > 18 -- reference query 8 -- reference query 8\n"
-				+ "                      OR  c.age < 12 ) -- reference query 8 -- reference query 8\n"
-				+ "                AND c.id <= 122321213\n"
-				+ "         UNION ALL -- reference query 8\n"
-				+ "         SELECT l.id   AS person_id,  -- reference query 8 -- reference query 8\n"
-				+ "                l.name AS fullname -- reference query 8\n"
-				+ "         FROM   hive.extended_comments_test_db_hive2.Leads AS l\n"
-				+ "         WHERE  l.name LIKE 's%')  -- reference query 9\n"
-				+ "  SELECT   person_id,\n"
-				+ "           full_name -- reference query 10\n"
-				+ "  FROM     person\n"
-				+ "  WHERE    full_name LIKE 's%'\n"
-				+ "  ORDER BY full_name; -- reference query 11"));
+				  + "     AS ( -- reference query 7\n"
+				  + "          SELECT c.id   AS person_id,\n"
+				  + "                c.name AS  -- reference query 8\n"
+				  + "                           full_name\n"
+				  + "         FROM   hive.extended_comments_test_db_hive2.Contacts AS c -- reference query 8\n"
+				  + "         WHERE   -- reference query 8\n"
+				  + "                 c.name LIKE  -- reference query 8\n"
+				  + "                              's%' -- reference query 6\n"
+				  + "                AND (  -- reference query 8\n"
+				  + "                       c.age > 18 -- reference query 8\n"
+				  + "                      OR  -- reference query 8\n"
+				  + "                          c.age < 12 ) -- reference query 8\n"
+				  + "                AND c.id <= 122321213\n"
+				  + "         UNION ALL -- reference query 8\n"
+				  + "         SELECT l.id  -- reference query 8  \n"
+				  + "                        AS person_id, -- reference query 8\n"
+				  + "                l.name AS fullname -- reference query 8\n"
+				  + "         FROM   hive.extended_comments_test_db_hive2.Leads AS l\n"
+				  + "         WHERE  l.name LIKE 's%')  -- reference query 9\n"
+				  + "  SELECT   person_id,\n"
+				  + "           full_name -- reference query 10\n"
+				  + "  FROM     person\n"
+				  + "  WHERE    full_name LIKE 's%'\n"
+				  + "  ORDER BY full_name; -- reference query 11"));
 	}
 	
 	
