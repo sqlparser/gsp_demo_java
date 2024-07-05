@@ -177,7 +177,7 @@ public class testBigQuery extends TestCase {
 
 
     public static void testShowCTEColumns() {
-        doTestShowCTEColumn(  gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"bigquery\\solidatus\\cte_with_star_columns.sql",
+        doTestShowCTEColumn(  gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"bigquery/solidatus/cte_with_star_columns.sql",
                 "Tables:\n" +
                         "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`\n" +
                         "`data`.`RETAIL_PROD_SOURCE`\n" +

@@ -35,7 +35,7 @@ public class testStarColumnInfile  extends TestCase {
 
         try {
             outStr = TBaseType.readFile(out, Charset.defaultCharset());
-            a = outStr.trim().split(TBaseType.windowsLinebreakEscape);
+            a = outStr.trim().split("\r?\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class testStarColumnInfile  extends TestCase {
                 TCustomSqlStatement sqlStatement = sqlparser.sqlstatements.get(i);
                 sqlStatement.acceptChildren(starColumnVisitor);
                 StringBuilder sbout = starColumnVisitor.getResultColumns();
-                b = sbout.toString().trim().split(TBaseType.windowsLinebreakEscape);
+                b = sbout.toString().trim().split("\r?\n");
             }
 //            System.out.println("actual===========");
 //            for(String s:b){
