@@ -3,6 +3,7 @@ package test;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
+import gudusoft.gsqlparser.TBaseType;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,13 +48,13 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "job depends on: emp.job, emp.deptno\r\n"
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "job depends on: emp.job, emp.deptno\r\n"
 						+ "dept_10 depends on: emp.deptno, emp.job, emp\r\n"
 						+ "dept_20 depends on: emp.deptno, emp.job, emp\r\n"
 						+ "dept_30 depends on: emp.deptno, emp.job, emp\r\n"
-						+ "dept_40 depends on: emp.deptno, emp.job, emp\r\n" ) );
+						+ "dept_40 depends on: emp.deptno, emp.job, emp\r\n" ) ));
 
 	}
 
@@ -73,9 +74,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "employee_name depends on: emp.ename, emp.deptno\r\nemp_dept_count depends on: emp, emp.deptno\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "employee_name depends on: emp.ename, emp.deptno\r\nemp_dept_count depends on: emp, emp.deptno\r\n" ) ));
 
 	}
 
@@ -90,9 +91,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "SAL depends on: store_information.sal, internet_sales.sal\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "SAL depends on: store_information.sal, internet_sales.sal\r\n" ) ));
 
 	}
 
@@ -117,9 +118,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "* depends on: emp.sal, dept.sal, emp.deptno, dept.deptno, emp.dname, dept.dname\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "* depends on: emp.sal, dept.sal, emp.deptno, dept.deptno, emp.dname, dept.dname\r\n" ) ));
 
 	}
 
@@ -131,9 +132,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "* depends on: persons.dept, persons.dept.paredeptid, persons.dept.deptid\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "* depends on: persons.dept, persons.dept.paredeptid, persons.dept.deptid\r\n" ) ));
 	}
 
 	public void testWhereSQL( )
@@ -148,9 +149,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "a.ca1 depends on: ta.ca1, ta.ca3, tb.cb_id, tb.cb3, ta.ca_id\r\na.ca2 depends on: ta.ca2, ta.ca3, tb.cb_id, tb.cb3, ta.ca_id\r\nb.cb1 depends on: tb.cb1, tb.cb3, tb.cb_id, ta.ca_id, ta.ca3\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "a.ca1 depends on: ta.ca1, ta.ca3, tb.cb_id, tb.cb3, ta.ca_id\r\na.ca2 depends on: ta.ca2, ta.ca3, tb.cb_id, tb.cb3, ta.ca_id\r\nb.cb1 depends on: tb.cb1, tb.cb3, tb.cb_id, ta.ca_id, ta.ca3\r\n" ) ));
 
 	}
 
@@ -170,9 +171,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "product_id depends on: products.product_id\r\nproduct_type_id depends on: products.product_type_id\r\ntestcasewhen depends on: products.product_type_id\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "product_id depends on: products.product_id\r\nproduct_type_id depends on: products.product_type_id\r\ntestcasewhen depends on: products.product_type_id\r\n" ) ));
 	}
 
 	public void testOrderBySQL( )
@@ -183,9 +184,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "* depends on: mytb, mytb.mycol\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "* depends on: mytb, mytb.mycol\r\n" ) ));
 	}
 
 	public void testUpdateSQL( )
@@ -201,9 +202,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				false );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "base_cow_id depends on: sds_tst_prdct.std_tst_id, bog_pr_jil.tstid, bog_pr_jil.bsecowid\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "base_cow_id depends on: sds_tst_prdct.std_tst_id, bog_pr_jil.tstid, bog_pr_jil.bsecowid\r\n" ) ));
 
 	}
 
@@ -220,9 +221,9 @@ public class ColumnImpactTest extends TestCase
 				true,
 				null );
 		impact.impactSQL();
-		//System.out.println( impact.getImpactResult( ) );
-		Assert.assertTrue( impact.getImpactResult( )
-				.equals( "T1.PRODUCT depends on: products.product\r\nT2.AMOUNT depends on: sales.amount, sales.qty\r\n" ) );
+		//System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
+		Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
+				,( "T1.PRODUCT depends on: products.product\r\nT2.AMOUNT depends on: sales.amount, sales.qty\r\n" ) ));
 
 	}
 
@@ -317,11 +318,11 @@ public class ColumnImpactTest extends TestCase
 							true,
 							new MetaDatabaseFilter( ) );
 					impact.impactSQL();
-				//	System.out.println( impact.getImpactResult( ) );
+				//	System.out.println( TBaseType.compareStringsLineByLine(impact.getImpactResult( ) ));
 
-					Assert.assertTrue( impact.getImpactResult( )
+					Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
 							.trim( )
-							.equalsIgnoreCase( getContent( xmlFile ) ) );
+							,( getContent( xmlFile ) ) ));
 				}
 			}
 		}
