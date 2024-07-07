@@ -301,7 +301,7 @@ public class testSQLServer extends TestCase {
     }
 
     public static void testFile1() {
-        doTestFile(gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"mssql\\column_resolver\\pivot.sql",
+        doTestFile(gspCommon.BASE_SQL_DIR_PRIVATE_JAVA +"mssql/column_resolver/pivot.sql",
                 "Tables:\n" +
                         "Imported.ADDRESS\n" +
                         "Imported.STATES\n" +

@@ -21,3 +21,43 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+
+# Visual Studio LightSwitch build output
+# maven #
+target
+bin
+
+logs
+
+# windows #
+Thumbs.db
+
+# Mac #
+.DS_Store
+
+# eclipse #
+.settings
+.project
+.classpath
+*.class
+
+# idea #
+.idea
+*.iml
+
+# Package Files #
+*.jar
+*.war
+*.ear
+/target
+
+## JRebel ##
+rebel.xml
+
+# Maven target
+**/target
+
+*.iml
+
+

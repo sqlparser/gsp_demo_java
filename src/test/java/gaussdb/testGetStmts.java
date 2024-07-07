@@ -11,7 +11,7 @@ public class testGetStmts extends TestCase {
 
     public void testCreateFunction(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
-        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create function.sql";
+        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/CREATE FUNCTION.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
         assertTrue(sqlparser.getSqlstatements().size() == 29);
         assertTrue(sqlparser.sqlstatements.get(1) instanceof TCreateFunctionStmt);
@@ -24,7 +24,7 @@ public class testGetStmts extends TestCase {
 
     public void testCreatePackage(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
-        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create package.sql";
+        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/CREATE PACKAGE.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
         assertTrue(sqlparser.getSqlstatements().size() == 9);
         assertTrue(sqlparser.sqlstatements.get(1) instanceof TPlsqlCreatePackage);
@@ -37,7 +37,7 @@ public class testGetStmts extends TestCase {
 
     public void testCreateProcedure(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
-        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create procedure.sql";
+        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/CREATE PROCEDURE.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
         assertTrue(sqlparser.getSqlstatements().size() == 16);
         assertTrue(sqlparser.sqlstatements.get(0) instanceof TCreateProcedureStmt);
@@ -50,7 +50,7 @@ public class testGetStmts extends TestCase {
 
     public void testCreateTrigger(){
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
-        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/create trigger.sql";
+        sqlparser.sqlfilename = gspCommon.BASE_SQL_DIR_PUBLIC_JAVA +"gaussdb/sql grammar/CREATE TRIGGER.sql";
         assertTrue(sqlparser.getrawsqlstatements() == 0);
         assertTrue(sqlparser.getSqlstatements().size() == 23);
         assertTrue(sqlparser.sqlstatements.get(2) instanceof TCreateFunctionStmt);

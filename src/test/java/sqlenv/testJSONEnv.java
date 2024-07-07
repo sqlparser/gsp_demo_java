@@ -48,7 +48,7 @@ public class testJSONEnv extends TestCase {
     @Override
     protected void setUp() throws Exception {
        // System.out.println("Setting it up!");
-        sqlEnv = new TJSONSQLEnv(EDbVendor.dbvmssql,common.gspCommon.BASE_SQL_DIR_PRIVATE+"\\sqlflow\\api_json\\DBexport20191212.json");
+        sqlEnv = new TJSONSQLEnv(EDbVendor.dbvmssql,common.gspCommon.BASE_SQL_DIR_PRIVATE+"/sqlflow/api_json/DBexport20191212.json");
         sqlEnv.initSQLEnv();
     }
     @Override

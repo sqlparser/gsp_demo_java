@@ -9,6 +9,7 @@ import java.util.List;
 
 import common.gspCommon;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.util.SQLUtil;
 import junit.framework.TestCase;
@@ -45,10 +46,10 @@ public class testDataflow extends TestCase {
 				String dataflow = analyzer.generateDataFlow();
 				File dataflowFile = new File(sqlfiles[j].getParentFile(),
 						sqlfiles[j].getName().replace(".sql", ".xml"));
-				if (!dataflowFile.exists()) 
+				if (!dataflowFile.exists())
 				{
 					try {
-						SQLUtil.writeToFile(dataflowFile, dataflow);
+						SQLUtil.writeToFile(dataflowFile, dataflow.replaceAll("\r?\n", "\n").trim());
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -64,7 +65,7 @@ public class testDataflow extends TestCase {
 						}
 					}
 				}
-				assertEquals(dataflow, SQLUtil.readFile(dataflowFile));
+				assertTrue(TBaseType.compareStringBuilderToFile(new StringBuilder(dataflow), dataflowFile.getAbsolutePath()));
 			}
 		}
 	}
