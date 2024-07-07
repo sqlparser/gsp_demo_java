@@ -6811,6 +6811,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+	public void preVisit( TDoExecuteBlockStmt node )
+	{
+
+		e_parent = (Element) elementStack.peek( );
+		Element e_do_block = xmldoc.createElement( "do_synonymous_block_statement" );
+		e_parent.appendChild( e_do_block );
+		elementStack.push( e_do_block );
+
+		node.getBlockBody().accept(this);
+
+		elementStack.pop( );
+	}
+
 	public void preVisit( TParameterDeclarationList list )
 	{
 		e_parent = (Element) elementStack.peek( );
