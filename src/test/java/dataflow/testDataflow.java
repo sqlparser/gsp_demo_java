@@ -49,7 +49,7 @@ public class testDataflow extends TestCase {
 				if (!dataflowFile.exists())
 				{
 					try {
-						SQLUtil.writeToFile(dataflowFile, dataflow.replaceAll("\r?\n", "\r\n").trim());
+						SQLUtil.writeToFile(dataflowFile, dataflow.trim());
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
