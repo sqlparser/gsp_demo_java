@@ -3078,6 +3078,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+
+	public void preVisit(TExplainPlan stmt) {
+		Element e_use_database = xmldoc.createElement("explain_statement");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_use_database);
+		elementStack.push(e_use_database);
+		stmt.getStatement().accept(this);
+
+		elementStack.pop();
+	}
+
 	public void preVisit(TUseDatabase stmt) {
 		Element e_use_database = xmldoc.createElement("use_database_statement");
 		e_parent = (Element) elementStack.peek();
