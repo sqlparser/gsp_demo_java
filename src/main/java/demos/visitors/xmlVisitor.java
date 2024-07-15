@@ -2121,6 +2121,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case join:
 				node.getJoinExpr().accept(this);
 				break;
+			case caseJoin:
+
+				e_table_reference = xmldoc.createElement("case_join_table_reference");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_table_reference);
+				elementStack.push(e_table_reference);
+
+				node.getCaseJoin().accept(this);
+				elementStack.pop();
+				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
 				e_parent = (Element) elementStack.peek();
@@ -2163,6 +2173,42 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
+
+
+
+	public void preVisit(TCaseJoinClause node) {
+		Element e_case_join_clause = xmldoc.createElement("case_join_clause");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_case_join_clause);
+		elementStack.push(e_case_join_clause);
+		for(TCaseJoinItem item:node.getCaseJoinItems()){
+			item.accept(this);
+		}
+		if (node.getDefaultJoinItem() != null){
+			node.getDefaultJoinItem().accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TCaseJoinItem node) {
+		Element e_case_join_item = xmldoc.createElement("case_join_item");
+
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_case_join_item);
+		elementStack.push(e_case_join_item);
+		if (node.getWhenCondition() != null){
+			node.getWhenCondition().accept(this);
+		}
+
+		node.getColumnList().accept(this);
+
+		node.getTableReference().accept(this);
+		node.getJoinCondition().accept(this);
+
+		elementStack.pop();
+	}
+
 	public void preVisit(TFlashback node) {
 		Element e_flash_back = xmldoc.createElement("flashback");
 
@@ -2171,7 +2217,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.push(e_flash_back);
 		elementStack.pop();
 	}
-
 
 	public void preVisit(TLateralView node) {
 		Element e_lateral_view = xmldoc.createElement("lateral_view");
