@@ -35,6 +35,7 @@ import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
+import gudusoft.gsqlparser.nodes.snowflake.TTaskOption;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
 import gudusoft.gsqlparser.stmt.bigquery.TExportDataStmt;
@@ -463,12 +464,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_set_assignment = xmldoc.createElement("reset_statement");
 		e_parent.appendChild(e_set_assignment);
 		elementStack.push(e_set_assignment);
-		if (stmt.getVariableName() != null){
+		if (stmt.getVariableName() != null) {
 			stmt.getVariableName().accept(this);
 		}
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TSetStmt stmt) {
@@ -509,9 +509,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_value = xmldoc.createElement("value");
 		e_literal.appendChild(e_value);
 		e_value.setTextContent(node.toString());
-		switch (node.getLiteralType()){
+		switch (node.getLiteralType()) {
 			case interval:
-				if (node.getInt64_expression() != null){ // bigquery
+				if (node.getInt64_expression() != null) { // bigquery
 					node.getInt64_expression().accept(this);
 				}
 				break;
@@ -519,7 +519,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				Element e1 = xmldoc.createElement("json_content");
 				e_literal.appendChild(e1);
 				elementStack.push(e1);
-				for(TKeyValueSqlNode n:node.getKeyValues()){
+				for (TKeyValueSqlNode n : node.getKeyValues()) {
 					n.accept(this);
 				}
 
@@ -531,7 +531,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TKeyValueSqlNode node) {
@@ -646,7 +645,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_join);
 		elementStack.push(e_join);
 
-		e_join.setAttribute("type",node.getJointype().toString());
+		e_join.setAttribute("type", node.getJointype().toString());
 
 		Element e_left_relation = xmldoc.createElement("left_relation");
 		e_parent = (Element) elementStack.peek();
@@ -662,20 +661,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		node.getRightTable().accept(this);
 		elementStack.pop();
 
-		if (node.onCondition != null){
+		if (node.onCondition != null) {
 			Element e_on_condition = xmldoc.createElement("on_condition");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_on_condition);
 			elementStack.push(e_on_condition);
 			node.onCondition.accept(this);
 			elementStack.pop();
-		}else if (node.usingColumns != null){
+		} else if (node.usingColumns != null) {
 			Element e_using_columns = xmldoc.createElement("using_columns");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_using_columns);
 			elementStack.push(e_using_columns);
 			node.usingColumns.accept(this);
-			if (node.getJoin_using_alias() != null){
+			if (node.getJoin_using_alias() != null) {
 				node.getJoin_using_alias().accept(this);
 			}
 			elementStack.pop();
@@ -729,7 +728,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			Element e_binary_query_expression = xmldoc.createElement("binary_query_expression");
 
 			ArrayList<TSelectSqlStatement> flattenedSelects = node.getFlattenedSelects();
-			if (flattenedSelects.size()>100){
+			if (flattenedSelects.size() > 100) {
 				e_query_expression.appendChild(e_binary_query_expression);
 				elementStack.push(e_binary_query_expression);
 
@@ -737,13 +736,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_select_list.setAttribute("count", String.valueOf(flattenedSelects.size()));
 				e_binary_query_expression.appendChild(e_select_list);
 				elementStack.push(e_select_list);
-				for(int i=0;i<flattenedSelects.size();i++){
+				for (int i = 0; i < flattenedSelects.size(); i++) {
 					flattenedSelects.get(i).accept(this);
 				}
 				elementStack.pop();
 
 				elementStack.pop();
-			}else{
+			} else {
 				e_binary_query_expression.setAttribute("set_operator",
 						node.getSetOperatorType().toString());
 				e_binary_query_expression.setAttribute("is_all",
@@ -776,11 +775,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getComputeClause().accept(this);
 			}
 
-			if (node.getQualifyClause() != null){
+			if (node.getQualifyClause() != null) {
 				node.getQualifyClause().accept(this);
 			}
 
-			if (node.getWindowClause() != null){
+			if (node.getWindowClause() != null) {
 				node.getWindowClause().accept(this);
 			}
 
@@ -834,16 +833,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getIntoClause().accept(this);
 		}
 
-		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN){
+		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN) {
 			Element e_from_clause = xmldoc.createElement("from_clause");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_from_clause);
 			elementStack.push(e_from_clause);
-			for(TTable table:node.getRelations()){
+			for (TTable table : node.getRelations()) {
 				table.accept(this);
 			}
 			elementStack.pop();
-		}else{
+		} else {
 			//  采用原来的遍历方法
 			if (node.joins.size() > 0) {
 				Element e_from_clause = xmldoc.createElement("from_clause");
@@ -887,19 +886,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getComputeClause().accept(this);
 		}
 
-		if (node.getQualifyClause() != null){
+		if (node.getQualifyClause() != null) {
 			node.getQualifyClause().accept(this);
 		}
 
-		if (node.getWindowClause() != null){
+		if (node.getWindowClause() != null) {
 			node.getWindowClause().accept(this);
 		}
 
-		if (node.getOffsetClause() != null){
+		if (node.getOffsetClause() != null) {
 			node.getOffsetClause().accept(this);
 		}
 
-		if (node.getFetchFirstClause() != null){
+		if (node.getFetchFirstClause() != null) {
 			node.getFetchFirstClause().accept(this);
 		}
 
@@ -925,7 +924,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_fetch_clause = xmldoc.createElement("fetch_clause");
 		e_parent.appendChild(e_fetch_clause);
 		elementStack.push(e_fetch_clause);
-		if (node.getFetchValue() != null){
+		if (node.getFetchValue() != null) {
 			node.getFetchValue().accept(this);
 		}
 
@@ -938,13 +937,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_fetch_clause = xmldoc.createElement("offset_clause");
 		e_parent.appendChild(e_fetch_clause);
 		elementStack.push(e_fetch_clause);
-		if (node.getSelectOffsetValue() != null){
+		if (node.getSelectOffsetValue() != null) {
 			node.getSelectOffsetValue().accept(this);
 		}
 
 		elementStack.pop();
 	}
-
 
 
 	public void postVisit(TSelectSqlStatement node) {
@@ -994,15 +992,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getAliasClause().accept(this);
 		}
 
-		if (node.getExceptColumnList() != null){
-			addElementOfNode("except_columns",node.getExceptColumnList());
+		if (node.getExceptColumnList() != null) {
+			addElementOfNode("except_columns", node.getExceptColumnList());
 		}
 
-		if (node.getReplaceExprAsIdentifiers() != null){
+		if (node.getReplaceExprAsIdentifiers() != null) {
 			Element e_replace_clause = xmldoc.createElement("replace_clause");
 			e_result_column.appendChild(e_replace_clause);
 			elementStack.push(e_replace_clause);
-			for(int i=0;i<node.getReplaceExprAsIdentifiers().size();i++){
+			for (int i = 0; i < node.getReplaceExprAsIdentifiers().size(); i++) {
 				node.getReplaceExprAsIdentifiers().get(i).accept(this);
 			}
 			elementStack.pop();
@@ -1072,9 +1070,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
 				elementStack.push(e_expression);
-				if (node.getSubQuery() != null){
+				if (node.getSubQuery() != null) {
 					node.getSubQuery().accept(this);
-				}else{
+				} else {
 					node.getLeftOperand().accept(this);
 					node.getRightOperand().accept(this);
 				}
@@ -1173,20 +1171,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_parent.appendChild(e_expression);
 				elementStack.push(e_expression);
 
-				if (node.getTypeName() != null){
-					addElementOfNode("element_type",node.getTypeName());
+				if (node.getTypeName() != null) {
+					addElementOfNode("element_type", node.getTypeName());
 				}
 
 				if (node.getExprList() != null) {
-					for(int k=0;k<node.getExprList().size();k++){
+					for (int k = 0; k < node.getExprList().size(); k++) {
 						TExpression expr = node.getExprList().getExpression(k);
 						Element arrayElement = xmldoc.createElement("element");
 						e_expression.appendChild(arrayElement);
 
-						if ((expr.getExpressionType() == parenthesis_t)||(expr.getExpressionType() == list_t)){
-							arrayElement.setAttribute("element_type","struct");
-						}else{
-							arrayElement.setAttribute("element_type","normal");
+						if ((expr.getExpressionType() == parenthesis_t) || (expr.getExpressionType() == list_t)) {
+							arrayElement.setAttribute("element_type", "struct");
+						} else {
+							arrayElement.setAttribute("element_type", "normal");
 						}
 						elementStack.push(arrayElement);
 						expr.accept(this);
@@ -1359,7 +1357,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_parent.appendChild(e_expression);
 				if (node.getOperatorToken() != null) {
 					e_expression.setAttribute("operator",
-							node.getOperatorToken().toString()+"("+node.getOperatorToken().lineNo+","+node.getOperatorToken().columnNo+")");
+							node.getOperatorToken().toString() + "(" + node.getOperatorToken().lineNo + "," + node.getOperatorToken().columnNo + ")");
 				}
 				elementStack.push(e_expression);
 				current_expression_tag = "first_expr";
@@ -1434,9 +1432,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getLeftOperand().accept(this);
 				break;
 			case fieldselection_t:
-				if (node.getLeftOperand() != null){
+				if (node.getLeftOperand() != null) {
 					node.getLeftOperand().accept(this);
-				}else if (node.getFunctionCall() != null){
+				} else if (node.getFunctionCall() != null) {
 					node.getFunctionCall().accept(this);
 				}
 				node.getFieldName().accept(this);
@@ -1880,9 +1878,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_json_object_function);
 		elementStack.push(e_json_object_function);
-		e_json_object_function.setAttribute("function_name",node.getFunctionName().toString());
+		e_json_object_function.setAttribute("function_name", node.getFunctionName().toString());
 
-		for(int i=0;i<node.getKeyValues().size();i++){
+		for (int i = 0; i < node.getKeyValues().size(); i++) {
 			node.getKeyValues().get(i).accept(this);
 		}
 
@@ -1894,7 +1892,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_open_query);
 		elementStack.push(e_open_query);
-		if (node.getSubquery() != null){
+		if (node.getSubquery() != null) {
 			node.getSubquery().accept(this);
 		}
 		elementStack.pop();
@@ -1909,10 +1907,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		Element e_table_reference = xmldoc.createElement(tag_name);
 		e_table_reference.setAttribute("type", node.getTableType().toString());
-		if (node.getEffectType() != null){
+		if (node.getEffectType() != null) {
 			e_table_reference.setAttribute("effect_type", node.getEffectType().toString());
 		}
-		e_table_reference.setAttribute("is_cte", node.isCTEName()?"yes":"no");
+		e_table_reference.setAttribute("is_cte", node.isCTEName() ? "yes" : "no");
 
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_table_reference);
@@ -1928,7 +1926,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getTableName().accept(this);
 				current_objectName_tag = null;
 				elementStack.pop();
-				if (node.getPartitionExtensionClause() != null){
+				if (node.getPartitionExtensionClause() != null) {
 					node.getPartitionExtensionClause().accept(this);
 				}
 //				if (node.getPartitionClause() != null){
@@ -1946,7 +1944,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				current_expression_tag = "table_expr";
 				node.getTableExpr().accept(this);
 
-				if (node.getColumnDefinitions() != null){
+				if (node.getColumnDefinitions() != null) {
 					node.getColumnDefinitions().accept(this);
 				}
 
@@ -2157,16 +2155,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 			appendEndTag("tablehints");
 		}
 
-		if (node.getForXMLClause() != null){
+		if (node.getForXMLClause() != null) {
 			node.getForXMLClause().accept(this);
 		}
 
-		if (node.getFlashback() != null){
+		if (node.getFlashback() != null) {
 			node.getFlashback().accept(this);
 		}
 
-		if (node.getLateralViewList() != null){
-			for(TLateralView lv:node.getLateralViewList()){
+		if (node.getLateralViewList() != null) {
+			for (TLateralView lv : node.getLateralViewList()) {
 				lv.accept(this);
 			}
 		}
@@ -2175,17 +2173,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-
 	public void preVisit(TCaseJoinClause node) {
 		Element e_case_join_clause = xmldoc.createElement("case_join_clause");
 
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_case_join_clause);
 		elementStack.push(e_case_join_clause);
-		for(TCaseJoinItem item:node.getCaseJoinItems()){
+		for (TCaseJoinItem item : node.getCaseJoinItems()) {
 			item.accept(this);
 		}
-		if (node.getDefaultJoinItem() != null){
+		if (node.getDefaultJoinItem() != null) {
 			node.getDefaultJoinItem().accept(this);
 		}
 		elementStack.pop();
@@ -2197,7 +2194,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_case_join_item);
 		elementStack.push(e_case_join_item);
-		if (node.getWhenCondition() != null){
+		if (node.getWhenCondition() != null) {
 			node.getWhenCondition().accept(this);
 		}
 
@@ -2225,7 +2222,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_lateral_view);
 		elementStack.push(e_lateral_view);
 		node.getUdtf().accept(this);
-		if (node.getTableAlias() != null){
+		if (node.getTableAlias() != null) {
 			node.getTableAlias().accept(this);
 		}
 		node.getColumnAliasList().accept(this);
@@ -2240,23 +2237,23 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_unnest);
 		elementStack.push(e_unnest);
 
-		if (node.getArrayExpr() != null){
+		if (node.getArrayExpr() != null) {
 			node.getArrayExpr().accept(this);
-		}else if (node.getColumns() != null){
+		} else if (node.getColumns() != null) {
 			node.getColumns().accept(this);
 		}
 
 
-		if (node.getWithOffset() != null){
-			if (node.getWithOffsetAlais() != null){
-				addElementOfString("with_offset",node.getWithOffsetAlais().toString());
-			}else{
-				addElementOfString("with_offset","empty_value");
+		if (node.getWithOffset() != null) {
+			if (node.getWithOffsetAlais() != null) {
+				addElementOfString("with_offset", node.getWithOffsetAlais().toString());
+			} else {
+				addElementOfString("with_offset", "empty_value");
 			}
 		}
 
-		if (node.getDerivedColumnList() != null){
-			addElementOfNode("derived_column_list",node.getDerivedColumnList());
+		if (node.getDerivedColumnList() != null) {
+			addElementOfNode("derived_column_list", node.getDerivedColumnList());
 		}
 
 		elementStack.pop();
@@ -2268,11 +2265,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_for_xml_clause);
 		elementStack.push(e_for_xml_clause);
-		if (node.getElementName() != null){
-			addElementOfString("element_name",node.getElementName());
+		if (node.getElementName() != null) {
+			addElementOfString("element_name", node.getElementName());
 		}
-		if (node.getForXMLItems() != null){
-			for(int i=0;i<node.getForXMLItems().size();i++){
+		if (node.getForXMLItems() != null) {
+			for (int i = 0; i < node.getForXMLItems().size(); i++) {
 				node.getForXMLItems().get(i).accept(this);
 			}
 		}
@@ -2286,9 +2283,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_common_directive);
 		elementStack.push(e_common_directive);
-		if (node.getCommonDirectiveType() == TXMLCommonDirective.EXMLCommonDirectiveType.ROOT){
-			if (node.getRootName() != null){
-				addElementOfString("root_name",node.getRootName());
+		if (node.getCommonDirectiveType() == TXMLCommonDirective.EXMLCommonDirectiveType.ROOT) {
+			if (node.getRootName() != null) {
+				addElementOfString("root_name", node.getRootName());
 			}
 		}
 		elementStack.pop();
@@ -2331,15 +2328,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 
 
-
-		if ((node.getAnsiCatalogName() != null) && (node.getAnsiCatalogName().length() >0)){
+		if ((node.getAnsiCatalogName() != null) && (node.getAnsiCatalogName().length() > 0)) {
 			Element e_database = xmldoc.createElement("database_name");
 			e_object_name.appendChild(e_database);
 			e_database.setTextContent(node.getAnsiCatalogName().toString());
 		}
 
 
-		if ((node.getAnsiSchemaName() != null) && (node.getAnsiSchemaName().length() >0)){
+		if ((node.getAnsiSchemaName() != null) && (node.getAnsiSchemaName().length() > 0)) {
 			Element e_schema = xmldoc.createElement("schema_name");
 			e_object_name.appendChild(e_schema);
 			e_schema.setTextContent(node.getAnsiSchemaName().toString());
@@ -2385,17 +2381,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getDblink() != null) {
 			addElementOfNode("db_link", node.getDblink());
 		}
-		if (node.getPath() != null){
+		if (node.getPath() != null) {
 			node.getPath().accept(this);
 		}
 
-		if ((node.getSourceTableList() != null)&&(node.getSourceTableList().size()>0)){
+		if ((node.getSourceTableList() != null) && (node.getSourceTableList().size() > 0)) {
 			Element e_source_table_list = xmldoc.createElement("source_table_list");
 			e_object_name.appendChild(e_source_table_list);
 			elementStack.push(e_source_table_list);
 
 
-			for(int i=0;i<node.getSourceTableList().size();i++){
+			for (int i = 0; i < node.getSourceTableList().size(); i++) {
 				TTable t = node.getSourceTableList().get(i);
 				String sourceTable = t.getTableName().toString();
 				if (t.getAliasClause() != null) {
@@ -2414,12 +2410,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 			addElementOfString("source_table", sourceTable);
 		}
 
-		if (node.getSourceColumn() != null){
+		if (node.getSourceColumn() != null) {
 			addElementOfString("source_column", node.getSourceColumn().toString()
-					+String.format("(%d,%d)",node.getSourceColumn().getStartToken().lineNo,node.getSourceColumn().getStartToken().columnNo));
+					+ String.format("(%d,%d)", node.getSourceColumn().getStartToken().lineNo, node.getSourceColumn().getStartToken().columnNo));
 		}
 
-		if (node.getParentObjectName() != null){
+		if (node.getParentObjectName() != null) {
 			// this is usually attribute of a struct type,
 			//   create table absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED (
 			//	Emp_id INT64,Name STRING
@@ -2428,7 +2424,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			//INSERT INTO `absolute-runner-302907.gudu_sqlflow.INFO` (emp_id,name,state,city,zipcode)
 			//select emp_id,name,state,city,zipcode from `absolute-runner-302907.gudu_sqlflow.ADDRESS_NESTED`, UNNEST(address)
 
-			addElementOfString("parent_column",node.getParentObjectName().toString());
+			addElementOfString("parent_column", node.getParentObjectName().toString());
 		}
 
 	}
@@ -2473,9 +2469,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_trigger = xmldoc.createElement("drop_trigger_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_trigger);
-		e_drop_trigger.setAttribute("trigger_name",stmt.getTriggerName().toString());
-		if (stmt.getTableName() != null){
-			addElementOfNode("table_name",stmt.getTableName());
+		e_drop_trigger.setAttribute("trigger_name", stmt.getTriggerName().toString());
+		if (stmt.getTableName() != null) {
+			addElementOfNode("table_name", stmt.getTableName());
 		}
 
 		elementStack.push(e_drop_trigger);
@@ -2488,8 +2484,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_function_header);
 
 		elementStack.push(e_function_header);
-		addElementOfNode("function_name",node.getFunctionName());
-		if (node.getArgs() != null){
+		addElementOfNode("function_name", node.getFunctionName());
+		if (node.getArgs() != null) {
 			node.getArgs().accept(this);
 		}
 		elementStack.pop();
@@ -2499,16 +2495,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_function = xmldoc.createElement("drop_function_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_function);
-		e_drop_function.setAttribute("function_name",stmt.getFunctionName().toString());
+		e_drop_function.setAttribute("function_name", stmt.getFunctionName().toString());
 		stmt.getFunctionName().accept(this);
 		elementStack.push(e_drop_function);
 
-		switch (stmt.dbvendor){
+		switch (stmt.dbvendor) {
 			case dbvpostgresql:
 				Element e_function_list = xmldoc.createElement("function_list");
 				e_drop_function.appendChild(e_function_list);
 				elementStack.push(e_function_list);
-				for(int i=0;i<stmt.getFunctions().size();i++){
+				for (int i = 0; i < stmt.getFunctions().size(); i++) {
 					stmt.getFunctions().get(i).accept(this);
 				}
 				elementStack.pop();
@@ -2526,7 +2522,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_table_function = xmldoc.createElement("flatten_function");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_table_function);
-		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		e_table_function.setAttribute("function_type", node.getFunctionType().toString());
 		elementStack.push(e_table_function);
 		node.getArgs().accept(this);
 		elementStack.pop();
@@ -2537,14 +2533,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_table_function = xmldoc.createElement("table_function");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_table_function);
-		e_table_function.setAttribute("function_type",node.getFunctionType().toString());
+		e_table_function.setAttribute("function_type", node.getFunctionType().toString());
 		elementStack.push(e_table_function);
-		switch (node.getFunctionType()){
+		switch (node.getFunctionType()) {
 			case struct_t:
-				if (node.getFieldValues() != null){
+				if (node.getFieldValues() != null) {
 					node.getFieldValues().accept(this);
 				}
-				if (node.getFieldDefs() != null){
+				if (node.getFieldDefs() != null) {
 					node.getFieldDefs().accept(this);
 				}
 				break;
@@ -2558,16 +2554,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_procedure = xmldoc.createElement("drop_procedure_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_procedure);
-		e_drop_procedure.setAttribute("procedure_name",stmt.getProcedureName().toString());
+		e_drop_procedure.setAttribute("procedure_name", stmt.getProcedureName().toString());
 		elementStack.push(e_drop_procedure);
 		stmt.getProcedureName().accept(this);
 
-		switch (stmt.dbvendor){
+		switch (stmt.dbvendor) {
 			case dbvpostgresql:
 				Element e_procedure_list = xmldoc.createElement("procedure_list");
 				e_drop_procedure.appendChild(e_procedure_list);
 				elementStack.push(e_procedure_list);
-				for(int i=0;i<stmt.getProcedures().size();i++){
+				for (int i = 0; i < stmt.getProcedures().size(); i++) {
 					stmt.getProcedures().get(i).accept(this);
 				}
 				elementStack.pop();
@@ -2576,26 +2572,27 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 		}
 
-		if (stmt.getParameterDeclarations() != null){
+		if (stmt.getParameterDeclarations() != null) {
 			stmt.getParameterDeclarations().accept(this);
 		}
 
 
 		elementStack.pop();
 	}
+
 	public void preVisit(TDropViewSqlStatement stmt) {
 		Element e_drop_view = xmldoc.createElement("drop_view_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_view);
-		e_drop_view.setAttribute("view_name",stmt.getViewName().toString());
+		e_drop_view.setAttribute("view_name", stmt.getViewName().toString());
 		elementStack.push(e_drop_view);
 
-		switch (stmt.dbvendor){
+		switch (stmt.dbvendor) {
 			case dbvpostgresql:
 				Element e_view_list = xmldoc.createElement("view_list");
 				e_drop_view.appendChild(e_view_list);
 				elementStack.push(e_view_list);
-				for(int i=0;i<stmt.getViewNameList().size();i++){
+				for (int i = 0; i < stmt.getViewNameList().size(); i++) {
 					stmt.getViewNameList().getObjectName(i).accept(this);
 				}
 				elementStack.pop();
@@ -2606,19 +2603,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
+
 	public void preVisit(TDropSequenceStmt stmt) {
 		Element e_drop_sequence = xmldoc.createElement("drop_sequence_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_sequence);
-		e_drop_sequence.setAttribute("sequence_name",stmt.getSequenceName().toString());
+		e_drop_sequence.setAttribute("sequence_name", stmt.getSequenceName().toString());
 		elementStack.push(e_drop_sequence);
 
-		switch (stmt.dbvendor){
+		switch (stmt.dbvendor) {
 			case dbvpostgresql:
 				Element e_sequence_list = xmldoc.createElement("sequence_list");
 				e_drop_sequence.appendChild(e_sequence_list);
 				elementStack.push(e_sequence_list);
-				for(int i=0;i<stmt.getSequenceNameList().size();i++){
+				for (int i = 0; i < stmt.getSequenceNameList().size(); i++) {
 					stmt.getSequenceNameList().getObjectName(i).accept(this);
 				}
 				elementStack.pop();
@@ -2629,19 +2627,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
+
 	public void preVisit(TDropIndexSqlStatement stmt) {
 		Element e_drop_index = xmldoc.createElement("drop_index_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_index);
-		e_drop_index.setAttribute("index_name",stmt.getIndexName().toString());
+		e_drop_index.setAttribute("index_name", stmt.getIndexName().toString());
 		elementStack.push(e_drop_index);
 
-		switch (stmt.dbvendor){
+		switch (stmt.dbvendor) {
 			case dbvpostgresql:
 				Element e_index_list = xmldoc.createElement("index_list");
 				e_drop_index.appendChild(e_index_list);
 				elementStack.push(e_index_list);
-				for(int i=0;i<stmt.getIndexNameList().size();i++){
+				for (int i = 0; i < stmt.getIndexNameList().size(); i++) {
 					stmt.getIndexNameList().getObjectName(i).accept(this);
 				}
 				elementStack.pop();
@@ -2652,7 +2651,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TWhereClause node) {
@@ -2885,8 +2883,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	public void preVisit(TForUpdate node) {
 		Element e_for_update_clause = xmldoc.createElement("for_update_clause");
-		e_for_update_clause.setAttribute("wait",  node.isWait()?"true":"false");
-		e_for_update_clause.setAttribute("nowait",  node.isNowait()?"true":"false");
+		e_for_update_clause.setAttribute("wait", node.isWait() ? "true" : "false");
+		e_for_update_clause.setAttribute("nowait", node.isNowait() ? "true" : "false");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_for_update_clause);
 		elementStack.push(e_for_update_clause);
@@ -3024,12 +3022,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_unload_stmt = xmldoc.createElement("unload_stmt");
 		e_parent.appendChild(e_unload_stmt);
 		elementStack.push(e_unload_stmt);
-		if (stmt.getSelectSqlStatement() != null){
+		if (stmt.getSelectSqlStatement() != null) {
 			stmt.getSelectSqlStatement().accept(this);
 		}
 
-		if (stmt.getS3() != null){
-			addElementOfString("s3_path",stmt.getS3());
+		if (stmt.getS3() != null) {
+			addElementOfString("s3_path", stmt.getS3());
 		}
 
 
@@ -3064,16 +3062,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getParameterDeclarations().accept(this);
 		}
 
-		if (node.getBlockBody() != null){
+		if (node.getBlockBody() != null) {
 			node.getBlockBody().accept(this);
-		}
-		else if (node.getBodyStatements().size() > 0) {
+		} else if (node.getBodyStatements().size() > 0) {
 			current_statement_list_tag = "body_statement_list";
 			node.getBodyStatements().accept(this);
 		}
 
-		if (node.getSqlExpression() != null){
-			addElementOfNode("sql_expression",node.getSqlExpression());
+		if (node.getSqlExpression() != null) {
+			addElementOfNode("sql_expression", node.getSqlExpression());
 		}
 
 		elementStack.pop();
@@ -3122,7 +3119,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TExplainPlan stmt) {
@@ -3359,14 +3355,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_alter_table_option.appendChild(e_option);
 				elementStack.push(e_option);
 				node.getColumnName().accept(this);
-				if (node.getNewDataType() != null){
+				if (node.getNewDataType() != null) {
 					node.getNewDataType().accept(this);
 				}
 
 
-				switch (node.getAlterColumnSubType()){
+				switch (node.getAlterColumnSubType()) {
 					case Comment:
-						addElementOfString("comment",node.getComment());
+						addElementOfString("comment", node.getComment());
 						break;
 				}
 
@@ -3450,13 +3446,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getNewTableName().accept(this);
 				break;
 			case AddConstraintUnique:
-				if (node.getConstraintName() != null){
-					addElementOfNode("constraint_name",node.getConstraintName());
+				if (node.getConstraintName() != null) {
+					addElementOfNode("constraint_name", node.getConstraintName());
 				}
-				if (node.getIndexCols() != null){
-					addElementOfNode("column_list",node.getIndexCols());
-				}else if (node.getColumnNameList() != null){
-					addElementOfNode("column_list",node.getColumnNameList());
+				if (node.getIndexCols() != null) {
+					addElementOfNode("column_list", node.getIndexCols());
+				} else if (node.getColumnNameList() != null) {
+					addElementOfNode("column_list", node.getColumnNameList());
 				}
 
 				break;
@@ -3475,13 +3471,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-
 	public void preVisit(TPartitionClause node) {
 		Element e_partition = xmldoc.createElement("partition_clause");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_partition);
 		elementStack.push(e_partition);
-		if (node.getExpressionList()!=null){
+		if (node.getExpressionList() != null) {
 			node.getExpressionList().accept(this);
 		}
 		elementStack.pop();
@@ -3504,11 +3499,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 			for (int i = 0; i < node.getKeyValues().size(); i++) {
 				TExpression e = node.getKeyValues().getExpression(i);
 				//addElementOfNode("column_name",e.getLeftOperand());
-				if (e.getExpressionType() == assignment_t){
+				if (e.getExpressionType() == assignment_t) {
 					addElementOfString("column_name", e.getLeftOperand().toString());
 					addElementOfString("column_value", e.getRightOperand().toString());
 
-				}else{
+				} else {
 					addElementOfString("column_name", e.toString());
 				}
 
@@ -3526,19 +3521,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 	public void preVisit(TAlterMaterializedViewStmt stmt) {
 		Element e_alter_view = xmldoc.createElement("alter_materialized_view_statement");
 		e_parent = (Element) elementStack.peek();
-		e_alter_view.setAttribute("alter_option",stmt.getAlterViewOption().toString());
+		e_alter_view.setAttribute("alter_option", stmt.getAlterViewOption().toString());
 		e_parent.appendChild(e_alter_view);
 		elementStack.push(e_alter_view);
 
 		current_objectName_tag = "view_name";
 		stmt.getMaterializedViewName().accept(this);
-		if (stmt.getAlterViewOption() != null){
-			switch (stmt.getAlterViewOption()){
+		if (stmt.getAlterViewOption() != null) {
+			switch (stmt.getAlterViewOption()) {
 				case setComment:
-					addElementOfString("comment",stmt.getComment());
+					addElementOfString("comment", stmt.getComment());
 					break;
 				case rename:
-					addElementOfNode("new_view_name",stmt.getNewViewName());
+					addElementOfNode("new_view_name", stmt.getNewViewName());
 				default:
 					break;
 			}
@@ -3549,19 +3544,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 	public void preVisit(TAlterViewStatement stmt) {
 		Element e_alter_view = xmldoc.createElement("alter_view_statement");
 		e_parent = (Element) elementStack.peek();
-		e_alter_view.setAttribute("alter_option",stmt.getAlterViewOption().toString());
+		e_alter_view.setAttribute("alter_option", stmt.getAlterViewOption().toString());
 		e_parent.appendChild(e_alter_view);
 		elementStack.push(e_alter_view);
 
 		current_objectName_tag = "view_name";
 		stmt.getViewName().accept(this);
-		if (stmt.getAlterViewOption() != null){
-			switch (stmt.getAlterViewOption()){
+		if (stmt.getAlterViewOption() != null) {
+			switch (stmt.getAlterViewOption()) {
 				case rename:
 					stmt.getNewViewName().accept(this);
 					break;
 				case setComment:
-					addElementOfString("comment",stmt.getComment());
+					addElementOfString("comment", stmt.getComment());
 					break;
 				default:
 					break;
@@ -3621,10 +3616,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getLength() != null) {
 			e_datatype.setAttribute("length", node.getLength().toString());
 		}
-		if (node.getCharsetName() != null){
+		if (node.getCharsetName() != null) {
 			e_datatype.setAttribute("character_set", node.getCharsetName());
 		}
-		if (node.getCollationName() != null){
+		if (node.getCollationName() != null) {
 			e_datatype.setAttribute("collation_name", node.getCollationName());
 		}
 		e_parent.appendChild(e_datatype);
@@ -3633,12 +3628,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_datatype.appendChild(e_value);
 
 		elementStack.push(e_datatype);
-		switch (node.getDataType()){
+		switch (node.getDataType()) {
 			case struct_t:
-				addElementOfNode("element_list",node.getColumnDefList());
+				addElementOfNode("element_list", node.getColumnDefList());
 				break;
 			case array_t:
-				if (node.getTypeOfList() != null){
+				if (node.getTypeOfList() != null) {
 					node.getTypeOfList().accept(this);
 				}
 
@@ -3657,7 +3652,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_column);
 		elementStack.push(e_column);
 		e_column.setAttribute("explicit_nullable", String.valueOf(node.isNull()));
-		if (node.getCollationName() != null){
+		if (node.getCollationName() != null) {
 			e_column.setAttribute("collation_name", node.getCollationName());
 		}
 		current_objectName_tag = "column_name";
@@ -3684,22 +3679,22 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
-		if (node.getDataDefinitions() != null){
+		if (node.getDataDefinitions() != null) {
 			Element e_dataDefinitions = xmldoc.createElement("data_definitions");
 			e_column.appendChild(e_dataDefinitions);
 			elementStack.push(e_dataDefinitions);
-			for(int i=0;i<node.getDataDefinitions().size();i++){
+			for (int i = 0; i < node.getDataDefinitions().size(); i++) {
 				node.getDataDefinitions().get(i).accept(this);
 			}
 			elementStack.pop();
 		}
 
-		if (node.getComment() != null){
+		if (node.getComment() != null) {
 			node.getComment().accept(this);
 		}
 
-		if (node.getColumnGeneratedClause() != null){
-			addElementOfString ("generated_clause",node.getColumnGeneratedClause().toString());
+		if (node.getColumnGeneratedClause() != null) {
+			addElementOfString("generated_clause", node.getColumnGeneratedClause().toString());
 		}
 
 		elementStack.pop();
@@ -3712,7 +3707,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_data_definition);
 		elementStack.push(e_data_definition);
 
-		switch (node.getDataDefinitionType()){
+		switch (node.getDataDefinitionType()) {
 			case columnConstraint:
 				node.getColumnConstraint().accept(this);
 				break;
@@ -3802,7 +3797,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		// appendStartTag(node);
 		e_parent = (Element) elementStack.peek();
 		Element e_merge_insert_action = xmldoc.createElement("merge_insert_action");
-		e_merge_insert_action.setAttribute("insert_row",  ((node.getValuelist()==null)&&(node.getColumnList() == null))?"true":"false");
+		e_merge_insert_action.setAttribute("insert_row", ((node.getValuelist() == null) && (node.getColumnList() == null)) ? "true" : "false");
 		e_parent.appendChild(e_merge_insert_action);
 		elementStack.push(e_merge_insert_action);
 
@@ -3946,8 +3941,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 						"default_constriant_type");
 				current_expression_tag = "default_value";
 				node.getDefaultExpression().accept(this);
-				if (node.getForObjectName() != null){
-					addElementOfNode("for_column",node.getForObjectName());
+				if (node.getForObjectName() != null) {
+					addElementOfNode("for_column", node.getForObjectName());
 				}
 				break;
 			default:
@@ -4011,7 +4006,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		current_objectName_tag = "view_name";
 		stmt.getViewName().accept(this);
-		if (stmt.getComment() != null){
+		if (stmt.getComment() != null) {
 			stmt.getComment().accept(this);
 		}
 
@@ -4153,8 +4148,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		addElementOfNode("trigger_name", stmt.getTriggerName());
 		stmt.getTriggeringClause().accept(this);
 		stmt.getBodyStatements().accept(this);
-		if (stmt.getFunctionCall() != null){
-			addElementOfNode("execute_function",stmt.getFunctionCall());
+		if (stmt.getFunctionCall() != null) {
+			addElementOfNode("execute_function", stmt.getFunctionCall());
 		}
 		elementStack.pop();
 	}
@@ -4164,8 +4159,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_trigger_dml_event = xmldoc.createElement("dml_event");
 		e_parent.appendChild(e_trigger_dml_event);
 		elementStack.push(e_trigger_dml_event);
-		e_trigger_dml_event.setAttribute("event_type",node.getDmlType().toString());
-		if (node.getColumnList() != null){
+		e_trigger_dml_event.setAttribute("event_type", node.getDmlType().toString());
+		if (node.getColumnList() != null) {
 			node.getColumnList().accept(this);
 		}
 		elementStack.pop();
@@ -4176,18 +4171,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_create_trigger_clause = xmldoc.createElement("simple_dml_trigger_clause");
 		e_parent.appendChild(e_create_trigger_clause);
 		elementStack.push(e_create_trigger_clause);
-		e_create_trigger_clause.setAttribute("granularity",node.getGranularity().toString());
-		if (node.getEventClause() instanceof TDmlEventClause){
-			TDmlEventClause dmlEventClause = (TDmlEventClause)node.getEventClause();
-			e_create_trigger_clause.setAttribute("source_table",dmlEventClause.getTableName().toString());
-			for(int i=0;i<dmlEventClause.getEventItems().size();i++){
-				TDmlEventItem dmlEventItem = (TDmlEventItem)dmlEventClause.getEventItems().get(i);
+		e_create_trigger_clause.setAttribute("granularity", node.getGranularity().toString());
+		if (node.getEventClause() instanceof TDmlEventClause) {
+			TDmlEventClause dmlEventClause = (TDmlEventClause) node.getEventClause();
+			e_create_trigger_clause.setAttribute("source_table", dmlEventClause.getTableName().toString());
+			for (int i = 0; i < dmlEventClause.getEventItems().size(); i++) {
+				TDmlEventItem dmlEventItem = (TDmlEventItem) dmlEventClause.getEventItems().get(i);
 				dmlEventItem.accept(this);
 			}
 		}
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TCreateVariableStmt stmt) {
@@ -4278,8 +4272,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_rename_stmt);
 		elementStack.push(e_rename_stmt);
 
-		addElementOfNode("old_name",stmt.getOldName());
-		addElementOfNode("new_name",stmt.getNewName());
+		addElementOfNode("old_name", stmt.getOldName());
+		addElementOfNode("new_name", stmt.getNewName());
 
 		elementStack.pop();
 	}
@@ -4293,7 +4287,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		switch (stmt.getExecType()) {
 			case TBaseType.metExecSp:
-				switch (stmt.getExecuteType()){
+				switch (stmt.getExecuteType()) {
 					case module:
 						current_objectName_tag = "module_name";
 						stmt.getModuleName().accept(this);
@@ -4307,11 +4301,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 						break;
 					case expr:
 						stmt.getPreparedValue().accept(this);
-						if (stmt.getIntoVariable() != null){
+						if (stmt.getIntoVariable() != null) {
 							current_objectName_tag = "into_variable";
 							stmt.getIntoVariable().accept(this);
 						}
-						if (stmt.getUsingVariables()!=null){
+						if (stmt.getUsingVariables() != null) {
 							stmt.getUsingVariables().accept(this);
 						}
 						break;
@@ -4320,11 +4314,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				break;
 			case TBaseType.metExecStringCmd:
-				for(int i=0;i<stmt.getStringValues().size();i++){
+				for (int i = 0; i < stmt.getStringValues().size(); i++) {
 					stmt.getStringValues().getExpression(i).accept(this);
 				}
-				if (stmt.getLinkServerName() != null){
-					addElementOfNode("link_server",stmt.getLinkServerName());
+				if (stmt.getLinkServerName() != null) {
+					addElementOfNode("link_server", stmt.getLinkServerName());
 				}
 
 				break;
@@ -4496,7 +4490,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_merge);
 		elementStack.push(e_merge);
 
-		if (stmt.getUsingVariableList() != null){
+		if (stmt.getUsingVariableList() != null) {
 			Element e_using_vars = xmldoc.createElement("using_variable_list");
 			e_merge.appendChild(e_using_vars);
 			elementStack.push(e_using_vars);
@@ -4540,7 +4534,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_security_policy = xmldoc.createElement("drop_security_policy");
 		e_parent.appendChild(e_drop_security_policy);
 		elementStack.push(e_drop_security_policy);
-		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		e_drop_security_policy.setAttribute("policy_name", stmt.getPolicyName().toString());
 		stmt.getPolicyName().accept(this);
 		elementStack.pop();
 	}
@@ -4550,7 +4544,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_security_policy = xmldoc.createElement("alter_security_policy");
 		e_parent.appendChild(e_drop_security_policy);
 		elementStack.push(e_drop_security_policy);
-		e_drop_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		e_drop_security_policy.setAttribute("policy_name", stmt.getPolicyName().toString());
 		stmt.getPolicyName().accept(this);
 		elementStack.pop();
 	}
@@ -4560,11 +4554,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_create_security_policy = xmldoc.createElement("create_security_policy");
 		e_parent.appendChild(e_create_security_policy);
 		elementStack.push(e_create_security_policy);
-		e_create_security_policy.setAttribute("policy_name",stmt.getPolicyName().toString());
+		e_create_security_policy.setAttribute("policy_name", stmt.getPolicyName().toString());
 		stmt.getPolicyName().accept(this);
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TOutputClause node) {
@@ -4608,7 +4601,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
-		if (stmt.getWhereCondition() != null){
+		if (stmt.getWhereCondition() != null) {
 			stmt.getWhereCondition().accept(this);
 		}
 
@@ -4618,10 +4611,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 	public void preVisit(TPartitionBoundSpecSqlNode node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_partition_bound_spec = xmldoc.createElement("partition_bound_spec");
-		e_partition_bound_spec.setAttribute("type",node.getSpecType().toString());
+		e_partition_bound_spec.setAttribute("type", node.getSpecType().toString());
 		e_parent.appendChild(e_partition_bound_spec);
 		elementStack.push(e_partition_bound_spec);
-		switch (node.getSpecType()){
+		switch (node.getSpecType()) {
 			case typeIn:
 				node.getPartition_bound_expr_list().accept(this);
 				break;
@@ -4639,7 +4632,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_export_data = xmldoc.createElement("export_data");
 		e_parent.appendChild(e_export_data);
 		elementStack.push(e_export_data);
-		if (stmt.getConnectName() != null){
+		if (stmt.getConnectName() != null) {
 			current_objectName_tag = "connection_name";
 		}
 		stmt.getSubQuery().accept(this);
@@ -4689,13 +4682,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 				break;
 			case clone:
-				addElementOfNode("clone_table",stmt.getCloneSourceTable());
+				addElementOfNode("clone_table", stmt.getCloneSourceTable());
 				break;
 			case copy:
-				addElementOfNode("copy_table",stmt.getCloneSourceTable());
+				addElementOfNode("copy_table", stmt.getCloneSourceTable());
 				break;
 			case partitionOf:
-				addElementOfNode("parent_table",stmt.getSuperTableName());
+				addElementOfNode("parent_table", stmt.getSuperTableName());
 				stmt.getPartitionBoundSpec().accept(this);
 				break;
 		}
@@ -4724,12 +4717,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
-		if (stmt.getTableProperties() != null){
+		if (stmt.getTableProperties() != null) {
 			addElementOfNode("table_properties", stmt.getTableProperties());
 		}
 
-		if (stmt.getTablePartition() != null){
-			addElementOfNode("table_partition",stmt.getTablePartition());
+		if (stmt.getTablePartition() != null) {
+			addElementOfNode("table_partition", stmt.getTablePartition());
 		}
 
 		elementStack.pop();
@@ -4756,7 +4749,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_partition_definition);
 		elementStack.push(e_partition_definition);
 		node.getPartitionName().accept(this);
-		switch (node.getTablePartitionType()){
+		switch (node.getTablePartitionType()) {
 			case range:
 				node.getLessThanValueList().accept(this);
 				break;
@@ -4767,6 +4760,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		elementStack.pop();
 	}
+
 	public void preVisit(TRangePartitions node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_range_partitions = xmldoc.createElement("range_partitions");
@@ -4775,23 +4769,23 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		switch (node.dbvendor){
+		switch (node.dbvendor) {
 			case dbvpostgresql:
 				node.getPartitionColumnExprs().accept(this);
 				break;
 			case dbvmysql:
-				if (node.getColumnList() != null){
+				if (node.getColumnList() != null) {
 					addElementOfNode("partition_column_list", node.getColumnList());
-				}else if (node.getRangeExpr() != null){
-					addElementOfNode("range_expr",node.getRangeExpr());
+				} else if (node.getRangeExpr() != null) {
+					addElementOfNode("range_expr", node.getRangeExpr());
 				}
 
 				Element e_partition_def_list = xmldoc.createElement("partition_def_list");
 				e_range_partitions.appendChild(e_partition_def_list);
 				elementStack.push(e_partition_def_list);
 
-				if (node.getPartitionDefinitions() != null){
-					for(TPartitionDefinition pd:node.getPartitionDefinitions()){
+				if (node.getPartitionDefinitions() != null) {
+					for (TPartitionDefinition pd : node.getPartitionDefinitions()) {
 						pd.accept(this);
 					}
 				}
@@ -4801,12 +4795,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
 
-				if (node.getIntervalExpr() != null){
-					addElementOfNode("interval_expr",node.getIntervalExpr());
+				if (node.getIntervalExpr() != null) {
+					addElementOfNode("interval_expr", node.getIntervalExpr());
 				}
 
 				ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-				for(int i=0;i<items.size();i++){
+				for (int i = 0; i < items.size(); i++) {
 					items.get(i).accept(this);
 				}
 		}
@@ -4824,15 +4818,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.push(e_range_partitions);
 
 		addElementOfNode("partition_column_list", node.getColumnList());
-		if (node.getIntervalExpr() != null){
-			addElementOfNode("interval_expr",node.getIntervalExpr());
+		if (node.getIntervalExpr() != null) {
+			addElementOfNode("interval_expr", node.getIntervalExpr());
 		}
 
 		//
 		node.getSubPartitionByClause().accept(this);
 
 		ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-		for(int i=0;i<items.size();i++){
+		for (int i = 0; i < items.size(); i++) {
 			items.get(i).accept(this);
 		}
 
@@ -4859,12 +4853,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_hash_partitions);
 		elementStack.push(e_hash_partitions);
 
-		if (node.getColumnList() != null){
+		if (node.getColumnList() != null) {
 			addElementOfNode("partition_column_list", node.getColumnList());
 		}
 
-		if (node.getPartitionNum() != null){
-			addElementOfNode("partitions_num",node.getPartitionNum());
+		if (node.getPartitionNum() != null) {
+			addElementOfNode("partitions_num", node.getPartitionNum());
 		}
 
 
@@ -4880,19 +4874,19 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_hash_partitions);
 		elementStack.push(e_hash_partitions);
 
-		if (node.getColumnList() != null){
+		if (node.getColumnList() != null) {
 			addElementOfNode("partition_column_list", node.getColumnList());
 		}
 
-		if (node.getHashPartitionsByQuantity() != null){
+		if (node.getHashPartitionsByQuantity() != null) {
 			node.getHashPartitionsByQuantity().accept(this);
 		}
-		if (node.getHashExpr() != null){
-			addElementOfNode("hash_expr",node.getHashExpr());
+		if (node.getHashExpr() != null) {
+			addElementOfNode("hash_expr", node.getHashExpr());
 		}
 
-		if (node.getPartitionNum() != null){
-			addElementOfNode("partitions_num",node.getPartitionNum());
+		if (node.getPartitionNum() != null) {
+			addElementOfNode("partitions_num", node.getPartitionNum());
 		}
 		elementStack.pop();
 	}
@@ -4904,7 +4898,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		if (node.getSubPartitionName() != null){
+		if (node.getSubPartitionName() != null) {
 			node.getSubPartitionName().accept(this);
 		}
 
@@ -4920,7 +4914,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		if (node.getSubPartitionName() != null){
+		if (node.getSubPartitionName() != null) {
 			node.getSubPartitionName().accept(this);
 		}
 
@@ -4937,20 +4931,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_range_partitions);
 		elementStack.push(e_range_partitions);
 
-		switch (node.dbvendor){
+		switch (node.dbvendor) {
 			case dbvmysql:
-				if (node.getColumnList() != null){
+				if (node.getColumnList() != null) {
 					addElementOfNode("partition_column_list", node.getColumnList());
-				}else if (node.getListExpr() != null){
-					addElementOfNode("list_expr",node.getListExpr());
+				} else if (node.getListExpr() != null) {
+					addElementOfNode("list_expr", node.getListExpr());
 				}
 
 				Element e_partition_def_list = xmldoc.createElement("partition_def_list");
 				e_range_partitions.appendChild(e_partition_def_list);
 				elementStack.push(e_partition_def_list);
 
-				if (node.getPartitionDefinitions() != null){
-					for(TPartitionDefinition pd:node.getPartitionDefinitions()){
+				if (node.getPartitionDefinitions() != null) {
+					for (TPartitionDefinition pd : node.getPartitionDefinitions()) {
 						pd.accept(this);
 					}
 				}
@@ -4961,7 +4955,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 				addElementOfNode("partition_column_list", node.getColumnList());
 
 				ArrayList<TTablePartitionItem> items = node.getTablePartitionItems();
-				for(int i=0;i<items.size();i++){
+				for (int i = 0; i < items.size(); i++) {
 					items.get(i).accept(this);
 				}
 		}
@@ -4969,47 +4963,48 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
-    public void preVisit(TTablePartitionItem node) {
-        e_parent = (Element) elementStack.peek();
-        Element e_table_partition_item = xmldoc.createElement("table_partition_item");
-        e_table_partition_item.setAttribute("type",node.getTablePartitionItemType().toString());
+	public void preVisit(TTablePartitionItem node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_table_partition_item = xmldoc.createElement("table_partition_item");
+		e_table_partition_item.setAttribute("type", node.getTablePartitionItemType().toString());
 
-        e_parent.appendChild(e_table_partition_item);
-        elementStack.push(e_table_partition_item);
+		e_parent.appendChild(e_table_partition_item);
+		elementStack.push(e_table_partition_item);
 
-        switch (node.getTablePartitionItemType()){
+		switch (node.getTablePartitionItemType()) {
 			case range:
-				if (node.getPartitionName() != null){
-					addElementOfNode("partition_name",node.getPartitionName());
+				if (node.getPartitionName() != null) {
+					addElementOfNode("partition_name", node.getPartitionName());
 				}
 				node.getRangeValuesClause().accept(this);
 				break;
 			case hashByQuantity:
-				addElementOfNode("hash_partition_quantity",node.getHashPartitionQuantity());
-				if (node.getStoreInTablespaceList() != null){
-					addElementOfNode("store_in_tablespaces",node.getStoreInTablespaceList());
+				addElementOfNode("hash_partition_quantity", node.getHashPartitionQuantity());
+				if (node.getStoreInTablespaceList() != null) {
+					addElementOfNode("store_in_tablespaces", node.getStoreInTablespaceList());
 				}
 				break;
 			case list:
-				if (node.getPartitionName() != null){
-					addElementOfNode("partition_name",node.getPartitionName());
+				if (node.getPartitionName() != null) {
+					addElementOfNode("partition_name", node.getPartitionName());
 				}
 				node.getListValuesClause().accept(this);
 				break;
 		}
 
-		if (node.getRangeSubpartitionDescs() != null){
-			for(int i=0;i<node.getRangeSubpartitionDescs().size();i++){
+		if (node.getRangeSubpartitionDescs() != null) {
+			for (int i = 0; i < node.getRangeSubpartitionDescs().size(); i++) {
 				node.getRangeSubpartitionDescs().get(i).accept(this);
 			}
-		}else if (node.getListSubpartitionDescs() != null){
-			for(int i=0;i<node.getListSubpartitionDescs().size();i++){
+		} else if (node.getListSubpartitionDescs() != null) {
+			for (int i = 0; i < node.getListSubpartitionDescs().size(); i++) {
 				node.getListSubpartitionDescs().get(i).accept(this);
 			}
 		}
 
-        elementStack.pop();
-    }
+		elementStack.pop();
+	}
+
 	public void preVisit(TRangeValuesClause node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_range_value_clause = xmldoc.createElement("range_value_clause");
@@ -5023,19 +5018,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-    public void preVisit(TUseSchema stmt) {
-        e_parent = (Element) elementStack.peek();
-        Element e_use_schema = xmldoc.createElement("use_schema");
+	public void preVisit(TUseSchema stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_use_schema = xmldoc.createElement("use_schema");
 
-        e_parent.appendChild(e_use_schema);
-        elementStack.push(e_use_schema);
+		e_parent.appendChild(e_use_schema);
+		elementStack.push(e_use_schema);
 
-        stmt.getSchemaName().accept(this);
+		stmt.getSchemaName().accept(this);
 
-        elementStack.pop();
-    }
-
-
+		elementStack.pop();
+	}
 
 
 	public void preVisit(TListValuesClause node) {
@@ -5051,7 +5044,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-    public void preVisit(TIndexDefinition node) {
+	public void preVisit(TIndexDefinition node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_index_definition = xmldoc.createElement("index_definition");
 		e_index_definition.setAttribute("type", node.getIndexType().toString());
@@ -5060,9 +5053,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_index_definition.setAttribute("all", String.valueOf(node.isAll()));
 		e_parent.appendChild(e_index_definition);
 		elementStack.push(e_index_definition);
-		switch (node.getIndexType()){
+		switch (node.getIndexType()) {
 			case partitionBy:
-				for(int i=0;i<node.getPartitioningLevels().size();i++){
+				for (int i = 0; i < node.getPartitioningLevels().size(); i++) {
 					node.getPartitioningLevels().get(i).accept(this);
 				}
 				break;
@@ -5091,7 +5084,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_partition_level);
 		elementStack.push(e_partition_level);
 
-		if (node.getPartitionExpression() != null){
+		if (node.getPartitionExpression() != null) {
 			node.getPartitionExpression().accept(this);
 		}
 
@@ -5119,18 +5112,15 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getStageLocation().accept(this);
 				break;
 			case etoDistributeOn:
-				addElementOfNode("distribute_on",node.getColumnNamelist());
+				addElementOfNode("distribute_on", node.getColumnNamelist());
 				break;
 			case etoOrganizeOn:
-				addElementOfNode("organize_on",node.getColumnNamelist());
+				addElementOfNode("organize_on", node.getColumnNamelist());
 				break;
 		}
 
 		elementStack.pop();
 	}
-
-
-
 
 
 	public void preVisit(TLeaveStmt stmt) {
@@ -5170,7 +5160,6 @@ public class xmlVisitor extends TParseTreeVisitor {
 		stmt.getTables().getTable(0).accept(this);
 		elementStack.pop();
 	}
-
 
 
 	public void preVisit(TDeleteSqlStatement stmt) {
@@ -5247,17 +5236,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 					.accept(this);
 		}
 
-		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN){
+		if (TBaseType.USE_JOINEXPR_INSTEAD_OF_JOIN) {
 			Element e_from_clause = xmldoc.createElement("from_clause");
 			e_parent = (Element) elementStack.peek();
 			e_parent.appendChild(e_from_clause);
 			elementStack.push(e_from_clause);
-			for(TTable table:stmt.getRelations()){
-				if ((table.getEffectType() != null)&&(table.getEffectType() == ETableEffectType.tetUpdate)) continue;
+			for (TTable table : stmt.getRelations()) {
+				if ((table.getEffectType() != null) && (table.getEffectType() == ETableEffectType.tetUpdate)) continue;
 				table.accept(this);
 			}
 			elementStack.pop();
-		}else{
+		} else {
 			if (stmt.joins.size() > 0) {
 				Element e_from_clause = xmldoc.createElement("from_clause");
 				e_parent = (Element) elementStack.peek();
@@ -5293,22 +5282,22 @@ public class xmlVisitor extends TParseTreeVisitor {
 	}
 
 
-
 	public void preVisit(TLimitClause node) {
 		Element e_parentNode = (Element) elementStack.peek();
 		Element e_limit = xmldoc.createElement("limit_clause");
 		e_parentNode.appendChild(e_limit);
 		elementStack.push(e_limit);
-		if (node.getRow_count() != null){
+		if (node.getRow_count() != null) {
 			node.getRow_count().accept(this);
 		}
-		if (node.getOffset() != null){
+		if (node.getOffset() != null) {
 			node.getOffset().accept(this);
 		}
 
 		elementStack.pop();
 
 	}
+
 	public void preVisit(TWithinGroup withinGroup) {
 		Element e_functionCall = (Element) elementStack.peek();
 		Element e_within_group = xmldoc.createElement("within_group");
@@ -5353,12 +5342,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 				e_overClause.appendChild(e_partition);
 				elementStack.push(e_partition);
 				current_expression_list_tag = "partitions";
-				if (windowDef.getPartitionClause().getExpressionList() != null){
+				if (windowDef.getPartitionClause().getExpressionList() != null) {
 					windowDef.getPartitionClause()
 							.getExpressionList()
 							.accept(this);
-				}
-				else if (windowDef.getPartitionClause().getSortedColumns() != null){
+				} else if (windowDef.getPartitionClause().getSortedColumns() != null) {
 					windowDef.getPartitionClause().getSortedColumns().accept(this);
 				}
 				elementStack.pop();
@@ -5387,229 +5375,211 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
-	public void preVisit(TRangeNFunctionItem node){
-		e_parent = (Element) elementStack.peek( );
+	public void preVisit(TRangeNFunctionItem node) {
+		e_parent = (Element) elementStack.peek();
 		Element e_range_n_item = xmldoc.createElement("range_n_item");
-		e_parent.appendChild( e_range_n_item );
+		e_parent.appendChild(e_range_n_item);
 		elementStack.push(e_range_n_item);
-   	    addElementOfNode("start_expression",node.getStartExpression());
+		addElementOfNode("start_expression", node.getStartExpression());
 
-		if (node.getEndExpression() != null){
-			addElementOfNode("end_expression",node.getEndExpression());
+		if (node.getEndExpression() != null) {
+			addElementOfNode("end_expression", node.getEndExpression());
 		}
 
-		if (node.getRangeSize() != null){
-			addElementOfNode("range_size",node.getRangeSize());
+		if (node.getRangeSize() != null) {
+			addElementOfNode("range_size", node.getRangeSize());
 		}
 
 		elementStack.pop();// e_overClause
 	}
 
-	public void preVisit( TRangeNFunction node ){
-		e_parent = (Element) elementStack.peek( );
-		Element e_functionCall = xmldoc.createElement( "range_n_function" );
-		e_parent.appendChild( e_functionCall );
+	public void preVisit(TRangeNFunction node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_functionCall = xmldoc.createElement("range_n_function");
+		e_parent.appendChild(e_functionCall);
 
-		elementStack.push( e_functionCall );
+		elementStack.push(e_functionCall);
 
-		addElementOfNode("test_expression",node.getExpr1());
-		Element e_list = xmldoc.createElement( "range_n_items" );
-		e_list.setAttribute("count",String.valueOf(node.getRangeNFunctionItems().size()));
+		addElementOfNode("test_expression", node.getExpr1());
+		Element e_list = xmldoc.createElement("range_n_items");
+		e_list.setAttribute("count", String.valueOf(node.getRangeNFunctionItems().size()));
 		e_functionCall.appendChild(e_list);
 		elementStack.push(e_list);
-		for(TRangeNFunctionItem item : node.getRangeNFunctionItems()){
+		for (TRangeNFunctionItem item : node.getRangeNFunctionItems()) {
 			item.accept(this);
 		}
 		elementStack.pop();
-		addElementOfString("range_spec",node.getRangeSpec().toString());
+		addElementOfString("range_spec", node.getRangeSpec().toString());
 
-		elementStack.pop( );
+		elementStack.pop();
 
 	}
 
-	public void preVisit( TFunctionCall node )
-	{
+	public void preVisit(TFunctionCall node) {
 		String tag_name = TAG_FUNCTIONCALL;
-		if ( current_functionCall_tag != null )
-		{
+		if (current_functionCall_tag != null) {
 			tag_name = current_functionCall_tag;
 			current_functionCall_tag = null;
 		}
-		e_parent = (Element) elementStack.peek( );
-		Element e_functionCall = xmldoc.createElement( tag_name );
-		e_parent.appendChild( e_functionCall );
-		e_functionCall.setAttribute( "type", node.getFunctionType( ).toString( ) );
-		e_functionCall.setAttribute( "aggregateType", node.getAggregateType( )
-				.toString( ) );
-		e_functionCall.setAttribute( "builtIn",
-				( node.isBuiltIn( dbVendor ) ) ? "true" : "false" );
+		e_parent = (Element) elementStack.peek();
+		Element e_functionCall = xmldoc.createElement(tag_name);
+		e_parent.appendChild(e_functionCall);
+		e_functionCall.setAttribute("type", node.getFunctionType().toString());
+		e_functionCall.setAttribute("aggregateType", node.getAggregateType()
+				.toString());
+		e_functionCall.setAttribute("builtIn",
+				(node.isBuiltIn(dbVendor)) ? "true" : "false");
 
-		elementStack.push( e_functionCall );
+		elementStack.push(e_functionCall);
 		current_objectName_tag = TAG_FUNCTIONNAME;
-		node.getFunctionName( ).accept( this );
+		node.getFunctionName().accept(this);
 		current_objectName_tag = null;
 
 		current_expression_list_tag = TAG_FUNCTIONARGS;
 		Element e_expression_list = null;
 		Element e_function = null;
 
-		switch ( node.getFunctionType( ) )
-		{
-			case unknown_t :
-				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getArgs( ) != null )
-				{
-					node.getArgs( ).accept( this );
+		switch (node.getFunctionType()) {
+			case unknown_t:
+				e_function = xmldoc.createElement(TAG_GENERIC_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getArgs() != null) {
+					node.getArgs().accept(this);
 				}
-				elementStack.pop( );
+				elementStack.pop();
 				break;
-			case udf_t :
-			case case_n_t :
-			case chr_t :
-				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getArgs( ) != null )
-				{
-					node.getArgs( ).accept( this );
+			case udf_t:
+			case case_n_t:
+			case chr_t:
+				e_function = xmldoc.createElement(TAG_GENERIC_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getArgs() != null) {
+					node.getArgs().accept(this);
 				}
-				if ( node.getAnalyticFunction( ) != null )
-				{
-					node.getAnalyticFunction( ).accept( this );
+				if (node.getAnalyticFunction() != null) {
+					node.getAnalyticFunction().accept(this);
 				}
-				elementStack.pop( );
+				elementStack.pop();
 				break;
-			case cast_t :
-				e_function = xmldoc.createElement( TAG_CAST_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				node.getExpr1( ).accept( this );
-				if (node.getTypename( ) != null){
-					node.getTypename( ).accept( this );
-				}else if (node.getDataConversionItems()!=null){
-					for(TDataConversionItem item:node.getDataConversionItems()){
+			case cast_t:
+				e_function = xmldoc.createElement(TAG_CAST_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				node.getExpr1().accept(this);
+				if (node.getTypename() != null) {
+					node.getTypename().accept(this);
+				} else if (node.getDataConversionItems() != null) {
+					for (TDataConversionItem item : node.getDataConversionItems()) {
 						item.accept(this);
 					}
 				}
 
-				elementStack.pop( );
+				elementStack.pop();
 				break;
-			case convert_t :
-				e_function = xmldoc.createElement( TAG_CONVERT_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getTypename( ) != null )
-				{
-					node.getTypename( ).accept( this );
-				}
-				else
-				{
+			case convert_t:
+				e_function = xmldoc.createElement(TAG_CONVERT_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getTypename() != null) {
+					node.getTypename().accept(this);
+				} else {
 					// convert in MySQL have no datatype argument
 				}
-				node.getParameter( ).accept( this );
+				node.getParameter().accept(this);
 
-				elementStack.pop( );
+				elementStack.pop();
 
 				break;
-			case trim_t :
-				e_function = xmldoc.createElement( TAG_TRIM_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getTrimArgument( ) != null )
-				{
+			case trim_t:
+				e_function = xmldoc.createElement(TAG_TRIM_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getTrimArgument() != null) {
 					// node.getTrimArgument().accept(this);
-					TTrimArgument trimArgument = node.getTrimArgument( );
-					if ( trimArgument.getBoth_trailing_leading( ) != null )
-					{
-						Element e_trim_style = xmldoc.createElement( "style" );
-						e_trim_style.setTextContent( trimArgument.getBoth_trailing_leading( )
-								.toString( ) );
-						e_function.appendChild( e_trim_style );
+					TTrimArgument trimArgument = node.getTrimArgument();
+					if (trimArgument.getBoth_trailing_leading() != null) {
+						Element e_trim_style = xmldoc.createElement("style");
+						e_trim_style.setTextContent(trimArgument.getBoth_trailing_leading()
+								.toString());
+						e_function.appendChild(e_trim_style);
 					}
-					if ( trimArgument.getTrimCharacter( ) != null )
-					{
+					if (trimArgument.getTrimCharacter() != null) {
 						current_expression_tag = "char_expr";
-						trimArgument.getTrimCharacter( ).accept( this );
+						trimArgument.getTrimCharacter().accept(this);
 					}
 					current_expression_tag = "source_expr";
-					trimArgument.getStringExpression( ).accept( this );
+					trimArgument.getStringExpression().accept(this);
 				}
-				elementStack.pop( );
+				elementStack.pop();
 
 				break;
-			case extract_t :
-				e_function = xmldoc.createElement( TAG_EXTRACT_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getArgs( ) != null )
-				{ // extract xml
+			case extract_t:
+				e_function = xmldoc.createElement(TAG_EXTRACT_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getArgs() != null) { // extract xml
 					current_expression_list_tag = "functionArgs";
-					node.getArgs( ).accept( this );
-				}
-				else
-				{
-					Element e_time = xmldoc.createElement( "time" );
-					e_time.setTextContent( node.getExtract_time_token( )
-							.toString( ) );
-					e_function.appendChild( e_time );
+					node.getArgs().accept(this);
+				} else {
+					Element e_time = xmldoc.createElement("time");
+					e_time.setTextContent(node.getExtract_time_token()
+							.toString());
+					e_function.appendChild(e_time);
 
-					if ( node.getExpr1( ) != null )
-					{
-						node.getExpr1( ).accept( this );
+					if (node.getExpr1() != null) {
+						node.getExpr1().accept(this);
 					}
 				}
 
-				elementStack.pop( );
+				elementStack.pop();
 				break;
-			case treat_t :
-				e_function = xmldoc.createElement( TAG_TREAT_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				node.getExpr1( ).accept( this );
-				node.getTypename( ).accept( this );
-				elementStack.pop( );
+			case treat_t:
+				e_function = xmldoc.createElement(TAG_TREAT_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				node.getExpr1().accept(this);
+				node.getTypename().accept(this);
+				elementStack.pop();
 				break;
-			case contains_t :
-				e_function = xmldoc.createElement( TAG_CONTAINS_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
+			case contains_t:
+				e_function = xmldoc.createElement(TAG_CONTAINS_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
 				current_expression_tag = "column_reference";
 				current_expression_list_tag = null;
-				node.getExpr1( ).accept( this );
+				node.getExpr1().accept(this);
 				current_expression_tag = "value_expression";
-				node.getExpr2( ).accept( this );
-				elementStack.pop( );
+				node.getExpr2().accept(this);
+				elementStack.pop();
 				break;
-			case freetext_t :
-				e_function = xmldoc.createElement( TAG_CONTAINS_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
+			case freetext_t:
+				e_function = xmldoc.createElement(TAG_CONTAINS_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
 				current_expression_tag = "column_reference";
 				current_expression_list_tag = null;
-				node.getExpr1( ).accept( this );
+				node.getExpr1().accept(this);
 				current_expression_tag = "value_expression";
-				node.getExpr2( ).accept( this );
-				elementStack.pop( );
+				node.getExpr2().accept(this);
+				elementStack.pop();
 				break;
-			case substring_t :
-				e_function = xmldoc.createElement( "substring_function" );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
+			case substring_t:
+				e_function = xmldoc.createElement("substring_function");
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
 				current_expression_tag = "string_expression";
-				node.getExpr1( ).accept( this );
-				if ( node.getExpr2( ) != null )
-				{
+				node.getExpr1().accept(this);
+				if (node.getExpr2() != null) {
 					current_expression_tag = "from_expression";
-					node.getExpr2( ).accept( this );
+					node.getExpr2().accept(this);
 				}
-				if ( node.getExpr3( ) != null )
-				{
+				if (node.getExpr3() != null) {
 					current_expression_tag = "for_expression";
-					node.getExpr3( ).accept( this );
+					node.getExpr3().accept(this);
 				}
-				elementStack.pop( );
+				elementStack.pop();
 				break;
 //			case range_n_t :
 //				e_function = xmldoc.createElement( "range_n_function" );
@@ -5629,29 +5599,29 @@ public class xmlVisitor extends TParseTreeVisitor {
 //				elementStack.pop();
 //				elementStack.pop( );
 //				break;
-			case position_t :
-			case xmlquery_t :
-			case xmlcast_t :
-			case match_against_t :
-			case adddate_t :
-			case date_add_t :
-			case subdate_t :
-			case date_sub_t :
-			case timestampadd_t :
-			case timestampdiff_t :
-				Element e_not_support = xmldoc.createElement( "not_decode_function" );
-				e_functionCall.appendChild( e_not_support );
-				e_not_support.setTextContent( node.toString( ) );
+			case position_t:
+			case xmlquery_t:
+			case xmlcast_t:
+			case match_against_t:
+			case adddate_t:
+			case date_add_t:
+			case subdate_t:
+			case date_sub_t:
+			case timestampadd_t:
+			case timestampdiff_t:
+				Element e_not_support = xmldoc.createElement("not_decode_function");
+				e_functionCall.appendChild(e_not_support);
+				e_not_support.setTextContent(node.toString());
 				break;
 			case struct_t://bigquery
-				addElementOfNode("field_values",node.getFieldValues());
-				if (node.getFieldDefs() != null){
-					addElementOfNode("field_defs",node.getFieldDefs());
+				addElementOfNode("field_values", node.getFieldValues());
+				if (node.getFieldDefs() != null) {
+					addElementOfNode("field_defs", node.getFieldDefs());
 				}
 				break;
 			case csum_t:
 			case rank_t:
-				if (node.getOrderByList() != null){
+				if (node.getOrderByList() != null) {
 					node.getOrderByList().accept(this);
 				}
 				break;
@@ -5660,75 +5630,65 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getExpr2().accept(this);
 				node.getExpr3().accept(this);
 				break;
-			default :
-				e_function = xmldoc.createElement( TAG_GENERIC_FUNCTION );
-				e_functionCall.appendChild( e_function );
-				elementStack.push( e_function );
-				if ( node.getArgs( ) != null )
-				{
-					node.getArgs( ).accept( this );
+			default:
+				e_function = xmldoc.createElement(TAG_GENERIC_FUNCTION);
+				e_functionCall.appendChild(e_function);
+				elementStack.push(e_function);
+				if (node.getArgs() != null) {
+					node.getArgs().accept(this);
 				}
-				elementStack.pop( );
+				elementStack.pop();
 				break;
 		}
 
-		if ( node.getWindowDef( ) != null )
-		{
-			node.getWindowDef( ).accept( this );
+		if (node.getWindowDef() != null) {
+			node.getWindowDef().accept(this);
 		}
 
-		if (node.getWithinGroup() != null){
+		if (node.getWithinGroup() != null) {
 			node.getWithinGroup().accept(this);
 		}
 		current_expression_list_tag = null;
-		elementStack.pop( );
+		elementStack.pop();
 
 	}
 
-	public void preVisit( TWindowFrameBoundary boundary )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_boundary = xmldoc.createElement( "window_frame_boundary" );
-		e_parent.appendChild( e_boundary );
-		e_boundary.setAttribute( "type", boundary.getBoundaryType( ).toString( ) );
-		if ( boundary.getBoundaryNumber( ) != null )
-		{
-			e_boundary.setAttribute( "offset_value",
-					boundary.getBoundaryNumber( ).toString( ) );
+	public void preVisit(TWindowFrameBoundary boundary) {
+		e_parent = (Element) elementStack.peek();
+		Element e_boundary = xmldoc.createElement("window_frame_boundary");
+		e_parent.appendChild(e_boundary);
+		e_boundary.setAttribute("type", boundary.getBoundaryType().toString());
+		if (boundary.getBoundaryNumber() != null) {
+			e_boundary.setAttribute("offset_value",
+					boundary.getBoundaryNumber().toString());
 		}
 
 		// elementStack.push(e_insert);
 	}
 
-	public void preVisit( TInsertSqlStatement stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_insert = xmldoc.createElement( "insert_statement" );
-		e_parent.appendChild( e_insert );
-		e_insert.setAttribute( "insertSource", stmt.getInsertSource( )
-				.toString( ) );
+	public void preVisit(TInsertSqlStatement stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_insert = xmldoc.createElement("insert_statement");
+		e_parent.appendChild(e_insert);
+		e_insert.setAttribute("insertSource", stmt.getInsertSource()
+				.toString());
 
-		elementStack.push( e_insert );
+		elementStack.push(e_insert);
 
-		if ( stmt.getCteList( ) != null )
-		{
-			stmt.getCteList( ).accept( this );
+		if (stmt.getCteList() != null) {
+			stmt.getCteList().accept(this);
 		}
 
-		if ( stmt.getTargetTable( ) != null )
-		{
+		if (stmt.getTargetTable() != null) {
 			current_table_reference_tag = "target_table";
-			stmt.getTargetTable( ).accept( this );
-		}
-		else
-		{
+			stmt.getTargetTable().accept(this);
+		} else {
 			// hive insert may have no target table
 		}
 
-		if ( stmt.getColumnList( ) != null )
-		{
+		if (stmt.getColumnList() != null) {
 			current_objectName_list_tag = "column_list";
-			stmt.getColumnList( ).accept( this );
+			stmt.getColumnList().accept(this);
 		}
 
 		//
@@ -5742,559 +5702,525 @@ public class xmlVisitor extends TParseTreeVisitor {
 		// stmt.getOutputClause().accept(this);
 		// }
 		//
-		switch ( stmt.getInsertSource( ) )
-		{
-			case values :
-				Element e_insert_values = xmldoc.createElement( "insert_values" );
-				e_parent = (Element) elementStack.peek( );
-				e_parent.appendChild( e_insert_values );
-				elementStack.push( e_insert_values );
+		switch (stmt.getInsertSource()) {
+			case values:
+				Element e_insert_values = xmldoc.createElement("insert_values");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_insert_values);
+				elementStack.push(e_insert_values);
 				Element e_row_values;
-				for ( int i = 0; i < stmt.getValues( ).size( ); i++ )
-				{
-					e_row_values = xmldoc.createElement( "row_values" );
-					e_insert_values.appendChild( e_row_values );
-					elementStack.push( e_row_values );
-					TMultiTarget multiTarget = stmt.getValues( )
-							.getMultiTarget( i );
+				for (int i = 0; i < stmt.getValues().size(); i++) {
+					e_row_values = xmldoc.createElement("row_values");
+					e_insert_values.appendChild(e_row_values);
+					elementStack.push(e_row_values);
+					TMultiTarget multiTarget = stmt.getValues()
+							.getMultiTarget(i);
 
-					for ( int j = 0; j < multiTarget.getColumnList( ).size( ); j++ )
-					{
-						if ( multiTarget.getColumnList( )
-								.getResultColumn( j )
-								.isPlaceHolder( ) )
+					for (int j = 0; j < multiTarget.getColumnList().size(); j++) {
+						if (multiTarget.getColumnList()
+								.getResultColumn(j)
+								.isPlaceHolder())
 							continue; // teradata allow empty value
-						multiTarget.getColumnList( )
-								.getResultColumn( j )
-								.getExpr( )
-								.accept( this );
+						multiTarget.getColumnList()
+								.getResultColumn(j)
+								.getExpr()
+								.accept(this);
 					}
 
-					elementStack.pop( ); // e_row_values
+					elementStack.pop(); // e_row_values
 				}
-				elementStack.pop( ); // e_insert_values
+				elementStack.pop(); // e_insert_values
 
 				break;
-			case subquery :
+			case subquery:
 				current_query_expression_tag = "insert_query";
-				stmt.getSubQuery( ).accept( this );
+				stmt.getSubQuery().accept(this);
 				break;
-			case values_empty :
+			case values_empty:
 				break;
-			case values_function :
+			case values_function:
 				// stmt.getFunctionCall().accept(this);
 				break;
-			case values_oracle_record :
+			case values_oracle_record:
 				// stmt.getRecordName().accept(this);
 				break;
-			case execute :
-				Element e_insert_execute = xmldoc.createElement( "insert_execute" );
-				e_parent = (Element) elementStack.peek( );
-				e_parent.appendChild( e_insert_execute );
-				elementStack.push( e_insert_execute );
-				stmt.getExecuteStmt( ).accept( this );
-				elementStack.pop( );
+			case execute:
+				Element e_insert_execute = xmldoc.createElement("insert_execute");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_insert_execute);
+				elementStack.push(e_insert_execute);
+				stmt.getExecuteStmt().accept(this);
+				elementStack.pop();
 				break;
 			case value_table:
-				addElementOfNode("source_table",stmt.getSourceValueTable());
+				addElementOfNode("source_table", stmt.getSourceValueTable());
 				break;
 			case set_column_value:
-				addElementOfNode("set_columns",stmt.getSetColumnValues());
+				addElementOfNode("set_columns", stmt.getSetColumnValues());
 				break;
-			default :
+			default:
 				break;
 		}
 		//
 		// if (stmt.getReturningClause() != null){
 		// stmt.getReturningClause().accept(this);
 		// }
-		elementStack.pop( );
+		elementStack.pop();
 
-		if (stmt.getMultiInsertStatements().size() > 0){
-			for(int i=0;i<stmt.getMultiInsertStatements().size();i++){
+		if (stmt.getMultiInsertStatements().size() > 0) {
+			for (int i = 0; i < stmt.getMultiInsertStatements().size(); i++) {
 				stmt.getMultiInsertStatements().get(i).accept(this);
 			}
 		}
 	}
 
-	public void postVisit( TInsertSqlStatement stmt )
-	{
-		appendEndTag( stmt );
+	public void postVisit(TInsertSqlStatement stmt) {
+		appendEndTag(stmt);
 	}
 
-	public void preVisit( TMultiTarget node )
-	{
-		appendStartTag( node );
-		if ( node.getColumnList( ) != null )
-		{
-			node.getColumnList( ).accept( this );
+	public void preVisit(TMultiTarget node) {
+		appendStartTag(node);
+		if (node.getColumnList() != null) {
+			node.getColumnList().accept(this);
 		}
 
-		if ( node.getSubQuery( ) != null )
-		{
-			node.getSubQuery( ).accept( this );
+		if (node.getSubQuery() != null) {
+			node.getSubQuery().accept(this);
 		}
 	}
 
-	public void preVisit( TMultiTargetList node )
-	{
-		appendStartTag( node );
-		for ( int i = 0; i < node.size( ); i++ )
-		{
-			node.getMultiTarget( i ).accept( this );
+	public void preVisit(TMultiTargetList node) {
+		appendStartTag(node);
+		for (int i = 0; i < node.size(); i++) {
+			node.getMultiTarget(i).accept(this);
 		}
 	}
 
-	public void postVisit( TMultiTargetList node )
-	{
-		appendEndTag( node );
+	public void postVisit(TMultiTargetList node) {
+		appendEndTag(node);
 	}
 
-	public void preVisit( TCTE node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_cte = xmldoc.createElement( "cte" );
-		e_parent.appendChild( e_cte );
-		elementStack.push( e_cte );
+	public void preVisit(TCTE node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_cte = xmldoc.createElement("cte");
+		e_parent.appendChild(e_cte);
+		elementStack.push(e_cte);
 		current_objectName_tag = "expression_name";
-		node.getTableName( ).accept( this );
+		node.getTableName().accept(this);
 
-		if ( node.getColumnList( ) != null )
-		{
+		if (node.getColumnList() != null) {
 			current_objectName_list_tag = "column_list";
-			node.getColumnList( ).accept( this );
+			node.getColumnList().accept(this);
 		}
 
 
-		if ( node.getSubquery( ) != null )
-		{
-			node.getSubquery( ).setDummyTag( TOP_STATEMENT );
-			node.getSubquery( ).accept( this );
-		}
-		else if ( node.getUpdateStmt( ) != null )
-		{
-			node.getUpdateStmt( ).accept( this );
-		}
-		else if ( node.getInsertStmt( ) != null )
-		{
-			node.getInsertStmt( ).accept( this );
-		}
-		else if ( node.getDeleteStmt( ) != null )
-		{
-			node.getDeleteStmt( ).accept( this );
+		if (node.getSubquery() != null) {
+			node.getSubquery().setDummyTag(TOP_STATEMENT);
+			node.getSubquery().accept(this);
+		} else if (node.getUpdateStmt() != null) {
+			node.getUpdateStmt().accept(this);
+		} else if (node.getInsertStmt() != null) {
+			node.getInsertStmt().accept(this);
+		} else if (node.getDeleteStmt() != null) {
+			node.getDeleteStmt().accept(this);
 		}
 
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void postVisit( TCTE node )
-	{
+	public void postVisit(TCTE node) {
 
 	}
 
-	public void preVisit( TCTEList node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_cte_list = xmldoc.createElement( "cte_list" );
-		e_parent.appendChild( e_cte_list );
-		elementStack.push( e_cte_list );
-		for ( int i = 0; i < node.size( ); i++ )
-		{
-			node.getCTE( i ).accept( this );
+	public void preVisit(TCTEList node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_cte_list = xmldoc.createElement("cte_list");
+		e_parent.appendChild(e_cte_list);
+		elementStack.push(e_cte_list);
+		for (int i = 0; i < node.size(); i++) {
+			node.getCTE(i).accept(this);
 		}
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void postVisit( TCTEList node )
-	{
-		appendEndTag( node );
+	public void postVisit(TCTEList node) {
+		appendEndTag(node);
 	}
 
-	public void preVisit( TAssignStmt stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_assign_stmt = xmldoc.createElement( "assignment_statement" );
-		e_assign_stmt.setAttribute("type",stmt.getAssignType().toString());
-		e_parent.appendChild( e_assign_stmt );
-		elementStack.push( e_assign_stmt );
+	public void preVisit(TAssignStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_assign_stmt = xmldoc.createElement("assignment_statement");
+		e_assign_stmt.setAttribute("type", stmt.getAssignType().toString());
+		e_parent.appendChild(e_assign_stmt);
+		elementStack.push(e_assign_stmt);
 
-		switch (stmt.getAssignType()){
+		switch (stmt.getAssignType()) {
 			case normal:
 				current_expression_tag = "left";
-				if (stmt.getVariableName() != null){
+				if (stmt.getVariableName() != null) {
 					stmt.getVariableName().accept(this);
-				}else{
-					stmt.getLeft( ).accept( this );
+				} else {
+					stmt.getLeft().accept(this);
 				}
 
 				current_expression_tag = "right";
-				stmt.getExpression( ).accept( this );
+				stmt.getExpression().accept(this);
 				break;
 			case variableAssignment:
-				addElementOfNode("variable",stmt.getVariableName());
-				stmt.getExpression( ).accept( this );
+				addElementOfNode("variable", stmt.getVariableName());
+				stmt.getExpression().accept(this);
 				break;
 			case cursorAssignment:
-				addElementOfNode("variable",stmt.getVariableName());
+				addElementOfNode("variable", stmt.getVariableName());
 				stmt.getQuery().accept(this);
 				break;
 			case resultsetAssignment:
 				break;
 		}
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TMssqlCreateXmlSchemaCollectionStmt stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_create_xml_schema_collection_stmt = xmldoc.createElement( "create_xml_schema_collection_statement" );
-		e_parent.appendChild( e_create_xml_schema_collection_stmt );
-		elementStack.push( e_create_xml_schema_collection_stmt );
+	public void preVisit(TMssqlCreateXmlSchemaCollectionStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_xml_schema_collection_stmt = xmldoc.createElement("create_xml_schema_collection_statement");
+		e_parent.appendChild(e_create_xml_schema_collection_stmt);
+		elementStack.push(e_create_xml_schema_collection_stmt);
 		current_objectName_tag = "schema_name";
-		stmt.getSchemaName( ).accept( this );
+		stmt.getSchemaName().accept(this);
 		current_expression_tag = "expr";
-		stmt.getExpr( ).accept( this );
-		elementStack.pop( );
+		stmt.getExpr().accept(this);
+		elementStack.pop();
 	}
 
 
-
-	public void preVisit( TIfStmt node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_if_stmt = xmldoc.createElement( "if_statement" );
-		e_parent.appendChild( e_if_stmt );
-		elementStack.push( e_if_stmt );
+	public void preVisit(TIfStmt node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_if_stmt = xmldoc.createElement("if_statement");
+		e_parent.appendChild(e_if_stmt);
+		elementStack.push(e_if_stmt);
 		current_expression_tag = "condition";
-		node.getCondition( ).accept( this );
+		node.getCondition().accept(this);
 		current_statement_list_tag = "then_statement_list";
-		node.getThenStatements( ).accept( this );
-		if ( node.getElseifStatements( ).size( ) > 0 )
-		{
-			Element e_elsif_cause_list = xmldoc.createElement( "elsif_clause_list" );
-			e_if_stmt.appendChild( e_elsif_cause_list );
-			elementStack.push( e_elsif_cause_list );
-			for ( int i = 0; i < node.getElseifStatements( ).size( ); i++ )
-			{
-				TElsifStmt elsifStmt = (TElsifStmt) node.getElseifStatements( )
-						.get( i );
+		node.getThenStatements().accept(this);
+		if (node.getElseifStatements().size() > 0) {
+			Element e_elsif_cause_list = xmldoc.createElement("elsif_clause_list");
+			e_if_stmt.appendChild(e_elsif_cause_list);
+			elementStack.push(e_elsif_cause_list);
+			for (int i = 0; i < node.getElseifStatements().size(); i++) {
+				TElsifStmt elsifStmt = (TElsifStmt) node.getElseifStatements()
+						.get(i);
 
-				Element e_elsif_cause = xmldoc.createElement( "elsif_clause" );
-				e_elsif_cause_list.appendChild( e_elsif_cause );
-				elementStack.push( e_elsif_cause );
+				Element e_elsif_cause = xmldoc.createElement("elsif_clause");
+				e_elsif_cause_list.appendChild(e_elsif_cause);
+				elementStack.push(e_elsif_cause);
 				current_expression_tag = "condition";
-				elsifStmt.getCondition( ).accept( this );
-				elsifStmt.getThenStatements( ).accept( this );
-				elementStack.pop( );
+				elsifStmt.getCondition().accept(this);
+				elsifStmt.getThenStatements().accept(this);
+				elementStack.pop();
 			}
 
-			elementStack.pop( );
+			elementStack.pop();
 		}
-		if ( node.getElseStatements( ).size( ) > 0 )
-		{
+		if (node.getElseStatements().size() > 0) {
 			current_statement_list_tag = "else_statement_list";
-			node.getElseStatements( ).accept( this );
+			node.getElseStatements().accept(this);
 		}
 
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TMssqlIfElse node )
-	{
-		e_parent = (Element) elementStack.peek( );
+	public void preVisit(TMssqlIfElse node) {
+		e_parent = (Element) elementStack.peek();
 
-		Element e_if_stmt = xmldoc.createElement( "if_statement" );
-		e_parent.appendChild( e_if_stmt );
-		elementStack.push( e_if_stmt );
-		if ( node.getCondition( ) != null )
-		{
+		Element e_if_stmt = xmldoc.createElement("if_statement");
+		e_parent.appendChild(e_if_stmt);
+		elementStack.push(e_if_stmt);
+		if (node.getCondition() != null) {
 			current_expression_tag = "condition";
-			node.getCondition( ).accept( this );
+			node.getCondition().accept(this);
 		}
 
 		current_statement_list_tag = "then_statement_list";
-		TStatementList ifList = new TStatementList( );
-		ifList.add( node.getStmt( ) );
-		ifList.accept( this );
+		TStatementList ifList = new TStatementList();
+		ifList.add(node.getStmt());
+		ifList.accept(this);
 
-		if ( node.getElseStmt( ) != null )
-		{
+		if (node.getElseStmt() != null) {
 			current_statement_list_tag = "else_statement_list";
-			TStatementList elseList = new TStatementList( );
-			elseList.add( node.getElseStmt( ) );
-			elseList.accept( this );
+			TStatementList elseList = new TStatementList();
+			elseList.add(node.getElseStmt());
+			elseList.accept(this);
 		}
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TBasicStmt node )
-	{
+	public void preVisit(TBasicStmt node) {
 		// appendStartTag(node);
 		// outputNodeData(node);
-		e_parent = (Element) elementStack.peek( );
-		Element e_basic_stmt = xmldoc.createElement( "plsql_basic_statement" );
-		e_parent.appendChild( e_basic_stmt );
-		elementStack.push( e_basic_stmt );
-		node.getExpr( ).accept( this );
-		elementStack.pop( );
+		e_parent = (Element) elementStack.peek();
+		Element e_basic_stmt = xmldoc.createElement("plsql_basic_statement");
+		e_parent.appendChild(e_basic_stmt);
+		elementStack.push(e_basic_stmt);
+		node.getExpr().accept(this);
+		elementStack.pop();
 
 	}
 
-	public void preVisit( TCaseStmt node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_case_stmt = xmldoc.createElement( "case_stmt" );
-		e_parent.appendChild( e_case_stmt );
-		if ( node.getCaseExpr( ) != null )
-		{
-			elementStack.push( e_case_stmt );
-			node.getCaseExpr( ).accept( this );
-			elementStack.pop( );
+	public void preVisit(TCaseStmt node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_case_stmt = xmldoc.createElement("case_stmt");
+		e_parent.appendChild(e_case_stmt);
+		if (node.getCaseExpr() != null) {
+			elementStack.push(e_case_stmt);
+			node.getCaseExpr().accept(this);
+			elementStack.pop();
 		}
 	}
 
-	public void preVisit( TCaseExpression node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_case_expr = xmldoc.createElement( TAG_CASE_EXPR );
-		e_parent.appendChild( e_case_expr );
-		elementStack.push( e_case_expr );
+	public void preVisit(TCaseExpression node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_case_expr = xmldoc.createElement(TAG_CASE_EXPR);
+		e_parent.appendChild(e_case_expr);
+		elementStack.push(e_case_expr);
 
-		if ( node.getInput_expr( ) != null )
-		{
+		if (node.getInput_expr() != null) {
 			current_expression_tag = "input_expression";
-			node.getInput_expr( ).accept( this );
+			node.getInput_expr().accept(this);
 		}
 
 		Element e_when_then;// = xmldoc.createElement("when_then_clause");
-		for ( int i = 0; i < node.getWhenClauseItemList( ).size( ); i++ )
-		{
-			e_when_then = xmldoc.createElement( "when_then_clause" );
-			e_case_expr.appendChild( e_when_then );
-			elementStack.push( e_when_then );
+		for (int i = 0; i < node.getWhenClauseItemList().size(); i++) {
+			e_when_then = xmldoc.createElement("when_then_clause");
+			e_case_expr.appendChild(e_when_then);
+			elementStack.push(e_when_then);
 			current_expression_tag = "search_expression";
-			node.getWhenClauseItemList( )
-					.getWhenClauseItem( i )
-					.getComparison_expr( )
-					.accept( this );
+			node.getWhenClauseItemList()
+					.getWhenClauseItem(i)
+					.getComparison_expr()
+					.accept(this);
 			current_expression_tag = "result_expression";
-			if ( node.getWhenClauseItemList( )
-					.getWhenClauseItem( i )
-					.getReturn_expr( ) != null )
-			{
-				node.getWhenClauseItemList( )
-						.getWhenClauseItem( i )
-						.getReturn_expr( )
-						.accept( this );
+			if (node.getWhenClauseItemList()
+					.getWhenClauseItem(i)
+					.getReturn_expr() != null) {
+				node.getWhenClauseItemList()
+						.getWhenClauseItem(i)
+						.getReturn_expr()
+						.accept(this);
+			} else if (node.getWhenClauseItemList()
+					.getWhenClauseItem(i)
+					.getStatement_list() != null) {
+				Element result_expression = xmldoc.createElement(current_expression_tag);
+				e_when_then.appendChild(result_expression);
+				elementStack.push(result_expression);
+				node.getWhenClauseItemList()
+						.getWhenClauseItem(i)
+						.getStatement_list()
+						.accept(this);
+				elementStack.pop();
 			}
-			else if ( node.getWhenClauseItemList( )
-					.getWhenClauseItem( i )
-					.getStatement_list( ) != null )
-			{
-				Element result_expression = xmldoc.createElement( current_expression_tag );
-				e_when_then.appendChild( result_expression );
-				elementStack.push( result_expression );
-				node.getWhenClauseItemList( )
-						.getWhenClauseItem( i )
-						.getStatement_list( )
-						.accept( this );
-				elementStack.pop( );
-			}
-			elementStack.pop( );
+			elementStack.pop();
 		}
 
-		if ( node.getElse_expr( ) != null )
-		{
+		if (node.getElse_expr() != null) {
 			current_expression_tag = "else_expression";
-			node.getElse_expr( ).accept( this );
+			node.getElse_expr().accept(this);
 		}
 
-		if ( node.getElse_statement_list( ).size( ) > 0 )
-		{
-			node.getElse_statement_list( ).accept( this );
+		if (node.getElse_statement_list().size() > 0) {
+			node.getElse_statement_list().accept(this);
 		}
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TWhenClauseItemList node )
-	{
-		appendStartTag( node );
-		for ( int i = 0; i < node.size( ); i++ )
-		{
-			node.getWhenClauseItem( i ).accept( this );
+	public void preVisit(TWhenClauseItemList node) {
+		appendStartTag(node);
+		for (int i = 0; i < node.size(); i++) {
+			node.getWhenClauseItem(i).accept(this);
 		}
 
 	}
 
-	public void postVisit( TWhenClauseItemList node )
-	{
-		appendEndTag( node );
+	public void postVisit(TWhenClauseItemList node) {
+		appendEndTag(node);
 	}
 
-	public void preVisit( TWhenClauseItem node )
-	{
-		appendStartTag( node );
-		node.getComparison_expr( ).accept( this );
-		if ( node.getReturn_expr( ) != null )
-		{
-			node.getReturn_expr( ).accept( this );
-		}
-		else if ( node.getStatement_list( ).size( ) > 0 )
-		{
-			node.getStatement_list( ).accept( this );
+	public void preVisit(TWhenClauseItem node) {
+		appendStartTag(node);
+		node.getComparison_expr().accept(this);
+		if (node.getReturn_expr() != null) {
+			node.getReturn_expr().accept(this);
+		} else if (node.getStatement_list().size() > 0) {
+			node.getStatement_list().accept(this);
 		}
 	}
 
-	public void addElementOfString( String tagName, String str )
-	{
-		Element e_literal = xmldoc.createElement( tagName );
-		e_parent = (Element) elementStack.peek( );
-		e_parent.appendChild( e_literal );
+	public void addElementOfString(String tagName, String str) {
+		Element e_literal = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_literal);
 
-		Element e_value = xmldoc.createElement( "value" );
-		e_literal.appendChild( e_value );
-		e_value.setTextContent( str );
+		Element e_value = xmldoc.createElement("value");
+		e_literal.appendChild(e_value);
+		e_value.setTextContent(str);
 	}
 
-	public void addElementOfNode( String tagName, TParseTreeNode node )
-	{
-		Element e_element = xmldoc.createElement( tagName );
-		e_parent = (Element) elementStack.peek( );
-		e_parent.appendChild( e_element );
+	public void addElementOfNode(String tagName, TParseTreeNode node) {
+		Element e_element = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_element);
 		elementStack.push(e_element);
 		node.accept(this);
 		elementStack.pop();
 	}
 
-	public void addElementOfNode( String tagName, TParseTreeNodeList <TParseTreeNode> nodeList )
-	{
-		Element e_element = xmldoc.createElement( tagName );
-		e_parent = (Element) elementStack.peek( );
-		e_parent.appendChild( e_element );
+	public void addElementOfNode(String tagName, TParseTreeNodeList<TParseTreeNode> nodeList) {
+		Element e_element = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_element);
 		elementStack.push(e_element);
-		for(TParseTreeNode node:nodeList){
+		for (TParseTreeNode node : nodeList) {
 			node.accept(this);
 		}
 		elementStack.pop();
 	}
 
-	public void addElementOfNode( String tagName, TPTNodeList <TColumnWithSortOrder> nodeList )
-	{
-		Element e_element = xmldoc.createElement( tagName );
-		e_parent = (Element) elementStack.peek( );
-		e_parent.appendChild( e_element );
+	public void addElementOfNode(String tagName, TPTNodeList<TColumnWithSortOrder> nodeList) {
+		Element e_element = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_element);
 		elementStack.push(e_element);
-		for(int i=0;i<nodeList.size();i++){
+		for (int i = 0; i < nodeList.size(); i++) {
 			nodeList.getElement(i).accept(this);
 		}
 		elementStack.pop();
 	}
 
-	public void addElementOfNode( String tagName, TObjectNameList nodeList )
-	{
-		Element e_element = xmldoc.createElement( tagName );
-		e_parent = (Element) elementStack.peek( );
-		e_parent.appendChild( e_element );
+	public void addElementOfNode(String tagName, TObjectNameList nodeList) {
+		Element e_element = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_element);
 		elementStack.push(e_element);
-		for(TObjectName node:nodeList){
+		for (TObjectName node : nodeList) {
 			node.accept(this);
 		}
 		elementStack.pop();
 	}
 
-	public void preVisit( TMySQLDeallocatePrepareStmt node ) {
+	public void preVisit(TMySQLDeallocatePrepareStmt node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_prepare_stmt = xmldoc.createElement("deallocate_prepare_statement");
 		e_parent.appendChild(e_prepare_stmt);
 		elementStack.push(e_prepare_stmt);
 		current_objectName_tag = "stmt_name";
 		node.getStmtName().accept(this);
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TPrepareStmt node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_prepare_stmt = xmldoc.createElement( "prepare_statement" );
-		e_parent.appendChild( e_prepare_stmt );
-		elementStack.push( e_prepare_stmt );
-		switch (node.dbvendor){
+	public void preVisit(TPrepareStmt node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_prepare_stmt = xmldoc.createElement("prepare_statement");
+		e_parent.appendChild(e_prepare_stmt);
+		elementStack.push(e_prepare_stmt);
+		switch (node.dbvendor) {
 			case dbvpresto:
 			case dbvhana:
-				if (node.getParentStmt() != null){
+				if (node.getParentStmt() != null) {
 					node.getPreparableStmt().accept(this);
 				}
 				break;
 			default:
 				current_objectName_tag = "stmt_name";
-				node.getStmtName().accept( this );
-				if (node.getPreparableStmt() != null){
+				node.getStmtName().accept(this);
+				if (node.getPreparableStmt() != null) {
 					node.getPreparableStmt().accept(this);
 				}
-				if (node.getPreparableStmtStr().length() > 0){
-					addElementOfString("stmt_value",node.getPreparableStmtStr());
+				if (node.getPreparableStmtStr().length() > 0) {
+					addElementOfString("stmt_value", node.getPreparableStmtStr());
 				}
 				break;
 		}
 
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TCloseStmt node )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_close_stmt = xmldoc.createElement( "close_statement" );
-		e_parent.appendChild( e_close_stmt );
-		elementStack.push( e_close_stmt );
+	public void preVisit(TCloseStmt node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_close_stmt = xmldoc.createElement("close_statement");
+		e_parent.appendChild(e_close_stmt);
+		elementStack.push(e_close_stmt);
 		current_objectName_tag = "cursor_name";
-		node.getCursorName( ).accept( this );
-		elementStack.pop( );
+		node.getCursorName().accept(this);
+		elementStack.pop();
 	}
 
-	public void preVisit( TAlterTaskStmt stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_close_stmt = xmldoc.createElement( "alter_task_statement" );
-		e_parent.appendChild( e_close_stmt );
-		elementStack.push( e_close_stmt );
+	public void preVisit(TAlterTaskStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_close_stmt = xmldoc.createElement("alter_task_statement");
+		e_parent.appendChild(e_close_stmt);
+		elementStack.push(e_close_stmt);
 		current_objectName_tag = "task_name";
-		stmt.getTaskName( ).accept( this );
-		elementStack.pop( );
+		stmt.getTaskName().accept(this);
+		elementStack.pop();
 	}
 
-	public void preVisit( TCreateStageStmt stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_create_stage = xmldoc.createElement( "create_stage_statement" );
-		e_parent.appendChild( e_create_stage );
-		elementStack.push( e_create_stage );
+	public void preVisit(TCreateStageStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_stage = xmldoc.createElement("create_stage_statement");
+		e_parent.appendChild(e_create_stage);
+		elementStack.push(e_create_stage);
 		current_objectName_tag = "stage_name";
-		stmt.getStageName( ).accept( this );
-		if (stmt.getExternalStageURL() != null){
-			addElementOfString("external_stage",stmt.getExternalStageURL());
+		stmt.getStageName().accept(this);
+		if (stmt.getExternalStageURL() != null) {
+			addElementOfString("external_stage", stmt.getExternalStageURL());
 		}
-		if (stmt.getFileFormatName() != null){
-			addElementOfString("file_format",stmt.getFileFormatName());
+		if (stmt.getFileFormatName() != null) {
+			addElementOfString("file_format", stmt.getFileFormatName());
 		}
-		if (stmt.getFileFormatType() != null){
-			addElementOfString("file_type",stmt.getFileFormatType());
+		if (stmt.getFileFormatType() != null) {
+			addElementOfString("file_type", stmt.getFileFormatType());
 		}
 
-		elementStack.pop( );
+		elementStack.pop();
 	}
 
-	public void preVisit( TCreateTaskStmt stmt )
-	{
-		e_parent = (Element) elementStack.peek( );
-		Element e_create_task = xmldoc.createElement( "create_task_statement" );
-		e_parent.appendChild( e_create_task );
-		elementStack.push( e_create_task );
+	public void preVisit(TCreateTaskStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_task = xmldoc.createElement("create_task_statement");
+		e_parent.appendChild(e_create_task);
+
+		elementStack.push(e_create_task);
 		current_objectName_tag = "task_name";
-		stmt.getTaskName( ).accept( this );
+		stmt.getTaskName().accept(this);
 		stmt.getSqlStatement().accept(this);
+		if (stmt.getTaskOptionList() != null) {
+			for (TTaskOption item : stmt.getTaskOptionList()) {
+				item.accept(this);
+			}
+		}
 
-		elementStack.pop( );
+		elementStack.pop();
 	}
+
+	public void preVisit(TTaskOption node){
+		e_parent = (Element) elementStack.peek();
+		Element e_task_option = xmldoc.createElement("task_option");
+		e_parent.appendChild(e_task_option);
+		elementStack.push(e_task_option);
+		e_task_option.setAttribute("task_option_type",node.getTaskOptionType().toString());
+		switch (node.getTaskOptionType()){
+			case AFTER:
+				for(TObjectName item:node.getAfter()){
+					addElementOfString("parent_task",item.toString());
+				}
+				break;
+
+		}
+
+		elementStack.pop();
+
+	}
+
+
 
 	public void preVisit( TCreateStreamStmt stmt )
 	{

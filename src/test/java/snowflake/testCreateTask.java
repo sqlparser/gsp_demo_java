@@ -21,6 +21,7 @@ public class testCreateTask  extends TestCase {
                 "SYSTEM$STREAM_HAS_DATA('EDM_REFINED_DEV.DW_APPL.HCM_TOTALEE_SNOWFLAKE_STREAM_R')\n" +
                 "AS\n" +
                 "call EDM_REFINED_DEV.DW_APPL.sp_ARCHIVE_HCM_TOTALEE();";
+
         assertTrue(sqlparser.parse() == 0);
 
         TCreateTaskStmt createtaskStmt = (TCreateTaskStmt)sqlparser.sqlstatements.get(0);
@@ -56,6 +57,7 @@ public class testCreateTask  extends TestCase {
                 "  USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE = 'XSMALL'\n" +
                 "AS\n" +
                 "INSERT INTO mytable(ts) VALUES(CURRENT_TIMESTAMP);";
+
         assertTrue(sqlparser.parse() == 0);
 
         TCreateTaskStmt createtaskStmt = (TCreateTaskStmt)sqlparser.sqlstatements.get(0);
