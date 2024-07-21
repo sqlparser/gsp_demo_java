@@ -2652,6 +2652,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+	public void preVisit(TDropStmt stmt) {
+		Element e_drop_stmt = xmldoc.createElement("drop_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_stmt);
+		e_drop_stmt.setAttribute("object_type", stmt.getDbObjectType().toString());
+		elementStack.push(e_drop_stmt);
+		stmt.getDbObjectName().accept(this);
+
+		elementStack.pop();
+	}
+
 
 	public void preVisit(TWhereClause node) {
 		// appendStartTag(node);
