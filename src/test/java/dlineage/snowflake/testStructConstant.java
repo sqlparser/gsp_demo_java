@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
@@ -34,7 +33,6 @@ public class testStructConstant  extends TestCase {
                 "            END;\n" +
                 "            ';";
 
-		TBaseType.ENABLE_RESOLVER = true;
         TGSqlParser parser = new TGSqlParser(EDbVendor.dbvsnowflake);
         parser.sqltext = sql;
         parser.parse();
