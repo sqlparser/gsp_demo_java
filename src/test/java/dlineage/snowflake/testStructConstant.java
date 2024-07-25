@@ -1,6 +1,12 @@
 package dlineage.snowflake;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;
 import gudusoft.gsqlparser.dlineage.dataflow.model.Option;
@@ -9,15 +15,12 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.json.RelationshipElement;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
 import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
 import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
+
 import junit.framework.TestCase;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class testStructConstant  extends TestCase {
-
-    public void test1_999() throws Exception {
+	
+	public void test999_1() throws Exception {
 
         String sql = "CREATE OR REPLACE PROCEDURE COVID19_PROCESSED.PUBLIC.INSERT_NYT_US_COVID19()\n" +
                 "            RETURNS VARCHAR(16777216)\n" +
@@ -31,6 +34,7 @@ public class testStructConstant  extends TestCase {
                 "                WHERE CASES_SINCE_PREV_DAY > 0;\n" +
                 "            END;\n" +
                 "            ';";
+
         TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvsnowflake);
         sqlParser.sqltext = sql;
         sqlParser.parse();
@@ -47,6 +51,7 @@ public class testStructConstant  extends TestCase {
                 "                WHERE CASES_SINCE_PREV_DAY > 0"));
 
     }
+
 
     public void test999() throws Exception {
 
