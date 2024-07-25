@@ -39,6 +39,31 @@ public class testStructConstant  extends TestCase {
         sqlParser.sqltext = sql;
         sqlParser.parse();
         TCreateProcedureStmt createProcedureStmt = (TCreateProcedureStmt) sqlParser.sqlstatements.get(0);
+        assertTrue(createProcedureStmt.asCanonical().equalsIgnoreCase("CREATE OR REPLACE PROCEDURE COVID19_PROCESSED.PUBLIC.INSERT_NYT_US_COVID19()\n" +
+                "            RETURNS VARCHAR(16777216)\n" +
+                "            LANGUAGE SQL\n" +
+                "            EXECUTE AS OWNER\n" +
+                "            AS '\n" +
+                "            BEGIN\n" +
+                "                INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
+                "                SELECT *\n" +
+                "                FROM COVID19_STAGE.PUBLIC.NYT_US_COVID19\n" +
+                "                WHERE CASES_SINCE_PREV_DAY > 999;\n" +
+                "            END;\n" +
+                "            '"));
+
+        assertTrue(createProcedureStmt.toString().equalsIgnoreCase("CREATE OR REPLACE PROCEDURE COVID19_PROCESSED.PUBLIC.INSERT_NYT_US_COVID19()\n" +
+                "            RETURNS VARCHAR(16777216)\n" +
+                "            LANGUAGE SQL\n" +
+                "            EXECUTE AS OWNER\n" +
+                "            AS '\n" +
+                "            BEGIN\n" +
+                "                INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
+                "                SELECT *\n" +
+                "                FROM COVID19_STAGE.PUBLIC.NYT_US_COVID19\n" +
+                "                WHERE CASES_SINCE_PREV_DAY > 0;\n" +
+                "            END;\n" +
+                "            '"));
 
         TInsertSqlStatement insertSqlStatement = (TInsertSqlStatement) createProcedureStmt.getBodyStatements().get(0);
         assertTrue(insertSqlStatement.asCanonical().equalsIgnoreCase("INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
