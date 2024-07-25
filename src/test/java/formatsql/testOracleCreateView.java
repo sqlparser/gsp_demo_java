@@ -372,7 +372,7 @@ public class testOracleCreateView extends TestCase
 				"         AND POLIN.CONTRACT_ID = Contract_Number.PO_HEADER_ID(+)\n" +
 				"         AND ITEM.INVENTORY_ITEM_ID = MSTK1.INVENTORY_ITEM_ID (+)\n" +
 				"         AND ITEM.ORGANIZATION_ID = MSTK1.ORGANIZATION_ID (+)";
-		System.out.println(leftExpr);
+		// System.out.println(leftExpr);
 		assertTrue( leftExpr.equalsIgnoreCase( rightExpr ) );
 		// System.out.println(result);
 	}

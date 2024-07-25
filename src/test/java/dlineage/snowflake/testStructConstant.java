@@ -7,6 +7,8 @@ import gudusoft.gsqlparser.dlineage.dataflow.model.Option;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.Dataflow;
 import gudusoft.gsqlparser.dlineage.dataflow.model.json.RelationshipElement;
 import gudusoft.gsqlparser.dlineage.dataflow.model.xml.dataflow;
+import gudusoft.gsqlparser.stmt.TCreateProcedureStmt;
+import gudusoft.gsqlparser.stmt.TInsertSqlStatement;
 import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +16,38 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class testStructConstant  extends TestCase {
+
+    public void test1_999() throws Exception {
+
+        String sql = "CREATE OR REPLACE PROCEDURE COVID19_PROCESSED.PUBLIC.INSERT_NYT_US_COVID19()\n" +
+                "            RETURNS VARCHAR(16777216)\n" +
+                "            LANGUAGE SQL\n" +
+                "            EXECUTE AS OWNER\n" +
+                "            AS '\n" +
+                "            BEGIN\n" +
+                "                INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
+                "                SELECT *\n" +
+                "                FROM COVID19_STAGE.PUBLIC.NYT_US_COVID19\n" +
+                "                WHERE CASES_SINCE_PREV_DAY > 0;\n" +
+                "            END;\n" +
+                "            ';";
+        TGSqlParser sqlParser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlParser.sqltext = sql;
+        sqlParser.parse();
+        TCreateProcedureStmt createProcedureStmt = (TCreateProcedureStmt) sqlParser.sqlstatements.get(0);
+
+        TInsertSqlStatement insertSqlStatement = (TInsertSqlStatement) createProcedureStmt.getBodyStatements().get(0);
+        assertTrue(insertSqlStatement.asCanonical().equalsIgnoreCase("INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
+                "                SELECT *\n" +
+                "                FROM COVID19_STAGE.PUBLIC.NYT_US_COVID19\n" +
+                "                WHERE CASES_SINCE_PREV_DAY > 999"));
+        assertTrue (insertSqlStatement.toString().equalsIgnoreCase("INSERT INTO COVID19_PROCESSED.PUBLIC.NYT_US_COVID19\n" +
+                "                SELECT *\n" +
+                "                FROM COVID19_STAGE.PUBLIC.NYT_US_COVID19\n" +
+                "                WHERE CASES_SINCE_PREV_DAY > 0"));
+
+    }
+
     public void test999() throws Exception {
 
         String sql = "CREATE OR REPLACE PROCEDURE COVID19_PROCESSED.PUBLIC.INSERT_NYT_US_COVID19()\n" +
@@ -28,6 +62,8 @@ public class testStructConstant  extends TestCase {
                 "                WHERE CASES_SINCE_PREV_DAY > 0;\n" +
                 "            END;\n" +
                 "            ';";
+
+       // System.out.println(sql);
 
         Option option = new Option();
         option.setVendor(EDbVendor.dbvsnowflake);
@@ -48,5 +84,6 @@ public class testStructConstant  extends TestCase {
         assertTrue(!sourceColumnNames.contains("999"));
         assertTrue(sourceColumnNames.contains("0"));
     }
+
 }
 
