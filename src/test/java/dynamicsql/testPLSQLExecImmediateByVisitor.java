@@ -177,7 +177,7 @@ public class testPLSQLExecImmediateByVisitor extends TestCase {
                 "\tFROM USRTEMP.T$_AYF_F_D_DEP_TRAF_POST_'||V_THREAD||'';\n" +
                 "\tCOMMIT;\n" +
                 "\t\n" +
-                "    EXECUTE IMMEDIATE 'ALTER INDEX DWA.IDX1_AYF_F_D_DEPART_TRAF_POSTPAGO REBUILD PARTITION P_'||V_THREAD;\n" +
+                "     EXECUTE IMMEDIATE 'ALTER INDEX DWA.IDX1_AYF_F_D_DEPART_TRAF_POSTPAGO REBUILD PARTITION P_'||V_THREAD;\n" +
                 "    \n" +
                 "    -------------------------------------------------------------------------------------------------------------------------------------------\n" +
                 "    DWO.PKG_FRAME_IDEAS_REPORT.SP_SET_PROCESS_STEP_LOG(999,'','Finzalizando insercion de informacion en la tabla DWA.AYF_F_D_DEPART_TRAF_POSTPAGO');\n" +
@@ -209,8 +209,9 @@ public class testPLSQLExecImmediateByVisitor extends TestCase {
         assertTrue(sqlparser.parse() == 0);
 
         nodeVisitor nodeVisitor = new nodeVisitor();
-        System.out.println(sqlparser.sqlstatements.get(0).getClass().getName());
+       // System.out.println(sqlparser.sqlstatements.get(0).getClass().getName());
         sqlparser.sqlstatements.get(0).acceptChildren(nodeVisitor);
+        //System.out.println(sqlparser.sqltext);
         assertTrue(nodeVisitor.stmtCount == 9);
 
     }

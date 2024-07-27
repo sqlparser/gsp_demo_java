@@ -1,15 +1,61 @@
 package common;
 
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.ETableSource;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TCTEList;
+import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TTable;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 
 public class testCTE extends TestCase {
+
+    public void testSelectListinSubQueryCTE() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
+        sqlparser.sqltext = "with table_a as (\n" +
+                "  select id ,ssid from (\n" +
+                "select id,ssid from table_a\n" +
+                "  )t)\n" +
+                "select * from table_a";
+        assertTrue(sqlparser.parse() == 0);
+
+        TSelectSqlStatement select = (TSelectSqlStatement) sqlparser.getSqlstatements().get(0);
+        // table_a in select * from table_a is CTE
+        TTable table2 = select.getRelations().get(0);
+        assertTrue(table2.toString().equalsIgnoreCase("table_a"));
+        assertTrue(table2.isCTEName());
+
+
+        TCTEList ctelist = select.getCteList();
+
+        // aaa in from clause of : with aaa as (select nameen from aaa) is not CTE
+        TCTE cte0 = ctelist.getCTE(0);
+        TSelectSqlStatement subquery = cte0.getSubquery();
+
+
+        TResultColumn resultColumn = subquery.getResultColumnList().getResultColumn(0);
+        assertTrue(resultColumn.getExpr().getObjectOperand().getSourceTable().getTableType() == ETableSource.subquery);
+        assertTrue(resultColumn.getExpr().getObjectOperand().getSourceTable().getStartToken().lineNo == 2);
+
+
+        TSelectSqlStatement subquery2 = subquery.getRelations().get(0).getSubquery();
+        TTable table = subquery2.getRelations().get(0);
+        assertTrue(table.toString().equalsIgnoreCase("table_a"));
+        assertTrue(table.getStartToken().lineNo == 3);
+        assertTrue(!subquery2.getRelations().get(0).isCTEName());
+        assertTrue(table.getCTE() == null);
+        assertTrue(!subquery2.tables.getTable(0).isCTEName());
+        TResultColumn resultColumn0 = subquery2.getResultColumnList().getResultColumn(0);
+        assertTrue(resultColumn0.getExpr().toString().equalsIgnoreCase("id"));
+        TResultColumn resultColumn1 = subquery2.getResultColumnList().getResultColumn(1);
+        assertTrue(resultColumn1.getExpr().toString().equalsIgnoreCase("ssid"));
+        assertTrue (resultColumn0.getExpr().getObjectOperand().getSourceTable().getStartToken().lineNo == 3);
+
+
+    }
 
     public void testFalseCTETable() {
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);

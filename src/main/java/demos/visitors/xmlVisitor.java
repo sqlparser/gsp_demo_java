@@ -3576,6 +3576,24 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+
+	public void preVisit(TAlterSequenceStatement stmt) {
+
+		Element e_alter_sequence = xmldoc.createElement("alter_sequence_statement");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_alter_sequence);
+		elementStack.push(e_alter_sequence);
+		stmt.getSequenceName().accept(this);
+		if (stmt.getOptions() != null) {
+			for(TSequenceOption option:stmt.getOptions()){
+				option.accept(this);
+			}
+		}
+		elementStack.pop();
+
+	}
+
 	public void preVisit(TAlterTableStatement stmt) {
 
 		Element e_alter_table = xmldoc.createElement("alter_table_statement");
@@ -4037,8 +4055,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 			}
 			elementStack.pop();
 		}
-		stmt.getSubquery().setDummyTag(TOP_STATEMENT);
-		stmt.getSubquery().accept(this);
+
+		if (stmt.getSubquery() != null){ // gaussdb create view using jdbc option does not support subquery
+			stmt.getSubquery().setDummyTag(TOP_STATEMENT);
+			stmt.getSubquery().accept(this);
+		}
 
 
 		elementStack.pop();
@@ -4072,6 +4093,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 		current_statement_list_tag = "body_statement_list";
 		if (stmt.getBodyStatements().size() > 0)
 			stmt.getBodyStatements().accept(this);
+
+		elementStack.pop();
+	}
+
+
+	public void preVisit(TAlterTypeStatement stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_type = xmldoc.createElement("alter_type_statement");
+		e_parent.appendChild(e_alter_type);
+		elementStack.push(e_alter_type);
+		stmt.getTypeName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TSequenceOption node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_sequence_option = xmldoc.createElement("sequence_option");
+		e_parent.appendChild(e_sequence_option);
+		elementStack.push(e_sequence_option);
+		addElementOfNode(node.getSequenceOptionType().toString(), node.getOptionValue());
 
 		elementStack.pop();
 	}
@@ -4579,6 +4620,20 @@ public class xmlVisitor extends TParseTreeVisitor {
 		for (int i = 0; i < node.getSelectItemList().size(); i++) {
 			node.getSelectItemList().getElement(i).accept(this);
 		}
+		elementStack.pop();
+	}
+
+
+
+	public void preVisit(TAlterIndexStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_create_index = xmldoc.createElement("alter_index_statement");
+		e_parent.appendChild(e_create_index);
+		elementStack.push(e_create_index);
+		e_create_index.setAttribute("alter_type",stmt.getAlterIndexOption().toString());
+		stmt.getIndexName().accept(this);
+
+
 		elementStack.pop();
 	}
 
