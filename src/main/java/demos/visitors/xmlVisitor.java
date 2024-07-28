@@ -1439,6 +1439,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				node.getFieldName().accept(this);
 				break;
+			case overlaps_t:
+				node.getLeftOperand().accept(this);
+				node.getRightOperand().accept(this);
+				break;
 			default:
 				e_expression = xmldoc.createElement(TAG_UNKNOWN_EXPR);
 				e_parent = (Element) elementStack.peek();
@@ -1472,6 +1476,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 		}
 		elementStack.pop();
 	}
+
+	public void preVisit(TJsonTable node) {
+		Element e_join_table = xmldoc.createElement("Json_Table");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_join_table);
+		elementStack.push(e_join_table);
+		if (node.getJsonExpression() != null){
+			node.getJsonExpression().accept(this);
+		}
+		if (node.getPath() != null){
+			addElementOfString("path",node.getPath());
+		}
+		if (node.getColumnDefinitions() != null){
+			node.getColumnDefinitions().accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+
 
 	public void preVisit(TDataConversionItem node) {
 		Element e_data_conversion = xmldoc.createElement("data_conversion_item");
@@ -2128,6 +2152,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 				node.getCaseJoin().accept(this);
 				elementStack.pop();
+				break;
+			case jsonTable:
+				node.getJsonTable().accept(this);
 				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
@@ -3469,6 +3496,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			case partition:
 				node.getTablePartition().accept(this);
+				break;
+			case renameIndex:
+				node.getIndexName().accept(this);
+				if (node.getNewIndexName() != null){
+					node.getNewIndexName().accept(this);
+				}
 				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
