@@ -7,11 +7,52 @@ import gudusoft.gsqlparser.nodes.TCTE;
 import gudusoft.gsqlparser.nodes.TCTEList;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TTable;
+import gudusoft.gsqlparser.stmt.TCreateViewSqlStatement;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
 
 public class testCTE extends TestCase {
+
+    public void testrecursiveCTE() {
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        sqlparser.sqltext = "create view v3 as \n" +
+                "WITH RECURSIVE employee_recursive(distance, employee_name, manager_name) AS (\n" +
+                "SELECT 1, employee_name, manager_name\n" +
+                "FROM employee\n" +
+                "WHERE manager_name = 'Mary'\n" +
+                "UNION ALL\n" +
+                "SELECT er.distance + 1, e.employee_name, e.manager_name\n" +
+                "FROM employee_recursive er, employee e\n" +
+                "WHERE er.employee_name = e.manager_name\n" +
+                ")\n" +
+                "SELECT distance, employee_name FROM employee_recursive;";
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateViewSqlStatement createViewSqlStatement = (TCreateViewSqlStatement) sqlparser.sqlstatements.get(0);
+
+        TSelectSqlStatement select = createViewSqlStatement.getSubquery();
+        // employee_recursive in SELECT distance, employee_name FROM employee_recursive is CTE
+        TTable table2 = select.getRelations().get(0);
+        assertTrue(table2.toString().equalsIgnoreCase("employee_recursive"));
+        assertTrue(table2.isCTEName());
+
+
+        TCTEList ctelist = select.getCteList();
+
+        // aaa in from clause of : with aaa as (select nameen from aaa) is not CTE
+        TCTE cte0 = ctelist.getCTE(0);
+        TSelectSqlStatement subquery = cte0.getSubquery();
+        TSelectSqlStatement rightSubQuery = subquery.getRightStmt();
+
+
+        TTable table = rightSubQuery.getRelations().get(0);
+        assertTrue(table.toString().equalsIgnoreCase("employee_recursive"));
+        assertTrue(table.getStartToken().lineNo == 8);
+        assertTrue(table.isCTEName());
+        assertTrue(table.getCTE() == cte0);
+
+    }
 
     public void testSelectListinSubQueryCTE() {
         TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvgaussdb);
@@ -53,8 +94,6 @@ public class testCTE extends TestCase {
         TResultColumn resultColumn1 = subquery2.getResultColumnList().getResultColumn(1);
         assertTrue(resultColumn1.getExpr().toString().equalsIgnoreCase("ssid"));
         assertTrue (resultColumn0.getExpr().getObjectOperand().getSourceTable().getStartToken().lineNo == 3);
-
-
     }
 
     public void testFalseCTETable() {
