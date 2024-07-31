@@ -13,9 +13,30 @@ public class testOracle extends TestCase {
         getTableColumn.showTableEffect = false;
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
+        getTableColumn.listStarColumn = true;
         getTableColumn.runText(inputQuery);
         //  System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+    }
+
+    public static void testCalculatedColumnWithStarColumn() {
+        doTest("SELECT \n" +
+                        "     tx_date_yyyymmdd  AS DATA_DT   --数据日期\n" +
+                        "    ,'zfb' as OPEN_CHAN_ORG_CD\n" +
+                        "from \n" +
+                        "  (select *\n" +
+                        "  , START_DT - to_date(cast(intbegindate as varchar),'YYYYMMDD') + 1 as QIXIAN\n" +
+                        "  from dwodata.kcb_run_bj_contract_sz t1\n" +
+                        ") t1\n" +
+                        "where T1.QIXIAN > 0",
+                "Tables:\n" +
+                        "dwodata.kcb_run_bj_contract_sz\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "dwodata.kcb_run_bj_contract_sz.*\n" +
+                        "dwodata.kcb_run_bj_contract_sz.intbegindate\n" +
+                        "dwodata.kcb_run_bj_contract_sz.START_DT\n" +
+                        "dwodata.kcb_run_bj_contract_sz.tx_date_yyyymmdd");
     }
 
     public static void testJsonObject() {
