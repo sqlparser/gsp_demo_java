@@ -68,4 +68,38 @@ public class testCreateTask  extends TestCase {
         assertTrue(insertSqlStatement.getTargetTable().toString().equalsIgnoreCase("mytable"));
     }
 
+    public void test4(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE TASK DB.SCH.TASK_2\n" +
+                "WAREHOUSE=WH1\n" +
+                "AFTER TASK_1\n" +
+                "AS SELECT 1;";
+
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTaskStmt createtaskStmt = (TCreateTaskStmt)sqlparser.sqlstatements.get(0);
+
+        assertTrue(createtaskStmt.getTaskName().toString().equalsIgnoreCase("DB.SCH.TASK_2"));
+        assertTrue(createtaskStmt.getTaskOptionList().get(1).getAfter().getObjectName(0).getObjectToken().toString().equalsIgnoreCase("TASK_1"));
+
+    }
+
+    public void test5(){
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvsnowflake);
+        sqlparser.sqltext = "CREATE OR REPLACE TASK DB.SCH.TASK_2\n" +
+                "WAREHOUSE=WH1\n" +
+                "AFTER DB1.SCH1.TASK_1\n" +
+                "AS SELECT 1;";
+
+        assertTrue(sqlparser.parse() == 0);
+
+        TCreateTaskStmt createtaskStmt = (TCreateTaskStmt)sqlparser.sqlstatements.get(0);
+
+        assertTrue(createtaskStmt.getTaskName().toString().equalsIgnoreCase("DB.SCH.TASK_2"));
+        assertTrue(createtaskStmt.getTaskOptionList().get(1).getAfter().getObjectName(0).getDatabaseToken().toString().equalsIgnoreCase("DB1"));
+        assertTrue(createtaskStmt.getTaskOptionList().get(1).getAfter().getObjectName(0).getSchemaToken().toString().equalsIgnoreCase("SCH1"));
+        assertTrue(createtaskStmt.getTaskOptionList().get(1).getAfter().getObjectName(0).getObjectToken().toString().equalsIgnoreCase("TASK_1"));
+
+    }
+
 }

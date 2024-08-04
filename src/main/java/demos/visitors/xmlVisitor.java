@@ -592,6 +592,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getExprList() != null) {
 			node.getExprList().accept(this);
 		}
+		if (node.getVariableList() != null){
+			node.getVariableList().accept(this);
+		}
 
 		elementStack.pop();
 	}
@@ -1483,7 +1486,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_join_table);
 		elementStack.push(e_join_table);
 		if (node.getJsonExpression() != null){
-			node.getJsonExpression().accept(this);
+			//node.getJsonExpression().accept(this);
+			addElementOfNode("json_data_expr",node.getJsonExpression());
 		}
 		if (node.getPath() != null){
 			addElementOfString("path",node.getPath());
@@ -6064,6 +6068,39 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 
 	}
+
+	public void preVisit(TAlterSessionStatement stmt) {
+		// appendStartTag(node);
+		// outputNodeData(node);
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_session = xmldoc.createElement("alter_session_statement");
+		e_parent.appendChild(e_alter_session);
+		elementStack.push(e_alter_session);
+		e_alter_session.setAttribute("type",stmt.getType().toString());
+		elementStack.pop();
+
+	}
+
+	public void preVisit(TUpsertStmt stmt) {
+		e_parent = (Element) elementStack.peek();
+		Element e_upsert_stmt = xmldoc.createElement("upsert_statement");
+		e_parent.appendChild(e_upsert_stmt);
+		elementStack.push(e_upsert_stmt);
+		stmt.getTargetTable().accept(this);
+		if (stmt.getColumnList() != null) {
+			stmt.getColumnList().accept(this);
+		}
+		if (stmt.getSubQuery() != null){
+			stmt.getSubQuery().accept(this);
+		}else if (stmt.getValues() != null){
+			stmt.getValues().accept(this);
+		}
+
+		elementStack.pop();
+
+	}
+
+
 
 	public void preVisit(TCaseStmt node) {
 		e_parent = (Element) elementStack.peek();
