@@ -7576,10 +7576,17 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.push( e_comment_on_stmt );
 		current_objectName_tag = "object_name";
 		stmt.getObjectName( ).accept( this );
+
+		if (stmt.getMessage() != null){
+			Element e_string = xmldoc.createElement( "comment_message" );
+			e_comment_on_stmt.appendChild( e_string );
+			e_string.setTextContent( stmt.getMessage( ).toString( ) );
+		}
+//		Element e_string = xmldoc.createElement( "comment_message" );
+//		e_comment_on_stmt.appendChild( e_string );
+//		e_string.setTextContent( stmt.getMessage( ).toString( ) );
 		elementStack.pop( );
-		Element e_string = xmldoc.createElement( "comment_message" );
-		e_comment_on_stmt.appendChild( e_string );
-		e_string.setTextContent( stmt.getMessage( ).toString( ) );
+
 	}
 
 	public void preVisit( TOpenStmt stmt )
