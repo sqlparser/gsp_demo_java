@@ -2352,6 +2352,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_object_name.setAttribute("object_type", node.getDbObjectType()
 				.toString());
 		e_identifier.setTextContent(node.toString());
+
+		if ((node.getDbObjectType() == EDbObjectType.table)||(node.getDbObjectType() == EDbObjectType.view)) {
+			e_object_name.setAttribute("table_kind", node.getTableKind().toString());
+		}
 		if (node.getServerToken() != null) {
 			Element e_server = xmldoc.createElement("server_name");
 			e_object_name.appendChild(e_server);

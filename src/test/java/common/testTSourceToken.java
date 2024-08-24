@@ -1,5 +1,6 @@
 package common;
 
+import gudusoft.gsqlparser.EDbObjectType;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;
@@ -66,7 +67,8 @@ public class testTSourceToken extends TestCase {
         TCreateViewSqlStatement createView = (TCreateViewSqlStatement)sqlparser.sqlstatements.get(0);
         TSelectSqlStatement select = createView.getSubquery();
         TResultColumn column = select.getResultColumnList().getResultColumn(0);
-        assertTrue(column.getExpr().getObjectOperand().getObjectToken().getDbObjType() == TObjectName.ttObjTableAlias);
+        //assertTrue(column.getExpr().getObjectOperand().getObjectToken().getDbObjType() == TObjectName.ttObjTableAlias);
+        assertTrue(column.getExpr().getObjectOperand().getObjectToken().getDbObjectType() == EDbObjectType.table_alias);
         assertTrue(column.getExpr().getObjectOperand().getPartToken().getDbObjType() == TObjectName.ttobjColumn);
 
         TResultColumn column1 = select.getResultColumnList().getResultColumn(1);
@@ -78,7 +80,8 @@ public class testTSourceToken extends TestCase {
         assertTrue(table0.getTableName().getObjectToken().getDbObjType() == TObjectName.ttobjTable);
 
         TAliasClause tableAlias = table0.getAliasClause();
-        assert(tableAlias.getAliasName().getObjectToken().getDbObjType() == TObjectName.ttObjTableAlias);
+        //assert(tableAlias.getAliasName().getObjectToken().getDbObjType() == TObjectName.ttObjTableAlias);
+        assert(tableAlias.getAliasName().getObjectToken().getDbObjectType() == EDbObjectType.table_alias);
     }
 
 }

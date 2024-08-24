@@ -44,7 +44,8 @@ public class testXMLfunction extends TestCase {
        //System.out.println(functionCall1.getFunctionName().getSchemaString().toString());
         assertTrue(functionCall1.getFunctionName().getSchemaToken().getDbObjType() == TObjectName.ttobjSchemaName);
        // System.out.println(functionCall1.getFunctionName().getDatabaseToken().toString());
-        assertTrue((functionCall1.getFunctionName().getDatabaseToken().getDbObjType() == TObjectName.ttobjDatabaseName));
+        //assertTrue((functionCall1.getFunctionName().getDatabaseToken().getDbObjType() == TObjectName.ttobjDatabaseName));
+        assertTrue(functionCall1.getFunctionName().getDatabaseToken().getDbObjectType() == EDbObjectType.database);
 
     }
 

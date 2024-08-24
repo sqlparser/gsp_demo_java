@@ -4,6 +4,7 @@ package common;
  * Time: 16:36:08
  */
 
+import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.nodes.TObjectName;
 import junit.framework.TestCase;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -36,7 +37,7 @@ public class testTMssqlExecute extends TestCase {
 
         TMssqlExecute exec = (TMssqlExecute)sqlparser.sqlstatements.get(0);
         assertTrue(exec.getExecType() == TBaseType.metNoExecKeyword);
-        assertTrue(exec.getModuleName().getObjectType() == TObjectName.ttobjProcedureName);
+        assertTrue(exec.getModuleName().getDbObjectType() == EDbObjectType.procedure);
         assertTrue(exec.getModuleName().toString().equalsIgnoreCase("dbo.uspGetEmployeeManagers"));
         /*
         TExecParameter p = exec.getParameters().getExecParameter(0);

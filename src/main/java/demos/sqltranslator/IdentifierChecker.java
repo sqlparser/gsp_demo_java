@@ -3,6 +3,7 @@ package demos.sqltranslator;
 
 import demos.sqltranslator.exception.FunctionIdentifierException;
 import demos.sqltranslator.exception.SpecialIdentifierException;
+import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TSourceToken;
 import gudusoft.gsqlparser.nodes.TObjectName;
@@ -257,10 +258,13 @@ public class IdentifierChecker
 
 	private static boolean isAliasToken( TSourceToken token )
 	{
+		if ((token.getDbObjectType() == EDbObjectType.alias)||(token.getDbObjectType() == EDbObjectType.table_alias)) return true;
+
 		int dbObjType = token.getDbObjType( );
 		if ( dbObjType != TObjectName.ttobjColumnAlias
-				&& dbObjType != TObjectName.ttObjTableAlias
-				&& dbObjType != TObjectName.ttobjAliasName )
+			//	&& dbObjType != TObjectName.ttObjTableAlias
+			//	&& dbObjType != TObjectName.ttobjAliasName
+		)
 		{
 			return false;
 		}
