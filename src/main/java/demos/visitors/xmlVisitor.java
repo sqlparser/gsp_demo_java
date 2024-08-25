@@ -35,6 +35,7 @@ import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
+import gudusoft.gsqlparser.nodes.snowflake.TAtBeforeClause;
 import gudusoft.gsqlparser.nodes.snowflake.TTaskOption;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
@@ -2198,6 +2199,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			for (TLateralView lv : node.getLateralViewList()) {
 				lv.accept(this);
 			}
+		}
+
+		if (node.getTimeTravelClause() != null){
+			node.getTimeTravelClause().accept(this);
 		}
 
 		elementStack.pop();
@@ -5522,6 +5527,28 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+	public void preVisit(TAtBeforeClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_at_before = xmldoc.createElement("time_travel_clause");
+		e_parent.appendChild(e_at_before);
+		elementStack.push(e_at_before);
+		e_at_before.setAttribute("clause_type",node.getClauseType().toString());
+		e_at_before.setAttribute("time_travel_type",node.getType().toString());
+		switch (node.getType()){
+			case TIMESTAMP:
+				node.getTimestamp().accept(this);
+				break;
+			case OFFSET:
+				node.getOffset().accept(this);
+				break;
+			case STATEMENT:
+				node.getStatementId().accept(this);
+				break;
+
+		}
+		elementStack.pop();
+	}
+
 	public void preVisit(TFunctionCall node) {
 		String tag_name = TAG_FUNCTIONCALL;
 		if (current_functionCall_tag != null) {
@@ -6348,18 +6375,50 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.push(e_task_option);
 		e_task_option.setAttribute("task_option_type",node.getTaskOptionType().toString());
 		switch (node.getTaskOptionType()){
+			case WAREHOUSE:
+				e_task_option.setAttribute("task_option_value",node.getWarehouse());
+				break;
+			case SCHEDULE:
+				e_task_option.setAttribute("task_option_value",node.getScheduleString());
+				break;
 			case AFTER:
 				for(TObjectName item:node.getAfter()){
 					addElementOfString("parent_task",item.toString());
 				}
 				break;
-
+			case WHEN:
+				node.getWhenCondition().accept(this);
+				break;
+			case SESSION_PARAMETER:
+				for(TNameValuePair item:node.getSessionParameters()){
+					Element e_session_parameter = xmldoc.createElement("session_parameter");
+					e_task_option.appendChild(e_session_parameter);
+					elementStack.push(e_session_parameter);
+					item.accept(this);
+					elementStack.pop();
+				}
+				break;
+			default:
+				e_task_option.setAttribute("task_option_value",node.toString());
+				break;
 		}
 
 		elementStack.pop();
 
 	}
 
+	public void preVisit( TNameValuePair node )
+	{
+		e_parent = (Element) elementStack.peek( );
+		Element e_name_value_pair = xmldoc.createElement( "name_value_pair" );
+		e_parent.appendChild( e_name_value_pair );
+		elementStack.push( e_name_value_pair );
+		current_objectName_tag = "name";
+		node.getVarName( ).accept( this );
+		current_expression_tag = "value";
+		node.getVarValue( ).accept( this );
+		elementStack.pop( );
+	}
 
 
 	public void preVisit( TCreateStreamStmt stmt )
