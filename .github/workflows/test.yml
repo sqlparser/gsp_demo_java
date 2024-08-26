@@ -15,7 +15,8 @@ jobs:
     - name: Checkout gsp_sqlfiles
       uses: actions/checkout@v3
       with:
-        repository: liaowuhen2/gsp_sqlfiles@dev
+        repository: liaowuhen2/gsp_sqlfiles
+        ref: dev
         path: gsp_sqlfiles
         fetch-depth: 0
     - name: Checkout gsp_demo
