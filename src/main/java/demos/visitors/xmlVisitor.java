@@ -4910,6 +4910,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case dbvgreenplum:
+				addElementOfNode("partition_column_list", node.getPartitionColumnExprs());
+				break;
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
 
@@ -5068,6 +5071,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				elementStack.pop();
 
+				break;
+			case dbvgreenplum:
+				addElementOfNode("partition_column_list", node.getPartitionColumnExprs());
 				break;
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
@@ -5235,8 +5241,37 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case etoOrganizeOn:
 				addElementOfNode("organize_on", node.getColumnNamelist());
 				break;
+			case etoReloptions:
+				addElementOfNodes("reloptions", node.getAttributeOptions(), "reloption");
+				break;
+			case etoPartitionSpec:
+				addElementOfNode("partition_spec", node.getPartitionSpec());
+				break;
+			case etoDistributeBy:
+				addElementOfNode("distribute_by", node.getDistributeBy());
+				break;
+
 		}
 
+		elementStack.pop();
+	}
+
+	public void preVisit(TAttributeOption node){
+		e_parent = (Element) elementStack.peek();
+		Element e_attribute_option = xmldoc.createElement("attribute_option");
+		e_parent.appendChild(e_attribute_option);
+		elementStack.push(e_attribute_option);
+		addElementOfNode("attribute_name", node.getOptionName());
+		addElementOfString("attribute_value", node.getOptionValue());
+		elementStack.pop();
+	}
+
+	public void preVisit(TDistributeBy node){
+		e_parent = (Element) elementStack.peek();
+		Element e_distribute_by = xmldoc.createElement("distribute_by");
+		e_parent.appendChild(e_distribute_by);
+		elementStack.push(e_distribute_by);
+		addElementOfNode("distribute_by_column", node.getExpressionList());
 		elementStack.pop();
 	}
 
