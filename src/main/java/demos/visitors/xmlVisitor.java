@@ -36,6 +36,7 @@ import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.snowflake.TAtBeforeClause;
+import gudusoft.gsqlparser.nodes.snowflake.TStageReference;
 import gudusoft.gsqlparser.nodes.snowflake.TTaskOption;
 import gudusoft.gsqlparser.nodes.teradata.*;
 import gudusoft.gsqlparser.stmt.*;
@@ -2161,6 +2162,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case jsonTable:
 				node.getJsonTable().accept(this);
 				break;
+			case stageReference:
+				node.getStageReference().accept(this);
+				break;
 			default:
 				e_table_reference = xmldoc.createElement("named_table_reference");
 				e_parent = (Element) elementStack.peek();
@@ -2500,8 +2504,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_path);
 
 		elementStack.push(e_path);
-		current_objectName_list_tag = "path_list";
-		node.getPathList().accept(this);
+
+		for(String s: node.splitPath()){
+			addElementOfString("path_item", s);
+		}
 		elementStack.pop();
 	}
 
@@ -4904,6 +4910,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case dbvgreenplum:
+				addElementOfNode("partition_column_list", node.getPartitionColumnExprs());
+				break;
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
 
@@ -5062,6 +5071,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				}
 				elementStack.pop();
 
+				break;
+			case dbvgreenplum:
+				addElementOfNode("partition_column_list", node.getPartitionColumnExprs());
 				break;
 			default:
 				addElementOfNode("partition_column_list", node.getColumnList());
@@ -5229,8 +5241,37 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case etoOrganizeOn:
 				addElementOfNode("organize_on", node.getColumnNamelist());
 				break;
+			case etoReloptions:
+				addElementOfNodes("reloptions", node.getAttributeOptions(), "reloption");
+				break;
+			case etoPartitionSpec:
+				addElementOfNode("partition_spec", node.getPartitionSpec());
+				break;
+			case etoDistributeBy:
+				addElementOfNode("distribute_by", node.getDistributeBy());
+				break;
+
 		}
 
+		elementStack.pop();
+	}
+
+	public void preVisit(TAttributeOption node){
+		e_parent = (Element) elementStack.peek();
+		Element e_attribute_option = xmldoc.createElement("attribute_option");
+		e_parent.appendChild(e_attribute_option);
+		elementStack.push(e_attribute_option);
+		addElementOfNode("attribute_name", node.getOptionName());
+		addElementOfString("attribute_value", node.getOptionValue());
+		elementStack.pop();
+	}
+
+	public void preVisit(TDistributeBy node){
+		e_parent = (Element) elementStack.peek();
+		Element e_distribute_by = xmldoc.createElement("distribute_by");
+		e_parent.appendChild(e_distribute_by);
+		elementStack.push(e_distribute_by);
+		addElementOfNode("distribute_by_column", node.getExpressionList());
 		elementStack.pop();
 	}
 
@@ -5764,6 +5805,12 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getExpr2().accept(this);
 				node.getExpr3().accept(this);
 				break;
+			case string_agg_t:
+				node.getArgs().getExpression(0).accept(this);
+				if (node.getOrderByList() != null){
+					node.getOrderByList().accept(this);
+				}
+				break;
 			default:
 				e_function = xmldoc.createElement(TAG_GENERIC_FUNCTION);
 				e_functionCall.appendChild(e_function);
@@ -5785,6 +5832,22 @@ public class xmlVisitor extends TParseTreeVisitor {
 		current_expression_list_tag = null;
 		elementStack.pop();
 
+	}
+
+	public void preVisit(TStageReference node){
+		e_parent = (Element) elementStack.peek();
+		Element e_stage = xmldoc.createElement("stage_reference");
+		e_parent.appendChild(e_stage);
+		elementStack.push(e_stage);
+		node.getStageName().accept(this);
+		if (node.getStagePath() != null){
+			node.getStagePath().accept(this);
+		}
+
+		if (node.getStageParams() != null){
+			addElementOfNodes("stage_params",  node.getStageParams(),"stage_param");
+		}
+		elementStack.pop();
 	}
 
 	public void preVisit(TWindowFrameBoundary boundary) {
@@ -6239,6 +6302,18 @@ public class xmlVisitor extends TParseTreeVisitor {
 		node.accept(this);
 		elementStack.pop();
 	}
+
+	public <T extends TParseTreeNode> void addElementOfNodes(String tagName, ArrayList<T> nodeList, String itemTagName) {
+		Element e_element = xmldoc.createElement(tagName);
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_element);
+		elementStack.push(e_element);
+		for (T node : nodeList) {
+			addElementOfNode(itemTagName, node);
+		}
+		elementStack.pop();
+	}
+
 
 	public void addElementOfNode(String tagName, TParseTreeNodeList<TParseTreeNode> nodeList) {
 		Element e_element = xmldoc.createElement(tagName);

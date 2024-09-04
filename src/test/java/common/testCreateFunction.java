@@ -42,6 +42,7 @@ public class testCreateFunction extends TestCase {
                 "production.products\n" +
                 "WHERE\n" +
                 "model_year = @model_year;";
+        System.out.println(sqlparser.sqltext);
         assertTrue(sqlparser.parse() == 0);
 
         TCreateFunctionStmt stmt = (TCreateFunctionStmt)sqlparser.sqlstatements.get(0);
