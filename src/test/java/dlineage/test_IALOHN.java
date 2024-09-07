@@ -2,6 +2,7 @@ package dlineage;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import common.gspCommon;
@@ -28,9 +29,10 @@ public class test_IALOHN extends TestCase {
 		DataFlowAnalyzer dataFlowAnalyzer = new DataFlowAnalyzer(files, option);
 		dataFlowAnalyzer.generateDataFlow(true);
 		dataflow df = dataFlowAnalyzer.getDataFlow();
+		Map<String, String> tableIdMap = df.getTables().stream().collect(Collectors.toMap(t -> t.getId(), t -> t.getName()));
 		Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(EDbVendor.dbvgreenplum, df, false);
 		Relationship[] rels = Arrays.stream(dataFlow.getRelationships())
-				.filter(r -> r.getTarget().getParentName().contains("SCHEMACODE.SWC_RP_SELFMC_YYBPM_QSC"))
+				.filter(r -> "SCHEMACODE.SWC_RP_SELFMC_YYBPM_QSC".equals(tableIdMap.get(r.getTarget().getParentId())))
 				.collect(Collectors.toList()).toArray(new Relationship[0]);
 		assertTrue(rels.length > 0);
 		System.out.println("ok");
