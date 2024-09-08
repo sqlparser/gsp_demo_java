@@ -112,7 +112,7 @@ public class testDatatype extends TestCase {
         assertTrue(expr1.getExpressionType() == EExpressionType.parenthesis_t);
         TExpression expr2 = expr1.getLeftOperand();
         assertTrue(expr2.getExpressionType() == EExpressionType.simple_constant_t);
-        assertTrue(expr2.getConstantOperand().getValue().equalsIgnoreCase("'123.5'"));
+        assertTrue(expr2.getConstantOperand().getValue().equalsIgnoreCase("123.5"));
         assertTrue(expr2.getConstantOperand().getCastType().getDataType() == EDataType.float_t);
     }
 
@@ -126,7 +126,7 @@ public class testDatatype extends TestCase {
         TExpression expr = resultColumn.getExpr();
         assertTrue(expr.getExpressionType() == EExpressionType.simple_constant_t);
         assertTrue(expr.getConstantOperand().getCastType().getDataType() == EDataType.date_t);
-        assertTrue(expr.getConstantOperand().getValue().equalsIgnoreCase("'now'"));
+        assertTrue(expr.getConstantOperand().getValue().equalsIgnoreCase("now"));
 
 
         sqlparser.sqltext = "SELECT DATE('now')";

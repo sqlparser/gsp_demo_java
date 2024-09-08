@@ -35,7 +35,7 @@ public class test_IALOHN extends TestCase {
 				.filter(r -> "SCHEMACODE.SWC_RP_SELFMC_YYBPM_QSC".equals(tableIdMap.get(r.getTarget().getParentId())))
 				.collect(Collectors.toList()).toArray(new Relationship[0]);
 		assertTrue(rels.length > 0);
-		System.out.println("ok");
+		//System.out.println("ok");
 	}
 
 }
