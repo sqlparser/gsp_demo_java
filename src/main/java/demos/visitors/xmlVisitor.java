@@ -34,7 +34,6 @@ import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.snowflake.TAtBeforeClause;
-import gudusoft.gsqlparser.nodes.snowflake.TCopyIntoNode;
 import gudusoft.gsqlparser.nodes.snowflake.TStageReference;
 import gudusoft.gsqlparser.nodes.snowflake.TTaskOption;
 import gudusoft.gsqlparser.nodes.teradata.*;
@@ -2225,8 +2224,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
-	public void preVisit(TJsonAggFunction node){
-		Element e_json_agg_function = xmldoc.createElement("json_agg_function");
+	public void preVisit(TJsonFunction node){
+		Element e_json_agg_function = xmldoc.createElement("json_function");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_json_agg_function);
 		elementStack.push(e_json_agg_function);
