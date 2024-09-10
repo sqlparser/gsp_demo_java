@@ -33,15 +33,15 @@ public class testIAOX42  extends TestCase{
 		}
         Dataflow dataFlow = DataFlowAnalyzer.getSqlflowJSONModel(EDbVendor.dbvoracle, df, false);
 
-//        List<Relationship> relationshipsWithRelevantSources =
-//                Arrays.stream(dataFlow.getRelationships())
-//                        .filter(r -> Arrays.stream(r.getSources())
-//                                .filter(s -> !s.getParentName().equalsIgnoreCase("MIS_T_DAL_ACBAL"))
-//                                .collect(Collectors.toList())
-//                                .isEmpty())
-//                        .collect(Collectors.toList());
+        List<Relationship> relationshipsWithRelevantSources =
+                Arrays.stream(dataFlow.getRelationships())
+                        .filter(r -> Arrays.stream(r.getSources())
+                                .filter(s -> !s.getParentName().equalsIgnoreCase("MIS_T_DAL_ACBAL"))
+                                .collect(Collectors.toList())
+                                .isEmpty())
+                        .collect(Collectors.toList());
 
-        //assertTrue(relationshipsWithRelevantSources.size() == 556);
+        assertTrue(relationshipsWithRelevantSources.size() == 556);
 
         assertTargetAndSourceRelationshipExists(dataFlow, "MIS_T_AC_MSTR", "PRD_TYP_CODE", "MIS_T_DAL_ACBAL", "PRD_TYP_CODE");
     }
