@@ -4,8 +4,7 @@ package demos.visitors;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
 import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
-import gudusoft.gsqlparser.nodes.functions.TFlattenFunction;
-import gudusoft.gsqlparser.nodes.functions.TRangeNFunction;
+import gudusoft.gsqlparser.nodes.functions.*;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
 import gudusoft.gsqlparser.nodes.mdx.IMdxIdentifierSegment;
@@ -30,7 +29,6 @@ import gudusoft.gsqlparser.nodes.mdx.TMdxWithNode;
 import gudusoft.gsqlparser.nodes.mdx.TMdxWithSetNode;
 import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
-import gudusoft.gsqlparser.nodes.functions.TJsonObjectFunction;
 import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.TTableProperties;
@@ -2212,6 +2210,104 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+	public void preVisit(TUnPackFunction node){
+		Element e_unpack_function = xmldoc.createElement(node.getFunctionName().toString().toLowerCase() + "_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_unpack_function);
+		elementStack.push(e_unpack_function);
+		e_unpack_function.setAttribute("function_name",node.getFunctionName().toString());
+		node.getFunctionName().accept(this);
+		node.getTable().accept(this);
+		addElementOfNodes("unpack_options",node.getUnpackOptions(),"unpack_option");
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TJsonFunction node){
+		Element e_json_agg_function = xmldoc.createElement("json_function");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_json_agg_function);
+		elementStack.push(e_json_agg_function);
+		e_json_agg_function.setAttribute("function_name",node.getFunctionName().toString());
+		node.getFunctionName().accept(this);
+		node.getJsonAggList().accept(this);
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TUnpackOption node){
+		Element e_unpack_option = xmldoc.createElement("unpack_option");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_unpack_option);
+		elementStack.push(e_unpack_option);
+		switch (node.getOptionType()){
+			case TUnpackOption.UNPACK_TARGETCOLUMN:
+				e_unpack_option.setAttribute("type","UNPACK_TARGETCOLUMN");
+				node.getTargetColumn().accept(this);
+				break;
+			case TUnpackOption.UNPACK_DELIMITER:
+				e_unpack_option.setAttribute("type","UNPACK_DELIMITER");
+				node.getDelimiter().accept(this);
+				break;
+			case TUnpackOption.UNPACK_OUTPUTCOLUMNS:
+				e_unpack_option.setAttribute("type","UNPACK_OUTPUTCOLUMNS");
+				for(TConstant c : node.getOutputColumns()){
+					c.accept(this);
+				}
+				break;
+			case TUnpackOption.UNPACK_OUTPUTDATATYPES:
+				e_unpack_option.setAttribute("type","UNPACK_OUTPUTDATATYPES");
+				for(TConstant c:node.getOutputDataTypes()){
+					c.accept(this);
+				}
+				break;
+			case TUnpackOption.UNPACK_COLUMNLENTH:
+				e_unpack_option.setAttribute("type","UNPACK_COLUMNLENTH");
+				for(TConstant c:node.getColumnLengths()){
+					c.accept(this);
+				}
+				break;
+			case TUnpackOption.UNPACK_REGEX:
+				e_unpack_option.setAttribute("type","UNPACK_REGEX");
+				node.getRegex().accept(this);
+				break;
+			case TUnpackOption.UNPACK_REGEXSET:
+				e_unpack_option.setAttribute("type","UNPACK_REGEXSET");
+				node.getRegexSet().accept(this);
+				break;
+			case TUnpackOption.UNPACK_ACCUMULATE:
+				e_unpack_option.setAttribute("type","UNPACK_ACCUMULATE");
+				for(TConstant c: node.getAccumulate()){
+					c.accept(this);
+				}
+				break;
+			case TUnpackOption.UNPACK_IGNOREINVALID:
+				e_unpack_option.setAttribute("type","UNPACK_IGNOREINVALID");
+				node.getIgnoreInvalid().accept(this);
+				break;
+			case TUnpackOption.PACK_COLCAST:
+				e_unpack_option.setAttribute("type","PACK_COLCAST");
+				node.getColCast().accept(this);
+				break;
+			case TUnpackOption.PACK_INCLUDECOLUMNNAME:
+				e_unpack_option.setAttribute("type","PACK_INCLUDECOLUMNNAME");
+				node.getIncludeColumnName().accept(this);
+				break;
+			case TUnpackOption.PACK_OUTPUTCOLUMN:
+				e_unpack_option.setAttribute("type","PACK_OUTPUTCOLUMN");
+				node.getOutputColumn().accept(this);
+				break;
+			case TUnpackOption.PACK_TARGETCOLUMNS:
+				e_unpack_option.setAttribute("type","PACK_TARGETCOLUMNS");
+				for(TConstant c:node.getTargetColumns()){
+					c.accept(this);
+				}
+				break;
+		}
+
+		elementStack.pop();
+	}
 
 	public void preVisit(TCaseJoinClause node) {
 		Element e_case_join_clause = xmldoc.createElement("case_join_clause");

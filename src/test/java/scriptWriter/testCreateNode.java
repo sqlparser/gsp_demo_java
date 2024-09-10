@@ -1120,8 +1120,8 @@ public class testCreateNode extends TestCase
 		variable.setElementName( OracleParser.parseObjectName("my_ename") );
 		TTypeName datatype = new TTypeName( );
 		datatype.setDataType( EDataType.varchar2_t );
-		TConstant c = new TConstant( ELiteralType.integer_et );
-		c.setStringValue( "15" );
+		TConstant c = new TConstant( ELiteralType.etNumber,new TSourceToken("15") );
+		//c.setStringValue( "15" );
 		datatype.setLength( c );
 		variable.setDataType( datatype );
 		createProcedure.getDeclareStatements( ).add( variable );
