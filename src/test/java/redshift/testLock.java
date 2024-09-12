@@ -3,6 +3,7 @@ package redshift;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import gudusoft.gsqlparser.TGSqlParser;
+import gudusoft.gsqlparser.stmt.TLockTableStmt;
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftLock;
 import junit.framework.TestCase;
 
@@ -14,10 +15,11 @@ public class testLock extends TestCase {
         sqlparser.sqltext = "lock event, sales;";
         assertTrue(sqlparser.parse() == 0);
 
-        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstredshiftLock);
-        TRedshiftLock lock = (TRedshiftLock) sqlparser.sqlstatements.get(0);
+        assertTrue(sqlparser.sqlstatements.get(0).sqlstatementtype == ESqlStatementType.sstlocktable);
+        TLockTableStmt lock = (TLockTableStmt) sqlparser.sqlstatements.get(0);
         assertTrue(lock.getTableList().size() == 2);
-        assertTrue(lock.getTableList().getObjectName(0).toString().equalsIgnoreCase("event"));
+        assertTrue(lock.getTableList().get(0).toString().equalsIgnoreCase("event"));
+        assertTrue(lock.getTableList().get(1).toString().equalsIgnoreCase("sales"));
 
     }
 }

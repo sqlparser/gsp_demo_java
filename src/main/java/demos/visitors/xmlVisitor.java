@@ -7738,6 +7738,14 @@ public class xmlVisitor extends TParseTreeVisitor {
 		{
 			stmt.getStmt().accept(this);
 		}
+
+		if (stmt.getSqlText() != null){
+			addElementOfString("execute_sqlText",stmt.getSqlText());
+		}
+
+		if (stmt.getDynamicStatements() != null){
+			stmt.getDynamicStatements().accept(this);
+		}
 		elementStack.pop( );
 	}
 
