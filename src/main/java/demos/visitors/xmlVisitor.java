@@ -3782,6 +3782,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 			current_datatype_tag = null;
 		}
 		Element e_datatype = xmldoc.createElement(tag_name);
+
+
 		e_datatype.setAttribute("type", node.getDataType().toString());
 		if (node.getPrecision() != null) {
 			e_datatype.setAttribute("precision", node.getPrecision()
@@ -3799,12 +3801,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		if (node.getCollationName() != null) {
 			e_datatype.setAttribute("collation_name", node.getCollationName());
 		}
+
+
 		e_parent.appendChild(e_datatype);
+		elementStack.push(e_datatype);
+
 		Element e_value = xmldoc.createElement("value");
 		e_value.setTextContent(node.toString());
 		e_datatype.appendChild(e_value);
 
-		elementStack.push(e_datatype);
+
 		switch (node.getDataType()) {
 			case struct_t:
 				addElementOfNode("element_list", node.getColumnDefList());
@@ -3817,6 +3823,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				break;
 			default:
 				break;
+		}
+		if (node.getCharacterDatatypeProperty() != null){
+			node.getCharacterDatatypeProperty().accept(this);
 		}
 		elementStack.pop();
 
@@ -3910,6 +3919,23 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 		for (int i = 0; i < node.size(); i++) {
 			node.getColumn(i).accept(this);
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TCharacterDatatypeProperty node){
+		Element e_character_datatype_property = xmldoc.createElement("character_datatype_property");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_character_datatype_property);
+		elementStack.push(e_character_datatype_property);
+		if (node.getCharacterSetName() != null) {
+			addElementOfString("character_set", node.getCharacterSetName());
+		}
+		if (node.getCaseSpecific() == TCharacterDatatypeProperty.CASESPECIFIC) {
+			addElementOfString("case_specific_value", "CASESPECIFIC");
+		}else if (node.getCaseSpecific() == TCharacterDatatypeProperty.NOT_CASESPECIFIC) {
+			addElementOfString("case_specific_value", "NOT_CASESPECIFIC");
 		}
 
 		elementStack.pop();
