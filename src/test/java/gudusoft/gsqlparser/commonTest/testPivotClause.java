@@ -58,31 +58,31 @@ class nodeVisitor extends TParseTreeVisitor {
         );
 
         if (node.getType() == TPivotClause.pivot){
-            System.out.println("\n\nColumns in pivot table:");
+            //System.out.println("\n\nColumns in pivot table:");
         }else{
-            System.out.println("\n\nColumns in unpivot table:");
+            //System.out.println("\n\nColumns in unpivot table:");
         }
 
         for(TObjectName objectName:node.getPivotTable().getLinkedColumns()){
             System.out.println(objectName.toString());
             if (objectName.getSourceColumn() != null){
-                System.out.println("\tSource column:"+objectName.getSourceColumn().toString());
+              //  System.out.println("\tSource column:"+objectName.getSourceColumn().toString());
             }
         }
 
         System.out.println("\nColumns in pivot source table:");
         for(TObjectName objectName:node.getPivotTable().getSourceTableOfPivot().getLinkedColumns()){
-            System.out.println(objectName.toString());
+            //System.out.println(objectName.toString());
         }
 
         if (node.getAliasClause() != null){
             if (node.getAliasClause().getAliasName() != null){
-                System.out.println("pivot alias:\t"+node.getAliasClause().getAliasName().toString());
+                //System.out.println("pivot alias:\t"+node.getAliasClause().getAliasName().toString());
             }
             if (node.getAliasClause().getColumns() != null){
                 System.out.println("\tcolumns:\t");
                 for(TObjectName objectName:node.getAliasClause().getColumns()){
-                    System.out.println("\t\t"+objectName.toString());
+                  //  System.out.println("\t\t"+objectName.toString());
                 }
             }
         }
