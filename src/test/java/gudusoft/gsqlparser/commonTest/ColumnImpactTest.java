@@ -17,6 +17,8 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 import demos.antiSQLInjection.columnImpact.ColumnImpact;
 
+import static gudusoft.gsqlparser.TBaseType.readFromTextfile;
+
 public class ColumnImpactTest extends TestCase
 {
 
@@ -321,36 +323,12 @@ public class ColumnImpactTest extends TestCase
 
 					Assert.assertTrue( TBaseType.compareStringsLineByLine(impact.getImpactResult( )
 							.trim( )
-							,( getContent( xmlFile ) ) ));
+							,( TBaseType.readFromTextfile( xmlFile ) ) ));
 				}
 			}
 		}
 	}
 
-	private String getContent( File file )
-	{
-		try
-		{
-			ByteArrayOutputStream out = new ByteArrayOutputStream( 4096 );
-			byte[] tmp = new byte[4096];
-			InputStream is = new BufferedInputStream( new FileInputStream( file ) );
-			while ( true )
-			{
-				int r = is.read( tmp );
-				if ( r == -1 )
-					break;
-				out.write( tmp, 0, r );
-			}
-			byte[] bytes = out.toByteArray( );
-			is.close( );
-			out.close( );
-			String content = new String( bytes );
-			return content.trim( );
-		}
-		catch ( IOException e )
-		{
-			e.printStackTrace( );
-		}
-		return null;
-	}
+
+
 }

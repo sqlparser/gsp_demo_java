@@ -4397,7 +4397,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_create_trigger_clause = xmldoc.createElement("simple_dml_trigger_clause");
 		e_parent.appendChild(e_create_trigger_clause);
 		elementStack.push(e_create_trigger_clause);
-		e_create_trigger_clause.setAttribute("granularity", node.getGranularity().toString());
+		if (node.getGranularity() != null){
+			e_create_trigger_clause.setAttribute("granularity", node.getGranularity().toString());
+		}
+
 		if (node.getEventClause() instanceof TDmlEventClause) {
 			TDmlEventClause dmlEventClause = (TDmlEventClause) node.getEventClause();
 			e_create_trigger_clause.setAttribute("source_table", dmlEventClause.getTableName().toString());

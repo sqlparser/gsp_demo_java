@@ -7,7 +7,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import junit.framework.TestCase;
 
 public class testXML extends TestCase  {
-    String xsdfile = "file:/C:/prg/gsp_java/library/doc/xml/sqlquery.xsd";
+    String xsdfile = "file:/"+gspCommon.BASE_SQL_DIR_PUBLIC+ "xml/sqlschema.xsd";
 
      void toXmlFiles(EDbVendor db, String dir) throws Exception {
         TGSqlParser sqlparser = new TGSqlParser(db);
@@ -32,12 +32,12 @@ public class testXML extends TestCase  {
     }
 
     public void testSQLServer() throws Exception {
-        toXmlFiles(EDbVendor.dbvmssql, "c:/prg/gsqlparser/Test/TestCases/mssql");
-        toXmlFiles(EDbVendor.dbvmssql, "c:/prg/gsqlparser/Test/TestCases/java/mssql");
+        toXmlFiles(EDbVendor.dbvmssql, gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS+"mssql");
+        toXmlFiles(EDbVendor.dbvmssql,  gspCommon.BASE_SQL_DIR_PUBLIC_JAVA+"mssql");
     }
 
     public void testOracle() throws Exception {
-        toXmlFiles(EDbVendor.dbvoracle, "c:/prg/gsqlparser/Test/TestCases/oracle");
-        toXmlFiles(EDbVendor.dbvoracle, "c:/prg/gsqlparser/Test/TestCases/java/oracle");
+        toXmlFiles(EDbVendor.dbvoracle, gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS+"oracle");
+        toXmlFiles(EDbVendor.dbvoracle, gspCommon.BASE_SQL_DIR_PUBLIC_JAVA+"oracle");
     }
 }
