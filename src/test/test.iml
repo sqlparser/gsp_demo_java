@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="library" />
+    <orderEntry type="module" module-name="gsqlparser" />
     <orderEntry type="module" module-name="main" />
     <orderEntry type="module-library">
       <library>

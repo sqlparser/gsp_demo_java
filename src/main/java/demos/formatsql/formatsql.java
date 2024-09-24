@@ -31,7 +31,7 @@ public class formatsql {
              return;
          }
 
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvpostgresql);
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvdb2);
          sqlparser.sqlfilename = args[0];
 
 //        sqlparser.sqltext = "insert into emp(empno,empnm,deptnm,sal) select empno, empnm, dptnm, sal from emp where empno=:empno;\n" +
