@@ -266,10 +266,10 @@ class evalVisitor implements IExpressionVisitor
 			case function_t :
 				expr.setVal( computeFunction( expr ) );
 				break;
-			case new_structured_type_t :
-				// functionCall.doParse(psql,plocation);
-				expr.setVal( new UnknownValue( ) );
-				break;
+//			case new_structured_type_t :
+//				// functionCall.doParse(psql,plocation);
+//				expr.setVal( new UnknownValue( ) );
+//				break;
 			case cursor_t :
 				expr.setVal( new UnknownValue( ) );
 				break;

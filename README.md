@@ -23,3 +23,19 @@ https://sqlparser.com/download.php
 
 while the dev branch is updated more frequently and may not compile using the gsp.jar 
 from the official site or the jar under /lib directory.
+
+
+# Changes
+- [2024/9/17] Changes directory structure and package name,
+	all test unit under package name like: package gudusoft.gsqlparser.xxxTest;
+
+Move all test units from 
+	c:\prg\gsp_demo_java\src\test\java\
+to 
+	c:\prg\gsp_demo_java\src\test\java\gudusoft\gsqlparser\
+	
+	
+Move all demos from 
+	c:\prg\gsp_demo_java\src\main\java\demos
+to 
+	c:\prg\gsp_demo_java\src\main\java\gudusoft\gsqlparser\demos	

@@ -3,7 +3,6 @@ package demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;
-import gudusoft.gsqlparser.nodes.TReplaceExprAsIdentifier;
 import gudusoft.gsqlparser.nodes.functions.*;
 import gudusoft.gsqlparser.nodes.hive.THiveTablePartition;
 import gudusoft.gsqlparser.nodes.mdx.EMdxExpSyntax;
@@ -31,7 +30,6 @@ import gudusoft.gsqlparser.nodes.mssql.TForXMLClause;
 import gudusoft.gsqlparser.nodes.mssql.TXMLCommonDirective;
 import gudusoft.gsqlparser.nodes.oracle.TListSubpartitionDesc;
 import gudusoft.gsqlparser.nodes.oracle.TRangeSubpartitionDesc;
-import gudusoft.gsqlparser.nodes.TTableProperties;
 import gudusoft.gsqlparser.nodes.postgresql.TPartitionBoundSpecSqlNode;
 import gudusoft.gsqlparser.nodes.snowflake.TAtBeforeClause;
 import gudusoft.gsqlparser.nodes.snowflake.TStageReference;
@@ -56,7 +54,6 @@ import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateTrigger;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateType;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateTypeBody;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlCreateType_Placeholder;
-import gudusoft.gsqlparser.stmt.TExecImmeStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlForallStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlGotoStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlNullStmt;
@@ -64,6 +61,7 @@ import gudusoft.gsqlparser.stmt.oracle.TPlsqlRecordTypeDefStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlTableTypeDefStmt;
 import gudusoft.gsqlparser.stmt.oracle.TPlsqlVarrayTypeDefStmt;
 import gudusoft.gsqlparser.stmt.oracle.TSqlplusCmdStatement;
+import gudusoft.gsqlparser.nodes.mssql.TPeriodForClause;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -95,7 +93,6 @@ import javax.xml.validation.Validator;
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.*;
 import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
-import gudusoft.gsqlparser.stmt.TCreateMacro;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataCollectStatistics;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
 import gudusoft.gsqlparser.stmt.teradata.TTeradataUsing;
@@ -905,6 +902,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getFetchFirstClause().accept(this);
 		}
 
+		if (node.getHintClause() != null) {
+			node.getHintClause().accept(this);
+		}
+
 		elementStack.pop(); // query specification
 		elementStack.pop(); // query expression
 
@@ -1048,14 +1049,23 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getConstantOperand().accept(this);
 				elementStack.pop();
 				break;
-			case new_structured_type_t:
-			case type_constructor_t:
 			case function_t:
 				e_expression = xmldoc.createElement(TAG_FUNCTIONCALL_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
 				elementStack.push(e_expression);
 				node.getFunctionCall().accept(this);
+				elementStack.pop();
+				break;
+			case type_constructor_t:
+				e_expression = xmldoc.createElement("new_constructor");
+				e_parent = (Element) elementStack.peek();
+				e_parent.appendChild(e_expression);
+				elementStack.push(e_expression);
+				node.getObjectOperand().accept(this);
+				if (node.getExprList() != null) {
+					node.getExprList().accept(this);
+				}
 				elementStack.pop();
 				break;
 			case cursor_t:
@@ -1158,6 +1168,7 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case collection_constructor_multiset_t:
 			case collection_constructor_set_t:
 			case list_t:
+			case new_structured_type_t:
 				e_expression = xmldoc.createElement(TAG_LIST_EXPR);
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
@@ -1278,11 +1289,11 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 				break;
 			case typecast_t:
-				e_expression = xmldoc.createElement(TAG_UNARY_EXPR);
+				e_expression = xmldoc.createElement("typecast_expr");
 				e_parent = (Element) elementStack.peek();
 				e_parent.appendChild(e_expression);
 				elementStack.push(e_expression);
-				current_expression_tag = "first_expr";
+				current_expression_tag = "base_expr";
 				node.getLeftOperand().accept(this);
 				addElementOfNode("datatype", node.getTypeName());
 				elementStack.pop();
@@ -1446,6 +1457,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 				node.getLeftOperand().accept(this);
 				node.getRightOperand().accept(this);
 				break;
+			case lambda_t:
+				node.getLeftOperand().accept(this);
+				node.getRightOperand().accept(this);
+				break;
+			case object_access_t:
+				node.getObjectAccess().accept(this);
+				break;
 			default:
 				e_expression = xmldoc.createElement(TAG_UNKNOWN_EXPR);
 				e_parent = (Element) elementStack.peek();
@@ -1466,6 +1484,35 @@ public class xmlVisitor extends TParseTreeVisitor {
 			elementStack.pop();
 		}
 
+		elementStack.pop();
+	}
+
+	public void preVisit(TObjectAccess node){
+		Element e_object_access = xmldoc.createElement("object_access");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_object_access);
+		elementStack.push(e_object_access);
+		node.getObjectExpr().accept(this);
+		if (node.getAttributeOrMethods() != null){
+			for(int i = 0; i < node.getAttributeOrMethods().size(); i++){
+				node.getAttributeOrMethods().get(i).accept(this);
+			}
+		}
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TAttributeOrMethod node){
+		Element e_attribute_or_method = xmldoc.createElement("attribute_or_method");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_attribute_or_method);
+		elementStack.push(e_attribute_or_method);
+		if (node.getAttribute() != null){
+			node.getAttribute().accept(this);
+		}
+		if (node.getMethod() != null){
+			node.getMethod().accept(this);
+		}
 		elementStack.pop();
 	}
 
@@ -2525,6 +2572,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 			node.getPath().accept(this);
 		}
 
+
+
+
+		if (node.getExceptReplaceClause() != null) {
+			node.getExceptReplaceClause().accept(this);
+		}
+
 		if ((node.getSourceTableList() != null) && (node.getSourceTableList().size() > 0)) {
 			Element e_source_table_list = xmldoc.createElement("source_table_list");
 			e_object_name.appendChild(e_source_table_list);
@@ -2569,6 +2623,22 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+	public void preVisit(TExceptReplaceClause node){
+		Element e_except_replace_clause = xmldoc.createElement("except_replace_clause");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_except_replace_clause);
+		elementStack.push(e_except_replace_clause);
+		if (node.getColumnList() != null){
+			node.getColumnList().accept(this);
+		}
+		if (node.getExprAsIdentifiers() != null){
+			for(TReplaceExprAsIdentifier expr: node.getExprAsIdentifiers()){
+				expr.accept(this);
+			}
+		}
+		elementStack.pop();
+	}
+
 	public void postVisit(TObjectName node) {
 		appendEndTag(node);
 	}
@@ -2611,12 +2681,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_drop_trigger = xmldoc.createElement("drop_trigger_stmt");
 		e_parent = (Element) elementStack.peek();
 		e_parent.appendChild(e_drop_trigger);
-		e_drop_trigger.setAttribute("trigger_name", stmt.getTriggerName().toString());
+		elementStack.push(e_drop_trigger);
+
+		stmt.getTriggerName().accept(this);
 		if (stmt.getTableName() != null) {
 			addElementOfNode("table_name", stmt.getTableName());
 		}
 
-		elementStack.push(e_drop_trigger);
 		elementStack.pop();
 	}
 
@@ -2746,6 +2817,8 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop();
 	}
 
+
+
 	public void preVisit(TDropSequenceStmt stmt) {
 		Element e_drop_sequence = xmldoc.createElement("drop_sequence_stmt");
 		e_parent = (Element) elementStack.peek();
@@ -2801,6 +2874,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_drop_stmt.setAttribute("object_type", stmt.getDbObjectType().toString());
 		elementStack.push(e_drop_stmt);
 		stmt.getDbObjectName().accept(this);
+
+		elementStack.pop();
+	}
+
+	public void preVisit(TDropPartitionSchemeStmt stmt) {
+		Element e_drop_stmt = xmldoc.createElement("drop_partition_scheme_stmt");
+		e_parent = (Element) elementStack.peek();
+		e_parent.appendChild(e_drop_stmt);
+		elementStack.push(e_drop_stmt);
+		stmt.getPartitionSchemeName().accept(this);
 
 		elementStack.pop();
 	}
@@ -3455,6 +3538,26 @@ public class xmlVisitor extends TParseTreeVisitor {
 
 	}
 
+	public void preVisit(THintClause node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_hint_clause = xmldoc.createElement("hint_clause");
+		e_parent.appendChild(e_hint_clause);
+		elementStack.push(e_hint_clause);
+		for(int i=0;i<node.getHints().size();i++){
+			node.getHints().get(i).accept(this);
+		}
+		elementStack.pop();		
+	}
+
+	public void preVisit(TQueryHint node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_hint = xmldoc.createElement("query_hint");
+		e_parent.appendChild(e_hint);
+		elementStack.push(e_hint);
+		addElementOfString("hint_text", node.toString());
+		elementStack.pop();		
+	}
+
 	public void preVisit(TExceptionClause node) {
 		e_parent = (Element) elementStack.peek();
 		Element e_exception_clause = xmldoc.createElement("exception_clause");
@@ -3617,6 +3720,9 @@ public class xmlVisitor extends TParseTreeVisitor {
 				if (node.getNewIndexName() != null){
 					node.getNewIndexName().accept(this);
 				}
+				break;
+			case addPeriodForClause:
+				node.getPeriodForClause().accept(this);
 				break;
 			default:
 				e_option = xmldoc.createElement("not_implemented_option");
@@ -4278,6 +4384,71 @@ public class xmlVisitor extends TParseTreeVisitor {
 		e_parent.appendChild(e_alter_type);
 		elementStack.push(e_alter_type);
 		stmt.getTypeName().accept(this);
+		for(TAlterTypeOption alterTypeOption : stmt.getAlterTypeOptionList()){
+			alterTypeOption.accept(this);
+		}
+		elementStack.pop();
+	}
+
+	public void preVisit(TAlterProcedureStmt stmt){
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_procedure = xmldoc.createElement("alter_procedure_statement");
+		e_parent.appendChild(e_alter_procedure);
+		elementStack.push(e_alter_procedure);
+		stmt.getProcedureName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TAlterFunctionStmt stmt){
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_function = xmldoc.createElement("alter_function_statement");
+		e_parent.appendChild(e_alter_function);
+		elementStack.push(e_alter_function);
+		stmt.getFunctionName().accept(this);
+		elementStack.pop();
+	}
+
+	public void preVisit(TPeriodForClause node){
+		e_parent = (Element) elementStack.peek();
+		Element e_period_for_clause = xmldoc.createElement("period_for_clause");
+		e_parent.appendChild(e_period_for_clause);
+		elementStack.push(e_period_for_clause);
+		addElementOfNode("start_time", node.getSysStartTimeObjectName());
+		addElementOfNode("end_time", node.getSysEndTimeObjectName());
+		if (node.getTemporalColumnDefinitionList() != null){
+			for(TColumnDefinition columnDefinition : node.getTemporalColumnDefinitionList()){
+				columnDefinition.accept(this);
+			}
+		}
+		elementStack.pop();		
+
+	}
+
+
+	public void preVisit(TAlterTypeOption node) {
+		e_parent = (Element) elementStack.peek();
+		Element e_alter_type_option = xmldoc.createElement("alter_type_option");
+		e_alter_type_option.setAttribute("type", node.getType().toString());
+		e_parent.appendChild(e_alter_type_option);
+		elementStack.push(e_alter_type_option);
+		switch (node.getType()) {
+			case addAttribute:
+			case modifyAttribute:
+				//node.getColumnDefList().accept(this);
+				for(TColumnDefinition columnDefinition : node.getColumnDefList()){
+					columnDefinition.accept(this);
+				}
+				break;
+			case dropAttribute:
+				node.getAttributeList().accept(this);
+				break;
+			case modifyLimit:
+				node.getLimitValue().accept(this);
+				break;
+
+			default:
+				break;
+		}
 		elementStack.pop();
 	}
 
@@ -4397,7 +4568,10 @@ public class xmlVisitor extends TParseTreeVisitor {
 		Element e_create_trigger_clause = xmldoc.createElement("simple_dml_trigger_clause");
 		e_parent.appendChild(e_create_trigger_clause);
 		elementStack.push(e_create_trigger_clause);
-		e_create_trigger_clause.setAttribute("granularity", node.getGranularity().toString());
+		if (node.getGranularity() != null){
+			e_create_trigger_clause.setAttribute("granularity", node.getGranularity().toString());
+		}
+
 		if (node.getEventClause() instanceof TDmlEventClause) {
 			TDmlEventClause dmlEventClause = (TDmlEventClause) node.getEventClause();
 			e_create_trigger_clause.setAttribute("source_table", dmlEventClause.getTableName().toString());
@@ -4921,6 +5095,13 @@ public class xmlVisitor extends TParseTreeVisitor {
 				elementStack.pop();
 
 				break;
+			case forExchangeWith:
+				Element e_exchange_table = xmldoc.createElement("exchange_table");
+				e_create_table.appendChild(e_exchange_table);
+				elementStack.push(e_exchange_table);
+				stmt.getLikeTableName().accept(this);
+				elementStack.pop();
+				break;
 			case clone:
 				addElementOfNode("clone_table", stmt.getCloneSourceTable());
 				break;
@@ -5372,7 +5553,16 @@ public class xmlVisitor extends TParseTreeVisitor {
 			case etoDistributeBy:
 				addElementOfNode("distribute_by", node.getDistributeBy());
 				break;
-
+			case etoDistributeByHash:
+				addElementOfNode("distribute_by_hash", node.getColumnNamelist());
+				break;
+			case etoPartitioningKey:
+				addElementOfNode("partitioning_key", node.getColumnNamelist());
+				break;
+			case etoOrganizeBy:
+			case etoOrganizeByDimensions:
+				addElementOfNode("organize_by", node.getValueRowItemList());
+				break;
 		}
 
 		elementStack.pop();
