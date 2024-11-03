@@ -92,10 +92,7 @@ import javax.xml.validation.Validator;
 
 import gudusoft.gsqlparser.stmt.redshift.TRedshiftCopy;
 import gudusoft.gsqlparser.stmt.snowflake.*;
-import gudusoft.gsqlparser.stmt.teradata.TAllocateStmt;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataCollectStatistics;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataSetSession;
-import gudusoft.gsqlparser.stmt.teradata.TTeradataUsing;
+import gudusoft.gsqlparser.stmt.teradata.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -6828,8 +6825,77 @@ public class xmlVisitor extends TParseTreeVisitor {
 		elementStack.pop( );
 	}
 
+	public void preVisit( TTeradataBTEQCmd stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_bteq = xmldoc.createElement( "bteq_statement" );
+		e_parent.appendChild( e_bteq );
+		elementStack.push( e_bteq );
 
-	public void preVisit( TTeradataSetSession stmt )
+		e_bteq.setAttribute("type",stmt.getBteqCmdType().toString());
+		addElementOfString("bteq_cmd_parameter",stmt.getParamName());
+		addElementOfString("bteq_cmd_value",stmt.getParamValue());
+
+
+		elementStack.pop( );
+	}
+
+	public void preVisit( TTeradataMultiLoadCmd stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_bteq = xmldoc.createElement( "teradata_multiload_statement" );
+		e_parent.appendChild( e_bteq );
+		elementStack.push( e_bteq );
+
+		e_bteq.setAttribute("type",stmt.getCmdType().toString());
+
+		if (stmt.getBaseStatement() != null){
+			stmt.getBaseStatement().accept(this);
+		}
+
+		elementStack.pop( );
+	}
+
+	public void preVisit( TTeradataMultiLoadImport stmt ){
+		e_parent = (Element) elementStack.peek( );
+		Element e_import = xmldoc.createElement( "teradata_multiload_import_statement" );
+		e_parent.appendChild( e_import );
+		elementStack.push( e_import );
+
+		String command = String.format("ImportCommand{infile='%s', format='%s', layout='%s', " +
+		"apply='%s', skip=%d, checkpoint=%s, sessions=%s, indicators='%s'}",
+				stmt.getInfile(), stmt.getFormat(), stmt.getLayout(), stmt.getApply(), stmt.getSkip(),
+				stmt.getCheckpoint() != null ? stmt.getCheckpoint() : "null",
+				stmt.getSessions() != null ? stmt.getSessions() : "null",
+				stmt.getIndicators());
+
+		addElementOfString("statement",command);
+
+		elementStack.pop( );
+	}
+
+
+	public void preVisit(TTeradataMultiLoadLayout stmt){
+		e_parent = (Element) elementStack.peek( );
+		Element e_layout = xmldoc.createElement( "teradata_multiload_layout_statement" );
+		e_parent.appendChild( e_layout );
+		elementStack.push( e_layout );		
+		addElementOfString("layout_name",stmt.getLayoutName());
+		for(TTeradataMultiLoadLayout.LayoutField field : stmt.getFields()){
+			addElementOfString("field",String.format("fieldName='%s', dataType='%s', delimiter='%s'",field.getFieldName(),field.getDataType(),field.getDelimiter()));
+		}
+		elementStack.pop( );
+
+	}
+
+	public void preVisit(TTeradataMultiLoadExport stmt){
+		e_parent = (Element) elementStack.peek( );
+		Element e_export = xmldoc.createElement( "teradata_multiload_export_statement" );
+		e_parent.appendChild( e_export );
+		elementStack.push( e_export );
+		addElementOfString("statement",stmt.toCommandString());
+		elementStack.pop( );
+	}	
+
+	public void preVisit(TTeradataSetSession stmt )
 	{
 		e_parent = (Element) elementStack.peek( );
 		Element e_set_session_stmt = xmldoc.createElement( "set_session_statement" );
