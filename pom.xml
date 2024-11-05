@@ -84,7 +84,7 @@
     <dependency>
         <groupId>com.github.junrar</groupId>
         <artifactId>junrar</artifactId>
-        <version>0.7</version>
+        <version>7.4.1</version>
         <scope>system</scope>
         <systemPath>${project.basedir}/lib/junrar-0.7.jar</systemPath>     
     </dependency>
