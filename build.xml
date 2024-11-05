@@ -1,0 +1,49 @@
+<project name="checkGSP" basedir="." default="run_demo_listGSPInfo" xmlns:if="ant:if" xmlns:unless="ant:unless">
+
+
+	<property name="listGSPInfo-main-class"  value="demos.listGSPInfo.listGSPInfo"/>
+	<property name="demos.dir"   	value="src/main/java/demos"/>
+	<property name="build.dir"   	value="build"/>
+	<property name="classes.dir" 	value="${build.dir}/classes"/>
+	<property name="jar.demos.dir"     	value="${build.dir}/jar/demos"/>
+
+	
+	<property name="jar.dir"     	value="lib"/>	
+
+    <path id="classpath">
+        <fileset dir="${jar.dir}" includes="**/*.jar"/>
+    </path>
+
+
+    <target name="mk_class_dir">
+    	<mkdir dir="${build.dir}"/>
+    	<mkdir dir="${classes.dir}"/>
+    </target>	
+    
+	<target name="compile_demo_listGSPInfo" depends="mk_class_dir">
+        <javac srcdir="${demos.dir}/listGSPInfo" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+    </target>
+    <target name="jar_demo_listGSPInfo" depends="compile_demo_listGSPInfo">
+        <jar destfile="${jar.demos.dir}/listGSPInfo.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${listGSPInfo-main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+    <target name="run_demo_listGSPInfo" depends="jar_demo_listGSPInfo">
+        <java fork="true" classname="${listGSPInfo-main-class}">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.demos.dir}/listGSPInfo.jar"/>
+            </classpath>
+        </java>
+		<antcall target="clean" />
+    </target>
+	
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+</project>	
+	
+	

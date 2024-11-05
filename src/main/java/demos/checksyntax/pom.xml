@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.gudusoft.gsp</groupId>
+    <artifactId>checksynntax</artifactId>
+    <version>1.0</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+        <dependencies>
+            <!-- In the lib directory to execute the command 'mvn install:install-file -Dfile=gudusoft.gsqlparser-x.x.x.x.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar' -->
+            <dependency>
+                <groupId>gudusoft.gsqlparser</groupId>
+                <artifactId>gsqlparser</artifactId>
+                <version>latest</version>
+            </dependency>
+        </dependencies>
+
+    <build>
+        <sourceDirectory>.</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <includes>
+                        <include>checksyntax.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>demos.checksyntax.checksyntax</mainClass>
+
+                    <!-- Parameters of the checksyntax class -->
+                    <arguments>
+                        <argument>/f</argument>
+                        <argument>c:\prg\tmp\demo.sql</argument>
+                        <argument>/t</argument>
+                        <argument>postgresql</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+

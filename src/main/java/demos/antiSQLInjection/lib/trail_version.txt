@@ -1,0 +1,5 @@
+This is the trial version of General SQL Parser Java version shipped together with this 
+Anti SQL Injection tool, this SQL Parser can process SQL query with 2000 characters limitation.
+
+You can purchase a full version of this library at General SQL Parser official site:
+http://www.sqlparser.com

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="GetTableColumn" default="clean" basedir=".">
+	
+	<property name="gsp.version" value="2.0.2.4" />
+	<property name="demo.dir" value="../../../../.." />
+	
+	<property name="demo.src" value="${demo.dir}/src/main/java" />
+	<property name="demo.lib" value="${demo.dir}/lib" />
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="build.src" value="${build.dir}/src" />
+	<property name="build.bin" value="${build.dir}/bin" />
+	<property name="build.dest" value="${build.dir}/.." />
+	
+	<property name="jar" value="GetTableColumn.jar" />
+	
+	<path id="compile.classpath">
+		<fileset dir="${demo.lib}">
+			<include name="gudusoft.gsqlparser-${gsp.version}.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean" depends="build">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="init">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.src}" />
+		<mkdir dir="${build.bin}" />
+		<mkdir dir="${build.dest}" />
+		<copy todir="${build.src}">
+			<fileset dir="${demo.src}">
+				<include name="demos/gettablecolumns/*.java" />
+				<include name="demos/joinRelationAnalyze/*.java" />
+				<include name="demos/columnInClause.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${build.src}" destdir="${build.bin}" source="1.5" target="1.5">
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="build" depends="compile">
+		<jar jarfile="${build.dest}/${jar}" basedir="${build.bin}">
+			<zipfileset src="${demo.lib}/gudusoft.gsqlparser-${gsp.version}.jar" />
+			<manifest>
+				<attribute name="Main-Class" value="demos.gettablecolumns.runGetTableColumn" />
+			</manifest>
+		</jar>
+	</target>
+
+</project>

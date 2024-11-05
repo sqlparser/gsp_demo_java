@@ -1,0 +1,493 @@
+package mtag.teradata.sqlchecker.parser;
+
+import java.util.Arrays;
+import java.util.List;
+
+import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TGSqlParser;
+import junit.framework.TestCase;
+
+public class GeneralSqlParserTeradataTest extends TestCase {
+    
+    //table statements tests
+    public void testCreateTableValid() {
+        List<String> statements = Arrays.asList(
+                "CREATE TABLE t_employee ( \r\n" + 
+                "    employeeno INTEGER, \r\n" + 
+                "    firstname CHAR(30), \r\n" + 
+                "    lastname CHAR(30), \r\n" + 
+                "    departmentno SMALLINT, \r\n" + 
+                "    netpay INTEGER)\r\n" + 
+                "  PRIMARY INDEX(employeeno);"
+                
+               ,"    CREATE TABLE employee, DATABLOCKSIZE = 16384 BYTES,\r\n" + 
+                "     FREESPACE = 10 PERCENT (\r\n" + 
+                "      empno    SMALLINT FORMAT '9(5)' \r\n" + 
+                "               CHECK (empno >= 10001 AND empno <= 32001) NOT NULL,\r\n" + 
+                "      name     VARCHAR(12) NOT NULL,\r\n" + 
+                "      deptno   SMALLINT FORMAT '999' \r\n" + 
+                "               CHECK (deptno >= 100 AND deptno <= 900),\r\n" + 
+                "      jobtitle VARCHAR(12),\r\n" + 
+                "      salary   DECIMAL(8,2) FORMAT 'ZZZ,ZZ9.99'\r\n" + 
+                "               CHECK (salary >= 1.00 AND salary <= 999000.00),\r\n" + 
+                "      yrsexp   BYTEINT FORMAT 'Z9' \r\n" + 
+                "               CHECK (yrsexp >= -99 AND yrsexp <=99),\r\n" + 
+                "      dob      DATE FORMAT 'MMMbDDbYYYY' NOT NULL,\r\n" + 
+                "      sex      CHARACTER UPPERCASE NOT NULL,\r\n" + 
+                "      race     CHARACTER UPPERCASE,\r\n" + 
+                "      mstat    CHARACTER UPPERCASE,\r\n" + 
+                "      edlev    BYTEINT FORMAT 'Z9' \r\n" + 
+                "               CHECK(edlev >=0 AND edlev <= 22) NOT NULL,\r\n" + 
+                "      hcap     BYTEINT FORMAT 'Z9' \r\n" + 
+                "               CHECK (hcap >= -99 AND hcap <= 99))\r\n" + 
+                "    UNIQUE PRIMARY INDEX (empno),\r\n" + 
+                "    INDEX (name);"
+                
+               ,"    CREATE SET TABLE t_blc,\r\n" + 
+                "       NO FALLBACK,\r\n" + 
+                "       NO BEFORE JOURNAL,\r\n" + 
+                "       NO AFTER JOURNAL,\r\n" + 
+                "       CHECKSUM = DEFAULT (\r\n" + 
+                "       c1   INTEGER FORMAT '-(10)9' )    \r\n" + 
+                "     UNIQUE PRIMARY INDEX (c1)  \r\n" + 
+                "     PARTITION BY(RANGE_N(c1 BETWEEN 1 AND 500 EACH 5));",
+                
+                "    CREATE TABLE target_table AS (SELECT column_x, column_y FROM subquery_table)\r\n" + 
+                "    WITH NO DATA\r\n" + 
+                "    INDEX (column_y);"
+                
+               //{_/SET/MULTISET} {_/GLOBAL TEMPORARY/VOLATILE}
+               ,"CREATE TABLE table_name (id INTEGER);"
+               
+               ,"CREATE SET TABLE table_name (id INTEGER);"
+               
+               ,"CREATE MULTISET TABLE table_name (id INTEGER);"
+                
+               ,"CREATE GLOBAL TEMPORARY TABLE table_name (id INTEGER);"
+               
+               ,"CREATE SET GLOBAL TEMPORARY TABLE table_name (id INTEGER);"
+               
+               ,"CREATE MULTISET GLOBAL TEMPORARY TABLE table_name (id INTEGER);"
+               
+               ,"CREATE VOLATILE TABLE table_name (id INTEGER);"
+               
+               ,"CREATE SET VOLATILE TABLE table_name (id INTEGER);"
+               
+               ,"CREATE MULTISET VOLATILE TABLE table_name (id INTEGER);"
+               
+               //options
+               ,"CREATE TABLE table_name, FALLBACK (id INTEGER);"
+               
+               ,"CREATE TABLE table_name, NO FALLBACK (id INTEGER);"
+               
+               ,"CREATE TABLE table_name, WITH JOURNAL TABLE = journal_table_name, BEFORE JOURNAL (id INTEGER);"
+               
+               ,"CREATE TABLE table_name, WITH JOURNAL TABLE = db_name.journal_table_name, LOCAL AFTER JOURNAL (id INTEGER);"
+               
+               ,"CREATE VOLATILE TABLE table_name, LOG (id INTEGER);"
+               
+               ,"CREATE GLOBAL TEMPORARY TABLE table_name, NO LOG (id INTEGER);"
+               
+               ,"CREATE TABLE table_name, LOG (id INTEGER);"
+               
+               //PRIMARY INDEX
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY INDEX (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY INDEX index_name (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE PRIMARY INDEX (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE PRIMARY INDEX index_name (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) NO PRIMARY INDEX;"
+               
+               //PRIMARY AMP
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP (id) PARTITION BY COLUMN;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP INDEX (id) PARTITION BY COLUMN;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP index_name (id) PARTITION BY COLUMN;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP INDEX index_name (id) PARTITION BY COLUMN;"
+               
+               //UNIQUE INDEX
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX index_name (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX (id) WITH LOAD IDENTITY;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX index_name (id) WITH LOAD IDENTITY;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX (id) WITH NO LOAD IDENTITY;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) UNIQUE INDEX index_name (id) WITH NO LOAD IDENTITY;"
+               
+               //INDEX
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX index_name (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX ALL (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX index_name ALL (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY VALUES;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY VALUES (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY HASH;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) ORDER BY HASH (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) WITH LOAD IDENTITY;"
+               
+               ,"CREATE TABLE table_name (id INTEGER) INDEX (id) WITH NO LOAD IDENTITY;"
+               
+               //ON COMMIT
+               ,"CREATE GLOBAL TEMPORARY TABLE table_name (id INTEGER) ON COMMIT DELETE ROWS;"
+               
+               ,"CREATE GLOBAL TEMPORARY TABLE table_name (id INTEGER) ON COMMIT PRESERVE ROWS;"
+               
+               ,"CREATE VOLATILE TABLE table_name (id INTEGER) ON COMMIT DELETE ROWS;"
+               
+               ,"CREATE VOLATILE TABLE table_name (id INTEGER) ON COMMIT PRESERVE ROWS;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testCreateTableInvalid() {
+        List<String> statements = Arrays.asList(
+                "CREATE TABLE table_name"
+                
+               ,"CREATE TABLE table_name (id INTEGER) FALLBACK;"
+               
+               //PRIMARY AMP without PARTITION BY
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP INDEX (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP index_name (id);"
+               
+               ,"CREATE TABLE table_name (id INTEGER) PRIMARY AMP INDEX index_name (id);"
+               
+                //only in global temporary and volatile tables
+               ,"CREATE TABLE table_name (id INTEGER) ON COMMIT DELETE ROWS;"
+                
+               ,"CREATE TABLE table_name (id INTEGER) ON COMMIT PRESERVE ROWS;"
+               
+               ,"CREATE TABLE table_name, NO LOG (id INTEGER);"
+                );
+        runTest(statements, false);
+    }
+    
+    public void testAlterTableValid() {
+        List<String> statements = Arrays.asList(
+                "ALTER Table t_Table\r\n" + 
+                "       DROP col_c,\r\n" + 
+                "        ADD col_g INTEGER;"
+                
+               ,"ALTER table at3\r\n" + 
+                "        ADD (c1 INTEGER,\r\n" + 
+                "             k1 INTEGER);"
+                
+               ,"ALTER TABLE tbl_employee\r\n" + 
+                "     RENAME emp_nm TO employee_name;"
+                
+               ,"ALTER TABLE table_1 MODIFY CONSTRAINT check_1 CHECK (column_2 > 0);"
+                
+               ,"ALTER TABLE table_name RENAME old_column TO new_column;"
+                
+               ,"ALTER TABLE table_name DROP column_name;"
+                
+               ,"ALTER TABLE table_name DROP column_name CHECK;"
+                
+               ,"ALTER TABLE table_1 DROP CONSTRAINT check_1;"
+                
+               ,"ALTER TABLE table_1 DROP CONSTRAINT check_1 CHECK;"
+                
+               ,"ALTER TABLE table_1 DROP FOREIGN KEY (column_2) REFERENCES table_3;"
+                
+               ,"ALTER TABLE table_1 DROP CHECK;"
+                
+               ,"ALTER TABLE abc ADD column_2 NULL;"
+                
+               ,"ALTER TABLE sales TO CURRENT;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testRenameTableValid() {
+        List<String> statements = Arrays.asList(
+                "RENAME TABLE old_table TO new_table;"
+                
+               ,"RENAME TABLE db_name.old_table TO new_table;"
+                
+               ,"RENAME TABLE old_table TO db_name.new_table;"
+                
+               ,"RENAME TABLE db_name.old_table TO db_name.new_table;"
+                
+               ,"RENAME TABLE old_table AS new_table;"
+                
+               ,"RENAME TABLE db_name.old_table AS new_table;"
+                
+               ,"RENAME TABLE old_table AS db_name.new_table;"
+                
+               ,"RENAME TABLE db_name.old_table AS db_name.new_table;" 
+                );
+        runTest(statements, true);
+    }
+    
+    public void testDropTableValid() {
+        List<String> statements = Arrays.asList(
+                "DROP TABLE table_name;"
+                
+               ,"DROP TABLE db_name.table_name;"
+                
+               ,"DROP TABLE table_name ALL;"
+                
+               ,"DROP TABLE db_name.table_name ALL;"
+                
+               ,"DROP TEMPORARY TABLE table_name;"
+                
+               ,"DROP TEMPORARY TABLE db_name.table_name;"
+                
+               ,"DROP TEMPORARY TABLE table_name ALL;"
+                
+               ,"DROP TEMPORARY TABLE db_name.table_name ALL;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testDropErrorTableValid() {
+        List<String> statements = Arrays.asList(
+                "DROP ERROR TABLE FOR table_name;"
+                
+               ,"DROP ERROR TABLE FOR db_name.table_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpColumnValid() {
+        List<String> statements = Arrays.asList(
+                "HELP COLUMN column_name FROM table_name;"
+                
+               ,"HELP COLUMN column_name FROM db_name.table_name;"
+               
+               ,"HELP COLUMN * FROM table_name;"
+               
+               ,"HELP COLUMN * FROM db_name.table_name;"
+               
+               ,"HELP COLUMN table_name.column_name;"
+               
+               ,"HELP COLUMN db_name.table_name.column_name;"
+               
+               ,"HELP COLUMN table_name.*;"
+               
+               ,"HELP COLUMN db_name.table_name.*;"
+               
+               ,"HELP COLUMN column_name FROM ERROR TABLE FOR table_name;"
+               
+               ,"HELP COLUMN column_name FROM ERROR TABLE FOR db_name.table_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpConstraintValid() {
+        List<String> statements = Arrays.asList(
+                "HELP CONSTRAINT table_name.constraint_name;"
+                
+               ,"HELP CONSTRAINT db_name.table_name.constraint_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpErrorTableValid() {
+        List<String> statements = Arrays.asList(
+                "HELP ERROR TABLE FOR table_name;"
+                
+               ,"HELP ERROR TABLE FOR db_name.table_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpTableValid() {
+        List<String> statements = Arrays.asList(
+                "HELP TABLE table_name;"
+                
+               ,"HELP TABLE db_name.table_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpVolatileTableValid() {
+        List<String> statements = Arrays.asList(
+                "HELP VOLATILE TABLE table_name"
+                );
+        runTest(statements, true);
+    }
+    
+    //view statements tests
+    public void testCreateViewValid() {
+        List<String> statements = Arrays.asList(
+                "CREATE VIEW view_name AS (SELECT * FROM table_name);"
+                
+               ,"    CREATE VIEW dept AS\r\n" + 
+                "     SELECT   deptno(TITLE 'Department Number'),\r\n" + 
+                "              deptname(TITLE 'Department Name'), \r\n" + 
+                "              loc (TITLE 'Department Location'), \r\n" + 
+                "              mgrno(TITLE 'Manager Number') \r\n" + 
+                "     FROM department;"
+                
+               ,"    CREATE VIEW staff_info (id, name, address) AS\r\n" + 
+                "     SELECT employee_t.employee_id, employee_name, employee_address \r\n" + 
+                "     FROM employee_t\r\n" + 
+                "     WHERE employee_id NOT IN (1,2,3)\r\n" + 
+                "    WITH CHECK OPTION;"
+                
+               ,"    CREATE VIEW staff_info (id, name, address) AS\r\n" + 
+                "     SELECT TOP 1 employee_t.employee_id, employee_name, employee_address \r\n" + 
+                "     FROM employee_t\r\n" + 
+                "     WHERE employee_id NOT IN (1,2,3)\r\n" + 
+                "     ORDER BY 1;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testCreateViewInvalid() {
+        List<String> statements = Arrays.asList(
+                "    CREATE VIEW staff_info (id, name, address) AS\r\n" + 
+                "     SELECT employee_t.employee_id, employee_name, employee_address \r\n" + 
+                "     FROM employee_t\r\n" + 
+                "     WHERE employee_id NOT IN (1,2,3)\r\n" + 
+                "     ORDER BY 1;"
+                
+               ,""
+                );
+        runTest(statements, false);
+    }
+    
+    public void testRenameViewValid() {
+        List<String> statements = Arrays.asList(
+                "RENAME VIEW old_view TO new_view;"
+                
+               ,"RENAME VIEW db_name.old_view TO new_view;"
+               
+               ,"RENAME VIEW old_view TO db_name.new_view;"
+               
+               ,"RENAME VIEW db_name.old_view TO db_name.new_view;"
+               
+               ,"RENAME VIEW old_view AS new_view;"
+               
+               ,"RENAME VIEW db_name.old_view AS new_view;"
+               
+               ,"RENAME VIEW old_view AS db_name.new_view;"
+               
+               ,"RENAME VIEW db_name.old_view AS db_name.new_view;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testDropViewValid() {
+        List<String> statements = Arrays.asList(
+                "DROP VIEW view_name;"
+                
+               ,"DROP VIEW db_name.view_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testHelpViewValid() {
+        List<String> statements = Arrays.asList(
+                "HELP VIEW view_name;"
+                
+               ,"HELP VIEW db_name.view_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testCreateIndexValid() {
+        List<String> statements = Arrays.asList(
+                "CREATE INDEX index_name (order_id) ON order_t;"
+                
+               ,"CREATE UNIQUE INDEX index_name (order_id) ON order_t;"
+                
+               ,"CREATE INDEX index_name (order_id) ORDER BY VALUES ON order_t;"
+                
+               ,"CREATE INDEX index_name (order_id) ORDER BY VALUES (order_id) ON order_t;"
+               
+               ,"CREATE INDEX index_name (order_id) ORDER BY HASH ON order_t;"
+               
+               ,"CREATE INDEX index_name (order_id) ORDER BY HASH (order_id) ON order_t;"
+               
+               ,"CREATE INDEX index_name (order_id) WITH LOAD IDENTITY ON order_t;"
+               
+               ,"CREATE INDEX index_name (order_id) WITH NO LOAD IDENTITY ON order_t;"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testCreateJoinIndexValid() {
+        List<String> statements = Arrays.asList(
+                "    CREATE JOIN INDEX index_name, CHECKSUM=ON AS\r\n" + 
+                "    SELECT c.customer_city, COUNT(o.order_id) AS order_number, o.order_date \r\n" + 
+                "    FROM order_t o, customer_t c\r\n" + 
+                "    WHERE o.customer_id = c.customer_id \r\n" + 
+                "    GROUP BY c.customer_city, o.order_date\r\n" + 
+                "    ORDER BY o.order_date;"
+                
+               ,"     CREATE JOIN INDEX index_name AS \r\n" + 
+                "       SELECT customer_id, order_date \r\n" + 
+                "       FROM order_t \r\n" + 
+                "     PRIMARY INDEX (customer_id)\r\n" + 
+                "     PARTITION BY RANGE_N(order_date\r\n" + 
+                "                  BETWEEN  date '2000-01-01'\r\n" + 
+                "                  AND '2009-12-31' \r\n" + 
+                "                  EACH INTERVAL '1' MONTH, NO RANGE);"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testCreateHashIndexValid() {
+        List<String> statements = Arrays.asList(
+                "     CREATE HASH INDEX index_name, CHECKSUM=ON \r\n" + 
+                "       (order_date) ON order_t\r\n" + 
+                "     BY (order_date)\r\n" + 
+                "     ORDER BY VALUES;"
+                
+               ,"     CREATE HASH INDEX index_name (order_date) ON order_t\r\n" + 
+                "     BY (order_date) \r\n" + 
+                "     ORDER BY (order_date);"
+                );
+        runTest(statements, true);
+    }
+    
+    public void testDropIndexValid() {
+        List<String> statements = Arrays.asList(
+                "DROP INDEX index_name ON table_name;"
+                
+               ,"DROP INDEX index_name ON db_name.table_name;"
+                
+               ,"DROP TEMPORARY TABLE table_name;"
+                
+               ,"DROP TEMPORARY TABLE db_name.table_name;"
+                );
+        runTest(statements, true);
+    }
+    
+    private void runTest(List<String> statements, boolean isValid) {
+        statements.forEach(statement -> {
+            TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+            sqlparser.setSqltext(statement);
+            if(isValid) {
+                assertTrue(statement + " should be valid statement, but it causes syntax error."+"\n"+statement+"\n"+sqlparser.getErrormessage(), sqlparser.parse() == 0);
+            } else {
+                assertFalse(statement + " should cause syntax error, but it does not.", sqlparser.parse() == 0);
+            }
+        });
+    }
+}
