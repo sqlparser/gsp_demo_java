@@ -26,7 +26,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MMM-dd HH:mm z</maven.build.timestamp.format>
-        <gsp.core.version>3.0.2.1</gsp.core.version>
+        <gsp.core.version>3.0.2.5</gsp.core.version>
     </properties>
 
     <profiles>
