@@ -71,7 +71,7 @@ public class testRemoveCondition extends TestCase
 		Assert.assertEquals( remove.getRemoveResult( ), result );
 	}
 
-	public static void testIssue239( )
+	public  void testIssue239( )
 	{
 		String sql = "SELECT SUM (d.amt) \r\n "
 				+ "FROM   summit.cntrb_detail d \r\n "
@@ -92,7 +92,7 @@ public class testRemoveCondition extends TestCase
 		Assert.assertEquals( remove.getRemoveResult( ), result );
 	}
 
-	public static void testRemoveNonConditions( )
+	public  void testRemoveNonConditions( )
 	{
 		String sql = "SELECT SUM (d.amt)\r\n"
 				+ "FROM summit.cntrb_detail d\r\n"
@@ -123,7 +123,7 @@ public class testRemoveCondition extends TestCase
 		Assert.assertEquals( remove.getRemoveResult( ), result );
 	}
 
-	public static void testRemoveAllConditions( )
+	public  void testRemoveAllConditions( )
 	{
 		String sql = "SELECT SUM (d.amt)\r\n"
 				+ "FROM summit.cntrb_detail d\r\n"
@@ -138,8 +138,8 @@ public class testRemoveCondition extends TestCase
 		removeCondition remove = new removeCondition( sql,
 				EDbVendor.dbvmssql,
 				null );
-		System.out.println(remove.getRemoveResult( ));
-		//Assert.assertEquals( remove.getRemoveResult( ), result );
+		//System.out.println(remove.getRemoveResult( ));
+		Assert.assertEquals( remove.getRemoveResult( ), result );
 	}
 
 	public void testSQLFromFile( )

@@ -1,7 +1,7 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -15,7 +15,9 @@ public class testUpdate extends TestCase {
         getTableColumn.showTreeStructure = false;
         getTableColumn.listStarColumn = true;
         getTableColumn.runText(inputQuery);
-       //   System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println("SQL: \n\n"+inputQuery);
+//        System.out.println("\nActual: \n\n"+getTableColumn.outList.toString().trim());
+//        System.out.println("\nDesired: \n\n"+desireResult);
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
@@ -39,7 +41,7 @@ public class testUpdate extends TestCase {
     }
 
 
-    public static void testUpdate2() {
+    public  void testUpdate2() {
         doTest(EDbVendor.dbvteradata,
                 "UPDATE b_rate_plan\n" +
                         "FROM \n" +

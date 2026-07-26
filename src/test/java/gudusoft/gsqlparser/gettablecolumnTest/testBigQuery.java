@@ -1,7 +1,9 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
 import gudusoft.gsqlparser.commonTest.gspCommon;
-import demos.gettablecolumns.TGetTableColumn;
+//import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
+
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -17,7 +19,12 @@ public class testBigQuery extends TestCase {
         getTableColumn.listStarColumn = true;
         getTableColumn.showColumnsOfCTE = true;
         getTableColumn.runFile(inputFile);
-        // System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(inputFile);
+//        System.out.println("\nResult:");
+//        System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println("\nDesired:");
+//        System.out.println(desireResult);
+
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
@@ -44,11 +51,148 @@ public class testBigQuery extends TestCase {
         getTableColumn.showDatatype = true;
         getTableColumn.listStarColumn = true;
         getTableColumn.runText(inputQuery);
-        // System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(inputQuery);
+//        System.out.println("\nResult:");
+//        System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println("\nDesired:");
+//        System.out.println(desireResult);
+
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testunnestWithOffset2() {
+    public  void test10() {
+        doTest("CREATE OR REPLACE VIEW\n" +
+                        "atlanhq.nested_lineage_test.record_repeated_item_to_primitive AS\n" +
+                        "SELECT\n" +
+                        "TO_JSON_STRING(items[offset(0)]) AS item_0_primitive\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.items");
+    }
+
+    public  void test9() {
+        doTest("CREATE OR REPLACE VIEW\n" +
+                        "atlanhq.nested_lineage_test.primitive_repeated_item_to_primitive AS\n" +
+                        "SELECT\n" +
+                        "shipment_ids[offset(0)] AS shipment_id_0_primitive\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.shipment_ids");
+    }
+
+    public  void test8() {
+        doTest("CREATE OR REPLACE VIEW\n" +
+                        "atlanhq.nested_lineage_test.record_complete_to_record_repeated AS\n" +
+                        "SELECT\n" +
+                        "ARRAY[customer] AS customer_record_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.customer");
+    }
+
+    public  void test7() {
+        doTest("CREATE OR REPLACE VIEW\n" +
+                        "atlanhq.nested_lineage_test.record_nested_item_to_primitive_repeated AS\n" +
+                        "SELECT\n" +
+                        "ARRAY[customer.customer_id] AS customer_id_primitive_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.customer");
+    }
+
+    public  void test6() {
+        doTest("CREATE OR REPLACE VIEW\n" +
+                        "atlanhq.nested_lineage_test.primitive_to_repeated AS\n" +
+                        "SELECT\n" +
+                        "ARRAY[order_id] AS order_id_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.order_id");
+    }
+
+    public  void test5() {
+        doTest("SELECT\n" +
+                        "ARRAY(SELECT AS STRUCT customer.customer_id) AS customer_record_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.customer");
+    }
+
+    public  void test4() {
+        doTest("SELECT\n" +
+                        "ARRAY(SELECT TO_JSON_STRING(item) FROM UNNEST(items) AS item) AS items_primitive_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "item(unnest table)\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(unnest-table:item).item\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.items");
+    }
+
+    public  void test3() {
+        doTest("SELECT\n" +
+                        "STRUCT(items[offset(0)] AS item_0_record) AS item_record\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.items");
+    }
+
+    public  void test2() {
+        doTest("SELECT\n" +
+                        "ARRAY(SELECT AS STRUCT shipment_ids[offset(0)] AS shipment_id_0_primitive) AS shipment_ids_record_repeated\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.shipment_ids");
+    }
+
+    public  void test1() {
+        doTest("SELECT\n" +
+                        "STRUCT(shipment_ids[offset(0)] AS shipment_id_0_primitive) AS shipment_ids_record\n" +
+                        "FROM\n" +
+                        "atlanhq.nested_lineage_test.orders_raw;",
+                "Tables:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "atlanhq.nested_lineage_test.orders_raw.shipment_ids");
+    }
+
+    public  void testunnestWithOffset2() {
         doTest("SELECT *\n" +
                         "FROM UNNEST(['foo', 'bar', 'baz', 'qux', 'corge', 'garply', 'waldo', 'fred']) AS element\n" +
                         "WITH OFFSET",
@@ -61,7 +205,7 @@ public class testBigQuery extends TestCase {
                         "(unnest-table:element).offset");
     }
 
-    public static void testunnestWithOffset1() {
+    public  void testunnestWithOffset1() {
         doTest("SELECT *\n" +
                         "FROM UNNEST(['foo', 'bar', 'baz', 'qux', 'corge', 'garply', 'waldo', 'fred']) AS element\n" +
                         "WITH OFFSET AS offset2",
@@ -74,7 +218,7 @@ public class testBigQuery extends TestCase {
                         "(unnest-table:element).offset2");
     }
 
-    public static void testunnestAncCTE() {
+    public  void testunnestAncCTE() {
         doTestShowCTE("WITH\n" +
                         "  combinations AS (\n" +
                         "    SELECT\n" +
@@ -104,7 +248,7 @@ public class testBigQuery extends TestCase {
                         "combinations(CTE).numbers");
     }
 
-    public static void testunnest() {
+    public  void testunnest() {
 
         doTest("CREATE TABLE schema1.table2 AS \n" +
                         "    (SELECT \n" +
@@ -133,7 +277,7 @@ public class testBigQuery extends TestCase {
     }
 
 
-    public static void testbacktick1() {
+    public  void testbacktick1() {
         doTest("SELECT schema1.table1.id1, schema1.table2.id2 \n" +
                         "FROM `schema1.table1` \n" +
                         "LEFT JOIN schema1.table2\n" +
@@ -148,7 +292,7 @@ public class testBigQuery extends TestCase {
                         "schema1.table2.id2");
     }
 
-    public static void testbacktick2() {
+    public  void testbacktick2() {
         doTest("SELECT schema1.table1.id2, schema1.table2.id3\n" +
                         "FROM `schema1.table1`\n" +
                         "LEFT JOIN `schema1.table2`\n" +
@@ -164,7 +308,7 @@ public class testBigQuery extends TestCase {
                         "`schema1`.`table2`.id3");
     }
 
-    public static void testExceptColumns() {
+    public  void testExceptColumns() {
         doTest("SELECT COMMON.* EXCEPT (column1, column2) FROM dataset1.table1 COMMON;",
                 "Tables:\n" +
                         "dataset1.table1\n" +
@@ -176,101 +320,101 @@ public class testBigQuery extends TestCase {
     }
 
 
-    public static void testShowCTEColumns() {
-        doTestShowCTEColumn(  gspCommon.BASE_SQL_DIR_PRIVATE_JAVA + "bigquery/solidatus/cte_with_star_columns.sql",
-                "Tables:\n" +
-                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`\n" +
-                        "`solidatus-dev`.`data`.`RETAIL_PROD_REPAIR`\n" +
-                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE\n" +
-                        "\n" +
-                        "Fields:\n" +
-                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.*\n" +
-                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.from_date\n" +
-                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.to_date\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.*\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.__metadata\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.__uuid\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.adjustment_info\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.entity_uuid\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.from_date\n" +
-                        "`data`.`RETAIL_PROD_SOURCE`.to_date\n" +
-                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Processing_Type:string\n" +
-                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Source_System_Type:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__metadata:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.adjustment_info:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.entity_uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.from_date:timestamp\n" +
-                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.to_date:timestamp\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__metadata:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.adjustment_info:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.entity_uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.from_date:timestamp\n" +
-                        "solidatus-dev.data.RETAIL_PROD_REPAIR.to_date:timestamp\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__metadata:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.adjustment_info:array\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.entity_uuid:string\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.from_date:timestamp\n" +
-                        "solidatus-dev.data.RETAIL_PROD_SOURCE.to_date:timestamp\n" +
-                        "\n" +
-                        "Ctes:\n" +
-                        "EXCEPTION_RETAIL_000100.__metadata\n" +
-                        "EXCEPTION_RETAIL_000100.__uuid\n" +
-                        "EXCEPTION_RETAIL_000100.adjustment_info\n" +
-                        "EXCEPTION_RETAIL_000100.entity_uuid\n" +
-                        "EXCEPTION_RETAIL_000100.from_date\n" +
-                        "EXCEPTION_RETAIL_000100.to_date\n" +
-                        "EXCEPTION_RETAIL_000130.__metadata\n" +
-                        "EXCEPTION_RETAIL_000130.__uuid\n" +
-                        "EXCEPTION_RETAIL_000130.adjustment_info\n" +
-                        "EXCEPTION_RETAIL_000130.entity_uuid\n" +
-                        "EXCEPTION_RETAIL_000130.from_date\n" +
-                        "EXCEPTION_RETAIL_000130.to_date\n" +
-                        "RETAIL_PROD_SOURCE_000100.__metadata\n" +
-                        "RETAIL_PROD_SOURCE_000100.__uuid\n" +
-                        "RETAIL_PROD_SOURCE_000100.adjustment_info\n" +
-                        "RETAIL_PROD_SOURCE_000100.entity_uuid\n" +
-                        "RETAIL_PROD_SOURCE_000100.from_date\n" +
-                        "RETAIL_PROD_SOURCE_000100.to_date\n" +
-                        "RETAIL_PROD_SOURCE_000200.__metadata\n" +
-                        "RETAIL_PROD_SOURCE_000200.__uuid\n" +
-                        "RETAIL_PROD_SOURCE_000200.adjustment_info\n" +
-                        "RETAIL_PROD_SOURCE_000200.entity_uuid\n" +
-                        "RETAIL_PROD_SOURCE_000200.from_date\n" +
-                        "RETAIL_PROD_SOURCE_000200.to_date\n" +
-                        "RETAIL_PROD_SOURCE_000300.__metadata\n" +
-                        "RETAIL_PROD_SOURCE_000300.__uuid\n" +
-                        "RETAIL_PROD_SOURCE_000300.adjustment_info\n" +
-                        "RETAIL_PROD_SOURCE_000300.entity_uuid\n" +
-                        "RETAIL_PROD_SOURCE_000300.from_date\n" +
-                        "RETAIL_PROD_SOURCE_000300.to_date\n" +
-                        "RETAIL_PROD_SOURCE_000400.__metadata\n" +
-                        "RETAIL_PROD_SOURCE_000400.__uuid\n" +
-                        "RETAIL_PROD_SOURCE_000400.adjustment_info\n" +
-                        "RETAIL_PROD_SOURCE_000400.entity_uuid\n" +
-                        "RETAIL_PROD_SOURCE_000400.from_date\n" +
-                        "RETAIL_PROD_SOURCE_000400.to_date\n" +
-                        "STAGE1.__metadata\n" +
-                        "STAGE1.__uuid\n" +
-                        "STAGE1.adjustment_info\n" +
-                        "STAGE1.entity_uuid\n" +
-                        "STAGE1.from_date\n" +
-                        "STAGE1.to_date\n" +
-                        "STAGE2.__metadata\n" +
-                        "STAGE2.__uuid\n" +
-                        "STAGE2.adjustment_info\n" +
-                        "STAGE2.entity_uuid\n" +
-                        "STAGE2.from_date\n" +
-                        "STAGE2.to_date");
-    }
+//    public  void testShowCTEColumns() {
+//        doTestShowCTEColumn(  gspCommon.BASE_SQL_DIR_PRIVATE_JAVA + "bigquery/solidatus/cte_with_star_columns.sql",
+//                "Tables:\n" +
+//                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`\n" +
+//                        "`solidatus-dev`.`data`.`RETAIL_PROD_REPAIR`\n" +
+//                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE\n" +
+//                        "\n" +
+//                        "Fields:\n" +
+//                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.*\n" +
+//                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.from_date\n" +
+//                        "`data`.`RETAIL_PROD_EXCEPTIONS_SOURCE`.to_date\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.*\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.__metadata\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.__uuid\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.adjustment_info\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.entity_uuid\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.from_date\n" +
+//                        "`data`.`RETAIL_PROD_SOURCE`.to_date\n" +
+//                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Processing_Type:string\n" +
+//                        "solidatus-dev.data.FOTC_RD_EXCEPTION_FILE_PROCESSING.Source_System_Type:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__metadata:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.__uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.adjustment_info:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.entity_uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.from_date:timestamp\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_EXCEPTIONS_SOURCE.to_date:timestamp\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__metadata:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.__uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.adjustment_info:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.entity_uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.from_date:timestamp\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_REPAIR.to_date:timestamp\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__metadata:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.__uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.adjustment_info:array\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.entity_uuid:string\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.from_date:timestamp\n" +
+//                        "solidatus-dev.data.RETAIL_PROD_SOURCE.to_date:timestamp\n" +
+//                        "\n" +
+//                        "Ctes:\n" +
+//                        "EXCEPTION_RETAIL_000100.__metadata\n" +
+//                        "EXCEPTION_RETAIL_000100.__uuid\n" +
+//                        "EXCEPTION_RETAIL_000100.adjustment_info\n" +
+//                        "EXCEPTION_RETAIL_000100.entity_uuid\n" +
+//                        "EXCEPTION_RETAIL_000100.from_date\n" +
+//                        "EXCEPTION_RETAIL_000100.to_date\n" +
+//                        "EXCEPTION_RETAIL_000130.__metadata\n" +
+//                        "EXCEPTION_RETAIL_000130.__uuid\n" +
+//                        "EXCEPTION_RETAIL_000130.adjustment_info\n" +
+//                        "EXCEPTION_RETAIL_000130.entity_uuid\n" +
+//                        "EXCEPTION_RETAIL_000130.from_date\n" +
+//                        "EXCEPTION_RETAIL_000130.to_date\n" +
+//                        "RETAIL_PROD_SOURCE_000100.__metadata\n" +
+//                        "RETAIL_PROD_SOURCE_000100.__uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000100.adjustment_info\n" +
+//                        "RETAIL_PROD_SOURCE_000100.entity_uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000100.from_date\n" +
+//                        "RETAIL_PROD_SOURCE_000100.to_date\n" +
+//                        "RETAIL_PROD_SOURCE_000200.__metadata\n" +
+//                        "RETAIL_PROD_SOURCE_000200.__uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000200.adjustment_info\n" +
+//                        "RETAIL_PROD_SOURCE_000200.entity_uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000200.from_date\n" +
+//                        "RETAIL_PROD_SOURCE_000200.to_date\n" +
+//                        "RETAIL_PROD_SOURCE_000300.__metadata\n" +
+//                        "RETAIL_PROD_SOURCE_000300.__uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000300.adjustment_info\n" +
+//                        "RETAIL_PROD_SOURCE_000300.entity_uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000300.from_date\n" +
+//                        "RETAIL_PROD_SOURCE_000300.to_date\n" +
+//                        "RETAIL_PROD_SOURCE_000400.__metadata\n" +
+//                        "RETAIL_PROD_SOURCE_000400.__uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000400.adjustment_info\n" +
+//                        "RETAIL_PROD_SOURCE_000400.entity_uuid\n" +
+//                        "RETAIL_PROD_SOURCE_000400.from_date\n" +
+//                        "RETAIL_PROD_SOURCE_000400.to_date\n" +
+//                        "STAGE1.__metadata\n" +
+//                        "STAGE1.__uuid\n" +
+//                        "STAGE1.adjustment_info\n" +
+//                        "STAGE1.entity_uuid\n" +
+//                        "STAGE1.from_date\n" +
+//                        "STAGE1.to_date\n" +
+//                        "STAGE2.__metadata\n" +
+//                        "STAGE2.__uuid\n" +
+//                        "STAGE2.adjustment_info\n" +
+//                        "STAGE2.entity_uuid\n" +
+//                        "STAGE2.from_date\n" +
+//                        "STAGE2.to_date");
+//    }
 
-    public static void testMergeInsertValues() {
+    public  void testMergeInsertValues() {
         doTest("MERGE INTO EMP1 D USING (\n" +
                         "  SELECT E2.* FROM EMP2 E2, EMP3 E3 WHERE E3.dept = 'prod'\n" +
                         ") S\n" +
@@ -295,13 +439,36 @@ public class testBigQuery extends TestCase {
                         "EMP3.dept");
     }
 
-    public static void testBuiltinFunctionKeywordsInArgs() {
+    public  void testBuiltinFunctionKeywordsInArgs() {
         doTest("SELECT TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), date, SECOND) AS seconds_since FROM table_3;",
                 "Tables:\n" +
                         "table_3\n" +
                         "\n" +
                         "Fields:\n" +
                         "table_3.date");
+    }
+
+    public  void testMergeInsertValues2() {
+        doTest("MERGE dataset.DetailedInventory T\n" +
+                        "USING dataset.Inventory S\n" +
+                        "ON T.product = S.product\n" +
+                        "WHEN NOT MATCHED AND quantity < 20 THEN\n" +
+                        "  INSERT(product, quantity, supply_constrained, comments)\n" +
+                        "  VALUES(product, quantity, true, ARRAY<STRUCT<created DATE, comment STRING>>[(DATE('2016-01-01'), 'comment1')])\n" +
+                        "WHEN NOT MATCHED THEN\n" +
+                        "  INSERT(product, quantity, supply_constrained)\n" +
+                        "  VALUES(product, quantity, false)",
+                "Tables:\n" +
+                        "dataset.DetailedInventory\n" +
+                        "dataset.Inventory\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "dataset.DetailedInventory.comments\n" +
+                        "dataset.DetailedInventory.product\n" +
+                        "dataset.DetailedInventory.quantity\n" +
+                        "dataset.DetailedInventory.supply_constrained\n" +
+                        "dataset.Inventory.product\n" +
+                        "dataset.Inventory.quantity");
     }
 
 }

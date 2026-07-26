@@ -85,7 +85,7 @@ public class testRemoveSpecialConditions extends TestCase{
         rmvColumnListWithout$.add("$To_Date$");
         rmvColumnListWithout$.add("$OUMI_Departments$");
 
-        EDbVendor vendor = TGSqlParser.getDBVendorByName("gudusoft/gsqlparser");
+        EDbVendor vendor = TGSqlParser.getDBVendorByName("oracle");
 
         RemoveCondition rc = new RemoveCondition(sql,vendor,rmvColumnListWithout$);
 

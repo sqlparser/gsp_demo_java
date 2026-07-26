@@ -1,7 +1,8 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
+import gudusoft.gsqlparser.TBaseType;
 import junit.framework.TestCase;
 
 public class testHive extends TestCase {
@@ -14,11 +15,40 @@ public class testHive extends TestCase {
         getTableColumn.showTreeStructure = false;
         getTableColumn.showDatatype = true;
         getTableColumn.runText(inputQuery);
-        //System.out.println(getTableColumn.outList.toString().trim());
-        assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+//        System.out.println(inputQuery);
+//        System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(desireResult);
+        assertTrue(TBaseType.compareStringsLineByLine(
+                getTableColumn.outList.toString().trim(),
+                desireResult));
+        //assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
+    }
+    public  void test2() {
+        doTest("select first_name, employee_id, explode_table.col1 from trimmed_employee t\n" +
+                        "lateral view explode(array(1,2,3))explode_table as col1",
+                "Tables:\n" +
+                        "explode_table\n" +
+                        "trimmed_employee\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "(lateral_view:explode_table).col1\n" +
+                        "trimmed_employee.employee_id\n" +
+                        "trimmed_employee.first_name");
     }
 
-    public static void testColumnInSelectListInCTAS() {
+    public  void test1() {
+        doTest("select sum(B) as A, \n" +
+                        "case when xxx then A else 0 end as b from C;",
+                "Tables:\n" +
+                        "C\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "C.A\n" +
+                        "C.B\n" +
+                        "C.xxx");
+    }
+
+    public  void testColumnInSelectListInCTAS() {
         doTest("create table a(a int, b int);\n" +
                         "create table a as select b from c",
                 "Tables:\n" +
@@ -32,7 +62,7 @@ public class testHive extends TestCase {
                         "c.b");
     }
 
-    public static void testDate() {
+    public  void testDate() {
         doTest("create table table1(date date, col1 varchar(2));\n" +
                         "\n" +
                         "insert into table2\n" +
@@ -49,7 +79,7 @@ public class testHive extends TestCase {
     }
 
 
-    public static void testCreateFunction() {
+    public  void testCreateFunction() {
         doTest("SELECT\n" +
                         "    ssa.h_sammelanlage_hk,\n" +
                         "    ssa.id_sammelanlage,\n" +

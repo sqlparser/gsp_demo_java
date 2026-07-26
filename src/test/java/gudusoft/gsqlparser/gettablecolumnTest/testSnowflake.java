@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -13,8 +13,11 @@ public class testSnowflake extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.showDatatype = true;
+        getTableColumn.linkOrphanColumnToFirstTable = false;
         getTableColumn.runText(inputQuery);
-        // System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(inputQuery);
+//        System.out.println("\nActual:\n"+getTableColumn.outList.toString().trim());
+//        System.out.println("\nDesired:\n"+desireResult);
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
@@ -102,5 +105,28 @@ public class testSnowflake extends TestCase {
                         "Fields:\n" +
                         "SUNNY.HR.TEST.\"NAME\"\n" +
                         "SUNNY.HR.TEST.ID");
+    }
+
+    public  void testUnqualifiedColumnFoundInSubQuery() {
+        doTest("create table v1 as\n" +
+                        "select \n" +
+                        "    concat(title, first_name) as col1 \n" +
+                        "from (\n" +
+                        "    select * \n" +
+                        "    from QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.patrons p \n" +
+                        "    join QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP2 b on p.first_name = b.title\n" +
+                        ") a \n" +
+                        "join QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP3 using (BOOK_ID);",
+                "Tables:\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP2\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP3\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.patrons\n" +
+                        "v1\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP2.title\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.BOOKS_TMP3.BOOK_ID\n" +
+                        "QLI_AUTOMATION_DO_NOT_TOUCH.LIBRARY.patrons.first_name\n" +
+                        "v1.col1");
     }
 }

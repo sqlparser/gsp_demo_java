@@ -115,6 +115,25 @@
             <systemPath>${project.basedir}/lib/sqlflow-library.jar</systemPath>            
         </dependency>        
 
+        <!-- Carried over from the library-side build when the two demo trees
+             were merged: sources under demos/generateLineage need SnakeYAML,
+             and the JAXB API left the JDK after Java 8. -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -141,29 +160,36 @@
                              all, so these cannot compile against it, and they
                              would need JDBC drivers and a live server to run.
                              Everything else in their packages still builds. -->
-                        <exclude>demos/gettablecolumns/runGetTableColumn.java</exclude>
-                        <exclude>demos/columninspect/ColumnInspect.java</exclude>
-                        <exclude>demos/dlineage/DataFlowAnalyzer.java</exclude>
+                        <exclude>gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java</exclude>
+
+                        <!-- Declares package demos.gettablecolumns and redefines
+                             myMetaDB / TInfoRecord / SortIgnoreCase, which the
+                             retained demos/gettablecolumns/TGetTableColumn.java
+                             already provides. Its name records that it is dead. -->
+                        <exclude>gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java</exclude>
+                        <exclude>gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java</exclude>
+                        <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
                     </excludes>
                     <testExcludes>
-                        <!-- The same live-database metadata API, from the test
-                             side: these five reach for TSQLEnv / TSQLDataSource
-                             and their JDBC subclasses. Excluded so that a plain
-                             `mvn package` works against the public parser. -->
+                        <!-- The only test that cannot compile against the public
+                             parser: it asserts on TSQLEnv.columnCollationCaseSensitive,
+                             tableCollationCaseSensitive and defaultCollationCaseSensitive,
+                             three fields the published artifact does not expose.
+                             Verified by compiling all 224 test sources in a single
+                             javac pass: these are the only three errors. -->
                         <testExclude>gudusoft/gsqlparser/commonTest/testDBVendor.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testColumnResolver.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testNewTableColumn.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testSQLEnv.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/sqlenvTest/testJSONEnv.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/commonTest/ColumnImpactTest.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/dlineageTest/testColumnLevelLineageFile.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testDbObject.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/commonTest/metaDB.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/getObject.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/commonTest/testJoins.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/commonTest/testMetaDB.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/demosTest/removeCondition/testRemoveCondition.java</testExclude>
-                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testTC1.java</testExclude>
+
+                        <!-- Validates generated XML against
+                             ../gsp_java_core/doc/xml/sqlschema_comprehensive.xsd,
+                             a path outside this repository. It only resolves when
+                             the demo tree sits inside the library checkout, so it
+                             cannot pass standalone. It is a library-side test that
+                             arrived with the tree merge. -->
+                        <testExclude>demos/visitors/XmlSchemaValidationTest.java</testExclude>
+                        <!-- TestRunner exists only to run the class above, and
+                             referencing it would drag it back in through javac's
+                             implicit compilation regardless of the exclude. -->
+                        <testExclude>demos/visitors/TestRunner.java</testExclude>
                     </testExcludes>
                 </configuration>
             </plugin>

@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
@@ -187,7 +187,7 @@ public class testSQLEnv extends TestCase {
         TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvoracle);
         getTableColumn.isConsole = false;
         getTableColumn.listStarColumn = true;
-        if (!TBaseType.ENABLE_RESOLVER){
+        if (!TBaseType.isEnableResolver()){
             getTableColumn.setSqlEnv(new TOracleEnv2());
         }
 
@@ -267,7 +267,7 @@ public class testSQLEnv extends TestCase {
                 "ods_time.time_key";
 
         String resultStr="";
-        if (TBaseType.ENABLE_RESOLVER){
+        if (TBaseType.isEnableResolver()){
             resultStr = resultWithNewAlgo;
         }else{
             resultStr = resultWithOldAlgo;
@@ -287,7 +287,7 @@ public class testSQLEnv extends TestCase {
                 "    from some_table o1, other_table o2\n" +
                 ")");
         String strActual = getTableColumn.outList.toString();
-//        System.out.println(strActual);
+       // System.out.println(strActual);
         assertTrue(strActual.trim().equalsIgnoreCase("Tables:\n" +
                 "other_table\n" +
                 "some_table\n" +

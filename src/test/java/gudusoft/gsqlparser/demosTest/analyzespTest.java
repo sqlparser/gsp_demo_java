@@ -28,24 +28,24 @@ public class analyzespTest extends TestCase
 		analyze.setCheckDBObjectRelation( true );
 		analyze.analyzeSQL( );
 
-		String result = "[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Create|Barkod,IrsaliyeNo,GonderenDepo,AlanDepo,OkutmaTarihi,OkutanKullanici\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Insert|\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Update|Barkod\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Insert|\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|tb_TemaMobileCommandTransaction|Table|Read|TranData,TemaMobileTransactionTipTanimRef,IsDeleted\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Read|Barkod\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Read|ToplamaId,ToplamaKoliId,UrunBarkod\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Create|OutputValue\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Insert|OutputValue\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Read|OutputValue\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Drop|\r\n"
-                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Update|KaydiMiktar\r\n"
+		String result = "[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Create|Barkod,IrsaliyeNo,GonderenDepo,AlanDepo,OkutmaTarihi,OkutanKullanici\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Insert|\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Update|Barkod\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Insert|\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|tb_TemaMobileCommandTransaction|Table|Read|TranData,TemaMobileTransactionTipTanimRef,IsDeleted\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpKoliKabulCheck|Table|Read|Barkod\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Read|ToplamaId,ToplamaKoliId,UrunBarkod\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Create|OutputValue\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Insert|OutputValue\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Read|OutputValue\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpTable|Table|Drop|\n"
+                +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Update|KaydiMiktar\n"
                 +"[Retail]|[dbo].[usp_CreateUrunIcerikForKoliKabul]|SP|#tmpCurs|Table|Read|*";
 //		System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
 //		System.out.println("---------");
 //		System.out.println( result);
 
-		assertTrue( analyze.getDBObjectRelationsAnalysisResult( )
+		assertTrue( analyze.getDBObjectRelationsAnalysisResult( ).replace("\r\n", "\n")
 				.trim( )
 				.equalsIgnoreCase( result ) );
 	}
@@ -59,12 +59,12 @@ public class analyzespTest extends TestCase
 		analyze.setCheckDBObjectRelation( true );
 		analyze.analyzeSQL( );
 		//System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
-		String result = "[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Insert|AltDepoIsEmriRef,AnaDepo,FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
-                +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
-                +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\r\n"
+		String result = "[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Insert|AltDepoIsEmriRef,AnaDepo,FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\n"
+                +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\n"
+                +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Update|FromAltDepo,ToAltDepo,UrunID,Miktar,KalanMiktar,Tarih,AcilisNedenRef,IptalNedenRef,Durum\n"
                 +"[Retail]|[Sync].[Write_tb_AltDepoIsEmri]|SP|tb_AltDepoIsEmri|Table|Delete|";
 		//System.out.println(result);
-		assertTrue( analyze.getDBObjectRelationsAnalysisResult( )
+		assertTrue( analyze.getDBObjectRelationsAnalysisResult( ).replace("\r\n", "\n")
 				.trim( )
 				.equalsIgnoreCase( result ) );
 	}
@@ -93,22 +93,20 @@ public class analyzespTest extends TestCase
 		analyze.setCheckDBObjectRelation( true );
 		analyze.analyzeSQL( );
 
-		String result = "[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliBaslik|Table|Read|TemaTakipNo,SevkID,Depo,ToplamaID,KoliID\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Drop|\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliBaslik|Table|Read|Depo,SevkID,TemaTakipNo\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_DepoSevkBaslik|Table|Read|FromDepo,SevkID,ToDepo\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliDetay|Table|Read|TemaTakipNo,UrunID,Miktar\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_UrunRecete|Table|Read|UrunID1,UrunID2,Miktar\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Insert|\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Update|UrunID2,ReceteMiktar\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Read|UrunID2,AsortiMiktar,ReceteMiktar,TemaTakipNo\r\n"
-                +"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_Urun|Table|Read|UrunID,Barkod";
+		String result = "[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliBaslik|Table|Read|TemaTakipNo,SevkID,Depo,ToplamaID,KoliID\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Drop|\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliBaslik|Table|Read|Depo,SevkID,TemaTakipNo\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_DepoSevkBaslik|Table|Read|FromDepo,SevkID,ToDepo\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_KargoKoliDetay|Table|Read|TemaTakipNo,UrunID,Miktar\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|tb_UrunRecete|Table|Read|UrunID1,UrunID2,Miktar\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Insert|\n" +
+				"[Retail]|[dbo].[usp_GetKoliInfoByBarkod]|SP|#tmpIrsaliye|Table|Update|UrunID2,ReceteMiktar";
 
 //		System.out.println( analyze.getDBObjectRelationsAnalysisResult( ) );
 //		System.out.println("---------");
 //		System.out.println( result);
 
-		assertTrue( analyze.getDBObjectRelationsAnalysisResult( )
+		assertTrue( analyze.getDBObjectRelationsAnalysisResult( ).replace("\r\n", "\n")
 				.trim( )
 				.equalsIgnoreCase( result ) );
 	}

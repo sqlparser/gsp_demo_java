@@ -41,7 +41,7 @@ public class testRemoveCondition extends TestCase
 		conditionMap.put( "end_date", "2000-10-10" );
 	}
 
-	public static void testRemoveSpecialConditions( )
+	public  void testRemoveSpecialConditions( )
 	{
 		String sql = "SELECT SUM (d.amt)\r\n"
 				+ "FROM summit.cntrb_detail d\r\n"

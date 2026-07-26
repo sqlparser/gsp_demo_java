@@ -52,10 +52,10 @@ public class testPivotClause  extends TestCase {
 class nodeVisitor extends TParseTreeVisitor {
 
     public void preVisit(TPivotClause node) {
-        System.out.print(
-                 "name:" + node.getPivotTable().getTableName().toString()
-                + ", \tsource table:" + node.getPivotTable().getSourceTableOfPivot().getTableName().toString()
-        );
+//        System.out.print(
+//                 "name:" + node.getPivotTable().getTableName().toString()
+//                + ", \tsource table:" + node.getPivotTable().getSourceTableOfPivot().getTableName().toString()
+//        );
 
         if (node.getType() == TPivotClause.pivot){
             //System.out.println("\n\nColumns in pivot table:");
@@ -64,13 +64,13 @@ class nodeVisitor extends TParseTreeVisitor {
         }
 
         for(TObjectName objectName:node.getPivotTable().getLinkedColumns()){
-            System.out.println(objectName.toString());
+           // System.out.println(objectName.toString());
             if (objectName.getSourceColumn() != null){
               //  System.out.println("\tSource column:"+objectName.getSourceColumn().toString());
             }
         }
 
-        System.out.println("\nColumns in pivot source table:");
+        // System.out.println("\nColumns in pivot source table:");
         for(TObjectName objectName:node.getPivotTable().getSourceTableOfPivot().getLinkedColumns()){
             //System.out.println(objectName.toString());
         }
@@ -80,7 +80,7 @@ class nodeVisitor extends TParseTreeVisitor {
                 //System.out.println("pivot alias:\t"+node.getAliasClause().getAliasName().toString());
             }
             if (node.getAliasClause().getColumns() != null){
-                System.out.println("\tcolumns:\t");
+               // System.out.println("\tcolumns:\t");
                 for(TObjectName objectName:node.getAliasClause().getColumns()){
                   //  System.out.println("\t\t"+objectName.toString());
                 }

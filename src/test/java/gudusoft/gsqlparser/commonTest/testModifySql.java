@@ -102,7 +102,7 @@ public class testModifySql extends TestCase {
          if (t.toString().compareToIgnoreCase("table2") == 0){
              for(int j=0;j<t.getObjectNameReferences().size();j++){
                 if(t.getObjectNameReferences().getObjectName(j).getObjectToken().toString().equalsIgnoreCase("table2")){
-                    t.getObjectNameReferences().getObjectName(j).getObjectToken().astext = "table3";
+                    t.getObjectNameReferences().getObjectName(j).getObjectToken().setAstext("table3");
                 }
              }
            t.setString("(tableX join tableY using (id)) as table3");

@@ -1,6 +1,7 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.EResolverType;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -8,6 +9,7 @@ public class testSparkSQL extends TestCase {
 
     static void doTest(String inputQuery, String desireResult){
         TGetTableColumn getTableColumn = new TGetTableColumn(EDbVendor.dbvsparksql);
+        getTableColumn.setResolverType(EResolverType.RESOLVER2);
         getTableColumn.isConsole = false;
         getTableColumn.showTableEffect = false;
         getTableColumn.showColumnLocation = false;
@@ -18,7 +20,50 @@ public class testSparkSQL extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testColumnArray() {
+    public void test2(){
+        // Note: t.input refers to column "input" with prefix "t", but "t" is not a valid alias (table alias is t1)
+        // TSQLResolver2 correctly resolves this as B.input
+        doTest("create table db.table as  select explode(str_to_map(regexp_replace(regexp_replace(regexp_replace(lower(t.input), '', ''), '',''), '', ''), '', '')) as (`key`, `value`) from B t1"
+                ,"Tables:\n" +
+                        "B\n" +
+                        "db.table\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "B.input\n" +
+                        "db.table.`key`\n" +
+                        "db.table.`value`");
+
+    }
+    public void test1(){
+        doTest("create table db.table as select t.a1, t.a2,  \n" +
+                        "stack(2, 'T', t.a1, t.a2, t.a3/t.a4, t.a5/t.a6,   'T+0', t.a7, t.a8, t.a9/t.a10, t.a11/t.a12) as (b1, b2, b3, b4, b5) \n" +
+                        "from db1.table1 t",
+                "Tables:\n" +
+                        "db.table\n" +
+                        "db1.table1\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "db.table.a1\n" +
+                        "db.table.a2\n" +
+                        "db.table.b1\n" +
+                        "db.table.b2\n" +
+                        "db.table.b3\n" +
+                        "db.table.b4\n" +
+                        "db.table.b5\n" +
+                        "db1.table1.a1\n" +
+                        "db1.table1.a10\n" +
+                        "db1.table1.a11\n" +
+                        "db1.table1.a12\n" +
+                        "db1.table1.a2\n" +
+                        "db1.table1.a3\n" +
+                        "db1.table1.a4\n" +
+                        "db1.table1.a5\n" +
+                        "db1.table1.a6\n" +
+                        "db1.table1.a7\n" +
+                        "db1.table1.a8\n" +
+                        "db1.table1.a9");
+    }
+    public  void testColumnArray() {
         doTest("select distinct process_date, \n" +
                         "cast(str2['ptype'] as int) as ptype, \n" +
                         "cast(str2['pkr'] as int) as pkr, \n" +

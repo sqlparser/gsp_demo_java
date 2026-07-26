@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -18,7 +18,7 @@ public class testDB2 extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testCreateFunction() {
+    public  void testCreateFunction() {
         doTest("CREATE FUNCTION \"F_GetRFECustomerName\" ( p_date DATE,p_officecode CHAR(7),p_cifcode CHAR(8) )\n" +
                         "  RETURNS VARCHAR(1024)\n" +
                         "\n" +

@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -18,7 +18,7 @@ public class testPresto extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testUnnest1() {
+    public  void testUnnest1() {
         doTest("SELECT student, score\n" +
                         "FROM tests\n" +
                         "CROSS JOIN UNNEST(scores) AS t (score);",
@@ -32,7 +32,7 @@ public class testPresto extends TestCase {
                         "tests.student");
     }
 
-    public static void testUnnest2() {
+    public  void testUnnest2() {
         doTest("SELECT numbers, animals, n, a\n" +
                         "FROM (\n" +
                         "  VALUES\n" +
@@ -48,7 +48,7 @@ public class testPresto extends TestCase {
                         "(unnest-table:t).n");
     }
 
-    public static void testUnnest3() {
+    public  void testUnnest3() {
         doTest("SELECT numbers, n, a\n" +
                         "FROM (\n" +
                         "  VALUES\n" +
@@ -64,7 +64,7 @@ public class testPresto extends TestCase {
                         "(unnest-table:t).n");
     }
 
-    public static void testUnnest4() {
+    public  void testUnnest4() {
         doTest("SELECT\n" +
                         "    animals, a, n\n" +
                         "FROM (\n" +

@@ -1,12 +1,16 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
 import gudusoft.gsqlparser.commonTest.gspCommon;
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
 import junit.framework.TestCase;
 
+
+/**
+ * all testcases in this file are migrated to yaml file used by TSQLResolver2
+ */
 
 public class testSQLServer extends TestCase {
 
@@ -31,13 +35,134 @@ public class testSQLServer extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.runText(inputQuery);
-        //System.out.println(inputQuery);
-       // System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println(inputQuery);
+//        System.out.println("Desired result:\n\n"+desireResult);
+//        System.out.println("Actual result:\n\n"+getTableColumn.outList.toString().trim());
+
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
-       // System.out.println(desireResult);
     }
 
-    public static void testSearchTopLevel() {
+    public  void test2() {
+        doTest("CREATE TRIGGER [Production].[uWorkOrder] ON [Production].[WorkOrder]\n" +
+                        "    AFTER UPDATE AS\n" +
+                        "BEGIN\n" +
+                        "    DECLARE @Count int;\n" +
+                        "\n" +
+                        "    SET @Count = @@ROWCOUNT;\n" +
+                        "    IF @Count = 0\n" +
+                        "        RETURN;\n" +
+                        "\n" +
+                        "    SET NOCOUNT ON;\n" +
+                        "\n" +
+                        "    BEGIN TRY\n" +
+                        "        IF UPDATE([ProductID]) OR UPDATE([OrderQty])\n" +
+                        "            BEGIN\n" +
+                        "                INSERT INTO [Production].[TransactionHistory](\n" +
+                        "                                                              [ProductID]\n" +
+                        "                                                             ,[ReferenceOrderID]\n" +
+                        "                                                             ,[TransactionType]\n" +
+                        "                                                             ,[TransactionDate]\n" +
+                        "                                                             ,[Quantity])\n" +
+                        "                SELECT\n" +
+                        "                    inserted.[ProductID]\n" +
+                        "                     ,inserted.[WorkOrderID]\n" +
+                        "                     ,'W'\n" +
+                        "                     ,GETDATE()\n" +
+                        "                     ,inserted.[OrderQty]\n" +
+                        "                FROM inserted;\n" +
+                        "            END;\n" +
+                        "    END TRY\n" +
+                        "    BEGIN CATCH\n" +
+                        "        EXECUTE [dbo].[uspPrintError];\n" +
+                        "\n" +
+                        "        -- Rollback any active or uncommittable transactions before\n" +
+                        "        -- inserting information in the ErrorLog\n" +
+                        "        IF @@TRANCOUNT > 0\n" +
+                        "            BEGIN\n" +
+                        "                ROLLBACK TRANSACTION;\n" +
+                        "            END\n" +
+                        "\n" +
+                        "        EXECUTE [dbo].[uspLogError];\n" +
+                        "    END CATCH;\n" +
+                        "END",
+                "Tables:\n" +
+                        "[Production].[TransactionHistory]\n" +
+                        "[Production].[WorkOrder]\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "[Production].[TransactionHistory].[ProductID]\n" +
+                        "[Production].[TransactionHistory].[Quantity]\n" +
+                        "[Production].[TransactionHistory].[ReferenceOrderID]\n" +
+                        "[Production].[TransactionHistory].[TransactionDate]\n" +
+                        "[Production].[TransactionHistory].[TransactionType]\n" +
+                        "[Production].[WorkOrder].[OrderQty]\n" +
+                        "[Production].[WorkOrder].[ProductID]\n" +
+                        "[Production].[WorkOrder].[WorkOrderID]");
+    }
+
+    public  void test1() {
+        doTest("CREATE TRIGGER [Production].[uWorkOrder] ON [Production].[WorkOrder]\n" +
+                        "    AFTER UPDATE AS\n" +
+                        "BEGIN\n" +
+                        "    DECLARE @Count int;\n" +
+                        "\n" +
+                        "    SET @Count = @@ROWCOUNT;\n" +
+                        "    IF @Count = 0\n" +
+                        "        RETURN;\n" +
+                        "\n" +
+                        "    SET NOCOUNT ON;\n" +
+                        "\n" +
+                        "    BEGIN TRY\n" +
+                        "        IF UPDATE([ProductID2]) OR UPDATE([OrderQty2])\n" +
+                        "            BEGIN\n" +
+                        "                INSERT INTO [Production].[TransactionHistory](\n" +
+                        "                                                              [ProductID]\n" +
+                        "                                                             ,[ReferenceOrderID]\n" +
+                        "                                                             ,[TransactionType]\n" +
+                        "                                                             ,[TransactionDate]\n" +
+                        "                                                             ,[Quantity])\n" +
+                        "                SELECT\n" +
+                        "                    inserted.[ProductID]\n" +
+                        "                     ,inserted.[WorkOrderID]\n" +
+                        "                     ,'W'\n" +
+                        "                     ,GETDATE()\n" +
+                        "                     ,inserted.[OrderQty]\n" +
+                        "                FROM inserted;\n" +
+                        "            END;\n" +
+                        "    END TRY\n" +
+                        "    BEGIN CATCH\n" +
+                        "        EXECUTE [dbo].[uspPrintError];\n" +
+                        "\n" +
+                        "        -- Rollback any active or uncommittable transactions before\n" +
+                        "        -- inserting information in the ErrorLog\n" +
+                        "        IF @@TRANCOUNT > 0\n" +
+                        "            BEGIN\n" +
+                        "                ROLLBACK TRANSACTION;\n" +
+                        "            END\n" +
+                        "\n" +
+                        "        EXECUTE [dbo].[uspLogError];\n" +
+                        "    END CATCH;\n" +
+                        "END",
+                "Tables:\n" +
+                        "[Production].[TransactionHistory]\n" +
+                        "[Production].[WorkOrder]\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "[Production].[TransactionHistory].[ProductID]\n" +
+                        "[Production].[TransactionHistory].[Quantity]\n" +
+                        "[Production].[TransactionHistory].[ReferenceOrderID]\n" +
+                        "[Production].[TransactionHistory].[TransactionDate]\n" +
+                        "[Production].[TransactionHistory].[TransactionType]\n" +
+                        "[Production].[WorkOrder].[OrderQty2]\n" +
+                        "[Production].[WorkOrder].[OrderQty]\n" +
+                        "[Production].[WorkOrder].[ProductID2]\n" +
+                        "[Production].[WorkOrder].[ProductID]\n" +
+                        "[Production].[WorkOrder].[WorkOrderID]");
+    }
+
+
+
+    public  void testSearchTopLevel() {
         doTest("select\n" +
                         "    case\n" +
                         "        c.[SIZE] when 3 then (\n" +
@@ -67,7 +192,7 @@ public class testSQLServer extends TestCase {
                         "TestCatalog.TestSchema.TestTableEmployee.ename");
     }
 
-    public static void testColumnInSubquery() {
+    public  void testColumnInSubquery() {
 
         doTest("SELECT\n" +
                         "     [FacilityAccountID] = CAST(enc.FacilityAccountID AS VARCHAR(255))\n" +
@@ -242,7 +367,7 @@ public class testSQLServer extends TestCase {
     }
 
 
-    public static void testTableFunction() {
+    public  void testTableFunction() {
         doTest("CREATE VIEW [dbo].[ERRORS]\n" +
                         "AS\n" +
                         "WITH DESC_CTE\n" +
@@ -272,6 +397,8 @@ public class testSQLServer extends TestCase {
                         "ON CR.reasons_ID =CE.errorcode\n" +
                         "WHERE 1 = 1\n" +
                         "      AND CE.IsDeleted = 0;",
+                // Note: reasons_ID is NOT in the CTE's SELECT list (only rid, POS, c_desc)
+                // so CR.reasons_ID in the ON clause cannot be traced to dbo.reasons
                 "Tables:\n" +
                         "[dbo].[reasons]\n" +
                         "dbo.d_errors\n" +
@@ -280,7 +407,6 @@ public class testSQLServer extends TestCase {
                         "(table-valued function:STRING_SPLIT).value\n" +
                         "[dbo].[reasons].[IsDeleted]\n" +
                         "[dbo].[reasons].c_desc\n" +
-                        "[dbo].[reasons].reasons_ID\n" +
                         "[dbo].[reasons].reasons_ID1\n" +
                         "[dbo].[reasons].reasons_ID2\n" +
                         "[dbo].[reasons].rid\n" +
@@ -300,8 +426,81 @@ public class testSQLServer extends TestCase {
                         "T.C");
     }
 
-    public static void testFile1() {
-        doTestFile(gspCommon.BASE_SQL_DIR_PRIVATE_JAVA + "mssql/column_resolver/pivot.sql",
+    public static void testPivot() {
+        doTest("USE [InformerStg]\n" +
+                        "GO\n" +
+                        "\n" +
+                        "CREATE VIEW [ETL].[ODS_ADDRESS]\n" +
+                        "AS\n" +
+                        "\n" +
+                        "/*----------------------------------------------------------------------------------------------------\n" +
+                        "\tAuthor:\tAndrew Higgins\n" +
+                        "\tDescription:\t\n" +
+                        "\t\tReporting view that mimics the structure of an ODS_production table using Informer data\n" +
+                        "\tModification Log:\n" +
+                        "\t\tDate:\t\tMade by:\t\tDescription:\n" +
+                        "\t\t07/20/2015\tAndrew Higgins\tInitial Procedure Creation\t\t\n" +
+                        "\t\t07/22/2015\tAndrew Higgins\tData Type Adjustment\n" +
+                        "\t\t07/28/2015\tAndrew Higgins\tRemoved the ZIP_FIVE field per Linda Dykens - not in source\n" +
+                        "\t\t2017-03-10\tAndrew Higgins\tAdded STATE_DESC, multivalue PIVOT\n" +
+                        "\t\t2017-03-28\tAndrew Higgins\tAdded NULLIF\n" +
+                        "\t\t2018-05-15\tKevin Barrett\tAdded TRY_CONVERTs only to ADDRESS_LINE_1, ADDRESS_LINE_2 and ADDRESS_LINE_3\n" +
+                        "\t\t2019-11-05\tAndrew Higgins\tAdded RESIDENT fields\n" +
+                        "\t\t2019-01-08  Ron Cavuto\t\tTicket 21946 - add separate address line cols. Splitting by comma causes errors and Entrinsik contains fields for address lines 1 and 2\n" +
+                        "\t\t2020-01-30  Ranjit Chennam  LTRIM on ZIP\n" +
+                        "\t\t2020-04-01  Ranjit Chennam  CTE and PIVOT on ADDRESSLINES to populate to Correct ADDRESS_LINE1,ADDRESSLINE2,ADDRESS_LINE3\n" +
+                        "----------------------------------------------------------------------------------------------------*/\n" +
+                        "WITH STATELIST AS\n" +
+                        "    (\n" +
+                        "        SELECT\n" +
+                        "            STATES.STATES_ID\n" +
+                        "           ,STATES.STATES_DESC\n" +
+                        "        FROM Imported.STATES\n" +
+                        "        WHERE STATES.IsDeleted = 0\n" +
+                        "    )\n" +
+                        "\n" +
+                        ", [ADDRESS_LINES_CTE]\n" +
+                        "    AS (\n" +
+                        "           SELECT\n" +
+                        "                ADDRESS_ID\n" +
+                        "               ,[ss].[value]         \n" +
+                        "\t\t\t   ,ID = ROW_NUMBER() OVER (PARTITION BY  ADDRESS_ID ORDER BY  ADDRESS_ID)\n" +
+                        "\t\t\t   FROM\n" +
+                        "                Imported.ADDRESS\n" +
+                        "               CROSS APPLY  STRING_SPLIT(REPLACE(ADDRESS_LINES, '|~|',CHAR(7)),CHAR(7)) ss\n" +
+                        "\t\t\t\t)\n" +
+                        "\t\t\t\t\n" +
+                        "\n" +
+                        "SELECT\n" +
+                        "\t A.ADDRESS_ID\n" +
+                        "\t--,a.ADDRESS_LINES\n" +
+                        "\t,ADDRESS_LINE_1 = CAST(NULLIF(AL.ADDRESS_LINE1,'') AS VARCHAR(40))\t\t\t--LEFT(a.address_line1,40)\n" +
+                        "\t,ADDRESS_LINE_2 = CAST(NULLIF(LTRIM(AL.ADDRESS_LINE2),'') AS VARCHAR(40))--LEFT(a.address_line2,40)\n" +
+                        "\t,ADDRESS_LINE_3 = CAST(NULLIF(LTRIM(AL.ADDRESS_LINE3),'') AS VARCHAR(40))--LEFT(CASE WHEN a.address_line2 IS NOT NULL THEN LTRIM(REPLACE(RIGHT(a.ADDRESS_LINES,LEN(a.ADDRESS_LINES) - (CHARINDEX(a.address_line2,a.ADDRESS_LINES) + LEN(a.address_line2) - 1)),',','')) ELSE\tNULL END,40)\n" +
+                        "\t,A.CITY\n" +
+                        "\t,A.COUNTRY\n" +
+                        "\t,A.STATE\n" +
+                        "\t,STATE_DESC     = s.STATES_DESC\n" +
+                        "\t,LTRIM(A.ZIP) AS ZIP\n" +
+                        "\t,A.ADDRESS_ADD_DATE\n" +
+                        "\t,A.ADDRESS_CHANGE_DATE\n" +
+                        "\t,N19_ADR_RESIDENT1 = TRY_CAST(CASE WHEN CHARINDEX('|~|',A.RESIDENTS)>0 THEN SUBSTRING(A.RESIDENTS,0,CHARINDEX('|~|',A.RESIDENTS,1)) ELSE A.RESIDENTS END AS VARCHAR(10))\n" +
+                        "\t,N19_ADR_RESIDENT2 = TRY_CAST(CASE WHEN CHARINDEX('|~|',A.RESIDENTS)>0 THEN LTRIM(SUBSTRING(A.RESIDENTS,CHARINDEX('|~|',A.RESIDENTS,1)+3,CHARINDEX('|~|',A.RESIDENTS,CHARINDEX('|~|',A.RESIDENTS,2))-1)) ELSE NULL END AS VARCHAR(10))\n" +
+                        "\n" +
+                        "FROM Imported.ADDRESS A\n" +
+                        "     LEFT OUTER JOIN\n" +
+                        "     STATELIST s ON\n" +
+                        "         A.STATE = s.STATES_ID\n" +
+                        "\t\t LEFT JOIN (SELECT [p].[ADDRESS_ID]\n" +
+                        "                      ,[p].[3] AS ADDRESS_LINE3\n" +
+                        "                      ,[p].[2] AS ADDRESS_LINE2\n" +
+                        "                      ,[p].[1] AS ADDRESS_LINE1 FROM [ADDRESS_LINES_CTE]\n" +
+                        "\t\t\t\tPIVOT(MAX(value) FOR id IN ([1],[2],[3])) p\t) AL\n" +
+                        "\t\t\t\tON\tA.[ADDRESS_ID]= AL.[ADDRESS_ID]\n" +
+                        "\n" +
+                        "WHERE A.IsDeleted = 0\n" +
+                        "\t\t\t\t\n" +
+                        "\t\t\t\t\n",
                 "Tables:\n" +
                         "Imported.ADDRESS\n" +
                         "Imported.STATES\n" +

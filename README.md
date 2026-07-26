@@ -36,15 +36,15 @@ cat > q.sql <<'SQL'
 SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;
 SQL
 
-mvn -q exec:java -Dexec.mainClass=demos.checksyntax.checksyntax \
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
     -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime
 ```
 
 ```text
-Time Escaped: 1007,file processed: 1,syntax errors:0
+Time Escaped: 1546, file processed: 1, syntax errors: 0
 ```
 
-(The elapsed figure varies per run; `syntax errors:0` is the part that matters.)
+(The elapsed figure varies per run; `syntax errors: 0` is the part that matters.)
 
 Reformat it:
 
@@ -65,6 +65,18 @@ WHERE  a.x > 1;
 Argument conventions differ between demos: `checksyntax` takes `/f <file>` and
 `/t <vendor>`, while `formatsql` takes a bare filename. Run any demo with no
 arguments and it prints its own usage line.
+
+> **Package names are not uniform yet.** A move of the demos from `demos.*` to
+> `gudusoft.gsqlparser.demos.*` is partly done: 176 files sit under
+> `src/main/java/gudusoft/` while still declaring `package demos.*`, so the class
+> you pass to `-Dexec.mainClass` follows the **package declaration**, not the
+> directory. `checksyntax` is `gudusoft.gsqlparser.demos.checksyntax.checksyntax`;
+> `formatsql` is `demos.formatsql.formatsql`. When in doubt, read the first line
+> of the source:
+>
+> ```bash
+> head -1 src/main/java/gudusoft/gsqlparser/demos/<demo>/<Demo>.java
+> ```
 
 ## Where the parser comes from
 
@@ -106,7 +118,7 @@ for licensing.
 
 ## The demos
 
-43 runnable programs under `src/main/java/demos/`. Common starting points:
+Runnable programs under `src/main/java/gudusoft/gsqlparser/demos/`. Common starting points:
 
 | Demo | What it does |
 |------|--------------|
@@ -134,12 +146,12 @@ directories carry their own `readme.md`.
 mvn test
 ```
 
-123 tests run. **Three currently fail**, all in
+153 tests run. **Three currently fail**, all in
 `gudusoft.gsqlparser.demosTest.analyzespTest` (`testSample1`, `testSample6`,
 `testSample8`). They compare stored-procedure relation output against golden
 strings written for an older parser build, and that output has since changed.
 They are left in place rather than deleted or rewritten, because they are a
-real signal about output drift rather than a broken harness. The other 120
+real signal about output drift rather than a broken harness. The other 150
 pass. That is why the getting-started step above uses `-DskipTests`.
 
 ## What is excluded from the build
@@ -150,12 +162,16 @@ the `TSQLDataSource` / `TSQLEnv` family. The public parser artifact ships no
 would need JDBC drivers and a live server to do anything. `pom.xml` excludes
 them from the default build:
 
-- `demos/dbConnect/**`
-- `demos/gettablecolumns/runGetTableColumn.java`
-- `demos/columninspect/ColumnInspect.java`
-- `demos/dlineage/DataFlowAnalyzer.java`
-- the matching JUnit tests under `sqlenvTest`, `gettablecolumnTest` and
-  `commonTest`
+- `demos/dbConnect/**` — 143 files
+- `gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java`
+- `gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java`
+- `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java`
+- `gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java` — a
+  dead copy that redefines classes the retained `TGetTableColumn.java` provides
+- `commonTest/testDBVendor.java` — asserts on three `TSQLEnv` collation fields
+  the published artifact does not expose
+- `demos/visitors/XmlSchemaValidationTest.java` and its `TestRunner` — they read
+  an XSD from `../gsp_java_core/`, outside this repository
 
 Everything else in those packages still builds. Reviving them needs an API
 migration against a build that includes the metadata layer, not just a
@@ -177,11 +193,17 @@ recompile.
 
 # Changes
 
+- **[2026/7/26]** Merged with the library-side demo tree, which had diverged.
+  That tree is authoritative, so its version wins wherever the two differed (61
+  files). Nothing was dropped: the 282 files that existed only here — 143 under
+  `demos/dbConnect`, 130 tests, and a few data files — were kept. Test count
+  went from 123 to 153. Most demos moved to `src/main/java/gudusoft/gsqlparser/demos/`.
 - **[2026/7/26]** The build no longer inherits from the private `gudusoft:gsp_java`
   parent POM, which was why nobody outside Gudu could build this repository.
   It now resolves `com.gudusoft:gsqlparser` from
   <https://www.sqlparser.com/maven/> and builds standalone.
 - **[2024/9/17]** Test packages moved from `src/test/java/` to
   `src/test/java/gudusoft/gsqlparser/`, so unit tests now live under package
-  names like `gudusoft.gsqlparser.xxxTest`. The demos themselves were *not*
-  moved; they remain under `src/main/java/demos/`.
+  names like `gudusoft.gsqlparser.xxxTest`. The demos followed later, in the
+  2026/7/26 merge above, and that move is still only partly reflected in their
+  `package` declarations.

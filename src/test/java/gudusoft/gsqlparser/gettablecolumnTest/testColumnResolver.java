@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import junit.framework.TestCase;
@@ -10,8 +10,12 @@ public class testColumnResolver extends TestCase {
     static void doTest(String inputQuery, String desireResult){
         doTest(EDbVendor.dbvmssql,inputQuery,desireResult);
     }
-    static void doTest(EDbVendor dbVendor,String inputQuery, String desireResult){
-        if (!TBaseType.ENABLE_RESOLVER) return;
+    static void doTest(EDbVendor dbVendor,String inputQuery, String desireResult) {
+        doTest(dbVendor,inputQuery,desireResult,false);
+    }
+
+    static void doTest(EDbVendor dbVendor,String inputQuery, String desireResult, boolean linkOrphanColumnToFirstTable){
+        if (!TBaseType.isEnableResolver()) return;
 
         TGetTableColumn getTableColumn = new TGetTableColumn(dbVendor);
         getTableColumn.isConsole = false;
@@ -19,16 +23,128 @@ public class testColumnResolver extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.listStarColumn = true;
-        boolean b = TBaseType.ENABLE_RESOLVER;
-        TBaseType.ENABLE_RESOLVER = true;
+        getTableColumn.linkOrphanColumnToFirstTable = linkOrphanColumnToFirstTable;
+
+
+        boolean b = TBaseType.isEnableResolver();
+        TBaseType.setEnableResolver(true);
         TBaseType.DUMP_RESOLVER_LOG_TO_CONSOLE = false;
         getTableColumn.runText(inputQuery);
-        //System.out.println(getTableColumn.outList.toString().trim());
+
+//        System.out.println("input sql:\n" + inputQuery);
+//        System.out.println("Result:");
+//        System.out.println(getTableColumn.outList.toString().trim());
+//        System.out.println("\nDesire:");
+//        System.out.println(desireResult);
+
+
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
-        TBaseType.ENABLE_RESOLVER = b;
+        TBaseType.setEnableResolver(b);
     }
 
-    public static void test1() {
+    public  void test29() {
+
+        doTest(EDbVendor.dbvpostgresql,
+                "select x+y as c from (select * from table1 join table3 on table1.x=table3.y) a join table2 using (id);",
+                "Tables:\n" +
+                        "table1\n" +
+                        "table2\n" +
+                        "table3\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "table1.*\n" +
+                        "table1.x\n" +
+                        "table2.id\n" +
+                        "table3.*\n" +
+                        "table3.y");
+    }
+
+    public  void test28() {
+
+        doTest(EDbVendor.dbvpostgresql,
+                "select productid,\t(select productid from products_2 p2 where productid=1001) \"NEW_PRODUCTID\" from products_1 p1",
+                "Tables:\n" +
+                        "products_1\n" +
+                        "products_2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "products_1.productid\n" +
+                        "products_2.productid");
+    }
+
+    public  void test27() {
+
+        doTest(EDbVendor.dbvpostgresql,
+                        "UPDATE Sales.SalesPerson\n" +
+                                "SET SalesYTD = SalesYTD + SubTotal\n" +
+                                "FROM Sales.SalesPerson AS sp\n" +
+                                "\tJOIN Sales.SalesOrderHeader AS so ON\n" +
+                                "\tsp.BusinessEntityID = so.SalesPersonID\n" +
+                                "\tAND so.OrderDate = (SELECT MAX(OrderDate) FROM Sales.SalesOrderHeader WHERE SalesPersonID = sp.BusinessEntityID);",
+                "Tables:\n" +
+                        "Sales.SalesOrderHeader\n" +
+                        "Sales.SalesPerson\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "missed.SubTotal(2,27)\n" +
+                        "Sales.SalesOrderHeader.OrderDate\n" +
+                        "Sales.SalesOrderHeader.SalesPersonID\n" +
+                        "Sales.SalesPerson.BusinessEntityID\n" +
+                        "Sales.SalesPerson.SalesYTD");
+    }
+
+    public  void test26() {
+
+        doTest("SELECT col3,\n" +
+                        "       (SELECT col2\n" +
+                        "        FROM tab1\n" +
+                        "        WHERE col2 = col1)\n" +
+                        "FROM tab2",
+                "Tables:\n" +
+                        "tab1\n" +
+                        "tab2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "tab1.col1\n" +
+                        "tab1.col2\n" +
+                        "tab2.col3");
+    }
+
+    public  void test25() {
+
+        doTest("SELECT \n" +
+                        "    col1,\n" +
+                        "    (SELECT col2 \n" +
+                        "     FROM tab1 \n" +
+                        "     WHERE col2 = tab2.col1)  -- 这里的col1指向外层tab2的col1\n" +
+                        "FROM tab2",
+                "Tables:\n" +
+                        "tab1\n" +
+                        "tab2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "tab1.col2\n" +
+                        "tab2.col1");
+    }
+
+    public  void test24() {
+    // see matchAttribute() in TStmtScope.java
+        doTest("SELECT col1,\n" +
+                        "       (SELECT col2\n" +
+                        "        FROM tab1\n" +
+                        "        WHERE col2 = col1)\n" +
+                        "FROM tab2",
+                "Tables:\n" +
+                        "tab1\n" +
+                        "tab2\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "tab1.col1\n" +
+                        "tab1.col2\n" +
+                        "tab2.col1");
+    }
+
+    public  void test1() {
 
         doTest("SELECT col_1, col_11,col_2\n" +
                         "FROM (\n" +
@@ -52,7 +168,7 @@ public class testColumnResolver extends TestCase {
                         "table_b.id");
     }
 
-    public static void test2() {
+    public  void test2() {
         doTest("SELECT col_1, col_11,col_2\n" +
                         "FROM (\n" +
                         "    select ta.*\n" +
@@ -75,7 +191,7 @@ public class testColumnResolver extends TestCase {
                         "table_b.id");
     }
 
-    public static void test3() {
+    public  void test3() {
         doTest("SELECT col_1, col_11,col_2\n" +
                         "FROM (\n" +
                         "    select tb.*\n" +
@@ -97,10 +213,10 @@ public class testColumnResolver extends TestCase {
                         "table_b.id");
     }
 
-    public static void test4() {
+    public  void test4() {
         // 当 * 可以连接多个 table时采取不同的策略导致不同的结果
         int t = TBaseType.GUESS_COLUMN_STRATEGY;
-        TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_NOT_PICKUP;
+        //TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_NOT_PICKUP;
 
 
         doTest("SELECT col_1, col_11,col_2\n" +
@@ -118,6 +234,7 @@ public class testColumnResolver extends TestCase {
                         "table_c\n" +
                         "\n" +
                         "Fields:\n" +
+                        "missed.a_id(9,12)\n" +
                         "missed.col_1(1,8)\n" +
                         "missed.col_11(1,15)\n" +
                         "missed.col_2(1,22)\n" +
@@ -129,7 +246,7 @@ public class testColumnResolver extends TestCase {
         TBaseType.GUESS_COLUMN_STRATEGY = t;
     }
 
-    public static void test5() {
+    public  void test5() {
         // 当 * 可以连接多个 table时采取不同的策略导致不同的结果
         int t = TBaseType.GUESS_COLUMN_STRATEGY;
         TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_NEAREST;
@@ -161,7 +278,7 @@ public class testColumnResolver extends TestCase {
         TBaseType.GUESS_COLUMN_STRATEGY = t;
     }
 
-    public static void test6() {
+    public  void test6() {
         // 当 * 可以连接多个 table时采取不同的策略导致不同的结果
         int t = TBaseType.GUESS_COLUMN_STRATEGY;
         TBaseType.GUESS_COLUMN_STRATEGY = TBaseType.GUESS_COLUMN_STRATEGY_FARTHEST;
@@ -193,7 +310,7 @@ public class testColumnResolver extends TestCase {
         TBaseType.GUESS_COLUMN_STRATEGY = t;
     }
 
-    public static void test7() {
+    public  void test7() {
 
 
         doTest("SELECT col_c1, col_c11,col_b2,col_a3\n" +
@@ -220,7 +337,7 @@ public class testColumnResolver extends TestCase {
                         "table_c.col_c11");
     }
 
-    public static void test8() {
+    public  void test8() {
         doTest("    SELECT\n" +
                         "      col_1,\n" +
                         "      col_2\n" +
@@ -258,7 +375,7 @@ public class testColumnResolver extends TestCase {
                         "table_4.day");
     }
 
-    public static void test9() {
+    public  void test9() {
 
         doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
                         "    WITH\n" +
@@ -294,7 +411,7 @@ public class testColumnResolver extends TestCase {
                         "table_3.day");
     }
 
-    public static void test10() {
+    public  void test10() {
 
         doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
                         "    WITH\n" +
@@ -329,7 +446,7 @@ public class testColumnResolver extends TestCase {
                         "actor3.actor_id\n" +
                         "actor3.first_name");
     }
-    public static void test11() {
+    public  void test11() {
 
         doTest(EDbVendor.dbvpostgresql,"SELECT * FROM (\n" +
                         "    WITH\n" +
@@ -358,7 +475,7 @@ public class testColumnResolver extends TestCase {
                         "table_2.day");
     }
 
-    public static void test12() {
+    public  void test12() {
 
         doTest(EDbVendor.dbvoracle,"SELECT T.OPERATE_OBJECT_ID,\n" +
                         "        T.OPERATE_START_TIME,\n" +
@@ -396,7 +513,7 @@ public class testColumnResolver extends TestCase {
                         "DWI_TREASURY_LOG_EVENT.OPERATION");
     }
 
-    public static void test13() {
+    public  void test13() {
 
         doTest(EDbVendor.dbvoracle,"select * from \n" +
                         "( \n" +
@@ -425,7 +542,7 @@ public class testColumnResolver extends TestCase {
                         "C.name");
     }
 
-    public static void test14() {
+    public  void test14() {
 
         doTest(EDbVendor.dbvoracle,"SELECT * FROM REGIONS r ,\n" +
                         "(\n" +
@@ -445,7 +562,7 @@ public class testColumnResolver extends TestCase {
                         "REGIONS.*");
     }
 
-    public static void test15() {
+    public  void test15() {
 
         doTest(EDbVendor.dbvoracle,"SELECT D.DEPTNO, D.DEPTNAME,\n" +
                         "EMPINFO.AVGSAL, EMPINFO.EMPCOUNT\n" +
@@ -467,7 +584,7 @@ public class testColumnResolver extends TestCase {
                         "EMP.WORKDEPT");
     }
 
-    public static void test16() {
+    public  void test16() {
 
         doTest(EDbVendor.dbvsybase,"update titles\n" +
                         "set total_sales = total_sales + qty\n" +
@@ -491,10 +608,11 @@ public class testColumnResolver extends TestCase {
                         "salesdetail.title_id\n" +
                         "titles.qty\n" +
                         "titles.title_id\n" +
-                        "titles.total_sales");
+                        "titles.total_sales"
+                ,true);
     }
 
-    public static void test17() {
+    public  void test17() {
 
         doTest(EDbVendor.dbvgreenplum,"WITH RECURSIVE search_graph(id, link, data, depth, path, cycle) AS (\n" +
                         "        SELECT g.id, g.link, g.data, 1,\n" +
@@ -518,7 +636,7 @@ public class testColumnResolver extends TestCase {
                         "graph.link");
     }
 
-    public static void test18() {
+    public  void test18() {
 
         doTest(EDbVendor.dbvdb2,"MERGE INTO archive ar\n" +
                         "using (SELECT activity,\n" +
@@ -543,7 +661,7 @@ public class testColumnResolver extends TestCase {
                         "archive.description");
     }
 
-    public static void test19() {
+    public  void test19() {
 
 
         doTest(EDbVendor.dbvmssql,"SELECT [p].[ADDRESS_ID]\n" +
@@ -561,10 +679,11 @@ public class testColumnResolver extends TestCase {
                         "(pivot-table:p(piviot_table)).[3]\n" +
                         "[ADDRESS_LINES_CTE].[ADDRESS_ID]\n" +
                         "[ADDRESS_LINES_CTE].id\n" +
-                        "[ADDRESS_LINES_CTE].value");
+                        "[ADDRESS_LINES_CTE].value"
+        ,true);
     }
 
-    public static void test20Pivot() {
+    public  void test20Pivot() {
 
         doTest(EDbVendor.dbvmssql,"SELECT [Date] AS 'Day',\n" +
                         "[Sammich], [Pickle], [Apple], [Cake]\n" +
@@ -589,7 +708,7 @@ public class testColumnResolver extends TestCase {
                         "FoodEaten.FoodName");
     }
 
-    public static void test21Pivot() {
+    public  void test21Pivot() {
 
         doTest(EDbVendor.dbvmssql,"SELECT dim_patient_bk\n" +
                         "\t\t,FALNR\n" +
@@ -637,7 +756,7 @@ public class testColumnResolver extends TestCase {
                         "atl.covid_patient_bewegung.stellplatz_typ");
     }
 
-    public static void test22Pivot() {
+    public  void test22Pivot() {
 
         doTest(EDbVendor.dbvbigquery,"INSERT INTO `dev.TEST_BACKLOG.EMPLOYEE_INEO_EXCEPT`\n" +
                         "SELECT emp_id, name as Test_Name, LONDON as Test_Dept_Id\n" +
@@ -659,7 +778,7 @@ public class testColumnResolver extends TestCase {
                         "`dev`.`TEST_BACKLOG`.`EMPLOYEE_INFO`.name");
     }
 
-    public static void test23CTE() {
+    public  void test23CTE() {
 
         doTest(EDbVendor.dbvnetezza,"WITH manager (mgr_id, mgr_name, mgr_dept) AS\n" +
                         "\t(SELECT id, name, grp\n" +

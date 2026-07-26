@@ -1,7 +1,7 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -14,12 +14,43 @@ public class testOracle extends TestCase {
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
         getTableColumn.listStarColumn = true;
+        getTableColumn.linkOrphanColumnToFirstTable = false;
         getTableColumn.runText(inputQuery);
-        //  System.out.println(getTableColumn.outList.toString().trim());
+       // System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testCalculatedColumnWithStarColumn() {
+    public  void test1() {
+        doTest("PROCEDURE TEST_INDEX_PROCEDURE(p_va_load IN VARCHAR2 DEFAULT 'N') IS\n" +
+                        "  BEGIN\n" +
+                        "                          INSERT INTO asset_comment\n" +
+                        "                            (\n" +
+                        "                             comment_type_id,\n" +
+                        "                             language_id,\n" +
+                        "                             visibility_id\n" +
+                        "                             )\n" +
+                        "                          VALUES\n" +
+                        "                            (\n" +
+                        "                             sch.pk_constv2.c_cdsl,\n" +
+                        "                             sch.pk_constv2.c_english,\n" +
+                        "                             sch.pk_constv2.c_private\n" +
+                        "                             );\n" +
+                        "                       \n" +
+                        "        COMMIT;\n" +
+                        "  END TEST_INDEX_PROCEDURE;",
+                "Tables:\n" +
+                        "asset_comment\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "asset_comment.comment_type_id\n" +
+                        "asset_comment.language_id\n" +
+                        "asset_comment.visibility_id\n" +
+                        "missed.c_cdsl(11,45)\n" +
+                        "missed.c_english(12,45)\n" +
+                        "missed.c_private(13,45)");
+    }
+
+    public  void testCalculatedColumnWithStarColumn() {
         doTest("SELECT \n" +
                         "     tx_date_yyyymmdd  AS DATA_DT   --数据日期\n" +
                         "    ,'zfb' as OPEN_CHAN_ORG_CD\n" +
@@ -145,7 +176,7 @@ public class testOracle extends TestCase {
                         "employee.emp_num");
     }
 
-    public static void testColumnInSelectListOfJoin(){
+    public  void testColumnInSelectListOfJoin(){
         doTest("CREATE OR REPLACE FORCE VIEW \"CATALOG_IT\".\"VIEW1\" (\"COL1\", \"COL2\", \"COL3\", \"COL4\") AS\n" +
                         "SELECT al1.\"COL1\",al1.\"COL2\",al1.\"COL3\", al2.COL1 AS \"COL4\"\n" +
                         "FROM (SELECT COL1, COL2, COL3 FROM TABLE1 t1) al1\n" +

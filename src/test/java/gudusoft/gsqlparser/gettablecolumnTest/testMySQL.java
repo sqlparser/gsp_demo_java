@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 
@@ -19,15 +19,15 @@ public class testMySQL extends TestCase {
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
-    public static void testStringLiteral() {
-        doTest("SELECT 1 FROM table1 WHERE table1.field1 = \"Z\" or table.field1 = 'X'",
+    public  void testStringLiteral() {
+        doTest("SELECT 1 FROM table1 WHERE table1.field1 = \"Z\" or table1.field1 = 'X'",
                 "Tables:\n" +
                         "table1\n" +
                         "\nFields:\n" +
                         "table1.field1");
     }
 
-    public static void testAlterTableDropColumn() {
+    public  void testAlterTableDropColumn() {
         doTest("alter table test_1 drop column new_column23;",
                 "Tables:\n" +
                         "test_1\n" +

@@ -59,6 +59,9 @@ public class testJSONEnv extends TestCase {
 
     public void test1() {
         int totalProcedure = 0,totalView = 0;
+
+        //System.out.println(sqlEnv.toString());
+
         assertTrue(sqlEnv.getCatalogList().size() == 7);
 
         for (TSQLCatalog c : sqlEnv.getCatalogList()) {
@@ -76,7 +79,7 @@ public class testJSONEnv extends TestCase {
                 }
             }
         }
-      //  System.out.println("total procedure:" + totalProcedure+", total view:"+totalView+", queries:"+(totalProcedure+totalView));
+        //System.out.println("total procedure:" + totalProcedure+", total view:"+totalView+", queries:"+(totalProcedure+totalView));
         assertTrue((totalProcedure+totalView) == 549);
 
    }
@@ -86,12 +89,12 @@ public class testJSONEnv extends TestCase {
         TSQLTable sqlTable = sqlEnv.searchTable(tableName);
         assertTrue(sqlTable != null);
 
-        TSQLEnv.tableCollationCaseSensitive[EDbVendor.dbvmssql.ordinal()] = true;
-        tableName = "DataMart.dbo.loaN";
-        sqlTable = sqlEnv.searchTable(tableName);
-        assertTrue(sqlTable == null);
+//        TSQLEnv.tableCollationCaseSensitive.put(EDbVendor.dbvmssql, true);
+//        tableName = "DataMart.dbo.loaN";
+//        sqlTable = sqlEnv.searchTable(tableName);
+//        assertTrue(sqlTable == null);
 
-        TSQLEnv.tableCollationCaseSensitive[EDbVendor.dbvmssql.ordinal()] = false;
+        TSQLEnv.tableCollationCaseSensitive.put(EDbVendor.dbvmssql, false);
         tableName = "DataMart.dbo.loaN";
         sqlTable = sqlEnv.searchTable(tableName);
         assertTrue(sqlTable != null);

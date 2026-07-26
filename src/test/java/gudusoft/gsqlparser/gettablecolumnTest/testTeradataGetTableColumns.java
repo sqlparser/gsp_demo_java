@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.gettablecolumns.TGetTableColumn;
+import gudusoft.gsqlparser.util.TGetTableColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -19,23 +19,84 @@ public class testTeradataGetTableColumns extends TestCase {
         getTableColumn.showTableEffect = false;
         getTableColumn.showColumnLocation = false;
         getTableColumn.showTreeStructure = false;
+        getTableColumn.listStarColumn = false;
         getTableColumn.runText(inputQuery);
-//        System.out.println(inputQuery);
-//        System.out.println(desireResult);
+//        System.out.println(inputQuery+"\n\n");
+//        System.out.println(desireResult+"\n\n");
 //        System.out.println(getTableColumn.outList.toString().trim());
         assertTrue(getTableColumn.outList.toString().trim().equalsIgnoreCase(desireResult));
     }
 
+    public  void test4() {
+        doTest("UPDATE foodmart.STRTOK_TIME A SET SYSTEM_DESK = testdatabase.STRTOK_TIME.SYSTEM_DESK\n" +
+                        "WHERE A.LKUP_DATE =testdatabase.STRTOK_TIME.LKUP_DATE",
+                "Tables:\n" +
+                        "foodmart.STRTOK_TIME\n" +
+                        "testdatabase.STRTOK_TIME\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "foodmart.STRTOK_TIME.LKUP_DATE\n" +
+                        "foodmart.STRTOK_TIME.SYSTEM_DESK\n" +
+                        "testdatabase.STRTOK_TIME.LKUP_DATE\n" +
+                        "testdatabase.STRTOK_TIME.SYSTEM_DESK");
+    }
 
-//    public static void testDateColumn() {
-//        doTest("select  year(date),year(date1) from t",
-//                "Tables:\n" +
-//                        "t\n" +
-//                        "\n" +
-//                        "Fields:\n" +
-//                        "t.date\n" +
-//                        "t.date1");
-//    }
+    public  void test3() {
+        doTest("create view v1 as select f1 from b with data;",
+                "Tables:\n" +
+                        "b\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "b.f1");
+    }
+
+    public  void test2() {
+        doTest("DELETE FROM foodmart.trimmed_employee ACT\n" +
+                        "WHERE ACT.employee_id = employee.employee_id \n" +
+                        "AND  employee.first_name = 'Walter'\n" +
+                        "AND  trimmed_salary.employee_id = -1",
+                "Tables:\n" +
+                        "employee\n" +
+                        "foodmart.trimmed_employee\n" +
+                        "trimmed_salary\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "employee.employee_id\n" +
+                        "employee.first_name\n" +
+                        "foodmart.trimmed_employee.employee_id\n" +
+                        "trimmed_salary.employee_id");
+    }
+
+
+    public  void test1() {
+        doTest("UPDATE b_rate_plan\n" +
+                        "FROM\n" +
+                        "(\n" +
+                        "\tSELECT * FROM SPCOMM.L_FIXED_RATE_PLAN_REF\n" +
+                        "\tWHERE rate_plan_ref_eff_dt<= ipshare_ofccplv.cprof_d_period_dates_ref.PERIOD\n" +
+                        ") AS ref\n" +
+                        "SET accs_fee = REF.accs_fee,\n" +
+                        "SVC_TYPE = REF.prod_grp_lvl_1,\n" +
+                        "rate_plan_lvl3 = REF.rate_plan_lvl_3,\n" +
+                        "prod_grp_lvl3 = REF.prod_grp_lvl_2\n" +
+                        "WHERE b_rate_plan.svc_type IS NULL",
+                "Tables:\n" +
+                        "b_rate_plan\n" +
+                        "ipshare_ofccplv.cprof_d_period_dates_ref\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF\n" +
+                        "\n" +
+                        "Fields:\n" +
+                        "b_rate_plan.accs_fee\n" +
+                        "b_rate_plan.prod_grp_lvl3\n" +
+                        "b_rate_plan.rate_plan_lvl3\n" +
+                        "b_rate_plan.SVC_TYPE\n" +
+                        "ipshare_ofccplv.cprof_d_period_dates_ref.PERIOD\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF.accs_fee\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF.prod_grp_lvl_1\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF.prod_grp_lvl_2\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF.rate_plan_lvl_3\n" +
+                        "SPCOMM.L_FIXED_RATE_PLAN_REF.rate_plan_ref_eff_dt");
+    }
 
     public static void testEDate() {
         doTest("update table1 set col = 'value' where table1.id = table2.id2",
@@ -165,7 +226,7 @@ public class testTeradataGetTableColumns extends TestCase {
                         "DB51_CAD.ESKP_ZABEZP_RLNP_STG_8.ZWIAZEK_HIP1");
     }
 
-    public static void testUpdate() {
+    public  void testUpdate() {
 
         doTest("UPDATE DB51_CAD.CAD_FX\n" +
                         " SET fund_wlasne = DB51_CAD.TAB_FX_4.fund_wlasne\n" +
@@ -197,34 +258,7 @@ public class testTeradataGetTableColumns extends TestCase {
                         "SYS_CALENDAR.CALENDAR.calendar_date");
     }
 
-    public void testColumnSourceTable(){
 
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
-        sqlparser.sqltext = "del from table1 where table1.id = table2.id \n" +
-                "and table2.id = table3.id";
-
-        assertTrue(sqlparser.parse() == 0);
-        TDeleteSqlStatement delete = (TDeleteSqlStatement)sqlparser.sqlstatements.get(0);
-        TExpression expr = delete.getWhereClause().getCondition().getRightOperand().getLeftOperand();
-        assertTrue(expr.getObjectOperand().getSourceTable().toString().endsWith("table2"));
-    }
-
-    public void testSchema(){
-
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
-        sqlparser.sqltext = "Select * from DBC.B b where DBC.A.id = b.id;";
-
-        assertTrue(sqlparser.parse() == 0);
-        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
-        TExpression expr = select.getWhereClause().getCondition().getLeftOperand();
-        assertTrue(expr.getObjectOperand().getDatabaseToken().toString().equalsIgnoreCase("DBC"));
-        TTable sourceTable = expr.getObjectOperand().getSourceTable();
-        assertTrue(sourceTable.toString().endsWith("A"));
-        TObjectName tableName = sourceTable.getTableName();
-        assertTrue(tableName.getDatabaseToken().toString().equalsIgnoreCase("DBC"));
-        assertTrue(sourceTable.getPrefixDatabase().equalsIgnoreCase("DBC"));
-
-    }
 
     public static void testCreateTableSubquery() {
         doTest("create volatile table test as \n" +
@@ -323,10 +357,12 @@ public class testTeradataGetTableColumns extends TestCase {
                 "Tables:\n" +
                         "DBC.Accounts\n" +
                         "td_unpivot\n" +
-                        "\nFields:\n" +
-                        "DBC.Accounts.'AccountName'\n" +
-                        "DBC.Accounts.'RowType'\n" +
-                        "DBC.Accounts.'UserId'");
+                        "\n" +
+                        "Fields:\n" +
+                        "DBC.Accounts.RowType\n" +
+                        "DBC.Accounts.UserId\n" +
+                        "td_unpivot.AccountName\n" +
+                        "td_unpivot.RowType");
     }
 
     public static void testTDUnpivot2() {
@@ -341,12 +377,13 @@ public class testTeradataGetTableColumns extends TestCase {
                 "Tables:\n" +
                         "T\n" +
                         "td_unpivot\n" +
-                        "\nFields:\n" +
-                        "T.'dec_sales'\n" +
-                        "T.'feb_sales'\n" +
-                        "T.'jan_sales'\n" +
-                        "T.'month'\n" +
-                        "T.'monthly_sales'");
+                        "\n" +
+                        "Fields:\n" +
+                        "T.dec_sales\n" +
+                        "T.feb_sales\n" +
+                        "T.jan_sales\n" +
+                        "td_unpivot.month\n" +
+                        "td_unpivot.monthly_sales");
     }
 
     public static void testCastDate() {
@@ -409,6 +446,36 @@ public class testTeradataGetTableColumns extends TestCase {
                         "employee.empno\n" +
                         "employee.name\n" +
                         "employee.salary");
+    }
+
+    public void testColumnSourceTable(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "del from table1 where table1.id = table2.id \n" +
+                "and table2.id = table3.id";
+
+        assertTrue(sqlparser.parse() == 0);
+        TDeleteSqlStatement delete = (TDeleteSqlStatement)sqlparser.sqlstatements.get(0);
+        TExpression expr = delete.getWhereClause().getCondition().getRightOperand().getLeftOperand();
+        // System.out.println(expr.toString()+", and "+ expr.getObjectOperand().getSourceTable().toString());
+        assertTrue(expr.getObjectOperand().getSourceTable().toString().endsWith("table2"));
+    }
+
+    public void testSchema(){
+
+        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvteradata);
+        sqlparser.sqltext = "Select * from DBC.B b where DBC.A.id = b.id;";
+
+        assertTrue(sqlparser.parse() == 0);
+        TSelectSqlStatement select = (TSelectSqlStatement)sqlparser.sqlstatements.get(0);
+        TExpression expr = select.getWhereClause().getCondition().getLeftOperand();
+        assertTrue(expr.getObjectOperand().getDatabaseToken().toString().equalsIgnoreCase("DBC"));
+        TTable sourceTable = expr.getObjectOperand().getSourceTable();
+        assertTrue(sourceTable.toString().endsWith("A"));
+        TObjectName tableName = sourceTable.getTableName();
+        assertTrue(tableName.getDatabaseToken().toString().equalsIgnoreCase("DBC"));
+        assertTrue(sourceTable.getPrefixDatabase().equalsIgnoreCase("DBC"));
+
     }
 
 }

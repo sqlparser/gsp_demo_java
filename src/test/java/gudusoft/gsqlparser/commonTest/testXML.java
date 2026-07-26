@@ -34,6 +34,7 @@ public class testXML extends TestCase  {
     public void testSQLServer() throws Exception {
         toXmlFiles(EDbVendor.dbvmssql, gspCommon.BASE_SQL_DIR_PUBLIC_ALLVERSIONS+"mssql");
         toXmlFiles(EDbVendor.dbvmssql,  gspCommon.BASE_SQL_DIR_PUBLIC_JAVA+"mssql");
+
     }
 
     public void testOracle() throws Exception {
