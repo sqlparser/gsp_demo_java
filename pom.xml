@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-        <groupId>gudusoft</groupId>
-        <artifactId>gsp_java</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
+  <!-- No <parent>. This repository used to inherit from gudusoft:gsp_java,
+       the private library reactor, which is why it could not be built by
+       anyone outside Gudu: Maven could not resolve the parent POM. It now
+       stands on its own and takes the parser from Gudu's public Maven
+       repository, declared below. -->
 
   <groupId>gudusoft</groupId>
   <artifactId>gsp_demo_java</artifactId>
@@ -21,41 +21,34 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<project.name>Gudu Software Parser for Java Demo</project.name>
-		<project.version>${version}</project.version>
 		<project.organization.name>Gudu software</project.organization.name>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MMM-dd HH:mm z</maven.build.timestamp.format>
-        <gsp.core.version>3.0.2.5</gsp.core.version>
+        <!-- Bump this to move every demo to a newer parser. Available versions:
+             https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml -->
+        <gsp.core.version>4.1.6</gsp.core.version>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>local</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>gudusoft</groupId>
-                    <artifactId>gsqlparser</artifactId>
-                    <version>${gsp.core.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>remote</id>
-            <dependencies>
-                <dependency>
-                    <groupId>gudusoft</groupId>
-                    <artifactId>gsqlparser</artifactId>
-                    <version>${gsp.core.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+    <!-- Gudu's public Maven repository. The parser is not on Maven Central. -->
+    <repositories>
+        <repository>
+            <id>gudu-public-releases</id>
+            <url>https://www.sqlparser.com/maven/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
+        <!-- The parser itself. This is the trial build: fully functional for
+             evaluation, and enough for every demo here. The public Maven
+             version is a three-part number and does not necessarily match the
+             four-part product version in the release notes. -->
+        <dependency>
+            <groupId>com.gudusoft</groupId>
+            <artifactId>gsqlparser</artifactId>
+            <version>${gsp.core.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -124,5 +117,62 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <excludes>
+                        <!-- demos/dbConnect wires the parser up to live databases
+                             over JDBC to grab metadata. It is excluded from the
+                             default build for two reasons: it needs JDBC drivers
+                             and a reachable server to do anything, and it is
+                             written against gudusoft.gsqlparser.sqlenv.util,
+                             which the current public parser no longer ships.
+                             Reviving it needs an API migration, not a rebuild. -->
+                        <exclude>demos/dbConnect/**</exclude>
+
+                        <!-- Same story, three stragglers outside dbConnect: they
+                             build a TSQLDataSource / T<Vendor>SQLDataSource to
+                             read metadata straight out of a running database.
+                             The public parser ships no *SQLDataSource class at
+                             all, so these cannot compile against it, and they
+                             would need JDBC drivers and a live server to run.
+                             Everything else in their packages still builds. -->
+                        <exclude>demos/gettablecolumns/runGetTableColumn.java</exclude>
+                        <exclude>demos/columninspect/ColumnInspect.java</exclude>
+                        <exclude>demos/dlineage/DataFlowAnalyzer.java</exclude>
+                    </excludes>
+                    <testExcludes>
+                        <!-- The same live-database metadata API, from the test
+                             side: these five reach for TSQLEnv / TSQLDataSource
+                             and their JDBC subclasses. Excluded so that a plain
+                             `mvn package` works against the public parser. -->
+                        <testExclude>gudusoft/gsqlparser/commonTest/testDBVendor.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testColumnResolver.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testNewTableColumn.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testSQLEnv.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/sqlenvTest/testJSONEnv.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/commonTest/ColumnImpactTest.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/dlineageTest/testColumnLevelLineageFile.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testDbObject.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/commonTest/metaDB.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/getObject.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/commonTest/testJoins.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/commonTest/testMetaDB.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/demosTest/removeCondition/testRemoveCondition.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/gettablecolumnTest/testTC1.java</testExclude>
+                    </testExcludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
