@@ -177,6 +177,53 @@ Everything else in those packages still builds. Reviving them needs an API
 migration against a build that includes the metadata layer, not just a
 recompile.
 
+## The .bat scripts (Windows, no Maven)
+
+Each demo directory also ships `compile_<demo>.bat` and `run_<demo>.bat`, with
+`setenv/setenv.bat` holding `JAVA_HOME`. The original workflow was:
+
+1. edit `setenv/setenv.bat` and set `JAVA_HOME` to your JDK
+2. `cd` into a demo directory, for example `src/main/java/gudusoft/gsqlparser/demos/checksyntax`
+3. run `compile_checksyntax.bat`, then `run_checksyntax.bat`
+
+> **These scripts are stale.** They still compile
+> `src\main\java\demos\<demo>\<demo>.java` and `cd` up five levels, both of
+> which were correct before the demos moved under
+> `src/main/java/gudusoft/gsqlparser/demos/`. They need their paths and depth
+> updated. Use Maven in the meantime; the workflow is recorded here so it is not
+> lost.
+
+
+## Building the dlineage demo on its own
+
+`pom_dlineage.xml` builds just `DataFlowAnalyzer` into its own jar, for use as a
+standalone lineage tool:
+
+```bash
+mvn -f pom_dlineage.xml package
+
+java -cp "target/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:lib/*" \
+     gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer \
+     /f demo.sql /o lineage.json /json /graph \
+     /simpleShowRelationTypes fdd,fdr /filterRelationTypes fdd
+```
+
+Other invocations it supports: `/t mssql`, `/t postgresql`, `/showER`,
+`/filterRelationTypes fdd`.
+
+> **This build currently fails**, and did so before the trees were merged. It
+> pins `lib/gsqlparser-3.1.1.0.jar`, but `DataFlowAnalyzer` has moved on and now
+> calls `getOption().setTraceTablePosition(...)` and
+> `ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which
+> that jar has. It needs a parser build carrying both those methods and the
+> metadata layer. Recorded here so the invocations above are not lost.
+
+## master and dev branches
+
+`master` is updated when a new GSP version is released on
+<https://sqlparser.com/download.php>. The dev branches move faster and may not
+compile against the released jar or the one under `lib/`.
+
 ## Tutorials
 
 - SQL modify and rebuild, SQL refactor
@@ -207,3 +254,30 @@ recompile.
   names like `gudusoft.gsqlparser.xxxTest`. The demos followed later, in the
   2026/7/26 merge above, and that move is still only partly reflected in their
   `package` declarations.
+
+---
+
+## Appendix: organising multiple demos as Maven modules
+
+Design note carried over from the library-side tree. This describes a structure
+the repository does **not** currently use; it is kept as guidance.
+
+When a project contains multiple demos that need to be built separately, the
+usual approach is a Maven multi-module project: one parent `pom.xml` with
+`<packaging>pom</packaging>` and a `<modules>` section, plus a child `pom.xml`
+per demo declaring its own dependencies and inheriting shared versions from the
+parent's `<dependencyManagement>`.
+
+```
+gsp_demo_java/
+├── pom.xml               <-- parent POM, manages the modules
+├── dlineage-demo/
+│   ├── pom.xml
+│   └── src/main/java/demos/dlineage/DataFlowAnalyzer.java
+└── another-demo/
+    ├── pom.xml
+    └── src/main/java/demos/another/AnotherDemo.java
+```
+
+Build everything with `mvn clean package` from the root, or a single module with
+`mvn -pl dlineage-demo clean package`.
