@@ -38,16 +38,50 @@
         </repository>
     </repositories>
 
+    <profiles>
+        <!-- Default: the published parser from Gudu's public Maven repository.
+             This is what makes the repository build for anyone who clones it. -->
+        <profile>
+            <id>public</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.gudusoft</groupId>
+                    <artifactId>gsqlparser</artifactId>
+                    <version>${gsp.core.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- Library development: run the demos against a parser you just built
+             from the gsp_java sources, rather than the published one. The core
+             installs under the gudusoft groupId, not com.gudusoft, which is why
+             this needs its own profile.
+
+                 cd gsp_java
+                 mvn install -N && mvn install -pl gsp_java_core -Pquick_install
+                 cd ../gsp_demo_java
+                 mvn -Plocal -Dgsp.core.version=<installed version> compile
+
+             This replaces the loop that used to exist when the demos were a
+             vendored module of the gsp_java reactor. -->
+        <profile>
+            <id>local</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gudusoft</groupId>
+                    <artifactId>gsqlparser</artifactId>
+                    <version>${gsp.core.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- The parser itself. This is the trial build: fully functional for
              evaluation, and enough for every demo here. The public Maven
              version is a three-part number and does not necessarily match the
              four-part product version in the release notes. -->
-        <dependency>
-            <groupId>com.gudusoft</groupId>
-            <artifactId>gsqlparser</artifactId>
-            <version>${gsp.core.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

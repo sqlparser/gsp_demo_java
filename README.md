@@ -116,6 +116,31 @@ three-part number (for example `4.1.6`) and does not necessarily match the
 four-part product version in the release notes. See <https://www.sqlparser.com>
 for licensing.
 
+## Running the demos against a local parser build
+
+By default the demos resolve the published parser. If you are working on the
+library itself and want a demo to exercise the build you just made, use the
+`local` profile. The core installs under the `gudusoft` groupId rather than
+`com.gudusoft`, which is why it needs its own profile:
+
+```bash
+# in the library checkout
+cd gsp_java
+mvn install -N && mvn install -pl gsp_java_core -Pquick_install
+
+# then here, with the version you just installed
+cd ../gsp_demo_java
+mvn -Plocal -Dgsp.core.version=4.1.5.9 compile
+
+mvn -q -Plocal -Dgsp.core.version=4.1.5.9 exec:java \
+    -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
+    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime
+```
+
+This replaces the loop that existed while the demos were a vendored module of
+the `gsp_java` reactor.
+
+
 ## The demos
 
 Runnable programs under `src/main/java/gudusoft/gsqlparser/demos/`. Common starting points:
