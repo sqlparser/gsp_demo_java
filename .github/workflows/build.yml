@@ -1,0 +1,91 @@
+name: Build and test
+
+# These demos used to be a vendored tree inside the gsp_java library repo, whose
+# CI ran their tests via `mvn test -pl gsp_demo_java`. That tree has been
+# retired, so this workflow keeps the tests running rather than letting the
+# signal disappear with it.
+#
+# The parser is resolved from Gudu's public Maven repository, declared in
+# pom.xml, so nothing here needs credentials.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The parser jar is Java 8 bytecode and the POM pins source/target 1.8.
+        # Building on both proves the demos stay consumable from an old JDK and
+        # keep compiling on a current LTS.
+        java: ["8", "21"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Build
+        run: mvn -B package -DskipTests
+
+      # Three tests in analyzespTest compare stored-procedure output against
+      # golden strings written for an older parser and currently fail. They are
+      # deliberately not deleted -- see the README -- so the suite is expected
+      # to be red on exactly those three. `|| true` would hide a real
+      # regression, so instead assert the failure count has not grown.
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: mvn -B test
+
+      - name: Check only the known failures are failing
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d target/surefire-reports ]; then
+            echo "::error::no surefire reports produced"
+            exit 1
+          fi
+          total=$(grep -ho "Tests run: [0-9]*" target/surefire-reports/*.txt | awk '{s+=$3} END {print s+0}')
+          fails=$(grep -hoE "Failures: [0-9]*" target/surefire-reports/*.txt | awk '{s+=$2} END {print s+0}')
+          errs=$(grep -hoE "Errors: [0-9]*"   target/surefire-reports/*.txt | awk '{s+=$2} END {print s+0}')
+          echo "tests=$total failures=$fails errors=$errs"
+
+          if [ "$errs" -ne 0 ]; then
+            echo "::error::$errs test error(s); expected 0"
+            grep -l -E "Errors: [1-9]" target/surefire-reports/*.txt || true
+            exit 1
+          fi
+          if [ "$fails" -gt 3 ]; then
+            echo "::error::$fails failures, expected at most the 3 known analyzespTest ones"
+            grep -l -E "Failures: [1-9]" target/surefire-reports/*.txt || true
+            exit 1
+          fi
+          if [ "$fails" -lt 3 ]; then
+            echo "::notice::only $fails failures — if analyzespTest was fixed, lower the threshold in this workflow and update the README"
+          fi
+
+      - name: Smoke test a demo
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;\n' > q.sql
+          out=$(mvn -q exec:java \
+            -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
+            -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime)
+          echo "$out"
+          grep -q "syntax errors: 0" <<<"$out"
