@@ -71,7 +71,8 @@ arguments and it prints its own usage line.
 > `<scope>system</scope>`, since they have no public Maven coordinate. Maven's
 > `runtime` classpath scope excludes `system`-scoped dependencies by design, so
 > any demo that touches one of them (e.g. `dlineageBasic`, which uses
-> `org.simpleframework.xml`) fails with `NoClassDefFoundError` under `runtime`
+> `org.simpleframework.xml`, or `antiSQLInjection`, which uses
+> `org.boris.expr`) fails with `NoClassDefFoundError` under `runtime`
 > even though the jar is right there in `lib/`. `compile` scope includes them
 > and works for every demo.
 
@@ -230,6 +231,32 @@ the `gudusoft/gsqlparser/` tree — has since been folded into it as
 the other directories already use (`joinConvertTest` covers
 `demos.joinConvert`, `antiSQLInjectionTest` covers `demos.antiSQLInjection`,
 and so on). All 20 test files now live under one root.
+
+### The vendored expression library
+
+`src/main/java/gudusoft/gsqlparser/demos/antiSQLInjection/` used to carry 365
+`.java` files of a third-party expression evaluator under `org/boris/expr/`.
+That was **57% of every source file in this repository**, and it duplicated
+`lib/expr4j.jar`, which was already a declared dependency: the jar holds the
+same 365 top-level classes and nothing else, so the library shipped twice and
+javac quietly compiled the sources while the jar sat unused.
+
+The sources are gone; the jar now supplies `org.boris.expr`. Only one file ever
+imported it (`GEval.java`), the `antiSQLInjection` tests cover the path, and
+they pass against the jar. Two consequences worth knowing:
+
+- **The `antiSQLInjection` demo now needs `-Dexec.classpathScope=compile`**, for
+  the `system`-scope reason described above. It used to work under `runtime`
+  only because the classes happened to be compiled into `target/classes`.
+- **`mvn package` no longer puts `org/boris/expr/**` inside the project jar.**
+  Nothing here consumes that jar as a library, so this only matters if you start
+  doing so.
+
+The dependency's coordinates were also wrong: it was declared as
+`tk.pratanumandal:expr4j`, a different library entirely, which would have
+pointed SBOM and vulnerability tooling at the wrong project. It now names what
+is actually on disk, with a checksum recorded in `pom.xml` since the jar carries
+no version metadata of its own.
 
 ## What is excluded from the build
 

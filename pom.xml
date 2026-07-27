@@ -116,13 +116,31 @@
         <systemPath>${project.basedir}/lib/junrar-0.7.jar</systemPath>     
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/tk.pratanumandal/expr4j -->
+    <!-- The expression evaluator behind demos/antiSQLInjection (GEval).
+         lib/expr4j.jar contains ONLY org/boris/expr/**, that is "Boris Expr",
+         not tk.pratanumandal:expr4j, which this was previously declared as. That
+         coordinate named a completely different library and would have misled
+         SBOM and vulnerability tooling into scanning the wrong project, so it is
+         corrected here to describe the file that is actually on disk.
+
+         The jar carries no version metadata at all (bare MANIFEST.MF, no
+         pom.properties), so the version below is a placeholder, not a real
+         upstream release number. Identify it by content instead:
+             sha256 6267d9cb7cabcb24cf02d5bff1d11fdfea8c60c9ba1840dcb45359fb0165ca1b
+             367 classfiles, Java 5 bytecode (major version 49)
+
+         Until 2026/7/27 this repository also carried all 365 of these classes as
+         vendored .java under demos/antiSQLInjection/org/boris/expr/, so the
+         library was shipped twice and the jar was dead weight. The sources were
+         removed; this jar is now what actually supplies org.boris.expr. Because
+         system scope is absent from Maven's runtime classpath, the
+         antiSQLInjection demo requires -Dexec.classpathScope=compile. -->
     <dependency>
-        <groupId>tk.pratanumandal</groupId>
-        <artifactId>expr4j</artifactId>
-        <version>0.0.3</version>
-                <scope>system</scope>
-        <systemPath>${project.basedir}/lib/expr4j.jar</systemPath>  
+        <groupId>org.boris</groupId>
+        <artifactId>expr</artifactId>
+        <version>0.0.0-vendored</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/expr4j.jar</systemPath>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.jdom/jdom -->
         <dependency>
