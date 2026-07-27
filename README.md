@@ -311,6 +311,45 @@ levels, both correct only before the demos moved under
 paths and directory depths were corrected to match where each script actually
 sits (7 levels for most, 8 for the nested ones).
 
+### samples/ and src/main/resources/
+
+`src/main/java` is a *source* root: Maven compiles what is in it and does not
+put anything else on the classpath. 229 files in there were not `.java`, and
+that turned out to be hiding a real bug.
+
+**`snowflake.js` was broken.** `SnowflakeSQLExtractor` loads it with
+`getResourceAsStream("snowflake.js")`, but the file sat in `src/main/java`, so
+Maven never copied it to `target/classes` — the call returned `null` and the
+demo died on an NPE. It is the only classpath resource in the repository, and
+it now lives at
+`src/main/resources/gudusoft/gsqlparser/demos/snowflake/sqlextract/snowflake.js`,
+mirroring its package so the same lookup resolves. (The demo also uses Nashorn,
+removed from the JDK in 15, so it still needs Java 8–14 to run.)
+
+**Sample SQL moved to `samples/`.** The 85 `.sql` files were input data passed
+on the command line, never read from the classpath, so `src/main/resources` is
+the wrong home for them too — they belong outside `src/` entirely:
+
+```
+samples/dlineageBasic/{oracle,mysql,mssql}/…   81 files
+samples/tracedatalineage/                       2
+samples/dlineage/                               1
+samples/callgraph/                              1
+```
+
+**Build output deleted.** `demos/dlineage/class/` is created and `rm -rf`'d by
+`buildJar.sh` on every run, and `data-lineage-result.xml` was a generated
+lineage report nothing referenced. Both are now in `.gitignore`. The source
+manifest `demos/dlineage/MANIFEST.MF` stays, since `buildJar.sh` copies it —
+its `Main-Class` had been missed by the package rename and is now correct.
+
+What deliberately stays next to its demo: each demo's `readme.md`, its
+`compile_*.bat` / `run_*.bat` (which `cd` relative to their own location, so
+they cannot move), and a handful of per-demo assets (`tree-view.xsl` and
+`tree-view.css`, referenced by relative href from generated XML;
+`sqlflow-settings.png`; the dlineage PDF). Co-locating documentation and
+per-demo tooling with the demo is the point of this repository's layout.
+
 ## What is excluded from the build
 
 Some demos read metadata straight out of a running database over JDBC, using
