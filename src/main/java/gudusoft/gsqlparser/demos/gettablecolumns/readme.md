@@ -8,6 +8,24 @@ For more detailed information about how this tools works, please check [this art
 ## Usage
 `java runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]`
 
+> **`runGetTableColumn` does not compile in this repository.** It connects to a
+> live database over JDBC to resolve ambiguous columns (see "Resolve the
+> ambiguous columns in SQL query" below), using a `TSQLDataSource` class the
+> public trial parser artifact doesn't ship — `pom.xml` excludes it from the
+> build for exactly this reason. It's only runnable from the standalone
+> "Binary version" below, which bundles the full metadata layer.
+>
+> For column/table extraction without a database connection, in this
+> repository, use `getResultColumn` instead:
+> ```bash
+> mvn -q exec:java -Dexec.mainClass=demos.gettablecolumns.getResultColumn -Dexec.classpathScope=compile
+> ```
+> It parses an inline query and prints its result columns; edit the `sqltext`
+> in `getResultColumn.java` to try your own SQL. Other classes in this folder
+> (`columnTableStmt`, `columnsInResultColumn`, `whatClause`,
+> `tableColumnRename`) demonstrate related, database-free column/table
+> analysis and build the same way.
+
 ## Binary version
 https://www.gudusoft.com/gsp_java/gettablecolumn.zip
 

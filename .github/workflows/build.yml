@@ -86,6 +86,6 @@ jobs:
           printf 'SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;\n' > q.sql
           out=$(mvn -q exec:java \
             -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
-            -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime)
+            -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile)
           echo "$out"
           grep -q "syntax errors: 0" <<<"$out"

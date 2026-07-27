@@ -136,7 +136,20 @@ public class traceDataLineage
 		for ( int i = 0; i < streams.size( ); i++ )
 		{
 			TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvmssql );
-			sqlparser.setSqlInputStream( streams.get( i ) );
+			// TGSqlParser.setSqlInputStream(...) silently parses to zero
+			// statements against the public trial artifact (verified: parse()
+			// returns 0/no error, but sqlstatements stays empty), so every
+			// script fed through it here was always skipped. Reading the
+			// stream into sqltext parses correctly instead.
+			try
+			{
+				sqlparser.sqltext = readAll( streams.get( i ) );
+			}
+			catch ( java.io.IOException e )
+			{
+				System.err.println( e.getMessage( ) );
+				continue;
+			}
 			int result = sqlparser.parse( );
 			if ( result != 0 )
 			{
@@ -216,6 +229,19 @@ public class traceDataLineage
 				}
 			}
 		}
+	}
+
+	private static String readAll( InputStream stream ) throws java.io.IOException
+	{
+		java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream( );
+		byte[] chunk = new byte[8192];
+		int read;
+		while ( ( read = stream.read( chunk ) ) != -1 )
+		{
+			buffer.write( chunk, 0, read );
+		}
+		stream.close( );
+		return buffer.toString( "UTF-8" );
 	}
 
 	private void analyzeProcedureCallSql( TGSqlParser sqlparser )

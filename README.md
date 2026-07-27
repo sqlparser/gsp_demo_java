@@ -37,7 +37,7 @@ SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;
 SQL
 
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
-    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime
+    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile
 ```
 
 ```text
@@ -50,7 +50,7 @@ Reformat it:
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=demos.formatsql.formatsql \
-    -Dexec.args="q.sql" -Dexec.classpathScope=runtime
+    -Dexec.args="q.sql" -Dexec.classpathScope=compile
 ```
 
 ```text
@@ -66,16 +66,26 @@ Argument conventions differ between demos: `checksyntax` takes `/f <file>` and
 `/t <vendor>`, while `formatsql` takes a bare filename. Run any demo with no
 arguments and it prints its own usage line.
 
+> **Use `-Dexec.classpathScope=compile`, not `runtime`.** `pom.xml` declares
+> `simple-xml`, `fastjson` and a few other jars under `lib/` with
+> `<scope>system</scope>`, since they have no public Maven coordinate. Maven's
+> `runtime` classpath scope excludes `system`-scoped dependencies by design, so
+> any demo that touches one of them (e.g. `dlineageBasic`, which uses
+> `org.simpleframework.xml`) fails with `NoClassDefFoundError` under `runtime`
+> even though the jar is right there in `lib/`. `compile` scope includes them
+> and works for every demo.
+
 > **Package names are not uniform yet.** A move of the demos from `demos.*` to
 > `gudusoft.gsqlparser.demos.*` is partly done: 176 files sit under
 > `src/main/java/gudusoft/` while still declaring `package demos.*`, so the class
 > you pass to `-Dexec.mainClass` follows the **package declaration**, not the
 > directory. `checksyntax` is `gudusoft.gsqlparser.demos.checksyntax.checksyntax`;
-> `formatsql` is `demos.formatsql.formatsql`. When in doubt, read the first line
-> of the source:
+> `formatsql` is `demos.formatsql.formatsql`. When in doubt, grep the first
+> `package` line — some of these files lead with a blank line or a comment, so
+> plain `head -1` sometimes returns nothing:
 >
 > ```bash
-> head -1 src/main/java/gudusoft/gsqlparser/demos/<demo>/<Demo>.java
+> grep -m1 '^package' src/main/java/gudusoft/gsqlparser/demos/<demo>/<Demo>.java
 > ```
 
 ## Where the parser comes from
@@ -134,7 +144,7 @@ mvn -Plocal -Dgsp.core.version=4.1.5.9 compile
 
 mvn -q -Plocal -Dgsp.core.version=4.1.5.9 exec:java \
     -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
-    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=runtime
+    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile
 ```
 
 This replaces the loop that existed while the demos were a vendored module of
@@ -171,13 +181,19 @@ directories carry their own `readme.md`.
 mvn test
 ```
 
-153 tests run. **Three currently fail**, all in
+152 tests run. **Three currently fail**, all in
 `gudusoft.gsqlparser.demosTest.analyzespTest` (`testSample1`, `testSample6`,
 `testSample8`). They compare stored-procedure relation output against golden
 strings written for an older parser build, and that output has since changed.
 They are left in place rather than deleted or rewritten, because they are a
-real signal about output drift rather than a broken harness. The other 150
+real signal about output drift rather than a broken harness. The other 149
 pass. That is why the getting-started step above uses `-DskipTests`.
+
+(`traceDataLineageTest` used to contribute 2 of those "passing" tests with
+every line commented out — no assertions, testing nothing, referencing fixture
+files that never shipped with this repo. It's been replaced with one real
+test against inline SQL; see
+[#43](https://github.com/sqlparser/gsp_demo_java/issues/43).)
 
 ## What is excluded from the build
 

@@ -1,71 +1,50 @@
 
 package gudusoft.gsqlparser.demosTest;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import demos.tracedatalineage.Column;
+import demos.tracedatalineage.traceDataLineage;
 import junit.framework.TestCase;
 
+/**
+ * testDDL1/testDDL2 used to reference fixture files under
+ * /demos/tracedatalineage/test/ddl(2)/ that never shipped with this repo, so
+ * both methods had every line commented out and asserted nothing. Replaced
+ * with a self-contained test against inline SQL. See
+ * https://github.com/sqlparser/gsp_demo_java/issues/43.
+ */
 public class traceDataLineageTest extends TestCase
 {
 
-	public void testDDL1( )
+	public void testInsertSelectLineage( )
 	{
-//		List<InputStream> streams = new ArrayList<InputStream>( );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/g_sds_sub_dev0 - asd_asset_identifier.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/sds_bcp_dev0 - asd_wk_asset_identifier.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/sdsdev0 - asd_asset_identifier.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/sdsdev0 - asd_wk_asset_identifier.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/sdsdev0 - sds_m_asd_asset_identifier.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl/sdsdev0 - sds_post_asd_asset_identifier.sql" ) );
-//		traceDataLineage trace = new traceDataLineage( streams );
-//		assertEquals( trace.getTracedLineage( ).size( ), 25 );
-//		for ( int i = 0; i < trace.getTracedLineage( ).size( ); i++ )
-//		{
-//			List<Column> lineage = trace.getTracedLineage( ).get( i );
-//			if ( trace.getColumnFullName( lineage.get( 0 ) )
-//					.equals( "sds_bcp_dev0.asd_wk_asset_identifier.cusip_num" ) )
-//			{
-//				assertEquals( lineage.size( ), 4 );
-//				assertEquals( trace.getColumnFullName( lineage.get( 0 ) ),
-//						"sds_bcp_dev0.asd_wk_asset_identifier.cusip_num" );
-//				assertEquals( trace.getColumnFullName( lineage.get( 1 ) ),
-//						"sdsdev0.asd_wk_asset_identifier.cusip_num" );
-//				assertEquals( trace.getColumnFullName( lineage.get( 2 ) ),
-//						"sdsdev0.asd_asset_identifier.cusip_num" );
-//				assertEquals( trace.getColumnFullName( lineage.get( 3 ) ),
-//						"g_sds_sub_dev0.asd_asset_identifier.cusip_num" );
-//			}
-//		}
+		List<InputStream> streams = new ArrayList<InputStream>( );
+		streams.add( sql( "CREATE TABLE source_tbl (id INT, amount INT);"
+				+ "CREATE TABLE target_tbl (id INT, total INT);" ) );
+		streams.add( sql( "INSERT INTO target_tbl (id, total) "
+				+ "SELECT id, amount FROM source_tbl;" ) );
+
+		traceDataLineage trace = new traceDataLineage( streams );
+
+		assertEquals( 2, trace.getTracedLineage( ).size( ) );
+
+		List<Column> idLineage = trace.getTracedLineage( ).get( 0 );
+		assertEquals( 2, idLineage.size( ) );
+		assertEquals( "source_tbl.id", trace.getColumnFullName( idLineage.get( 0 ) ) );
+		assertEquals( "target_tbl.id", trace.getColumnFullName( idLineage.get( 1 ) ) );
+
+		List<Column> amountLineage = trace.getTracedLineage( ).get( 1 );
+		assertEquals( 2, amountLineage.size( ) );
+		assertEquals( "source_tbl.amount", trace.getColumnFullName( amountLineage.get( 0 ) ) );
+		assertEquals( "target_tbl.total", trace.getColumnFullName( amountLineage.get( 1 ) ) );
 	}
 
-	public void testDDL2( )
+	private static InputStream sql( String text )
 	{
-//		List<InputStream> streams = new ArrayList<InputStream>( );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/sdsdev0 - bog_pr_yu_qwe_jil_rltnshp.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/sdsdev0 - bog_pr_prk_jil_rltnshp.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/sdsdev0 - bog_pr_jil_snk.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/sdsdev0 - bog_pr_jil.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - sds_tst_prdct.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - sds_tst_pos.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - sds_bld_tst_prdct.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - bog_pr_yu_qwe_jil_rltnshp.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - bog_pr_prk_jil_rltnshp.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - bog_pr_jil_snk.sql" ) );
-//		streams.add( traceDataLineageTest.class.getResourceAsStream( "/demos/tracedatalineage/test/ddl2/g_sds_sub_dev0 - bog_pr_jil.sql" ) );
-//		traceDataLineage trace = new traceDataLineage(streams );
-//		assertEquals( trace.getTracedLineage( ).size( ), 74 );
-//		for ( int i = 0; i < trace.getTracedLineage( ).size( ); i++ )
-//		{
-//			List<Column> lineage = trace.getTracedLineage( ).get( i );
-//			if ( trace.getColumnFullName( lineage.get( 0 ) )
-//					.equals( "sdsdev0.bog_pr_jil.bsecowid" ) )
-//			{
-//				assertEquals( lineage.size( ), 3 );
-//				assertEquals( trace.getColumnFullName( lineage.get( 0 ) ),
-//						"sdsdev0.bog_pr_jil.bsecowid" );
-//				assertEquals( trace.getColumnFullName( lineage.get( 1 ) ),
-//						"g_sds_sub_dev0.bog_pr_jil.bsecowid" );
-//				assertEquals( trace.getColumnFullName( lineage.get( 2 ) ),
-//						"g_sds_sub_dev0.sds_tst_prdct.base_cow_id" );
-//			}
-//		}
+		return new ByteArrayInputStream( text.getBytes( ) );
 	}
 }
