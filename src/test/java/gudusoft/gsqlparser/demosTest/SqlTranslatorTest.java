@@ -3,10 +3,10 @@ package gudusoft.gsqlparser.demosTest;
 
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
-import demos.sqltranslator.IdentifierCheckResult;
-import demos.sqltranslator.IdentifierRule;
-import demos.sqltranslator.IdentifierRuleResult;
-import demos.sqltranslator.SqlTranslator;
+import gudusoft.gsqlparser.demos.sqltranslator.IdentifierCheckResult;
+import gudusoft.gsqlparser.demos.sqltranslator.IdentifierRule;
+import gudusoft.gsqlparser.demos.sqltranslator.IdentifierRuleResult;
+import gudusoft.gsqlparser.demos.sqltranslator.SqlTranslator;
 
 public class SqlTranslatorTest extends TestCase
 {

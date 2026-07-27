@@ -1,4 +1,4 @@
-package demos.utils;
+package gudusoft.gsqlparser.demos.utils;
 
 public class SQLQuery {
         private String name;

@@ -11,7 +11,7 @@ tracing a single query's result columns back to their sources instead.
 ## Usage
 
 ```
-java demos.tracedatalineage.traceDataLineage <sql scripts directory path> [<output file path>]
+java gudusoft.gsqlparser.demos.tracedatalineage.traceDataLineage <sql scripts directory path> [<output file path>]
 ```
 
 The first argument **must be a directory**, not a single `.sql` file —
@@ -21,7 +21,7 @@ identical to "ran fine, found no lineage." The optional second argument
 writes the result to a file instead of stdout.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=demos.tracedatalineage.traceDataLineage \
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.tracedatalineage.traceDataLineage \
     -Dexec.args="src/main/java/gudusoft/gsqlparser/demos/tracedatalineage/sample" \
     -Dexec.classpathScope=compile
 ```

@@ -1,5 +1,5 @@
 
-package demos.visitors;
+package gudusoft.gsqlparser.demos.visitors;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;

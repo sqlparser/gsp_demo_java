@@ -7,7 +7,7 @@ import java.util.List;
 
 import gudusoft.gsqlparser.commonTest.gspCommon;
 import junit.framework.TestCase;
-import demos.analyzesp.Analyze_SP;
+import gudusoft.gsqlparser.demos.analyzesp.Analyze_SP;
 
 public class analyzespTest extends TestCase
 {

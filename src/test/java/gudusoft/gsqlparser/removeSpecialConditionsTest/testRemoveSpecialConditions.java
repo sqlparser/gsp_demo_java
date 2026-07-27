@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.removeSpecialConditionsTest;
 
-import demos.removeSpecialConditions.RemoveCondition;
+import gudusoft.gsqlparser.demos.removeSpecialConditions.RemoveCondition;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import junit.framework.TestCase;

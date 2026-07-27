@@ -1,4 +1,4 @@
-package demos.columnInWhereClause;
+package gudusoft.gsqlparser.demos.columnInWhereClause;
 
 import java.io.File;
 import java.util.ArrayList;

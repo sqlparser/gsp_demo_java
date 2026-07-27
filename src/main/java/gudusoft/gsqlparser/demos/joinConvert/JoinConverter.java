@@ -1,4 +1,4 @@
-package demos.joinConvert;
+package gudusoft.gsqlparser.demos.joinConvert;
 
 /*
  * Date: 11-12-1

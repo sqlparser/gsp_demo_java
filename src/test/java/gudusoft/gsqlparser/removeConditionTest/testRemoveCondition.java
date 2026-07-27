@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import demos.removeCondition.removeCondition;
+import gudusoft.gsqlparser.demos.removeCondition.removeCondition;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.Assert;
 import junit.framework.TestCase;

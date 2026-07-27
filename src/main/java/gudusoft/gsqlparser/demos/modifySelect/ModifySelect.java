@@ -1,5 +1,5 @@
 
-package demos.modifySelect;
+package gudusoft.gsqlparser.demos.modifySelect;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

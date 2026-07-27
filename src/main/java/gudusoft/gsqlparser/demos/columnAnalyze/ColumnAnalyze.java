@@ -1,5 +1,5 @@
 
-package demos.columnAnalyze;
+package gudusoft.gsqlparser.demos.columnAnalyze;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlClause;
@@ -20,8 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import demos.antiSQLInjection.columnImpact.ColumnImpact;
-import demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
+import gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
 
 public class ColumnAnalyze
 {

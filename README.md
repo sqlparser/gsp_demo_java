@@ -49,7 +49,7 @@ Time Escaped: 1546, file processed: 1, syntax errors: 0
 Reformat it:
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=demos.formatsql.formatsql \
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
     -Dexec.args="q.sql" -Dexec.classpathScope=compile
 ```
 
@@ -76,18 +76,17 @@ arguments and it prints its own usage line.
 > even though the jar is right there in `lib/`. `compile` scope includes them
 > and works for every demo.
 
-> **Package names are not uniform yet.** A move of the demos from `demos.*` to
-> `gudusoft.gsqlparser.demos.*` is partly done: 176 files sit under
-> `src/main/java/gudusoft/` while still declaring `package demos.*`, so the class
-> you pass to `-Dexec.mainClass` follows the **package declaration**, not the
-> directory. `checksyntax` is `gudusoft.gsqlparser.demos.checksyntax.checksyntax`;
-> `formatsql` is `demos.formatsql.formatsql`. When in doubt, grep the first
-> `package` line — some of these files lead with a blank line or a comment, so
-> plain `head -1` sometimes returns nothing:
+> **Every demo is `gudusoft.gsqlparser.demos.<demo>.<Class>`.** The directory
+> path under `src/main/java/` *is* the package, for all 190 files, so you can
+> read the `-Dexec.mainClass` value straight off the file's location:
+> `src/main/java/gudusoft/gsqlparser/demos/checksyntax/checksyntax.java` is
+> `gudusoft.gsqlparser.demos.checksyntax.checksyntax`.
 >
-> ```bash
-> grep -m1 '^package' src/main/java/gudusoft/gsqlparser/demos/<demo>/<Demo>.java
-> ```
+> This used to be the single biggest trap in the repository. A half-finished
+> move had left 177 files sitting under `src/main/java/gudusoft/` while still
+> declaring `package demos.*`, so `-Dexec.mainClass` followed the package line
+> and not the directory, and the two disagreed for 263 of 273 files. That is
+> finished now; see "One package root" below.
 
 ## Where the parser comes from
 
@@ -228,9 +227,9 @@ because moving them would have required adding `org.jdom` and
 `src/test/java/demos/visitors/` — the last test package still sitting outside
 the `gudusoft/gsqlparser/` tree — has since been folded into it as
 `gudusoft/gsqlparser/visitorsTest/`, following the `<demoName>Test` convention
-the other directories already use (`joinConvertTest` covers
-`demos.joinConvert`, `antiSQLInjectionTest` covers `demos.antiSQLInjection`,
-and so on). All 20 test files now live under one root.
+the other directories already use (`joinConvertTest` covers the `joinConvert`
+demo, `antiSQLInjectionTest` covers `antiSQLInjection`, and so on). All 20 test
+files now live under one root.
 
 ### The vendored expression library
 
@@ -258,6 +257,60 @@ pointed SBOM and vulnerability tooling at the wrong project. It now names what
 is actually on disk, with a checksum recorded in `pom.xml` since the jar carries
 no version metadata of its own.
 
+### dbConnect moved to connector/
+
+`dbConnect` was a **complete Maven project nested inside `src/main/java`** — its
+own `pom.xml`, its own `src/main/java`, and 10 JDBC driver jars, all sitting in
+the compile root of the project that contains it. It was never built here
+(`pom.xml` excluded it), because it needs JDBC drivers and a live server, and is
+written against `gudusoft.gsqlparser.sqlenv.util` which the public parser no
+longer ships.
+
+It now lives at `connector/dbConnect/`, beside `oracleConnector`,
+`snowflakeConnector` and `sqlServerConnector` — standalone JDBC modules with
+exactly the same `pom.xml` + `src/` + `lib/` shape, none of them part of the
+root build. Nothing in `src/` referenced it, and everything it imports from
+`demos.sqlenv` is inside its own tree, so the move needed no code changes and
+the exclusion in `pom.xml` is simply gone.
+
+It also resolved one of the two split packages: 16 of `demos.sqlenv`'s files
+were dbConnect's and 1 (`runSQLEnv.java`) was not.
+
+### One package root
+
+`src/main/java` had grown four competing package roots — `demos.*`,
+`gudusoft.*`, `gsp.demos.dlineage` and a stray `com.gudusoft.gsqlparser.demo`
+(`App.java`, sitting loose at the very top of the source tree). Java's one hard
+rule is that a file's directory path mirrors its package, and **263 of 273
+files broke it**. Two packages were even split across both roots, so their
+halves shared package-private access from unrelated directories.
+
+There is now exactly one root, `gudusoft/`, and **path equals package for all
+190 files**:
+
+| | session start | now |
+|---|---|---|
+| `.java` under `src/main/java` | 273 | 190 |
+| files whose path contradicts their `package` | 263 | **0** |
+| package roots | 4 | **1** |
+| packages split across roots | 2 | **0** |
+| JDBC driver `.jar` files inside `src/main/java` | 10 | **0** |
+| Maven projects nested in the compile root | 1 | **0** |
+
+Everything moved to `gudusoft.gsqlparser.demos.<demo>`, which is the naming the
+repository had been half-migrated toward for years. **This changes every
+`-Dexec.mainClass` value**, so older instructions that say
+`demos.checksyntax.checksyntax` need `gudusoft.gsqlparser.demos.checksyntax.checksyntax`.
+The per-demo `readme.md` files, the `.bat` scripts and the CI workflow were all
+updated with it.
+
+A side effect worth knowing: the `.bat` scripts now work again. They had been
+stale twice over — compiling `src\main\java\demos\<demo>\` and `cd`-ing up five
+levels, both correct only before the demos moved under
+`gudusoft/gsqlparser/demos/`. Since the rename had to touch them anyway, their
+paths and directory depths were corrected to match where each script actually
+sits (7 levels for most, 8 for the nested ones).
+
 ## What is excluded from the build
 
 Some demos read metadata straight out of a running database over JDBC, using
@@ -266,7 +319,6 @@ the `TSQLDataSource` / `TSQLEnv` family. The public parser artifact ships no
 would need JDBC drivers and a live server to do anything. `pom.xml` excludes
 them from the default build:
 
-- `demos/dbConnect/**` — 143 files
 - `gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java`
 - `gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java`
 - `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java`
@@ -290,12 +342,13 @@ Each demo directory also ships `compile_<demo>.bat` and `run_<demo>.bat`, with
 2. `cd` into a demo directory, for example `src/main/java/gudusoft/gsqlparser/demos/checksyntax`
 3. run `compile_checksyntax.bat`, then `run_checksyntax.bat`
 
-> **These scripts are stale.** They still compile
-> `src\main\java\demos\<demo>\<demo>.java` and `cd` up five levels, both of
-> which were correct before the demos moved under
-> `src/main/java/gudusoft/gsqlparser/demos/`. They need their paths and depth
-> updated. Use Maven in the meantime; the workflow is recorded here so it is not
-> lost.
+These were stale for a long time: they compiled `src\main\java\demos\<demo>\`
+and `cd`-ed up five levels, both correct only before the demos moved under
+`src/main/java/gudusoft/gsqlparser/demos/`. The package rename had to rewrite
+their class names anyway, so their paths and `cd` depths were corrected at the
+same time — 7 levels for most, 8 for the two nested under another demo. They
+have not been run on Windows since, so treat them as repaired-but-unverified;
+Maven remains the tested path.
 
 
 ## Building the dlineage demo on its own

@@ -3,7 +3,7 @@ package gudusoft.gsqlparser.antiSQLInjectionTest;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlStatementType;
 import junit.framework.TestCase;
-import demos.antiSQLInjection.TAntiSQLInjection;
+import gudusoft.gsqlparser.demos.antiSQLInjection.TAntiSQLInjection;
 
 public class antiSQLInjectionTest extends TestCase
 {

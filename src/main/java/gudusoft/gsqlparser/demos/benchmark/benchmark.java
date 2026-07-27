@@ -1,4 +1,4 @@
-package demos.benchmark;
+package gudusoft.gsqlparser.demos.benchmark;
 /*
  * Date: 12-6-29
  */

@@ -17,7 +17,7 @@ cat > paren.sql <<'SQL'
 SELECT * FROM ta WHERE ((a.x > 1));
 SQL
 
-mvn -q exec:java -Dexec.mainClass=demos.sqlrefactor.rmdupParenthesis \
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.sqlrefactor.rmdupParenthesis \
     -Dexec.args="paren.sql /t mssql" -Dexec.classpathScope=runtime
 ```
 

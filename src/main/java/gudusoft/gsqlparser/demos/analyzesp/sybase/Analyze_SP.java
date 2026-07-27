@@ -1,5 +1,5 @@
 
-package demos.analyzesp.sybase;
+package gudusoft.gsqlparser.demos.analyzesp.sybase;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETableEffectType;

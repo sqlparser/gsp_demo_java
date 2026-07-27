@@ -1,5 +1,5 @@
 
-package demos.gettablecolumns;
+package gudusoft.gsqlparser.demos.gettablecolumns;
 
 import java.io.File;
 import java.util.ArrayList;

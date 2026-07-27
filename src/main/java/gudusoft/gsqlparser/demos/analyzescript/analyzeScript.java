@@ -1,4 +1,4 @@
-package demos.analyzescript;
+package gudusoft.gsqlparser.demos.analyzescript;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.*;

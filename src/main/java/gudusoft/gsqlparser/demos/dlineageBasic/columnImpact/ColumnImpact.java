@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.columnImpact;
+package gudusoft.gsqlparser.demos.dlineageBasic.columnImpact;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
@@ -58,25 +58,25 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import demos.dlineageBasic.Dlineage;
-import demos.dlineageBasic.metadata.DDLParser;
-import demos.dlineageBasic.metadata.MetaDB;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
-import demos.dlineageBasic.model.view.AliasModel;
-import demos.dlineageBasic.model.view.Clause;
-import demos.dlineageBasic.model.view.ColumnImpactModel;
-import demos.dlineageBasic.model.view.ColumnModel;
-import demos.dlineageBasic.model.view.FieldModel;
-import demos.dlineageBasic.model.view.ReferenceModel;
-import demos.dlineageBasic.model.view.TableModel;
-import demos.dlineageBasic.model.xml.columnImpactResult;
-import demos.dlineageBasic.model.xml.sourceColumn;
-import demos.dlineageBasic.model.xml.table;
-import demos.dlineageBasic.model.xml.targetColumn;
-import demos.dlineageBasic.util.SQLUtil;
-import demos.dlineageBasic.util.XML2Model;
-import demos.dlineageBasic.util.XMLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.Dlineage;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.DDLParser;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.MetaDB;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.AliasModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.Clause;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnImpactModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.FieldModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ReferenceModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.TableModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.columnImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.sourceColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.table;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.targetColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XML2Model;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XMLUtil;
 
 public class ColumnImpact
 {

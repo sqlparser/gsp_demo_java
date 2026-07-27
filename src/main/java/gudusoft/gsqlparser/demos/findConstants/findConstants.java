@@ -1,7 +1,7 @@
 
-package demos.findConstants;
+package gudusoft.gsqlparser.demos.findConstants;
 
-import demos.utils.SQLUtil;
+import gudusoft.gsqlparser.demos.utils.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETokenType;
 import gudusoft.gsqlparser.TGSqlParser;

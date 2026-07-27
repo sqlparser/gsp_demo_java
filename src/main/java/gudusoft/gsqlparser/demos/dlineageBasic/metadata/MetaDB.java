@@ -1,4 +1,4 @@
-package demos.dlineageBasic.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.metadata;
 
 import gudusoft.gsqlparser.IMetaDatabase;
 
@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 public class MetaDB implements IMetaDatabase {
 

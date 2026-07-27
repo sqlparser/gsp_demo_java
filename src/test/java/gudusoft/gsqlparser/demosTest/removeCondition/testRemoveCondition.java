@@ -1,7 +1,7 @@
 
 package gudusoft.gsqlparser.demosTest.removeCondition;
 
-import demos.removeCondition.removeCondition;
+import gudusoft.gsqlparser.demos.removeCondition.removeCondition;
 import gudusoft.gsqlparser.EDbVendor;
 
 import java.io.BufferedInputStream;

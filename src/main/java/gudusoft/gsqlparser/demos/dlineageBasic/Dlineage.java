@@ -1,4 +1,4 @@
-package demos.dlineageBasic;
+package gudusoft.gsqlparser.demos.dlineageBasic;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,22 +18,22 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import demos.dlineageBasic.columnImpact.ColumnImpact;
-import demos.dlineageBasic.metadata.DDLParser;
-import demos.dlineageBasic.metadata.DDLSchema;
-import demos.dlineageBasic.metadata.ProcedureRelationScanner;
-import demos.dlineageBasic.metadata.ViewParser;
-import demos.dlineageBasic.model.ddl.schema.database;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.MetaScanner;
-import demos.dlineageBasic.model.metadata.ProcedureMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
-import demos.dlineageBasic.model.xml.columnImpactResult;
-import demos.dlineageBasic.model.xml.procedureImpactResult;
-import demos.dlineageBasic.util.Pair;
-import demos.dlineageBasic.util.SQLUtil;
-import demos.dlineageBasic.util.XML2Model;
-import demos.dlineageBasic.util.XMLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.DDLParser;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.DDLSchema;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.ProcedureRelationScanner;
+import gudusoft.gsqlparser.demos.dlineageBasic.metadata.ViewParser;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.database;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.MetaScanner;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ProcedureMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.columnImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.procedureImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.Pair;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XML2Model;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XMLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 

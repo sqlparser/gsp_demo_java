@@ -1,4 +1,4 @@
-package demos.antiSQLInjection;
+package gudusoft.gsqlparser.demos.antiSQLInjection;
 
 /**
  * value returned when GEval can't evaluate a value from an expression.

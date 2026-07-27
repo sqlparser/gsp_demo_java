@@ -1,4 +1,4 @@
-package demos.listGSPInfo;
+package gudusoft.gsqlparser.demos.listGSPInfo;
 
 /**
  * This demo illustrate how to list information of general sql parser library.

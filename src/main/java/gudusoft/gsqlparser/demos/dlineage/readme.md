@@ -14,7 +14,7 @@ mvn package
 
 编译成功的 jar 包位于 target\dlineage-1.0.jar, 运行该demo
 ```
-java -cp "target/dlineage-1.0.jar;c:\prg\maven_repo\gudusoft\gsqlparser\3.1.0.2\gsqlparser-3.1.0.2.jar" gsp.demos.dlineage.DataFlowAnalyzer /f c:\prg\tmp\demo.sql /t oracle
+java -cp "target/dlineage-1.0.jar;c:\prg\maven_repo\gudusoft\gsqlparser\3.1.0.2\gsqlparser-3.1.0.2.jar" gsp.gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer /f c:\prg\tmp\demo.sql /t oracle
 ```
 
 

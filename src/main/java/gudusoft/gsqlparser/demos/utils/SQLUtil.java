@@ -1,5 +1,5 @@
 
-package demos.utils;
+package gudusoft.gsqlparser.demos.utils;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;

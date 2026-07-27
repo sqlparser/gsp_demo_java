@@ -1,4 +1,4 @@
-package demos.performance;
+package gudusoft.gsqlparser.demos.performance;
 
 import gudusoft.gsqlparser.*;
 import java.util.concurrent.*;

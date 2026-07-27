@@ -1,11 +1,11 @@
 
-package demos.dlineageBasic.model.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.metadata;
 
 import java.util.Arrays;
 import java.util.List;
 
-import demos.dlineageBasic.Dlineage;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.Dlineage;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 public class MetaScanner
 {

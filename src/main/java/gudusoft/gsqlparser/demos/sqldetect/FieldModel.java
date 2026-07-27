@@ -1,4 +1,4 @@
-package demos.sqldetect;
+package gudusoft.gsqlparser.demos.sqldetect;
 
 import gudusoft.gsqlparser.nodes.TResultColumn;
 

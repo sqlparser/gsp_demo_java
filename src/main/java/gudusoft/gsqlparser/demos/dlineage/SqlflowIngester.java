@@ -1,4 +1,4 @@
-package gsp.demos.dlineage;
+package gudusoft.gsqlparser.demos.dlineage;
 
 import gudusoft.sqlflow.ingester.exporter.SqlflowExporter;
 import gudusoft.sqlflow.ingester.library.domain.DataSource;

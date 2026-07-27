@@ -1,5 +1,5 @@
 
-package demos.tracedatalineage;
+package gudusoft.gsqlparser.demos.tracedatalineage;
 
 public class Column
 {

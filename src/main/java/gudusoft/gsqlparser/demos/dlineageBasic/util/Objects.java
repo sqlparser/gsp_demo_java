@@ -1,4 +1,4 @@
-package demos.dlineageBasic.util;
+package gudusoft.gsqlparser.demos.dlineageBasic.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

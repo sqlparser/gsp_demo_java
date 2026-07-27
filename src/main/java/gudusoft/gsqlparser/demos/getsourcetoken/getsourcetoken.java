@@ -1,4 +1,4 @@
-package demos.getsourcetoken;
+package gudusoft.gsqlparser.demos.getsourcetoken;
 
 
 import gudusoft.gsqlparser.*;

@@ -1,5 +1,5 @@
 
-package demos.getStmtTables;
+package gudusoft.gsqlparser.demos.getStmtTables;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

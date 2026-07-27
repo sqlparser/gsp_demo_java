@@ -1,4 +1,4 @@
-package demos.analyzescript;
+package gudusoft.gsqlparser.demos.analyzescript;
 /*
  * Date: 2010-12-10
  * Time: 16:24:30

@@ -1,5 +1,5 @@
 
-package demos.analyzeview;
+package gudusoft.gsqlparser.demos.analyzeview;
 
 import java.awt.Point;
 import java.io.File;

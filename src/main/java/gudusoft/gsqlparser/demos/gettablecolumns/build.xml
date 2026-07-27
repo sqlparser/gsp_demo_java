@@ -47,7 +47,7 @@
 		<jar jarfile="${build.dest}/${jar}" basedir="${build.bin}">
 			<zipfileset src="${demo.lib}/gudusoft.gsqlparser-${gsp.version}.jar" />
 			<manifest>
-				<attribute name="Main-Class" value="demos.gettablecolumns.runGetTableColumn" />
+				<attribute name="Main-Class" value="gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn" />
 			</manifest>
 		</jar>
 	</target>

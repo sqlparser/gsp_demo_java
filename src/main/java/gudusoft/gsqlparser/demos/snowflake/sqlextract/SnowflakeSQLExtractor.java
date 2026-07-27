@@ -1,4 +1,4 @@
-package demos.snowflake.sqlextract;
+package gudusoft.gsqlparser.demos.snowflake.sqlextract;
 
 import java.io.File;
 import java.io.InputStreamReader;

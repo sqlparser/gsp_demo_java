@@ -1,5 +1,5 @@
 
-package demos.antiSQLInjection;
+package gudusoft.gsqlparser.demos.antiSQLInjection;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

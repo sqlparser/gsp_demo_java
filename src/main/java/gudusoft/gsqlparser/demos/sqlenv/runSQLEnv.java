@@ -1,7 +1,7 @@
-package demos.sqlenv;
+package gudusoft.gsqlparser.demos.sqlenv;
 
-import demos.utils.SQLQuery;
-import demos.utils.TJsonSQLEnv;
+import gudusoft.gsqlparser.demos.utils.SQLQuery;
+import gudusoft.gsqlparser.demos.utils.TJsonSQLEnv;
 import gudusoft.gsqlparser.EDbVendor;
 
 import java.util.Arrays;

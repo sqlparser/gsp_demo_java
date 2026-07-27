@@ -16,7 +16,7 @@ import junit.framework.TestCase;
 import com.github.junrar.Archive;
 import com.github.junrar.rarfile.FileHeader;
 
-import demos.antiSQLInjection.TAntiSQLInjection;
+import gudusoft.gsqlparser.demos.antiSQLInjection.TAntiSQLInjection;
 
 public class antiSQLInjectionBatchTest extends TestCase
 {

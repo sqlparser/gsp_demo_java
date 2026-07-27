@@ -1,5 +1,5 @@
 
-package demos.removeCondition;
+package gudusoft.gsqlparser.demos.removeCondition;
 
 import java.io.File;
 import java.util.HashMap;

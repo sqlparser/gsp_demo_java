@@ -1,4 +1,4 @@
-package demos.formatsql;
+package gudusoft.gsqlparser.demos.formatsql;
 /*
  * Date: 2010-11-9
  * Time: 9:38:43

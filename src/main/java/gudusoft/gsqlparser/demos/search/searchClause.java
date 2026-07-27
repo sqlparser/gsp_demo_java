@@ -1,4 +1,4 @@
-package demos.search;
+package gudusoft.gsqlparser.demos.search;
 
 import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.EDbVendor;

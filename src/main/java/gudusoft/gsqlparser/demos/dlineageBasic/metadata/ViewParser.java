@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.metadata;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESetOperatorType;
@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import demos.dlineageBasic.columnImpact.ColumnImpact;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
-import demos.dlineageBasic.model.view.ColumnImpactModel;
-import demos.dlineageBasic.model.view.ColumnModel;
-import demos.dlineageBasic.model.view.ReferenceModel;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnImpactModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ReferenceModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 public class ViewParser
 {

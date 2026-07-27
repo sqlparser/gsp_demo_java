@@ -1,7 +1,7 @@
 package gudusoft.gsqlparser.commonTest;
 
 
-import demos.visitors.xmlVisitor;
+import gudusoft.gsqlparser.demos.visitors.xmlVisitor;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 import junit.framework.TestCase;

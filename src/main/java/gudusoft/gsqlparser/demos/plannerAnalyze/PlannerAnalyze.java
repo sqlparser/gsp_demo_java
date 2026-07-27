@@ -1,5 +1,5 @@
 
-package demos.plannerAnalyze;
+package gudusoft.gsqlparser.demos.plannerAnalyze;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlClause;
@@ -33,8 +33,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import demos.antiSQLInjection.columnImpact.ColumnImpact;
-import demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
+import gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact.ColumnImpact.TColumn;
 
 class PlanFileList
 {

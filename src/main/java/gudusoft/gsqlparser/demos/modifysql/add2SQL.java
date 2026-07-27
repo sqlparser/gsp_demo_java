@@ -1,4 +1,4 @@
-package demos.modifysql;
+package gudusoft.gsqlparser.demos.modifysql;
 /*
  * Date: 2010-12-10
  * Time: 11:18:02

@@ -1,4 +1,4 @@
-package demos.events;
+package gudusoft.gsqlparser.demos.events;
 
 import gudusoft.gsqlparser.*;
 

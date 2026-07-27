@@ -1,4 +1,4 @@
-package demos.findproceduralsql;
+package gudusoft.gsqlparser.demos.findproceduralsql;
 
 import gudusoft.gsqlparser.*;
 

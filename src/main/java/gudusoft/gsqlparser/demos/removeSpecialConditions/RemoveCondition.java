@@ -1,4 +1,4 @@
-package demos.removeSpecialConditions;
+package gudusoft.gsqlparser.demos.removeSpecialConditions;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

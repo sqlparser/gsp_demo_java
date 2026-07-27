@@ -1,8 +1,8 @@
 
-package demos.sqltranslator;
+package gudusoft.gsqlparser.demos.sqltranslator;
 
-import demos.sqltranslator.exception.FunctionIdentifierException;
-import demos.sqltranslator.exception.SpecialIdentifierException;
+import gudusoft.gsqlparser.demos.sqltranslator.exception.FunctionIdentifierException;
+import gudusoft.gsqlparser.demos.sqltranslator.exception.SpecialIdentifierException;
 import gudusoft.gsqlparser.EDbObjectType;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TSourceToken;

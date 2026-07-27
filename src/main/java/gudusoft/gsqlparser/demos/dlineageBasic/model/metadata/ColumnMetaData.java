@@ -1,11 +1,11 @@
 
-package demos.dlineageBasic.model.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.metadata;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 @SuppressWarnings("serial")
 public class ColumnMetaData extends LinkedHashMap<String, Object>

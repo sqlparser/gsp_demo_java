@@ -49,7 +49,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>demos.checksyntax.checksyntax</mainClass>
+                    <mainClass>gudusoft.gsqlparser.demos.checksyntax.checksyntax</mainClass>
 
                     <!-- Parameters of the checksyntax class -->
                     <arguments>

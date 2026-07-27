@@ -1,4 +1,4 @@
-package demos.analyzescript;
+package gudusoft.gsqlparser.demos.analyzescript;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import demos.columnInClause;
+import gudusoft.gsqlparser.demos.columnInClause;
 
 /*
  * ref: http://www.dpriver.com/blog/list-of-demos-illustrate-how-to-use-general-sql-parser/visit-sql-statement-recursively/

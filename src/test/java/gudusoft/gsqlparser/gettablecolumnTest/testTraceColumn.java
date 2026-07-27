@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.gettablecolumnTest;
 
-import demos.traceColumn.TTraceColumn;
+import gudusoft.gsqlparser.demos.traceColumn.TTraceColumn;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TBaseType;
 import junit.framework.TestCase;

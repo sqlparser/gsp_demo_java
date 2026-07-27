@@ -1,5 +1,5 @@
 
-package demos.sqltranslator;
+package gudusoft.gsqlparser.demos.sqltranslator;
 
 import gudusoft.gsqlparser.EDataType;
 import gudusoft.gsqlparser.EDbVendor;

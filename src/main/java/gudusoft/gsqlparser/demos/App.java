@@ -1,4 +1,4 @@
-package com.gudusoft.gsqlparser.demo;
+package gudusoft.gsqlparser.demos;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;

@@ -1,4 +1,4 @@
-package demos.sqldetect;
+package gudusoft.gsqlparser.demos.sqldetect;
 
 public enum TableAction {
 	CREATE,SELECT,UDPATE,INSERT,DELETE,MERGE,DROP,TRUNCATE, OTHER;

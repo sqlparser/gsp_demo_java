@@ -1,4 +1,4 @@
-package demos.gettablecolumns;
+package gudusoft.gsqlparser.demos.gettablecolumns;
 
 
 import gudusoft.gsqlparser.*;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
-import demos.joinRelationAnalyze.joinRelationAnalyze;
+import gudusoft.gsqlparser.demos.joinRelationAnalyze.joinRelationAnalyze;
 
 class myMetaDB implements IMetaDatabase {
 

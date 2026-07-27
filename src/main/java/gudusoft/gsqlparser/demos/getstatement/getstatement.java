@@ -1,4 +1,4 @@
-package demos.getstatement;
+package gudusoft.gsqlparser.demos.getstatement;
 
 
 import gudusoft.gsqlparser.*;

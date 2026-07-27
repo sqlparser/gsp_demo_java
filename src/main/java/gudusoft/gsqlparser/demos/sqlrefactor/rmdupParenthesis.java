@@ -1,4 +1,4 @@
-package demos.sqlrefactor;
+package gudusoft.gsqlparser.demos.sqlrefactor;
 /*
  * Date: 13-9-30
  */

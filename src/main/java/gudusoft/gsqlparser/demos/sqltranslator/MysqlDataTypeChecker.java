@@ -1,5 +1,5 @@
 
-package demos.sqltranslator;
+package gudusoft.gsqlparser.demos.sqltranslator;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

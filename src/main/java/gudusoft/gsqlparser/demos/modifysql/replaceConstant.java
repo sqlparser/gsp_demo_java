@@ -1,4 +1,4 @@
-package demos.modifysql;
+package gudusoft.gsqlparser.demos.modifysql;
 /*
  * Date: 13-4-18
  */

@@ -1,5 +1,5 @@
 
-package demos.joinRelationAnalyze;
+package gudusoft.gsqlparser.demos.joinRelationAnalyze;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

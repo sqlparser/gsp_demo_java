@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.metadata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,22 +8,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import demos.dlineageBasic.columnImpact.ColumnImpact;
-import demos.dlineageBasic.model.ddl.schema.foreignKey;
-import demos.dlineageBasic.model.ddl.schema.index;
-import demos.dlineageBasic.model.ddl.schema.indexColumn;
-import demos.dlineageBasic.model.ddl.schema.reference;
-import demos.dlineageBasic.model.ddl.schema.unique;
-import demos.dlineageBasic.model.ddl.schema.uniqueColumn;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.ProcedureMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
-import demos.dlineageBasic.model.view.ColumnImpactModel;
-import demos.dlineageBasic.model.view.ColumnModel;
-import demos.dlineageBasic.model.view.ReferenceModel;
-import demos.dlineageBasic.model.xml.procedureImpactResult;
-import demos.dlineageBasic.util.Pair;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.foreignKey;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.index;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.indexColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.reference;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.unique;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.uniqueColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ProcedureMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnImpactModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ColumnModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.view.ReferenceModel;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.procedureImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.Pair;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.EKeyActionType;

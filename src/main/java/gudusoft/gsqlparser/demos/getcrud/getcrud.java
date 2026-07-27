@@ -1,4 +1,4 @@
-package demos.getcrud;
+package gudusoft.gsqlparser.demos.getcrud;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;

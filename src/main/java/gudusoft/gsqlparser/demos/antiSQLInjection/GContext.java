@@ -1,4 +1,4 @@
-package demos.antiSQLInjection;
+package gudusoft.gsqlparser.demos.antiSQLInjection;
 
 import java.util.Map;
 

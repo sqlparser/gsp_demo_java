@@ -1,4 +1,4 @@
-package demos.traceColumn;
+package gudusoft.gsqlparser.demos.traceColumn;
 
 
 import gudusoft.gsqlparser.EDbVendor;

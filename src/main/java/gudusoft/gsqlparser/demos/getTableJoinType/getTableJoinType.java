@@ -1,5 +1,5 @@
 
-package demos.getTableJoinType;
+package gudusoft.gsqlparser.demos.getTableJoinType;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EJoinType;

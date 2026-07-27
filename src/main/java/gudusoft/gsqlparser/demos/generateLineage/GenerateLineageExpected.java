@@ -1,4 +1,4 @@
-package demos.generateLineage;
+package gudusoft.gsqlparser.demos.generateLineage;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.dlineage.DataFlowAnalyzer;

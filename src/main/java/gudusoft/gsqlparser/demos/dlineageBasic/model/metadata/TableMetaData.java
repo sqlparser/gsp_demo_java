@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.model.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.metadata;
 
 import gudusoft.gsqlparser.EDbVendor;
 
@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import demos.dlineageBasic.model.ddl.schema.foreignKey;
-import demos.dlineageBasic.model.ddl.schema.index;
-import demos.dlineageBasic.model.ddl.schema.unique;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.foreignKey;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.index;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.unique;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 @SuppressWarnings("serial")
 public class TableMetaData extends HashMap<String, Object>

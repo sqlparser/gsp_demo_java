@@ -1,4 +1,4 @@
-package demos.dlineageBasic.model.xml;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.xml;
 
 import java.util.List;
 

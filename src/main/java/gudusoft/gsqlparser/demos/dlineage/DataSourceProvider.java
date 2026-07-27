@@ -1,4 +1,4 @@
-package gsp.demos.dlineage;
+package gudusoft.gsqlparser.demos.dlineage;
 
 import gudusoft.dbadapter.*;
 import gudusoft.gsqlparser.EDbVendor;

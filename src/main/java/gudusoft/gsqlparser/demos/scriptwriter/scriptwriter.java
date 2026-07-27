@@ -1,4 +1,4 @@
-package demos.scriptwriter;
+package gudusoft.gsqlparser.demos.scriptwriter;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

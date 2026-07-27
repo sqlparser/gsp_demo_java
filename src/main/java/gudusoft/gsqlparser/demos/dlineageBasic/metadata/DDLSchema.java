@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.metadata;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,11 +15,11 @@ import java.util.Map;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import demos.dlineageBasic.model.ddl.schema.column;
-import demos.dlineageBasic.model.ddl.schema.database;
-import demos.dlineageBasic.model.ddl.schema.table;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.TableMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.column;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.database;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.table;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.TableMetaData;
 
 public class DDLSchema
 {

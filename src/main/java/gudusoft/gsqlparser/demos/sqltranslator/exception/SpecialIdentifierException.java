@@ -1,5 +1,5 @@
 
-package demos.sqltranslator.exception;
+package gudusoft.gsqlparser.demos.sqltranslator.exception;
 
 public class SpecialIdentifierException extends Exception
 {

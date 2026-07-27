@@ -1,4 +1,4 @@
-package demos.dlineageBasic.model.view;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.view;
 
 import java.awt.Point;
 

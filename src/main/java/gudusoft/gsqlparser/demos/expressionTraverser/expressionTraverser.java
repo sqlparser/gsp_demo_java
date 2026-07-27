@@ -1,4 +1,4 @@
-package demos.expressionTraverser;
+package gudusoft.gsqlparser.demos.expressionTraverser;
 /*
  * Date: 2010-11-3
  * Time: 10:38:15

@@ -196,16 +196,19 @@
                 <version>3.13.0</version>
                 <configuration>
                     <excludes>
-                        <!-- demos/dbConnect wires the parser up to live databases
-                             over JDBC to grab metadata. It is excluded from the
-                             default build for two reasons: it needs JDBC drivers
-                             and a reachable server to do anything, and it is
-                             written against gudusoft.gsqlparser.sqlenv.util,
-                             which the current public parser no longer ships.
-                             Reviving it needs an API migration, not a rebuild. -->
-                        <exclude>demos/dbConnect/**</exclude>
+                        <!-- dbConnect used to be excluded here as demos/dbConnect/**.
+                             It was never part of this build: it wires the parser up
+                             to live databases over JDBC, needs drivers and a
+                             reachable server, and is written against
+                             gudusoft.gsqlparser.sqlenv.util which the public parser
+                             no longer ships. It was also a whole Maven project
+                             nested inside src/main/java, with its own pom.xml, its
+                             own src/main/java and 10 JDBC driver jars. It now lives
+                             at connector/dbConnect/ next to the other standalone
+                             JDBC modules, so there is nothing left to exclude. -->
 
-                        <!-- Same story, three stragglers outside dbConnect: they
+                        <!-- Three stragglers that do still sit in this source tree:
+                             they
                              build a TSQLDataSource / T<Vendor>SQLDataSource to
                              read metadata straight out of a running database.
                              The public parser ships no *SQLDataSource class at
@@ -214,10 +217,10 @@
                              Everything else in their packages still builds. -->
                         <exclude>gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java</exclude>
 
-                        <!-- Declares package demos.gettablecolumns and redefines
-                             myMetaDB / TInfoRecord / SortIgnoreCase, which the
-                             retained demos/gettablecolumns/TGetTableColumn.java
-                             already provides. Its name records that it is dead. -->
+                        <!-- Redefines myMetaDB / TInfoRecord / SortIgnoreCase,
+                             which the retained TGetTableColumn.java in the same
+                             package already provides. Its name records that it
+                             is dead. -->
                         <exclude>gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java</exclude>
                         <exclude>gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java</exclude>
                         <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
@@ -235,7 +238,7 @@
                              this tree sits inside the library checkout, so it
                              cannot pass standalone. It stays in this repository
                              regardless, because the class it exercises,
-                             demos.visitors.xmlVisitor, is a demo that lives here
+                             gudusoft.gsqlparser.demos.visitors.xmlVisitor, is a demo that lives here
                              and not in the library. -->
                         <testExclude>gudusoft/gsqlparser/visitorsTest/XmlSchemaValidationTest.java</testExclude>
                         <!-- TestRunner exists only to run the class above, and

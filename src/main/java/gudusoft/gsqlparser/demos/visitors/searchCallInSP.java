@@ -1,6 +1,6 @@
-package demos.visitors;
+package gudusoft.gsqlparser.demos.visitors;
 
-import demos.tracedatalineage.SqlFileList;
+import gudusoft.gsqlparser.demos.tracedatalineage.SqlFileList;
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TFunctionCall;
 import gudusoft.gsqlparser.nodes.TParseTreeVisitor;

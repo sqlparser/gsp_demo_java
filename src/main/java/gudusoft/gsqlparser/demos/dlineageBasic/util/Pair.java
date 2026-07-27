@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.util;
+package gudusoft.gsqlparser.demos.dlineageBasic.util;
 
 /**
  * Container to ease passing around a tuple of two objects. This object provides

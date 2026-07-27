@@ -1,4 +1,4 @@
-package demos.dlineageBasic;
+package gudusoft.gsqlparser.demos.dlineageBasic;
 
 import gudusoft.gsqlparser.EDbVendor;
 
@@ -20,20 +20,20 @@ import gudusoft.gsqlparser.TGSqlParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import demos.dlineageBasic.model.ddl.schema.column;
-import demos.dlineageBasic.model.ddl.schema.database;
-import demos.dlineageBasic.model.ddl.schema.table;
-import demos.dlineageBasic.model.metadata.ColumnMetaData;
-import demos.dlineageBasic.model.metadata.MetaScanner;
-import demos.dlineageBasic.model.metadata.ProcedureMetaData;
-import demos.dlineageBasic.model.xml.columnImpactResult;
-import demos.dlineageBasic.model.xml.linkTable;
-import demos.dlineageBasic.model.xml.sourceColumn;
-import demos.dlineageBasic.model.xml.sourceProcedure;
-import demos.dlineageBasic.model.xml.targetColumn;
-import demos.dlineageBasic.model.xml.targetProcedure;
-import demos.dlineageBasic.util.XML2Model;
-import demos.dlineageBasic.util.XMLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.column;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.database;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.ddl.schema.table;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ColumnMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.MetaScanner;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ProcedureMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.columnImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.linkTable;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.sourceColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.sourceProcedure;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.targetColumn;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.targetProcedure;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XML2Model;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.XMLUtil;
 
 public class DlineageRelation
 {

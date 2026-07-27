@@ -1,4 +1,4 @@
-package demos.utils;
+package gudusoft.gsqlparser.demos.utils;
 
 import java.util.Iterator;
 

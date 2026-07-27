@@ -8,7 +8,7 @@ REM # Set the target directory where the compiled class should be copied.
 set targetdir=build
 
 REM # Change directory to gsp Demo Home directory
-cd ..\..\..\..\..
+cd ..\..\..\..\..\..\..
 
 REM # Run the setenv to set the environment variables.
 call setenv\setenv.bat
@@ -22,7 +22,7 @@ call setenv\setenv.bat
     echo eg. JAVA_HOME=C:\Program Files\Java\jdk1.7.0_80
     echo ***************************
     echo.
-    cd src\main\java\demos\dlineageBasic
+    cd src\main\java\gudusoft\gsqlparser\demos\dlineageBasic
     pause
     goto END
     )
@@ -32,12 +32,12 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
-%JAVAC_CMD% -encoding UTF-8 -d %targetdir% -classpath %CLASSPATH% src\main\java\demos\dlineageBasic\model\xml\*.java src\main\java\demos\dlineageBasic\model\view\*.java src\main\java\demos\dlineageBasic\model\metadata\*.java src\main\java\demos\dlineageBasic\model\ddl\schema\*.java src\main\java\demos\dlineageBasic\metadata\*.java src\main\java\demos\dlineageBasic\util\*.java src\main\java\demos\dlineageBasic\columnImpact\*.java  src\main\java\demos\dlineageBasic\*.java
+%JAVAC_CMD% -encoding UTF-8 -d %targetdir% -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\xml\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\view\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\metadata\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\ddl\schema\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\metadata\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\util\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\columnImpact\*.java  src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\*.java
 
 echo Completed.
 
 REM # Change directory to the original directory
-cd src\main\java\demos\dlineageBasic
+cd src\main\java\gudusoft\gsqlparser\demos\dlineageBasic
 
 pause
 

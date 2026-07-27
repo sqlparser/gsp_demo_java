@@ -1,5 +1,5 @@
 
-package demos.removeSpecialConditions;
+package gudusoft.gsqlparser.demos.removeSpecialConditions;
 
 import gudusoft.gsqlparser.EExpressionType;
 import gudusoft.gsqlparser.TCustomSqlStatement;

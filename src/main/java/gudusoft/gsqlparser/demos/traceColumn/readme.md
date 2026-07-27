@@ -11,7 +11,7 @@ reads from, recursing into subqueries, derived tables and nested expressions.
 `/f` file argument or CLI parsing here, unlike most other demos. Run it with:
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=demos.traceColumn.runTraceColumn -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.traceColumn.runTraceColumn -Dexec.classpathScope=compile
 ```
 
 To trace a different query, edit the `sqltext` (or the vendor passed to

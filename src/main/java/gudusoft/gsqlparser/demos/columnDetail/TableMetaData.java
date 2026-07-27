@@ -1,4 +1,4 @@
-package demos.columnDetail;
+package gudusoft.gsqlparser.demos.columnDetail;
 
 import java.util.HashMap;
 

@@ -1,5 +1,5 @@
 
-package demos.analyzesp;
+package gudusoft.gsqlparser.demos.analyzesp;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ETableEffectType;

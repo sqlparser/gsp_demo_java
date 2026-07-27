@@ -1,11 +1,11 @@
 
-package demos.dlineageBasic.model.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.model.metadata;
 
 import gudusoft.gsqlparser.EDbVendor;
 
 import java.util.LinkedHashMap;
 
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 
 public class ProcedureMetaData extends LinkedHashMap<String, Object>
 {

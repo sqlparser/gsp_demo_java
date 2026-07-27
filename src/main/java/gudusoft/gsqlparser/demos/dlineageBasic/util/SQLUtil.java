@@ -1,5 +1,5 @@
 
-package demos.dlineageBasic.util;
+package gudusoft.gsqlparser.demos.dlineageBasic.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

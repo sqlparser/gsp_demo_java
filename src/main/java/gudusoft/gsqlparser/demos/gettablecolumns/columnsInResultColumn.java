@@ -1,4 +1,4 @@
-package demos.gettablecolumns;
+package gudusoft.gsqlparser.demos.gettablecolumns;
 
 /*
  * Date: 11-4-19
@@ -11,7 +11,7 @@ import gudusoft.gsqlparser.TGSqlParser;
 import gudusoft.gsqlparser.nodes.TResultColumn;
 import gudusoft.gsqlparser.nodes.TResultColumnList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import demos.columnInClause;
+import gudusoft.gsqlparser.demos.columnInClause;
 
 public class columnsInResultColumn {
 

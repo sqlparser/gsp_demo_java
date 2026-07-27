@@ -18,7 +18,7 @@ For more detailed information about how this tools works, please check [this art
 > For column/table extraction without a database connection, in this
 > repository, use `getResultColumn` instead:
 > ```bash
-> mvn -q exec:java -Dexec.mainClass=demos.gettablecolumns.getResultColumn -Dexec.classpathScope=compile
+> mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.gettablecolumns.getResultColumn -Dexec.classpathScope=compile
 > ```
 > It parses an inline query and prints its result columns; edit the `sqltext`
 > in `getResultColumn.java` to try your own SQL. Other classes in this folder
@@ -83,19 +83,19 @@ azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sq
 Tables are under this schema: `AdventureWorksDW2019/dbo`.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.gettablecolumns.runGetTableColumn /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /showDetail
+java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /showDetail
 ```
 
 ### connect to Oracle
 Tables are under `HR` schema and connect to database using `orcl` instance.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.gettablecolumns.runGetTableColumn /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /showDetail
+java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /showDetail
 ```
 
 ### connect to MySQL
 Tables are under `employees` database.
 
 ```sh
-java -cp .;lib/*;external_lib/* demos.gettablecolumns.runGetTableColumn /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /showDetail
+java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /showDetail
 ```

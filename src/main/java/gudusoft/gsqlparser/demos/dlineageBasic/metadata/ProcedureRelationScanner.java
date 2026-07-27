@@ -1,16 +1,16 @@
 
-package demos.dlineageBasic.metadata;
+package gudusoft.gsqlparser.demos.dlineageBasic.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import demos.dlineageBasic.model.metadata.ProcedureMetaData;
-import demos.dlineageBasic.model.xml.procedure;
-import demos.dlineageBasic.model.xml.procedureImpactResult;
-import demos.dlineageBasic.model.xml.sourceProcedure;
-import demos.dlineageBasic.model.xml.targetProcedure;
-import demos.dlineageBasic.util.Pair;
-import demos.dlineageBasic.util.SQLUtil;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.metadata.ProcedureMetaData;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.procedure;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.procedureImpactResult;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.sourceProcedure;
+import gudusoft.gsqlparser.demos.dlineageBasic.model.xml.targetProcedure;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.Pair;
+import gudusoft.gsqlparser.demos.dlineageBasic.util.SQLUtil;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;

@@ -1,6 +1,6 @@
 package gudusoft.gsqlparser.joinConvertTest;
 
-import demos.joinConvert.JoinConverter;
+import gudusoft.gsqlparser.demos.joinConvert.JoinConverter;
 import gudusoft.gsqlparser.EDbVendor;
 import junit.framework.TestCase;
 

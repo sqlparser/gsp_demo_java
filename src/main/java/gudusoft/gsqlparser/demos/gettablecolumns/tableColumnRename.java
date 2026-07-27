@@ -1,5 +1,5 @@
 
-package demos.gettablecolumns;
+package gudusoft.gsqlparser.demos.gettablecolumns;
 
 import gudusoft.gsqlparser.*;
 import gudusoft.gsqlparser.nodes.TObjectName;

@@ -1,4 +1,4 @@
-package demos.columnInWhereClause;
+package gudusoft.gsqlparser.demos.columnInWhereClause;
 
 import gudusoft.gsqlparser.nodes.TExpression;
 import gudusoft.gsqlparser.nodes.TFunctionCall;

@@ -1,5 +1,5 @@
 
-package demos.tracedatalineage;
+package gudusoft.gsqlparser.demos.tracedatalineage;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;

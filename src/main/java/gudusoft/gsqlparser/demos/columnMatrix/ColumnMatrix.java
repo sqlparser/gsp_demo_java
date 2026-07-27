@@ -1,5 +1,5 @@
 
-package demos.columnMatrix;
+package gudusoft.gsqlparser.demos.columnMatrix;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

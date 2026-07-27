@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import demos.visitors.xmlVisitor;
+import gudusoft.gsqlparser.demos.visitors.xmlVisitor;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;

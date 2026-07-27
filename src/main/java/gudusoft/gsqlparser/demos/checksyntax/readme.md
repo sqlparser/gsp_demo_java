@@ -18,7 +18,7 @@ Only SQL filename ended with .sql extentsion will be processed.
 2.Configure parameters for the checksyntax class in the pom.xml.
 ```pom
 <configuration>
-    <mainClass>demos.checksyntax.checksyntax</mainClass>
+    <mainClass>gudusoft.gsqlparser.demos.checksyntax.checksyntax</mainClass>
 
     <!-- Parameters of the checksyntax class, eg: -->
     <arguments>

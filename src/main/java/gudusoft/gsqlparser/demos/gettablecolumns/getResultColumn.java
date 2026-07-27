@@ -1,4 +1,4 @@
-package demos.gettablecolumns;
+package gudusoft.gsqlparser.demos.gettablecolumns;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

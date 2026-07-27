@@ -1,6 +1,6 @@
-package demos.visitors;
+package gudusoft.gsqlparser.demos.visitors;
 
-import demos.joinConvert.JoinConverter;
+import gudusoft.gsqlparser.demos.joinConvert.JoinConverter;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;

@@ -1,5 +1,5 @@
 
-package demos.scantable;
+package gudusoft.gsqlparser.demos.scantable;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.ESqlClause;

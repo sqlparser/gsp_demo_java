@@ -1,5 +1,5 @@
 
-package demos.visitors;
+package gudusoft.gsqlparser.demos.visitors;
 
 import gudusoft.gsqlparser.*;
 
@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
-//import demos.utils.SQLUtil;
+//import gudusoft.gsqlparser.demos.utils.SQLUtil;
 
 public class toXml
 {

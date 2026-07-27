@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import demos.tracedatalineage.Column;
-import demos.tracedatalineage.traceDataLineage;
+import gudusoft.gsqlparser.demos.tracedatalineage.Column;
+import gudusoft.gsqlparser.demos.tracedatalineage.traceDataLineage;
 import junit.framework.TestCase;
 
 /**

@@ -1,5 +1,5 @@
 
-package demos.sqltranslator;
+package gudusoft.gsqlparser.demos.sqltranslator;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TSourceToken;
@@ -8,7 +8,7 @@ import gudusoft.gsqlparser.nodes.THierarchical;
 import gudusoft.gsqlparser.nodes.TParseTreeNode;
 import gudusoft.gsqlparser.nodes.TParseTreeNodeList;
 import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
-import demos.joinConvert.JoinConverter;
+import gudusoft.gsqlparser.demos.joinConvert.JoinConverter;
 
 import java.util.Stack;
 

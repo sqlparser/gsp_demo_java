@@ -1,4 +1,4 @@
-package demos.modifysql;
+package gudusoft.gsqlparser.demos.modifysql;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

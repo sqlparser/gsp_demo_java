@@ -1,4 +1,4 @@
-package demos.antiSQLInjection.columnImpact;
+package gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.EExpressionType;

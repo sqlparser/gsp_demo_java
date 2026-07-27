@@ -1,5 +1,5 @@
 
-package demos.formatsql;
+package gudusoft.gsqlparser.demos.formatsql;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import demos.antiSQLInjection.columnImpact.ColumnImpact;
+import gudusoft.gsqlparser.demos.antiSQLInjection.columnImpact.ColumnImpact;
 
 import static gudusoft.gsqlparser.TBaseType.readFromTextfile;
 
