@@ -205,25 +205,25 @@
                         <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
                     </excludes>
                     <testExcludes>
-                        <!-- The only test that cannot compile against the public
-                             parser: it asserts on TSQLEnv.columnCollationCaseSensitive,
-                             tableCollationCaseSensitive and defaultCollationCaseSensitive,
-                             three fields the published artifact does not expose.
-                             Verified by compiling all 224 test sources in a single
-                             javac pass: these are the only three errors. -->
-                        <testExclude>gudusoft/gsqlparser/commonTest/testDBVendor.java</testExclude>
+                        <!-- commonTest/testDBVendor.java used to be excluded here: it
+                             asserted on three TSQLEnv collation fields the published
+                             artifact does not expose. It has since been returned to
+                             the library, along with the rest of the library-side test
+                             tree that was duplicated here. -->
 
                         <!-- Validates generated XML against
                              ../gsp_java_core/doc/xml/sqlschema_comprehensive.xsd,
                              a path outside this repository. It only resolves when
-                             the demo tree sits inside the library checkout, so it
-                             cannot pass standalone. It is a library-side test that
-                             arrived with the tree merge. -->
-                        <testExclude>demos/visitors/XmlSchemaValidationTest.java</testExclude>
+                             this tree sits inside the library checkout, so it
+                             cannot pass standalone. It stays in this repository
+                             regardless, because the class it exercises,
+                             demos.visitors.xmlVisitor, is a demo that lives here
+                             and not in the library. -->
+                        <testExclude>gudusoft/gsqlparser/visitorsTest/XmlSchemaValidationTest.java</testExclude>
                         <!-- TestRunner exists only to run the class above, and
                              referencing it would drag it back in through javac's
                              implicit compilation regardless of the exclude. -->
-                        <testExclude>demos/visitors/TestRunner.java</testExclude>
+                        <testExclude>gudusoft/gsqlparser/visitorsTest/TestRunner.java</testExclude>
                     </testExcludes>
                 </configuration>
             </plugin>

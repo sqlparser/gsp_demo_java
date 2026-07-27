@@ -181,19 +181,55 @@ directories carry their own `readme.md`.
 mvn test
 ```
 
-152 tests run. **Three currently fail**, all in
+144 tests run. **Three currently fail**, all in
 `gudusoft.gsqlparser.demosTest.analyzespTest` (`testSample1`, `testSample6`,
 `testSample8`). They compare stored-procedure relation output against golden
 strings written for an older parser build, and that output has since changed.
 They are left in place rather than deleted or rewritten, because they are a
-real signal about output drift rather than a broken harness. The other 149
+real signal about output drift rather than a broken harness. The other 141
 pass. That is why the getting-started step above uses `-DskipTests`.
+
+Every test here exercises a **demo** in this repository. The tests that
+exercise the *parser* live in the library, not here — see "The library-side
+test tree" below.
 
 (`traceDataLineageTest` used to contribute 2 of those "passing" tests with
 every line commented out — no assertions, testing nothing, referencing fixture
 files that never shipped with this repo. It's been replaced with one real
 test against inline SQL; see
 [#43](https://github.com/sqlparser/gsp_demo_java/issues/43).)
+
+### The library-side test tree
+
+`src/test/java/gudusoft/gsqlparser/` used to hold 222 files, but 204 of them
+were a stale copy of the library's own test tree, carried in by the 2026/7/26
+merge. They have been returned to `gsp_java_core`, which is where they belong
+and where they actually work:
+
+- They test the parser, not any demo here — none referenced demo code.
+- They resolve fixtures through `gspCommon.BASE_SQL_DIR`, which points at
+  `../gsp_java_core/gsp_sqlfiles/TestCases/`. That path does not exist relative
+  to this repository, so their data was never found here.
+- Most are named `testXxx.java` (lowercase), which Surefire's default include
+  patterns (`Test*.java`, `*Test.java`, `*TestCase.java`) do not match. Only 3
+  of the 204 were ever executed by `mvn test` here. `gsp_java_core`'s POM adds
+  `**/test*.java`, so they run there.
+
+169 were byte-identical to, or an older revision of, a file already in
+`gsp_java_core` and were simply deleted; 35 existed only here and were moved
+over. What remains are the 18 files that genuinely belong to this repository:
+13 tests that import demo classes, `commonTest/SqlFileList.java` and
+`commonTest/gspCommon.java` which those tests use, and three files kept back
+because moving them would have required adding `org.jdom` and
+`com.alibaba.fastjson` to the library's POM (`commonTest/testXmlXSD.java`,
+`sqlenvTest/TJSONSQLEnv.java`, `sqlenvTest/testJSONEnv.java`).
+
+`src/test/java/demos/visitors/` — the last test package still sitting outside
+the `gudusoft/gsqlparser/` tree — has since been folded into it as
+`gudusoft/gsqlparser/visitorsTest/`, following the `<demoName>Test` convention
+the other directories already use (`joinConvertTest` covers
+`demos.joinConvert`, `antiSQLInjectionTest` covers `demos.antiSQLInjection`,
+and so on). All 20 test files now live under one root.
 
 ## What is excluded from the build
 
@@ -209,10 +245,10 @@ them from the default build:
 - `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java`
 - `gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java` — a
   dead copy that redefines classes the retained `TGetTableColumn.java` provides
-- `commonTest/testDBVendor.java` — asserts on three `TSQLEnv` collation fields
-  the published artifact does not expose
-- `demos/visitors/XmlSchemaValidationTest.java` and its `TestRunner` — they read
-  an XSD from `../gsp_java_core/`, outside this repository
+- `gudusoft/gsqlparser/visitorsTest/XmlSchemaValidationTest.java` and its
+  `TestRunner` — they read an XSD from `../gsp_java_core/`, outside this
+  repository. They compile fine; only that path stops them running, so they
+  are excluded rather than deleted
 
 Everything else in those packages still builds. Reviving them needs an API
 migration against a build that includes the metadata layer, not just a

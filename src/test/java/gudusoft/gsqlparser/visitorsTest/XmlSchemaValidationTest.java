@@ -1,9 +1,11 @@
-package demos.visitors;
+package gudusoft.gsqlparser.visitorsTest;
 
 // JUnit 4 imports (compatible with existing project)
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+
+import demos.visitors.xmlVisitor;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
