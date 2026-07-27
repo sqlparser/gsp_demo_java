@@ -227,7 +227,7 @@ standalone lineage tool:
 ```bash
 mvn -f pom_dlineage.xml package
 
-java -cp "target/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:lib/*" \
+java -cp "target-dlineage/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:lib/*" \
      gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer \
      /f demo.sql /o lineage.json /json /graph \
      /simpleShowRelationTypes fdd,fdr /filterRelationTypes fdd
@@ -235,6 +235,15 @@ java -cp "target/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:lib/*" \
 
 Other invocations it supports: `/t mssql`, `/t postgresql`, `/showER`,
 `/filterRelationTypes fdd`.
+
+`pom_dlineage.xml` builds into `target-dlineage/`, a directory of its own,
+rather than the root build's `target/`. It shares this repository's
+`${project.basedir}` with `pom.xml` and declares only one source file, so
+without a separate output directory the compiler plugin's incremental-build
+cleanup would delete every `.class` file the root build produced that isn't
+part of this smaller source set — wiping out a working root build before this
+one even reaches its own compile error below. See
+[#39](https://github.com/sqlparser/gsp_demo_java/issues/39).
 
 > **This build currently fails**, and did so before the trees were merged. It
 > pins `lib/gsqlparser-3.1.1.0.jar`, but `DataFlowAnalyzer` has moved on and now

@@ -57,7 +57,13 @@ rebel.xml
 
 # Maven target
 **/target
+target-dlineage
 
 *.iml
+
+# Claude Code
+CLAUDE.md
+.claude/
+.mcp.json
 
 

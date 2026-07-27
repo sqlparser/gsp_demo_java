@@ -105,6 +105,15 @@
     </dependencies>
 
     <build>
+        <!-- This POM shares ${project.basedir} with the root pom.xml, so without
+             an explicit, separate output directory it also shares target/classes.
+             It declares only one source file (see the compiler <includes> below),
+             so the compiler plugin's incremental-compilation cleanup deletes every
+             .class file the root build produced that isn't part of this smaller
+             source set, before this build even reaches its own compile error.
+             That wipes out a working root build with no indication of why. See
+             https://github.com/sqlparser/gsp_demo_java/issues/39. -->
+        <directory>${project.basedir}/target-dlineage</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
