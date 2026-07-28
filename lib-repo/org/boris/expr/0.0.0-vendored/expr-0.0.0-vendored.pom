@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-written POM for a jar that has no upstream Maven coordinate.
+
+  This is a real artifact in a real (file-based) Maven repository, not a
+  `system`-scope reference to a file on disk. The difference matters: a
+  system-scope dependency is invisible to maven-shade-plugin,
+  maven-assembly-plugin and dependency:copy-dependencies, so it silently drops
+  out of every packaged artifact and every generated classpath - which is most
+  of why the standalone dlineage jar could not be built without hand-assembling
+  a classpath by hand. Declared this way, it resolves and packages like any
+  other dependency.
+
+  It has no dependencies of its own: every class in the jar is under
+  org/boris/expr/, and it references nothing outside java.* / javax.*.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.boris</groupId>
+  <artifactId>expr</artifactId>
+  <version>0.0.0-vendored</version>
+  <packaging>jar</packaging>
+
+  <name>Boris Expr (vendored)</name>
+  <description>
+    The expression evaluator behind gudusoft.gsqlparser.demos.antiSQLInjection
+    (GEval). The jar carries no version metadata at all - a bare MANIFEST.MF
+    with no pom.properties - so the version above is a placeholder, not an
+    upstream release number. Identify the file by content instead:
+
+        sha256 6267d9cb7cabcb24cf02d5bff1d11fdfea8c60c9ba1840dcb45359fb0165ca1b
+        367 classfiles, Java 5 bytecode (major version 49)
+
+    Note this is NOT tk.pratanumandal:expr4j, which the root pom.xml declared it
+    as for a long time despite the filename being the only thing they share.
+    That coordinate names a completely different library, and pointing SBOM and
+    vulnerability tooling at it would have made them scan the wrong project.
+  </description>
+</project>

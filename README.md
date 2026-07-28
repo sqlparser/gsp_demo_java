@@ -40,7 +40,7 @@ SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;
 SQL
 
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
-    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="/f q.sql /t oracle"
 ```
 
 ```text
@@ -53,7 +53,7 @@ Reformat it:
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
-    -Dexec.args="q.sql" -Dexec.classpathScope=compile
+    -Dexec.args="q.sql"
 ```
 
 ```text
@@ -69,15 +69,17 @@ Argument conventions differ between demos: `checksyntax` takes `/f <file>` and
 `/t <vendor>`, while `formatsql` takes a bare filename. Run any demo with no
 arguments and it prints its own usage line.
 
-> **Use `-Dexec.classpathScope=compile`, not `runtime`.** `pom.xml` declares
-> `simple-xml`, `fastjson` and a few other jars under `lib/` with
-> `<scope>system</scope>`, since they have no public Maven coordinate. Maven's
-> `runtime` classpath scope excludes `system`-scoped dependencies by design, so
-> any demo that touches one of them (e.g. `dlineageBasic`, which uses
-> `org.simpleframework.xml`, or `antiSQLInjection`, which uses
-> `org.boris.expr`) fails with `NoClassDefFoundError` under `runtime`
-> even though the jar is right there in `lib/`. `compile` scope includes them
-> and works for every demo.
+> **`-Dexec.classpathScope=compile` is no longer needed.** Every command in
+> this README used to carry it, and older instructions elsewhere still do. It
+> was a workaround: `pom.xml` declared `simple-xml`, `fastjson` and `expr4j`
+> with `<scope>system</scope>`, pointing at jars committed under `lib/`, and
+> Maven's `runtime` scope excludes `system`-scoped dependencies by design — so
+> any demo touching one of them died with `NoClassDefFoundError` under the
+> default scope even though the jar was right there on disk.
+>
+> All three are ordinary Maven dependencies now (see
+> [Dependencies and security advisories](#dependencies-and-security-advisories) below) and `lib/` is gone, so the
+> default scope works. The flag is harmless if you keep typing it.
 
 > **Every demo is `gudusoft.gsqlparser.demos.<demo>.<Class>`.** The directory
 > path under `src/main/java/` *is* the package, for all 190 files, so you can
@@ -117,13 +119,16 @@ To move every demo to a different parser build, run one command:
 .github/scripts/set-parser-version.sh 4.1.9
 ```
 
-The version is written in **five** files, not one: the `${gsp.core.version}`
-property in `pom.xml` and again in `pom_dlineage.xml`, plus a hardcoded
-`<version>` in each of the three `connector/*/pom.xml`, which are separate
-builds with no parent to inherit a property from. Editing them by hand is how
-one gets left behind, silently building against an older parser, so the script
-owns all five and CI runs `set-parser-version.sh --check` to fail the build if
-they ever disagree.
+The version is written in **four** files, not one: the `${gsp.core.version}`
+property in `pom.xml`, plus a hardcoded `<version>` in each of the three
+`connector/*/pom.xml`, which are separate builds with no parent to inherit a
+property from. Editing them by hand is how one gets left behind, silently
+building against an older parser, so the script owns all four and CI runs
+`set-parser-version.sh --check` to fail the build if they ever disagree.
+
+(It was five until `pom_dlineage.xml` was folded into `pom.xml`. That POM
+declared a second copy of the property for no reason beyond being a second
+POM.)
 
 Available versions:
 <https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml>
@@ -168,7 +173,7 @@ is not used here on purpose:
 
 Instead the nightly does the bumping. Its `latest` job resolves the newest
 release, runs the whole suite and every demo against it, and **only if all of
-that passes** opens a PR moving the five files. So you never edit a version: you
+that passes** opens a PR moving the four files. So you never edit a version: you
 merge a PR that is already proven green. Given that old versions are deleted,
 treat a red `pinned` job with a green `latest` job as urgent rather than
 informational: it means the pinned release is gone.
@@ -200,7 +205,7 @@ mvn -Plocal -Dgsp.core.version=4.1.5.9 compile
 
 mvn -q -Plocal -Dgsp.core.version=4.1.5.9 exec:java \
     -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
-    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="/f q.sql /t oracle"
 ```
 
 This replaces the loop that existed while the demos were a vendored module of
@@ -311,22 +316,34 @@ That was **57% of every source file in this repository**, and it duplicated
 same 365 top-level classes and nothing else, so the library shipped twice and
 javac quietly compiled the sources while the jar sat unused.
 
-The sources are gone; the jar now supplies `org.boris.expr`. Only one file ever
+The sources are gone; the jar supplies `org.boris.expr`. Only one file ever
 imported it (`GEval.java`), the `antiSQLInjection` tests cover the path, and
-they pass against the jar. Two consequences worth knowing:
-
-- **The `antiSQLInjection` demo now needs `-Dexec.classpathScope=compile`**, for
-  the `system`-scope reason described above. It used to work under `runtime`
-  only because the classes happened to be compiled into `target/classes`.
-- **`mvn package` no longer puts `org/boris/expr/**` inside the project jar.**
-  Nothing here consumes that jar as a library, so this only matters if you start
-  doing so.
+they pass against the jar. One consequence worth knowing: **`mvn package` no
+longer puts `org/boris/expr/**` inside the project jar.** Nothing here consumes
+that jar as a library, so this only matters if you start doing so. (The shaded
+`-dlineage` jar does contain it, along with every other runtime dependency —
+that is what an uber jar is.)
 
 The dependency's coordinates were also wrong: it was declared as
 `tk.pratanumandal:expr4j`, a different library entirely, which would have
 pointed SBOM and vulnerability tooling at the wrong project. It now names what
-is actually on disk, with a checksum recorded in `pom.xml` since the jar carries
-no version metadata of its own.
+is actually on disk, with a checksum recorded alongside it, since the jar
+carries no version metadata of its own.
+
+It is also the one dependency here with no coordinate in any public repository —
+searched and confirmed — so it is served from `lib-repo/`, a file-based Maven
+repository inside this checkout, laid out exactly like `~/.m2/repository`. See
+[`lib-repo/readme.md`](lib-repo/readme.md). It was a `<scope>system</scope>` jar
+under `lib/` until 2026-07-28, which is worse than it sounds: `system` scope is
+deprecated, invisible to Dependabot, **and skipped by `maven-shade-plugin`,
+`maven-assembly-plugin` and `dependency:copy-dependencies` alike**, so it could
+never appear in a packaged artifact or a generated classpath. That last part is
+most of why the dlineage demo needed a hand-assembled `java -cp`
+([#46](https://github.com/sqlparser/gsp_demo_java/issues/46)).
+
+If Gudu ever uploads it to `https://www.sqlparser.com/maven/`, delete `lib-repo/`
+and declare it normally — publishing to a repository you control is the better
+answer, and this project already resolves from that one.
 
 ### dbConnect was removed
 
@@ -414,11 +431,18 @@ samples/dlineage/                               1
 samples/callgraph/                              1
 ```
 
-**Build output deleted.** `demos/dlineage/class/` is created and `rm -rf`'d by
+**Build output deleted.** `demos/dlineage/class/` was created and `rm -rf`'d by
 `buildJar.sh` on every run, and `data-lineage-result.xml` was a generated
-lineage report nothing referenced. Both are now in `.gitignore`. The source
-manifest `demos/dlineage/MANIFEST.MF` stays, since `buildJar.sh` copies it —
-its `Main-Class` had been missed by the package rename and is now correct.
+lineage report nothing referenced. Both are now in `.gitignore`.
+
+`buildJar.sh`, `buildJar.bat` and `demos/dlineage/MANIFEST.MF` went with them on
+2026-07-28. All three existed to hand-assemble the same `data_flow_analyzer.jar`
+that `maven-shade-plugin` now produces from the normal build, and all three
+named files that do not exist: `buildJar.sh` copied
+`../../../../../lib/gudusoft.gsqlparser.jar`, which was never in `lib/` under
+that name, and the manifest's `Class-Path` listed
+`lib/gudusoft.gsqlparser.jar` and `lib/sqlflow-exporter.jar`, neither of which
+survived. Nothing in CI ran any of them, which is why nobody noticed.
 
 What deliberately stays next to its demo: each demo's `readme.md`, its
 `compile_*.bat` / `run_*.bat` (which `cd` relative to their own location, so
@@ -453,10 +477,28 @@ Two things worth keeping in mind for next time:
   1.x release, and it is where the 1.x deserialization advisories were fixed.
   Leave it, or move to `fastjson2`; do not "upgrade" it within 1.x.
 
-What still sits in `lib/` is exactly three jars that genuinely have no public
-coordinate and are declared system-scope in both `pom.xml` and
-`pom_dlineage.xml`: `expr4j` (see above), `simple-xml`, and `fastjson`. None of
-them are currently flagged.
+**`lib/` is now gone entirely, and with it the last `system`-scope dependency.**
+Three jars were left in it, believed to have no public coordinate. Two of them
+did:
+
+| jar | outcome |
+|---|---|
+| `simple-xml-2.7.1.jar` | on Maven Central as `org.simpleframework:simple-xml:2.7.1`, and **byte-for-byte identical** to the committed copy (`sha256 7a43d2d5…f4e429f9`). Declared normally; jar deleted. |
+| `fastjson-1.2.83.jar` | on Maven Central as `com.alibaba:fastjson:1.2.83`, likewise byte-identical (`sha256 641a4d65…5fe692631d`). Declared normally; jar deleted. |
+| `expr4j.jar` | genuinely not on Central under any groupId. Moved to `lib-repo/` as a real artifact, `org.boris:expr:0.0.0-vendored`. |
+
+Since the two Central jars are the same bytes, that swap changed nothing at
+runtime and gained three things: Dependabot can see and patch them, packaging
+plugins stop skipping them, and their **transitive** dependencies now resolve —
+`simple-xml` pulls in `stax` and `xpp3`, which under `system` scope were simply
+absent, waiting to surface as a `NoClassDefFoundError` on some code path nobody
+had exercised yet.
+
+The rule that follows: **add a dependency by coordinate, not by file.** Check
+Maven Central first — two of the three "no public coordinate" jars here were on
+it all along. If it truly has no coordinate, publishing it to Gudu's own Maven
+repository beats committing it; `lib-repo/` is the fallback for when nobody can
+upload one.
 
 `sqlflow-exporter.jar` and `sqlflow-library.jar` were dropped on 2026-07-28.
 They supplied `gudusoft.dbadapter.T<Vendor>SQLDataSource`, which two demos used
@@ -485,6 +527,11 @@ Vendored driver jars in particular should not come back. They are invisible to
 Dependabot for the same reason the system-scope entries above were, so they age
 in place with no bot to flag them.
 
+The one exception, `lib-repo/`, is deliberately not a place to drop jars: it is a
+Maven repository with a strict layout, every artifact needs a hand-written
+`.pom`, and its readme says to check Central and Gudu's own repository first.
+The friction is the point.
+
 ## What is excluded from the build
 
 Two demos used to be excluded because they read metadata straight out of a
@@ -500,10 +547,16 @@ metadata offline instead, which also let the two vendored jars behind it leave
   inspection already worked off that JSON string, so nothing else changed.
   `samples/columninspect/` has a runnable metadata file and script
 
-What `pom.xml` still excludes from the default build:
+**No main source is excluded from the build any more.**
+`gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java` was the last one, and
+its exclusion was circular: it was excluded because `pom_dlineage.xml` compiled
+it separately, and that POM existed only to produce a standalone jar. With
+`maven-shade-plugin` producing that jar from the one build, the exclusion had
+nothing left to justify it. See
+[The standalone dlineage tool](#the-standalone-dlineage-tool).
 
-- `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java` — not broken;
-  `pom_dlineage.xml` builds it on its own into `target-dlineage/` (issue #39)
+What `pom.xml` still excludes is two **test** sources:
+
 - `gudusoft/gsqlparser/visitorsTest/XmlSchemaValidationTest.java` and its
   `TestRunner` — they read an XSD from `../gsp_java_core/`, outside this
   repository. They compile fine; only that path stops them running, so they
@@ -527,11 +580,19 @@ run_checksyntax.bat /f ..\..\..\..\..\..\..\q.sql /t oracle
 That is the whole workflow now. You no longer edit `setenv.bat` first: it keeps
 whatever `JAVA_HOME` is already set, and it fetches the parser for you.
 
-**No parser jar is committed to this repository**, so the first script you run
-pulls one down. `setenv.bat` calls `setenv/fetch-parser.bat`, which reads
-`gsp.core.version` out of `pom.xml` and does a `mvn dependency:copy` into
-`external_lib/`. It is a no-op once the jar is there, and `external_lib/` is
-gitignored.
+**No jar of any kind is committed to this repository**, so the first script you
+run pulls them down. `setenv.bat` calls `setenv/fetch-parser.bat`, which runs
+`mvn dependency:copy-dependencies` into `external_lib/`. It is a no-op once they
+are there, and `external_lib/` is gitignored; delete that directory to force a
+refetch after changing a dependency.
+
+It used to copy only the parser, because everything else the demos needed lived
+in the committed `lib/` directory that this script put on the `CLASSPATH`. With
+`lib/` gone, `copy-dependencies` brings the whole set — parser, `fastjson`,
+`simple-xml`, `org.boris.expr` out of `lib-repo/`, JAXB, SnakeYAML — in one go,
+straight from `pom.xml`. No version is named anywhere in the `.bat` family, so
+it cannot drift from what the Maven build resolves. `CLASSPATH` is now a single
+directory, `external_lib\*`.
 
 That means the `.bat` route needs Maven **once**, to fetch, and never again.
 That is a deliberate trade. Vendoring a parser under `lib/` is what let these
@@ -541,8 +602,10 @@ jar in `lib/` was 3.1.1.0 while the demos had moved on to APIs like
 parser has. One artifact, resolved from one place, is worth a one-time Maven
 call.
 
-`external_lib/` also comes before `lib/` on the classpath, so the fetched parser
-wins over anything dropped into `lib/` later.
+A side effect worth noting: `run_DataFlowAnalyzer.bat` gets JAXB now. It never
+did before, because `lib/` had no copy of it, so the `.bat` route hit
+[#47](https://github.com/sqlparser/gsp_demo_java/issues/47) on any modern JDK
+just as the Maven route did.
 
 ### Verification status
 
@@ -552,7 +615,7 @@ top of this file covers it.
 
 | phase | covered | current |
 |-------|---------|---------|
-| Bootstrap | assert no parser jar is committed, then `fetch-parser.bat` pulls one into `external_lib/` | passing |
+| Bootstrap | assert no parser jar is committed, then `fetch-parser.bat` pulls the parser and every other dependency into `external_lib/` | passing |
 | Compile | all **39** `compile_<demo>.bat` | **39/39** |
 | Launch | all **50** `run_<demo>.bat`, no arguments | **50/50** |
 | Run for real | 4 demos with arguments, output checked against an expected string | passing |
@@ -661,68 +724,99 @@ three classes from the `TGetTableColumn.java` beside it and so broke any
 wildcard compile of that folder, which is exactly how
 `compile_gettablecolumns.bat` compiles it.
 
-## Building the dlineage demo on its own
+## The standalone dlineage tool
 
-`pom_dlineage.xml` builds just `DataFlowAnalyzer` into its own jar, for use as a
-standalone lineage tool:
+`mvn package` produces a second, self-contained jar alongside the ordinary one:
+
+```
+target/gsp_demo_java-1.0-SNAPSHOT.jar            the demos, needs a classpath
+target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar   standalone, runs on its own
+```
+
+The second is an executable uber jar built by `maven-shade-plugin` with every
+runtime dependency inside it, so running the data-lineage analyser takes no
+classpath at all:
 
 ```bash
-mvn -f pom_dlineage.xml package
+mvn package -DskipTests
 
-java -cp "target-dlineage/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:external_lib/*:lib/*" \
-     gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer \
-     /f demo.sql /o lineage.json /json /graph \
+java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     /f samples/dlineage/demo.sql /o lineage.json /json /graph \
      /simpleShowRelationTypes fdd,fdr /filterRelationTypes fdd
 ```
 
 Other invocations it supports: `/t mssql`, `/t postgresql`, `/showER`,
-`/filterRelationTypes fdd`.
+`/filterRelationTypes fdd`. Omit `/json` to get XML instead.
 
-`pom_dlineage.xml` builds into `target-dlineage/`, a directory of its own,
-rather than the root build's `target/`. It shares this repository's
-`${project.basedir}` with `pom.xml` and declares only one source file, so
-without a separate output directory the compiler plugin's incremental-build
-cleanup would delete every `.class` file the root build produced that isn't
-part of this smaller source set — wiping out a working root build before this
-one even reaches its own build. See
-[#39](https://github.com/sqlparser/gsp_demo_java/issues/39).
+It carries every demo class, not just this one, so it doubles as a
+no-setup way to run any of them:
 
-**This build used to fail**, and had done since before the demo trees were
-merged. The cause was the pinned jar, not the code: `pom_dlineage.xml` declared
-`lib/gsqlparser-3.1.1.0.jar` on `system` scope, while `DataFlowAnalyzer` had
-moved on to `getOption().setTraceTablePosition(...)` and
-`ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which a
-3.1.1.0 jar has. It now resolves the same parser the root build does, and
-builds and runs.
-
-**It then failed a second way, for anyone but us.** It kept a `<parent>` of
-`gudusoft:gsp_java:1.0-SNAPSHOT`, the private library reactor, which is not
-published anywhere. On a machine that had never installed that POM, Maven
-stopped before reading the file at all:
-
-```
-Non-resolvable parent POM for gudusoft:gsp_demo_java_dlineage:1.0-SNAPSHOT:
-Could not find artifact gudusoft:gsp_java:pom:1.0-SNAPSHOT
+```bash
+java -cp target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     gudusoft.gsqlparser.demos.checksyntax.checksyntax /f q.sql /t oracle
 ```
 
-The root `pom.xml` was cut loose from that parent when this repository was made
-buildable outside Gudu; this file was missed, and it looked fine to everyone who
-had the library checked out locally. The parent contributed nothing it needed:
-two compiler properties it already declares, an empty `<dependencies>`, and one
-`maven-antrun-plugin` marked `<inherited>false</inherited>`. It is gone, and the
-build now resolves `com.gudusoft:gsqlparser` from Gudu's public Maven repository
-and nothing else — verified against a completely empty local repository, where
-no `gudusoft/` group directory is created at all.
+### What this replaced, and why it kept breaking
 
-Both workflows now build it, and assert it left the root build's
-`target/classes` untouched. Nothing ran it before, which is why two separate
-breakages could sit in it unnoticed.
+Until 2026-07-28 this was a second POM, `pom_dlineage.xml`, built with
+`mvn -f pom_dlineage.xml package`. It broke four times, and **every one of them
+was invisible to a green build**, because until the very end nothing in CI ran
+the thing — and for most of that time nothing even built it.
+
+1. **It pinned a parser jar from 2019.** It declared
+   `lib/gsqlparser-3.1.1.0.jar` on `system` scope while `DataFlowAnalyzer` had
+   moved on to `getOption().setTraceTablePosition(...)` and
+   `ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which
+   that jar has.
+2. **It kept a `<parent>` published nowhere**, `gudusoft:gsp_java:1.0-SNAPSHOT`,
+   the private library reactor. Anyone without that POM in their local
+   repository got `Non-resolvable parent POM` before Maven read a line of the
+   file. It looked fine to everyone at Gudu, who all have the library checked
+   out. The root `pom.xml` had been cut loose from that parent years earlier;
+   this one was missed.
+3. **[#46](https://github.com/sqlparser/gsp_demo_java/issues/46) — the
+   documented run command could not work.** It put `external_lib/*` on the
+   classpath, a directory only the Windows `.bat` route ever creates, so anyone
+   following the Maven instructions in order hit `NoClassDefFoundError` on the
+   first command in the section. The jar Maven had actually downloaded sat in
+   `~/.m2`, under a filename containing a version number that changes with every
+   release, so it could not be guessed either.
+4. **[#47](https://github.com/sqlparser/gsp_demo_java/issues/47) — it was
+   missing the JAXB dependency `pom.xml` already had.** JAXB left the JDK after
+   Java 8; `pom.xml` had carried `jakarta.xml.bind-api` and `jaxb-runtime` for
+   ages, and `pom_dlineage.xml` had neither. Since `pom.xml` *excluded*
+   `DataFlowAnalyzer` from its own build, this second POM was the only thing
+   that ever compiled the class, so no other build path could catch it.
+
+Merging it into `pom.xml` removes the category rather than the four instances.
+There is no second POM to drift, no second parser version to forget, no second
+dependency list to fall behind — and no
+[#39](https://github.com/sqlparser/gsp_demo_java/issues/39) either, the bug
+where the second POM's incremental-compile cleanup deleted the root build's
+`target/classes` because both POMs shared `${project.basedir}`. One POM cannot
+collide with itself, so `target-dlineage/` is gone too.
+
+The exclusion that made all this necessary was circular: `DataFlowAnalyzer` was
+excluded from the root build *because* a separate POM compiled it, and that POM
+existed to produce a standalone jar. `maven-shade-plugin` produces the
+standalone jar from the one build, so nothing is excluded from `pom.xml` any
+more.
+
+**What actually keeps it working now is that CI runs it.**
+`.github/scripts/smoke-dlineage-jar.sh` executes the jar on
+`samples/dlineage/demo.sql` in both `build.yml` and `nightly.yml`, on JDK 8 and
+21, and asserts on the *output*: non-empty, parses, and contains lineage
+relationships. That last part is not pedantry — in #47 the process created
+`lineage.json`, died before writing a byte into it, and still exited `0`. A file
+that exists and an exit code of zero were both, at that moment, lies. It checks
+XML as well as JSON, because those are separate code paths and the JAXB one is
+the one that broke.
 
 ## master and dev branches
 
 `master` is updated when a new GSP version is released on
 <https://sqlparser.com/download.php>. The dev branches move faster and may not
-compile against the released jar or the one under `lib/`.
+compile against the released parser that `pom.xml` pins.
 
 ## Tutorials
 

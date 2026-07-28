@@ -3,17 +3,21 @@
 # Read, set, or verify the GSP parser version everywhere this repository writes
 # it down.
 #
-# The version lives in five files. The root build and the dlineage build each
-# declare a ${gsp.core.version} property, and the three connector/ modules
-# hardcode the version in their gsqlparser dependency, because they are separate
-# builds with no parent to inherit a property from. Nothing made them agree, so
-# they could drift apart silently -- and a bump meant five hand edits, which is
-# most of why bumping felt expensive.
+# The version lives in four files. The root build declares it as a
+# ${gsp.core.version} property, and the three connector/ modules hardcode the
+# version in their gsqlparser dependency, because they are separate builds with
+# no parent to inherit a property from. Nothing made them agree, so they could
+# drift apart silently -- and a bump meant four hand edits, which is most of why
+# bumping felt expensive.
+#
+# It was five until pom_dlineage.xml was merged into pom.xml. That second POM
+# declared its own copy of the property for no reason other than that it was a
+# second POM.
 #
 # Usage:
 #   set-parser-version.sh              print the current version(s)
-#   set-parser-version.sh --check      exit 1 if the five disagree
-#   set-parser-version.sh 4.1.8        rewrite all five to 4.1.8
+#   set-parser-version.sh --check      exit 1 if the four disagree
+#   set-parser-version.sh 4.1.8        rewrite all four to 4.1.8
 #
 # Exit codes:
 #   0  success, or --check found them consistent
@@ -53,8 +57,6 @@ new = os.environ["NEW"]
 # (path, human label, regex with exactly one capturing group around the version)
 TARGETS = [
     ("pom.xml", "root build property",
-     r"(?s)(<gsp\.core\.version>)([^<]+)(</gsp\.core\.version>)"),
-    ("pom_dlineage.xml", "dlineage build property",
      r"(?s)(<gsp\.core\.version>)([^<]+)(</gsp\.core\.version>)"),
 ]
 for mod in ("oracleConnector", "snowflakeConnector", "sqlServerConnector"):

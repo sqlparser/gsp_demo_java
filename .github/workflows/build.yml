@@ -39,11 +39,11 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
-      # The parser version is written in five files: the root and dlineage
-      # properties, and the three connector modules, which are separate builds
-      # with no parent to inherit from. Nothing used to make them agree, so a
-      # bump that missed one left a connector silently building against an older
-      # parser. Use .github/scripts/set-parser-version.sh <version> to move them.
+      # The parser version is written in four files: the root property, and the
+      # three connector modules, which are separate builds with no parent to
+      # inherit from. Nothing used to make them agree, so a bump that missed one
+      # left a connector silently building against an older parser. Use
+      # .github/scripts/set-parser-version.sh <version> to move them.
       - name: Parser version is consistent across all POMs
         run: .github/scripts/set-parser-version.sh --check
 
@@ -75,31 +75,24 @@ jobs:
           echo "$out"
           grep -q "syntax errors: 0" <<<"$out"
 
-      # pom_dlineage.xml is a second, separate build in this same directory, and
-      # nothing used to run it. It declared a <parent> of gudusoft:gsp_java,
-      # the private library reactor, so it only built for someone who had that
-      # POM installed locally; a plain clone got "Non-resolvable parent POM"
-      # before Maven read any of its own contents. Building it here is what
-      # stops that class of thing hiding again.
+      # The standalone lineage tool. It used to be a second POM,
+      # pom_dlineage.xml, and the step here only *built* it -- which is exactly
+      # how it shipped broken twice. Building proves nothing about a program:
+      # issue #47 was a missing JAXB dependency that compiles perfectly and dies
+      # at runtime on any JDK past 8, and issue #46 was a documented run command
+      # pointing at a directory the Maven route never creates. Both survived a
+      # green build. So this runs it and checks the output; see the script for
+      # why it asserts on the output rather than the exit status.
       #
-      # It also has to leave the root build alone: it declares a single source
-      # file, so sharing target/ with the root build makes the compiler plugin's
-      # incremental cleanup delete every class the root build just produced
-      # (issue #39). That is why it writes to target-dlineage/, and why the
-      # count check below is worth the two lines.
-      - name: Build the separate dlineage POM, and check it leaves target/ alone
-        shell: bash
-        run: |
-          set -euo pipefail
-          before=$(find target/classes -name '*.class' | wc -l)
-          mvn -B -f pom_dlineage.xml package -DskipTests
-          after=$(find target/classes -name '*.class' | wc -l)
-          echo "root classes before=$before after=$after"
-          if [ "$before" != "$after" ]; then
-            echo "::error::pom_dlineage.xml changed the root build's target/classes ($before -> $after); see issue #39"
-            exit 1
-          fi
-          ls -l target-dlineage/*.jar
+      # It runs on both matrix JDKs for the same reason: #47 does not reproduce
+      # on 8 at all, so a single-JDK check would have missed it.
+      #
+      # The issue-#39 guard that used to live here -- counting target/classes
+      # before and after, because the second POM's incremental cleanup would
+      # delete the root build's output -- is gone with the second POM. One POM
+      # cannot collide with itself.
+      - name: Run the standalone dlineage jar
+        run: .github/scripts/smoke-dlineage-jar.sh
 
   # The .bat scripts are the original Windows, no-Maven workflow: edit
   # setenv\setenv.bat, cd into a demo folder, run compile_<demo>.bat then

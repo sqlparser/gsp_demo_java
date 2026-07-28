@@ -6,7 +6,7 @@ REM # have to change the envrironment settings in only one location.
 
 
 REM # SET PATH FOR Native Libraries
-set PATH=%PATH%;lib\;external_lib\
+set PATH=%PATH%;external_lib\
 
 REM # set the Java home directory.
 REM # If JAVA_HOME is already set -- by CI, or by a developer who configured it
@@ -24,17 +24,22 @@ set JAVAC_CMD="%JAVA_HOME%\bin\javac.exe"
 REM #Set the home directory of the GSP library
 set gspDemoHome=.
 
-REM # No parser jar is committed to this repository, so fetch it into
-REM # external_lib\ the first time. This is a no-op once it is there.
+REM # No jars are committed to this repository, so fetch them into external_lib\
+REM # the first time. This is a no-op once they are there.
 REM #
 REM # A vendored parser is what previously let the demos compile against a build
-REM # years older than their own source, so the jar is resolved from Gudu's
-REM # public Maven repository instead and never checked in.
+REM # years older than their own source, so every jar is resolved from Maven
+REM # instead and none are checked in.
 for %%f in (%gspDemoHome%\external_lib\gsqlparser-*.jar) do goto :gspFound
 call "%gspDemoHome%\setenv\fetch-parser.bat"
 :gspFound
 
-REM # set classpath to the GSP library Jar files and the database JDBC drivers.
-REM # external_lib comes before lib so the fetched parser always wins over
-REM # anything that may be dropped into lib\ later.
-set CLASSPATH=.;%gspDemoHome%\build;%gspDemoHome%\external_lib\*;%gspDemoHome%\lib\*
+REM # set classpath to the GSP library and the rest of the demo dependencies.
+REM #
+REM # There used to be a second entry here, %gspDemoHome%\lib\*, for a committed
+REM # directory of <scope>system</scope> jars. Those became ordinary Maven
+REM # dependencies when pom_dlineage.xml was merged into pom.xml, lib\ was
+REM # deleted, and fetch-parser.bat now brings the same jars into external_lib\
+REM # via dependency:copy-dependencies. One directory, one source, nothing to
+REM # keep in sync by hand.
+set CLASSPATH=.;%gspDemoHome%\build;%gspDemoHome%\external_lib\*
