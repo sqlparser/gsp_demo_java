@@ -1,4 +1,4 @@
-package gudusoft.demo.dumpir;
+package gudusoft.gsqlparser.demos.dumpir;
 
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
