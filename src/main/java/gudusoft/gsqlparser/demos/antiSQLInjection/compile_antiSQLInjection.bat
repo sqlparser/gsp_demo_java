@@ -32,6 +32,9 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
+REM # javac -d needs the output directory to already exist.
+if not exist %targetdir% mkdir %targetdir%
+
 %JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\antiSQLInjection\*.java
 
 echo Completed.

@@ -32,6 +32,9 @@ call setenv\setenv.bat
 	)
 
 REM # Compile the gsp demo
+REM # javac -d needs the output directory to already exist.
+if not exist %targetdir% mkdir %targetdir%
+
 %JAVAC_CMD% -encoding UTF-8 -d %targetdir% -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\xml\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\view\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\metadata\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\model\ddl\schema\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\metadata\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\util\*.java src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\columnImpact\*.java  src\main\java\gudusoft\gsqlparser\demos\dlineageBasic\*.java
 
 echo Completed.
