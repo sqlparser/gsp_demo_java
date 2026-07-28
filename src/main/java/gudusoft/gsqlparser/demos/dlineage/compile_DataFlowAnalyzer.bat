@@ -35,9 +35,11 @@ REM # Compile the gsp demo
 REM # javac -d needs the output directory to already exist.
 if not exist %targetdir% mkdir %targetdir%
 
-%JAVAC_CMD% -d %targetdir% -encoding UTF-8 -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\SqlflowIngester.java
-REM # javac -d needs the output directory to already exist.
-if not exist %targetdir% mkdir %targetdir%
+REM # SqlflowIngester.java was compiled here as well until 2026-07-28. It read
+REM # database metadata over JDBC through the vendored lib/sqlflow-exporter.jar,
+REM # DataFlowAnalyzer's only call to it had been commented out, and it was
+REM # deleted along with that jar. -sourcepath above pulls in whatever
+REM # DataFlowAnalyzer actually references, so nothing else is needed here.
 
 %JAVAC_CMD% -d %targetdir% -encoding UTF-8 -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\DataFlowAnalyzer.java
 

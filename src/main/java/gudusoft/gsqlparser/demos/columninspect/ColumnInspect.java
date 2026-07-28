@@ -31,65 +31,51 @@ public class ColumnInspect {
             System.out.println("\"name\", a \"schema\" and a \"columns\" array of objects carrying \"name\".");
             System.out.println("Earlier revisions of this demo read the same JSON from a live server over");
             System.out.println("JDBC; it now takes the file directly, so it needs no database.");
-            return;
+            // No arguments is someone asking what this is, and exits 0 like
+            // every other demo here. Some arguments but not enough is a
+            // malformed invocation -- "/metadata" as the final token lands
+            // here -- and must not report success to a caller reading $?.
+            System.exit(args.length == 0 ? 0 : 1);
         }
         List<String> argList = Arrays.asList(args);
-        if (!argList.contains("/t")) {
-            System.err.println("the /t command be required.");
-        }
-        if (!argList.contains("/f")) {
-            System.err.println("the /f command be required.");
-        }
-        if (!argList.contains("/metadata")) {
-            System.err.println("the /metadata command be required.");
-        }
-        if (!argList.contains("/db")) {
-            System.err.println("the /db command be required.");
-        }
-        String db = args[argList.indexOf("/db") + 1];
-        String schema = null;
-        if (argList.contains("/schema")) {
-            schema = args[argList.indexOf("/schema") + 1];
-        }
 
-        String fileName = args[argList.indexOf("/f") + 1];
+        // Every required option is resolved before anything is indexed. The
+        // older shape here printed "the /x command be required." and carried on,
+        // so a missing flag left indexOf() at -1, and -1 + 1 read args[0]: the
+        // run failed later blaming whatever happened to sit in that slot. A
+        // flag given as the last argument threw ArrayIndexOutOfBounds instead.
+        String db = requiredOption(args, argList, "/db");
+        String fileName = requiredOption(args, argList, "/f");
+        String vendorName = requiredOption(args, argList, "/t");
+        String metadataPath = requiredOption(args, argList, "/metadata");
+        String schema = optionalOption(args, argList, "/schema");
+
         File file = new File(fileName);
         if (!file.exists()) {
             System.err.println("file not exists: " + fileName);
-            return;
+            System.exit(1);
         }
 
-        EDbVendor vendor = TGSqlParser.getDBVendorByName(args[argList.indexOf("/t") + 1]);
+        EDbVendor vendor = TGSqlParser.getDBVendorByName(vendorName);
         TGSqlParser sqlparser = new TGSqlParser(vendor);
         sqlparser.sqlfilename = fileName;
         sqlparser.parse();
 
-        String metadataJson = readMetadata(args[argList.indexOf("/metadata") + 1]);
-        if (metadataJson != null) {
-            try {
-                JSONObject metadata = JSONObject.parseObject(metadataJson);
-                JSONArray databases = metadata.getJSONArray("databases");
-                Map<String, Map<String, JSONObject>> map = new LinkedHashMap<>();
-                for (Object database : databases) {
-                    JSONObject databaseJson = (JSONObject) database;
-                    String databaseName = databaseJson.getString("name");
-                    if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotCatalog, db, databaseName)) {
-                        JSONArray ts = databaseJson.getJSONArray("tables");
-                        for (Object t : ts) {
-                            JSONObject tb = (JSONObject) t;
-                            if (schema != null) {
-                                String sch = tb.getString("schema");
-                                if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotSchema, schema, sch)) {
-                                    String name = tb.getString("name");
-                                    JSONArray columns = tb.getJSONArray("columns");
-                                    Map<String, JSONObject> p = new HashMap<>();
-                                    for (Object column : columns) {
-                                        JSONObject cl = (JSONObject) column;
-                                        p.put(cl.getString("name"), cl);
-                                    }
-                                    map.put(name, p);
-                                }
-                            } else {
+        String metadataJson = readMetadata(metadataPath);
+        try {
+            JSONObject metadata = JSONObject.parseObject(metadataJson);
+            JSONArray databases = metadata.getJSONArray("databases");
+            Map<String, Map<String, JSONObject>> map = new LinkedHashMap<>();
+            for (Object database : databases) {
+                JSONObject databaseJson = (JSONObject) database;
+                String databaseName = databaseJson.getString("name");
+                if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotCatalog, db, databaseName)) {
+                    JSONArray ts = databaseJson.getJSONArray("tables");
+                    for (Object t : ts) {
+                        JSONObject tb = (JSONObject) t;
+                        if (schema != null) {
+                            String sch = tb.getString("schema");
+                            if (TSQLEnv.compareIdentifier(vendor, ESQLDataObjectType.dotSchema, schema, sch)) {
                                 String name = tb.getString("name");
                                 JSONArray columns = tb.getJSONArray("columns");
                                 Map<String, JSONObject> p = new HashMap<>();
@@ -99,16 +85,65 @@ public class ColumnInspect {
                                 }
                                 map.put(name, p);
                             }
+                        } else {
+                            String name = tb.getString("name");
+                            JSONArray columns = tb.getJSONArray("columns");
+                            Map<String, JSONObject> p = new HashMap<>();
+                            for (Object column : columns) {
+                                JSONObject cl = (JSONObject) column;
+                                p.put(cl.getString("name"), cl);
+                            }
+                            map.put(name, p);
                         }
                     }
                 }
-                for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
-                    columnInspectByTable(vendor, sqlparser.sqlstatements.get(i), map);
-                }
-            } catch (Exception e) {
-                System.err.println("Get datasource metadata failed. " + e.getMessage());
             }
+            for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
+                columnInspectByTable(vendor, sqlparser.sqlstatements.get(i), map);
+            }
+        } catch (Exception e) {
+            // Exit non-zero. /metadata is required, so a file that is
+            // unparseable or structurally wrong (malformed JSON, or valid
+            // JSON with no "databases" array) leaves the demo with nothing
+            // to inspect against. Returning normally here reported success
+            // to any caller checking the exit status, while missing and
+            // unreadable files already exited 1 from readMetadata.
+            System.err.println("Reading metadata from " + metadataPath
+                    + " failed: " + e);
+            System.err.println("Expected a JSON object with a \"databases\" array; "
+                    + "see samples/columninspect/metadata.json.");
+            System.exit(1);
         }
+    }
+
+    /**
+     * Value of a required {@code /flag}, or exit 1 with a usable message.
+     * Rejects both a missing flag and a flag given without a following value.
+     */
+    private static String requiredOption(String[] args, List<String> argList, String flag) {
+        int i = argList.indexOf(flag);
+        if (i == -1) {
+            System.err.println(flag + " is required.");
+            System.exit(1);
+        }
+        if (i + 1 >= args.length) {
+            System.err.println(flag + " requires a value.");
+            System.exit(1);
+        }
+        return args[i + 1];
+    }
+
+    /** Value of an optional {@code /flag}, or null. A flag with no value is still an error. */
+    private static String optionalOption(String[] args, List<String> argList, String flag) {
+        int i = argList.indexOf(flag);
+        if (i == -1) {
+            return null;
+        }
+        if (i + 1 >= args.length) {
+            System.err.println(flag + " requires a value.");
+            System.exit(1);
+        }
+        return args[i + 1];
     }
 
     private static void columnInspectByTable(EDbVendor vendor, TCustomSqlStatement stmt, Map<String, Map<String, JSONObject>> map) {

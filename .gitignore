@@ -78,3 +78,6 @@ external_lib/
 
 # javac output dir used by compile_<demo>.bat
 /build/
+
+# Scratch dir some tooling resolves to inside the repo when TMPDIR is unset.
+/.gstack/
