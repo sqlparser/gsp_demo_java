@@ -7,30 +7,25 @@ SQL Parser library.
 
 Only SQL filename ended with .sql extentsion will be processed.
 
-## Maven usage 
+## Maven usage
 
-1. In the lib directory to execute the command
-```mvn
-   mvn install:install-file -Dfile=gudusoft.gsqlparser-x.x.x.x.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar
-   mvn install:install-file -Dfile=gudusoft.gsqlparser-2.8.3.8.jar -DgroupId=gudusoft.gsqlparser -DartifactId=gsqlparser -Dversion=latest -Dpackaging=jar
-````
+From the repository root. The parser is resolved from Gudu's public Maven
+repository by the root `pom.xml`, so there is nothing to install by hand:
 
-2.Configure parameters for the checksyntax class in the pom.xml.
-```pom
-<configuration>
-    <mainClass>gudusoft.gsqlparser.demos.checksyntax.checksyntax</mainClass>
-
-    <!-- Parameters of the checksyntax class, eg: -->
-    <arguments>
-        <argument>/f</argument>
-        <argument>d:\sql.sql</argument>
-        <argument>/t</argument>
-        <argument>oracle</argument>
-    </arguments>
-</configuration>
+```bash
+mvn -q exec:java \
+    -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
+    -Dexec.args="/f your.sql /t oracle" \
+    -Dexec.classpathScope=compile
 ```
 
-3.Compile and run
-```mvn
-mvn clean compile exec:java
-```
+Use `compile` scope, not `runtime` — some demos depend on `system`-scope jars
+under `lib/`, which Maven leaves off the runtime classpath. See the root
+`README.md`.
+
+> This folder used to carry its own `pom.xml`, and this section used to tell you
+> to `mvn install:install-file` a parser jar as
+> `gudusoft.gsqlparser:gsqlparser:latest` and then edit that POM. Both are gone:
+> the coordinate never resolved, `latest` is not a version Maven can use, and
+> the root build has resolved the parser automatically since the repository was
+> made buildable outside Gudu.

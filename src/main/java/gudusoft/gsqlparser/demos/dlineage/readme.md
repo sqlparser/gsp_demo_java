@@ -6,16 +6,29 @@ analyzing SQL script especially stored procedure like PL/SQL.
 
 This tool is built from the scratch, it is the main part of the backend of [the SQLFlow Cloud](https://sqlflow.gudusoft.com).
 
-## quick commpile and run 
+## Building it on its own
 
-```
-mvn package
+`DataFlowAnalyzer` is **excluded from the root build** — it needs a parser
+carrying the metadata layer, which the public trial artifact does not ship. The
+standalone build for it is `pom_dlineage.xml` in the repository root:
+
+```bash
+mvn -f pom_dlineage.xml package
 ```
 
-编译成功的 jar 包位于 target\dlineage-1.0.jar, 运行该demo
-```
-java -cp "target/dlineage-1.0.jar;c:\prg\maven_repo\gudusoft\gsqlparser\3.1.0.2\gsqlparser-3.1.0.2.jar" gsp.gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer /f c:\prg\tmp\demo.sql /t oracle
-```
+**That build currently fails**, and did before this demo was reorganised: it
+pins `lib/gsqlparser-3.1.1.0.jar`, while `DataFlowAnalyzer` has moved on to
+`getOption().setTraceTablePosition(...)` and
+`ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which that
+jar has. See the root `README.md`.
+
+> This section used to say `mvn package` against a `pom.xml` in this folder,
+> producing `target\dlineage-1.0.jar`, run with a classpath pointing into
+> `c:\prg\maven_repo\…\gsqlparser-3.1.0.2.jar` and a main class of
+> `gsp.gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer`. All three were
+> wrong: that POM referenced a parser jar that is not in this repository, the
+> Windows path was the original author's, and the class name carried a stray
+> `gsp.` prefix. The POM has been removed.
 
 
 ## Quick start
