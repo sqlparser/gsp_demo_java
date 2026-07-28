@@ -35,7 +35,7 @@ REM # Compile the gsp demo
 REM # javac -d needs the output directory to already exist.
 if not exist %targetdir% mkdir %targetdir%
 
-%JAVAC_CMD% -d %targetdir% -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\columnAnalyze\*.java src\main\java\gudusoft\gsqlparser\demos\columnAnalyze\*.java
+%JAVAC_CMD% -d %targetdir% -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\columnAnalyze\*.java src\main\java\gudusoft\gsqlparser\demos\columnAnalyze\*.java
 
 echo Completed.
 

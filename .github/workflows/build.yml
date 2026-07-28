@@ -128,6 +128,57 @@ jobs:
           echo ::error::fetch-parser.bat produced no parser jar
           exit /b 1
 
+      # Phase 1: every compile_<demo>.bat must succeed. This is the check that
+      # matters, and the one that would have caught the whole family going stale
+      # when the demos moved directory. `pause` at the end of each script would
+      # block forever on a runner with no keyboard, so stdin is fed from NUL.
+      - name: Compile all 39 demos via compile_*.bat
+        shell: cmd
+        run: |
+          setlocal enabledelayedexpansion
+          set FAILED=0
+          set COUNT=0
+          for /r "%GITHUB_WORKSPACE%\src\main\java" %%s in (compile_*.bat) do (
+            set /a COUNT+=1
+            pushd "%%~dps"
+            call "%%~nxs" < NUL > "%GITHUB_WORKSPACE%\c.txt" 2>&1
+            findstr /i /c:"error" /c:"file not found" /c:"no source files" "%GITHUB_WORKSPACE%\c.txt" >NUL && (
+              echo ::error::%%~nxs failed
+              type "%GITHUB_WORKSPACE%\c.txt"
+              set /a FAILED+=1
+            ) || echo   ok  %%~nxs
+            popd
+          )
+          echo.
+          echo compiled !COUNT! demos, !FAILED! failed
+          if not !FAILED!==0 exit /b 1
+
+      # Phase 2: every run_<demo>.bat must at least start its class. Run with no
+      # arguments, so most print their own usage line; what this proves is that
+      # the class name in the script still resolves and the classpath is right.
+      # A stale class name after a package move shows up here as
+      # ClassNotFoundException, which is exactly what had happened.
+      - name: Launch all 50 demos via run_*.bat
+        shell: cmd
+        run: |
+          setlocal enabledelayedexpansion
+          set FAILED=0
+          set COUNT=0
+          for /r "%GITHUB_WORKSPACE%\src\main\java" %%s in (run_*.bat) do (
+            set /a COUNT+=1
+            pushd "%%~dps"
+            call "%%~nxs" < NUL > "%GITHUB_WORKSPACE%\r.txt" 2>&1
+            findstr /c:"ClassNotFoundException" /c:"NoClassDefFoundError" /c:"Main method not found" "%GITHUB_WORKSPACE%\r.txt" >NUL && (
+              echo ::error::%%~nxs could not launch its class
+              type "%GITHUB_WORKSPACE%\r.txt"
+              set /a FAILED+=1
+            ) || echo   ok  %%~nxs
+            popd
+          )
+          echo.
+          echo launched !COUNT! demos, !FAILED! failed
+          if not !FAILED!==0 exit /b 1
+
       # `pause` at the end of each script would block forever on a runner with
       # no keyboard, so stdin is fed from NUL.
       #
@@ -136,7 +187,9 @@ jobs:
       # directory deeper (so its cd depth differs). They are generated from one
       # template and go stale as a set, which is exactly what happened when the
       # demos moved directory, so this is a canary rather than full coverage.
-      - name: Run the .bat scripts
+      # Phase 3: a few demos driven with real arguments and checked against a
+      # string their output must contain, so this is not only a smoke test.
+      - name: Run four demos with real arguments
         shell: cmd
         run: |
           echo SELECT a.id FROM ta a; > "%GITHUB_WORKSPACE%\q.sql"

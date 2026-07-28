@@ -445,26 +445,35 @@ They had been stale for years — compiling `src\main\java\demos\<demo>\` and
 `cd`-ing up five levels, both correct only before the demos moved under
 `gudusoft/gsqlparser/demos/`. Nothing noticed, because nothing ran them.
 
-The `windows-bat` job in `.github/workflows/build.yml` now does, on
-`windows-latest`. It first asserts that **no parser jar is committed** and that
-`fetch-parser.bat` can bootstrap one, then compiles and runs four demos, each
-checked against a string its output must contain:
+The `windows-bat` job in `.github/workflows/build.yml` runs them on
+`windows-latest`, in three phases:
 
-| demo | shape it covers |
-|------|-----------------|
-| `checksyntax` | `/f <file> /t <vendor>` |
-| `formatsql` | bare filename |
-| `listGSPInfo` | no arguments at all |
-| `modifysql` | compile and run scripts named differently (`compile_modifysql.bat` builds the folder, `run_replaceTablename.bat` runs one class) |
+1. **Bootstrap** — assert no parser jar is committed, then let
+   `fetch-parser.bat` pull one into `external_lib/`.
+2. **Compile all 39** `compile_<demo>.bat`. This is the check that matters: it
+   is what would have caught the whole family going stale when the demos moved
+   directory.
+3. **Launch all 50** `run_<demo>.bat` with no arguments, so most print their own
+   usage line. What this proves is that each script's class name still resolves
+   — a stale name after a package move surfaces here as
+   `ClassNotFoundException`, which is exactly what had happened.
+4. **Drive four with real arguments** and check their output contains what it
+   should: `checksyntax` (`/f <file> /t <vendor>`), `formatsql` (bare filename),
+   `listGSPInfo` (no arguments), and `modifysql`, whose compile and run scripts
+   are named differently (`compile_modifysql.bat` builds the folder,
+   `run_replaceTablename.bat` runs one class).
 
 Each script ends with `pause`, so CI feeds their stdin from `NUL` to keep them
 from blocking on a runner with no keyboard.
 
-Four demos, not all 45, is a deliberate stopping point: they are generated from
-one template and go stale as a set, which is exactly what happened when the
-demos moved directory. The four cover the distinct argument shapes, so a change
-that breaks the template shows up here.
-
+Bringing all 39 under CI turned up four things that were broken and invisible:
+two scripts still compiled `src\main\java\demos\*.java`, a directory deleted
+in the package rename; `compile_analyzesp.bat` in the nested `sybase` folder had
+picked up a doubled `sybase\sybase\` path; both `run_columnImpact.bat` files
+named a package that no longer existed; and seven demos could not compile at all
+because their scripts pass only their own folder to `javac` while the classes
+import across demos — fixed by adding `-sourcepath src\main\java`, which lets
+`javac` resolve the rest.
 
 ## Building the dlineage demo on its own
 

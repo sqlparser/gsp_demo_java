@@ -223,11 +223,12 @@
                              Everything else in their packages still builds. -->
                         <exclude>gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java</exclude>
 
-                        <!-- Redefines myMetaDB / TInfoRecord / SortIgnoreCase,
+                        <!-- TGetTableColumn_notUsed.java was excluded here. It
+                             redefined myMetaDB / TInfoRecord / SortIgnoreCase,
                              which the retained TGetTableColumn.java in the same
-                             package already provides. Its name records that it
-                             is dead. -->
-                        <exclude>gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java</exclude>
+                             package already provides, so it also broke any
+                             wildcard compile of that folder -- which is how
+                             compile_gettablecolumns.bat compiles it. Deleted. -->
                         <exclude>gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java</exclude>
                         <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
                     </excludes>
