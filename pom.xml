@@ -27,7 +27,7 @@
 		<maven.build.timestamp.format>yyyy-MMM-dd HH:mm z</maven.build.timestamp.format>
         <!-- Bump this to move every demo to a newer parser. Available versions:
              https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml -->
-        <gsp.core.version>4.1.6</gsp.core.version>
+        <gsp.core.version>4.1.9</gsp.core.version>
     </properties>
 
     <!-- Gudu's public Maven repository. The parser is not on Maven Central. -->
