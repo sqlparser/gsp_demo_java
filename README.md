@@ -695,6 +695,29 @@ moved on to `getOption().setTraceTablePosition(...)` and
 3.1.1.0 jar has. It now resolves the same parser the root build does, and
 builds and runs.
 
+**It then failed a second way, for anyone but us.** It kept a `<parent>` of
+`gudusoft:gsp_java:1.0-SNAPSHOT`, the private library reactor, which is not
+published anywhere. On a machine that had never installed that POM, Maven
+stopped before reading the file at all:
+
+```
+Non-resolvable parent POM for gudusoft:gsp_demo_java_dlineage:1.0-SNAPSHOT:
+Could not find artifact gudusoft:gsp_java:pom:1.0-SNAPSHOT
+```
+
+The root `pom.xml` was cut loose from that parent when this repository was made
+buildable outside Gudu; this file was missed, and it looked fine to everyone who
+had the library checked out locally. The parent contributed nothing it needed:
+two compiler properties it already declares, an empty `<dependencies>`, and one
+`maven-antrun-plugin` marked `<inherited>false</inherited>`. It is gone, and the
+build now resolves `com.gudusoft:gsqlparser` from Gudu's public Maven repository
+and nothing else — verified against a completely empty local repository, where
+no `gudusoft/` group directory is created at all.
+
+Both workflows now build it, and assert it left the root build's
+`target/classes` untouched. Nothing ran it before, which is why two separate
+breakages could sit in it unnoticed.
+
 ## master and dev branches
 
 `master` is updated when a new GSP version is released on

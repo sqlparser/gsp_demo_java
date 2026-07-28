@@ -4,11 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-        <groupId>gudusoft</groupId>
-        <artifactId>gsp_java</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
+  <!-- No <parent>, for the same reason the root pom.xml has none: this used to
+       inherit from gudusoft:gsp_java:1.0-SNAPSHOT, the private library reactor,
+       which is not published anywhere. Anyone without that POM installed in
+       their local repository got
+
+           Non-resolvable parent POM ... Could not find artifact
+           gudusoft:gsp_java:pom:1.0-SNAPSHOT
+
+       before Maven even looked at this file's own contents. The root pom.xml
+       was cut loose when the repository was made buildable outside Gudu; this
+       one was missed, and nothing noticed because no workflow builds it.
+
+       The parent contributed nothing that is needed here: its only properties
+       are maven.compiler.source/target 1.8, both declared below; its
+       <dependencies> is empty; and its one plugin is maven-antrun-plugin marked
+       <inherited>false</inherited>, cleaning .pas files out of the library's
+       parser folder. There is no dependencyManagement, pluginManagement,
+       distributionManagement or repositories section to lose. -->
 
   <groupId>gudusoft</groupId>
   <artifactId>gsp_demo_java_dlineage</artifactId>

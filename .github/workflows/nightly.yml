@@ -83,6 +83,24 @@ jobs:
       - name: Check the results
         run: .github/scripts/check-test-results.sh
 
+
+      # A second, separate build in the same directory that nothing used to run.
+      # It carried a <parent> pointing at the private gudusoft:gsp_java reactor,
+      # so it only built where that POM happened to be installed. Also asserts it
+      # leaves the root build's target/classes alone (issue #39).
+      - name: Build the separate dlineage POM
+        shell: bash
+        run: |
+          set -euo pipefail
+          before=$(find target/classes -name '*.class' | wc -l)
+          mvn -B -f pom_dlineage.xml package -DskipTests
+          after=$(find target/classes -name '*.class' | wc -l)
+          if [ "$before" != "$after" ]; then
+            echo "::error::pom_dlineage.xml changed the root build's target/classes ($before -> $after); see issue #39"
+            exit 1
+          fi
+          ls -l target-dlineage/*.jar
+
       - name: Every demo starts
         run: .github/scripts/run-all-demos.sh --timeout 90
 
@@ -152,6 +170,24 @@ jobs:
 
       - name: Check the results
         run: .github/scripts/check-test-results.sh
+
+
+      # A second, separate build in the same directory that nothing used to run.
+      # It carried a <parent> pointing at the private gudusoft:gsp_java reactor,
+      # so it only built where that POM happened to be installed. Also asserts it
+      # leaves the root build's target/classes alone (issue #39).
+      - name: Build the separate dlineage POM against the newest release
+        shell: bash
+        run: |
+          set -euo pipefail
+          before=$(find target/classes -name '*.class' | wc -l)
+          mvn -B -f pom_dlineage.xml package -DskipTests -Dgsp.core.version=${{ steps.ver.outputs.version }}
+          after=$(find target/classes -name '*.class' | wc -l)
+          if [ "$before" != "$after" ]; then
+            echo "::error::pom_dlineage.xml changed the root build's target/classes ($before -> $after); see issue #39"
+            exit 1
+          fi
+          ls -l target-dlineage/*.jar
 
       - name: Every demo starts
         env:
