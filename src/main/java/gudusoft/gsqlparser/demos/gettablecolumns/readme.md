@@ -8,23 +8,25 @@ For more detailed information about how this tools works, please check [this art
 ## Usage
 `java runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]`
 
-> **`runGetTableColumn` does not compile in this repository.** It connects to a
-> live database over JDBC to resolve ambiguous columns (see "Resolve the
-> ambiguous columns in SQL query" below), using a `TSQLDataSource` class the
-> public trial parser artifact doesn't ship — `pom.xml` excludes it from the
-> build for exactly this reason. It's only runnable from the standalone
-> "Binary version" below, which bundles the full metadata layer.
+```bash
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn \
+    -Dexec.classpathScope=compile -Dexec.args="/f your.sql /t mssql"
+```
+
+> **This demo opens no database connection.** It used to accept `/h /P /u /p`
+> and pull table metadata from a live server through
+> `gudusoft.dbadapter.T<Vendor>SQLDataSource`, out of the vendored
+> `lib/sqlflow-exporter.jar`. That path needed a reachable database and a JDBC
+> driver, so it never ran here, and it was the last thing keeping that jar in
+> the build. It was removed on 2026-07-28, and the demo now compiles and runs
+> as part of the normal build.
 >
-> For column/table extraction without a database connection, in this
-> repository, use `getResultColumn` instead:
-> ```bash
-> mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.gettablecolumns.getResultColumn -Dexec.classpathScope=compile
-> ```
-> It parses an inline query and prints its result columns; edit the `sqltext`
-> in `getResultColumn.java` to try your own SQL. Other classes in this folder
-> (`columnTableStmt`, `columnsInResultColumn`, `whatClause`,
-> `tableColumnRename`) demonstrate related, database-free column/table
-> analysis and build the same way.
+> Ambiguous columns (see "Resolve the ambiguous columns in SQL query" below)
+> can still be resolved without a server, by handing the analyser a `TSQLEnv`:
+> build one in code, as the `TSQLServerEnv` / `THiveEnv` classes at the bottom
+> of `runGetTableColumn.java` do, or parse one from a metadata JSON file with
+> `gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser`. The standalone
+> "Binary version" below still ships the live-connection build.
 
 ## Binary version
 https://www.gudusoft.com/gsp_java/gettablecolumn.zip
@@ -59,9 +61,18 @@ create table dept(
 );
 ```
 
-By connecting to the database to fetch metadata, column `ename` should be linked to the table `emp` correctly.
+Given that metadata, column `ename` is linked to table `emp` correctly.
 
-This is a list of arguments used when connect to a database:
+The metadata has to reach the analyser as a `TSQLEnv`. In this repository, build
+one offline — in code (see `TSQLServerEnv` at the bottom of
+`runGetTableColumn.java`) or from a metadata JSON file via
+`gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser` — and pass it with
+`getTableColumn.setSqlEnv(...)`.
+
+The JDBC arguments below (`/h /P /u /p /db /schema`) belong to the **"Binary
+version"** above, not to the build in this repository; they were removed here on
+2026-07-28 along with the vendored `sqlflow-exporter.jar` they depended on.
+
 ```
 /h: Optional, specify the host of jdbc connection
 /P: Optional, specify the port of jdbc connection

@@ -158,22 +158,7 @@
             <version>2.0.6.1</version>
             <scope>test</scope>
         </dependency>
-
-
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>exporter</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/sqlflow-exporter.jar</systemPath>            
-        </dependency>
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>library</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/sqlflow-library.jar</systemPath>            
-        </dependency>        
+        
 
         <!-- Carried over from the library-side build when the two demo trees
              were merged: sources under demos/generateLineage need SnakeYAML,
@@ -214,14 +199,15 @@
                              drivers carried 16 unpatchable Dependabot advisories.
                              See the README. Nothing left to exclude. -->
 
-                        <!-- Three stragglers that do still sit in this source tree:
-                             they build a TSQLDataSource / T<Vendor>SQLDataSource to
-                             read metadata straight out of a running database.
-                             The public parser ships no *SQLDataSource class at
-                             all, so these cannot compile against it, and they
-                             would need JDBC drivers and a live server to run.
-                             Everything else in their packages still builds. -->
-                        <exclude>gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java</exclude>
+                        <!-- Two demos used to be excluded here, and one still is.
+                             gettablecolumns/runGetTableColumn.java and
+                             columninspect/ColumnInspect.java both built a
+                             gudusoft.dbadapter.T<Vendor>SQLDataSource, out of the vendored
+                             lib/sqlflow-exporter.jar, to read table metadata from a running
+                             database, so neither could do anything without a live server and
+                             a JDBC driver. On 2026-07-28 both were changed to take that
+                             metadata offline instead, the vendored jar was dropped, and both
+                             joined the normal build. See the README. -->
 
                         <!-- TGetTableColumn_notUsed.java was excluded here. It
                              redefined myMetaDB / TInfoRecord / SortIgnoreCase,
@@ -229,7 +215,9 @@
                              package already provides, so it also broke any
                              wildcard compile of that folder, which is how
                              compile_gettablecolumns.bat compiles it. Deleted. -->
-                        <exclude>gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java</exclude>
+
+                        <!-- DataFlowAnalyzer stays excluded from THIS build: pom_dlineage.xml
+                             compiles it on its own into target-dlineage/ (issue #39). -->
                         <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
                     </excludes>
                     <testExcludes>

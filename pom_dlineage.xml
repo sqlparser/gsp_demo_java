@@ -92,20 +92,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>exporter</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/sqlflow-exporter.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>library</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/sqlflow-library.jar</systemPath>
-        </dependency>
     </dependencies>
 
     <build>

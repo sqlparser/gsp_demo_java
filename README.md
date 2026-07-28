@@ -384,10 +384,21 @@ Two things worth keeping in mind for next time:
   1.x release, and it is where the 1.x deserialization advisories were fixed.
   Leave it, or move to `fastjson2`; do not "upgrade" it within 1.x.
 
-What still sits in `lib/` is exactly the five jars that genuinely have no public
+What still sits in `lib/` is exactly three jars that genuinely have no public
 coordinate and are declared system-scope in both `pom.xml` and
-`pom_dlineage.xml`: `sqlflow-exporter`, `sqlflow-library`, `expr4j` (see above),
-`simple-xml`, and `fastjson`. None of them are currently flagged.
+`pom_dlineage.xml`: `expr4j` (see above), `simple-xml`, and `fastjson`. None of
+them are currently flagged.
+
+`sqlflow-exporter.jar` and `sqlflow-library.jar` were dropped on 2026-07-28.
+They supplied `gudusoft.dbadapter.T<Vendor>SQLDataSource`, which two demos used
+to read table metadata out of a running database — so both demos needed a live
+server and a JDBC driver, and `pom.xml` excluded them from the build for exactly
+that reason. Both now take their metadata offline instead
+(`runGetTableColumn` via `TSQLEnv`, `ColumnInspect` via a `/metadata` JSON file),
+so both build and run like every other demo, and the jars had nothing left
+holding them in. Two dead helpers went with them, `dlineage/SqlflowIngester.java`
+and `dlineage/DataSourceProvider.java`: neither had a `main`, and the only
+reference to either in the tree was a commented-out call in `DataFlowAnalyzer`.
 
 Eight more jars used to sit alongside them, 5.5 MB of the directory's 7.1 MB.
 None was declared by any POM, imported by any source, or named by any `.bat`
@@ -407,17 +418,23 @@ in place with no bot to flag them.
 
 ## What is excluded from the build
 
-Some demos read metadata straight out of a running database over JDBC, using
-the `TSQLDataSource` / `TSQLEnv` family. The public parser artifact ships no
-`*SQLDataSource` class, so those sources cannot compile against it, and they
-would need JDBC drivers and a live server to do anything. `pom.xml` excludes
-them from the default build:
+Two demos used to be excluded because they read metadata straight out of a
+running database over JDBC, and so needed a driver and a live server to do
+anything. **Both are now in the build**, since 2026-07-28: they take that
+metadata offline instead, which also let the two vendored jars behind it leave
+`lib/`.
 
-- `gudusoft/gsqlparser/demos/gettablecolumns/runGetTableColumn.java`
-- `gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java`
-- `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java`
-- `gudusoft/gsqlparser/demos/gettablecolumns/TGetTableColumn_notUsed.java` — a
-  dead copy that redefines classes the retained `TGetTableColumn.java` provides
+- `gettablecolumns/runGetTableColumn.java` — dropped its `/h /P /u /p` flags;
+  supply a `TSQLEnv` in code or from JSON if you want column disambiguation
+- `columninspect/ColumnInspect.java` — `/jdbc /u /p` became `/metadata <file>`,
+  reading the same JSON the connection used to return. Every line of the
+  inspection already worked off that JSON string, so nothing else changed.
+  `samples/columninspect/` has a runnable metadata file and script
+
+What `pom.xml` still excludes from the default build:
+
+- `gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java` — not broken;
+  `pom_dlineage.xml` builds it on its own into `target-dlineage/` (issue #39)
 - `gudusoft/gsqlparser/visitorsTest/XmlSchemaValidationTest.java` and its
   `TestRunner` — they read an XSD from `../gsp_java_core/`, outside this
   repository. They compile fine; only that path stops them running, so they

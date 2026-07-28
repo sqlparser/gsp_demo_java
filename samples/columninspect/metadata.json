@@ -1,0 +1,26 @@
+{
+  "databases": [
+    {
+      "name": "testdb",
+      "tables": [
+        {
+          "name": "emp",
+          "schema": "dbo",
+          "columns": [
+            { "name": "id", "dataType": "int" },
+            { "name": "ename", "dataType": "char(50)" },
+            { "name": "deptid", "dataType": "int" }
+          ]
+        },
+        {
+          "name": "dept",
+          "schema": "dbo",
+          "columns": [
+            { "name": "id", "dataType": "int" },
+            { "name": "dname", "dataType": "char(50)" }
+          ]
+        }
+      ]
+    }
+  ]
+}

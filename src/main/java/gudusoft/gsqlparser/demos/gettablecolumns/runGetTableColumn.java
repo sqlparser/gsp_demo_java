@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import gudusoft.dbadapter.*;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.IMetaDatabase;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -16,8 +15,6 @@ import gudusoft.gsqlparser.sqlenv.TSQLCatalog;
 import gudusoft.gsqlparser.sqlenv.TSQLEnv;
 import gudusoft.gsqlparser.sqlenv.TSQLSchema;
 import gudusoft.gsqlparser.sqlenv.TSQLTable;
-import gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser;
-import gudusoft.gsqlparser.util.SQLUtil;
 
 class sampleMetaDB implements IMetaDatabase
 {
@@ -212,45 +209,20 @@ public class runGetTableColumn
 		//getTableColumn.setMetaDatabase( new sampleMetaDB());
 
 
-		TSQLEnv sqlenv = null;
-		//Get database metadata from sql jdbc
-		if (argList.indexOf("/h") != -1 && argList.indexOf("/P") != -1 && argList.indexOf("/u") != -1 && argList.indexOf("/p") != -1) {
-		    try {
-			String host = args[argList.indexOf("/h") + 1];
-			String port = args[argList.indexOf("/P") + 1];
-			String user = args[argList.indexOf("/u") + 1];
-			String passowrd = args[argList.indexOf("/p") + 1];
-			String database = null;
-			String schema = null;
-			if (argList.indexOf("/db") != -1) {
-			    database = args[argList.indexOf("/db") + 1];
-			}
-			if (argList.indexOf("/schema") != -1) {
-			    schema = args[argList.indexOf("/schema") + 1];
-			}
-			TSQLDataSource datasource = createSQLDataSource(vendor, host, port, user, passowrd, database, schema);
-			if (datasource != null) {
-			    sqlenv = exportSQLEnv(datasource);
-			}
-		    } catch (Exception e) {
-			e.printStackTrace();
-		    }
-		}
-		
-		if (sqlenv == null) {
-		//	getTableColumn.setSqlEnv(new TSQLServerEnv());
-//			TJSONSQLEnvParser jsonsqlEnvParser = new TJSONSQLEnvParser();
-//			String jsonText = SQLUtil.getFileContent("f:\\tmp\\meatdata.json");
-//
-//			TSQLEnv tsqlEnv = jsonsqlEnvParser.parseSQLEnv(vendor, jsonText);
-//			System.out.println(tsqlEnv.toString());
-//
-//			getTableColumn.setSqlEnv(tsqlEnv);
-		}
-		else{
-			getTableColumn.setSqlEnv(sqlenv);
-		}
-
+		// This demo analyses SQL text only; it opens no database connection.
+		//
+		// Column resolution can be sharpened by handing the analyser a TSQLEnv
+		// describing the tables involved. Two ways to build one, both offline:
+		//   - in code, like the TSQLServerEnv / THiveEnv classes at the bottom
+		//     of this file:  getTableColumn.setSqlEnv( new TSQLServerEnv() );
+		//   - from a metadata JSON file, via
+		//     gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser.
+		//
+		// Reading that metadata out of a live server used to be done here with
+		// gudusoft.dbadapter.T<Vendor>SQLDataSource, from the vendored
+		// lib/sqlflow-exporter.jar. That path is gone: it needed a reachable
+		// database and a JDBC driver, so it never ran in this repository, and it
+		// was the only thing keeping that jar in the build.
 
 		if ( argList.indexOf( "/showDetail" ) != -1 )
 		{
@@ -300,17 +272,6 @@ public class runGetTableColumn
 //		getTableColumn.runFile( sqlFile.getAbsolutePath( ) );
 	}
 
-	public static TSQLEnv exportSQLEnv(TSQLDataSource dataSource) {
-		String json = dataSource.exportJSON();
-		if (!SQLUtil.isEmpty(json)) {
-			TSQLEnv[] envs = new TJSONSQLEnvParser(null, null, null).parseSQLEnv(dataSource.getVendor(), json);
-			if (envs != null && envs.length > 0) {
-				return envs[0];
-			}
-		}
-		return null;
-	}
-
 	private static void displayInitInformation( )
 	{
 		System.out.println( "Usage: java runGetTableColumn [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/t <database type>] [/<show option>]" );
@@ -321,108 +282,8 @@ public class runGetTableColumn
 		System.out.println( "/showTreeStructure: show option, display the information as a tree structure." );
 		System.out.println( "/showBySQLClause: show option, display the information group by sql clause type." );
 		System.out.println( "/showJoin: show option, display the join table and column." );
-		System.out.println("/h: option, specify the host of jdbc connection");
-		System.out.println("/P: option, specify the port of jdbc connection, note it's capital P.");
-		System.out.println("/u: option, specify the username of jdbc connection.");
-		System.out.println("/p: option, specify the password of jdbc connection, note it's lowercase P.");
-		System.out.println("/db: option, specify the database of jdbc connection.");
-		System.out.println("/schema: option, specify the schema which is used for extracting metadata.");
 	}
-	
-	private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String host, String port, String user,
-													  String passowrd, String database, String schema) {
-		try {
-			if (vendor == EDbVendor.dbvoracle) {
-				TOracleSQLDataSource datasource = new TOracleSQLDataSource(host, port, user, passowrd, database);
-				if (schema != null) {
-					datasource.setExtractedDbsSchemas(schema);
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvmssql) {
-				TMssqlSQLDataSource datasource = new TMssqlSQLDataSource(host, port, user, passowrd);
-				if (database != null) {
-					if (schema != null) {
-						datasource.setExtractedDbsSchemas(database + "/" + schema);
-					} else {
-						datasource.setExtractedDbsSchemas(database);
-					}
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvpostgresql) {
-				TPostgreSQLDataSource datasource = new TPostgreSQLDataSource(host, port, user, passowrd, database);
-				if (schema != null) {
-					datasource.setExtractedDbsSchemas(database + "/" + schema);
-				} else {
-					datasource.setExtractedDbsSchemas(database);
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvgreenplum) {
-				TGreenplumSQLDataSource datasource = new TGreenplumSQLDataSource(host, port, user, passowrd);
-				if (schema != null) {
-					datasource.setExtractedDbsSchemas(database + "/" + schema);
-				} else {
-					datasource.setExtractedDbsSchemas(database);
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvredshift) {
-				TRedshiftSQLDataSource datasource = new TRedshiftSQLDataSource(host, port, user, passowrd, database);
-				if (schema != null) {
-					datasource.setExtractedDbsSchemas(database + "/" + schema);
-				} else {
-					datasource.setExtractedDbsSchemas(database);
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvmysql) {
-				TMysqlSQLDataSource datasource = new TMysqlSQLDataSource(host, port, user, passowrd);
-				if (database != null) {
-					if (schema != null) {
-						datasource.setExtractedDbsSchemas(database + "/" + schema);
-					} else {
-						datasource.setExtractedDbsSchemas(database);
-					}
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvnetezza) {
-				TNetezzaSQLDataSource datasource = new TNetezzaSQLDataSource(host, port, user, passowrd, database);
-				if (database != null) {
-					if (schema != null) {
-						datasource.setExtractedDbsSchemas(database + "/" + schema);
-					} else {
-						datasource.setExtractedDbsSchemas(database);
-					}
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvsnowflake) {
-				TSnowflakeSQLDataSource datasource = new TSnowflakeSQLDataSource(host, port, user, passowrd);
-				if (database != null) {
-					if (schema != null) {
-						datasource.setExtractedDbsSchemas(database + "/" + schema);
-					} else {
-						datasource.setExtractedDbsSchemas(database);
-					}
-				}
-				return datasource;
-			}
-			if (vendor == EDbVendor.dbvteradata) {
-				TTeradataSQLDataSource datasource = new TTeradataSQLDataSource(host, port, user, passowrd, database);
-				if (database != null) {
-					datasource.setExtractedDatabases(database);
-				}
-				return datasource;
-			}
-		} catch (Exception e) {
-			System.err.println("Connect datasource failed. " + e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}
+
 }
 
 class TSQLServerEnv extends TSQLEnv{

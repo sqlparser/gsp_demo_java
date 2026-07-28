@@ -2,7 +2,6 @@ package gudusoft.gsqlparser.demos.columninspect;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import gudusoft.dbadapter.TSQLDataSource;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
@@ -19,15 +18,19 @@ import java.util.*;
 public class ColumnInspect {
 
     public static void main(String[] args) {
-        if (args.length < 12) {
-            System.out.println("Usage: java ColumnInspect [/t] [dbname] [/f] [sql file path] [/jdbc] [jdbc command] [/u] [username] [/p] [password] [/db] [database] [/schema] [schema]");
+        if (args.length < 8) {
+            System.out.println("Usage: java ColumnInspect [/t] [dbname] [/f] [sql file path] [/metadata] [metadata json path] [/db] [database] [/schema] [schema]");
             System.out.println("/t: required, specify the database type.");
             System.out.println("/f: required, specify the SQL script file path to analyze.");
-            System.out.println("/u: required, specify the username of jdbc connection.");
-            System.out.println("/p: required, specify the password of jdbc connection.");
-            System.out.println("/jdbc: required, specify the jdbc url of connection.");
+            System.out.println("/metadata: required, specify a JSON file describing the database metadata.");
             System.out.println("/db: required, specify the database to which the script to analyze belongs.");
             System.out.println("/schema: optional, specify the schema to which the script to analyze belongs.");
+            System.out.println();
+            System.out.println("The metadata JSON is the format TSQLEnv reads: a top-level \"databases\"");
+            System.out.println("array, each entry with a \"name\" and a \"tables\" array, each table with a");
+            System.out.println("\"name\", a \"schema\" and a \"columns\" array of objects carrying \"name\".");
+            System.out.println("Earlier revisions of this demo read the same JSON from a live server over");
+            System.out.println("JDBC; it now takes the file directly, so it needs no database.");
             return;
         }
         List<String> argList = Arrays.asList(args);
@@ -37,14 +40,8 @@ public class ColumnInspect {
         if (!argList.contains("/f")) {
             System.err.println("the /f command be required.");
         }
-        if (!argList.contains("/u")) {
-            System.err.println("the /u command be required.");
-        }
-        if (!argList.contains("/p")) {
-            System.err.println("the /p command be required.");
-        }
-        if (!argList.contains("/jdbc")) {
-            System.err.println("the /jdbc command be required.");
+        if (!argList.contains("/metadata")) {
+            System.err.println("the /metadata command be required.");
         }
         if (!argList.contains("/db")) {
             System.err.println("the /db command be required.");
@@ -67,13 +64,10 @@ public class ColumnInspect {
         sqlparser.sqlfilename = fileName;
         sqlparser.parse();
 
-        String jdbc = args[argList.indexOf("/jdbc") + 1];
-        String user = args[argList.indexOf("/u") + 1];
-        String passowrd = args[argList.indexOf("/p") + 1];
-        TSQLDataSource datasource = createSQLDataSource(vendor, jdbc, user, passowrd);
-        if (datasource != null) {
+        String metadataJson = readMetadata(args[argList.indexOf("/metadata") + 1]);
+        if (metadataJson != null) {
             try {
-                JSONObject metadata = JSONObject.parseObject(datasource.exportJSON());
+                JSONObject metadata = JSONObject.parseObject(metadataJson);
                 JSONArray databases = metadata.getJSONArray("databases");
                 Map<String, Map<String, JSONObject>> map = new LinkedHashMap<>();
                 for (Object database : databases) {
@@ -190,15 +184,31 @@ public class ColumnInspect {
         }
     }
 
-    private static TSQLDataSource createSQLDataSource(EDbVendor vendor, String jdbc, String user, String passowrd) {
-        TSQLDataSource r = null;
-        try {
-            r = TSQLDataSource.createSQLDataSource(vendor, jdbc, user, passowrd);
-        } catch (Exception e) {
-            System.err.println("connect datasource failed. " + e.getMessage());
+    /**
+     * Read the metadata JSON this demo inspects against.
+     *
+     * <p>This used to be {@code createSQLDataSource(...).exportJSON()}, which
+     * opened a JDBC connection through {@code gudusoft.dbadapter.TSQLDataSource}
+     * from the vendored {@code lib/sqlflow-exporter.jar}. Every line below the
+     * call already worked off the returned JSON string, so reading that same
+     * JSON from a file keeps the demo whole and drops both the driver and the
+     * vendored jar. Export it from a live server with the standalone SQLFlow
+     * metadata exporter if you want real data.
+     */
+    private static String readMetadata(String path) {
+        File metadataFile = new File(path);
+        if (!metadataFile.isFile()) {
+            System.err.println("metadata file not exists: " + path);
             System.exit(1);
         }
-        return r;
+        try {
+            byte[] bytes = java.nio.file.Files.readAllBytes(metadataFile.toPath());
+            return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            System.err.println("cannot read metadata file " + path + ": " + e.getMessage());
+            System.exit(1);
+        }
+        return null;
     }
 
 }
