@@ -89,3 +89,62 @@ jobs:
             -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile)
           echo "$out"
           grep -q "syntax errors: 0" <<<"$out"
+
+  # The .bat scripts are the original Windows, no-Maven workflow: edit
+  # setenv\setenv.bat, cd into a demo folder, run compile_<demo>.bat then
+  # run_<demo>.bat. They had been stale for years -- compiling
+  # src\main\java\demos\<demo>\ and cd-ing up five levels, both correct only
+  # before the demos moved under gudusoft\gsqlparser\demos\ -- and nothing ever
+  # noticed, because nothing ran them. This job runs them.
+  windows-bat:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The .bat scripts want a JDK 8 era toolchain, and setenv.bat now keeps
+      # whatever JAVA_HOME it is given rather than hardcoding one.
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+          cache: maven
+
+      # These scripts predate the parser being resolved from Maven. lib\ only
+      # carries old parser jars now, so on its own compile_<demo>.bat fails on
+      # symbols those jars predate. Drop the current parser into external_lib\,
+      # which setenv.bat puts ahead of lib\ on the classpath for exactly this
+      # reason. Not vendored: fetched here, and gitignored.
+      - name: Fetch the parser into external_lib
+        shell: bash
+        run: |
+          set -euo pipefail
+          ver=$(mvn -q help:evaluate -Dexpression=gsp.core.version -DforceStdout)
+          echo "parser version: $ver"
+          mvn -q dependency:copy \
+            -Dartifact=com.gudusoft:gsqlparser:"$ver" \
+            -DoutputDirectory=external_lib
+          ls external_lib
+
+      # `pause` at the end of each script would block forever on a runner with
+      # no keyboard, so stdin is fed from NUL.
+      - name: compile_checksyntax.bat then run_checksyntax.bat
+        shell: cmd
+        run: |
+          cd src\main\java\gudusoft\gsqlparser\demos\checksyntax
+          call compile_checksyntax.bat < NUL
+          if not exist "%GITHUB_WORKSPACE%\build\gudusoft\gsqlparser\demos\checksyntax\checksyntax.class" (
+            echo ::error::compile_checksyntax.bat did not produce checksyntax.class
+            exit /b 1
+          )
+          cd /d "%GITHUB_WORKSPACE%"
+          echo SELECT a.id FROM ta a; > q.sql
+          cd src\main\java\gudusoft\gsqlparser\demos\checksyntax
+          call run_checksyntax.bat /f "%GITHUB_WORKSPACE%\q.sql" /t oracle < NUL > "%GITHUB_WORKSPACE%\out.txt" 2>&1
+          type "%GITHUB_WORKSPACE%\out.txt"
+          findstr /c:"syntax errors: 0" "%GITHUB_WORKSPACE%\out.txt" >NUL || (
+            echo ::error::run_checksyntax.bat did not report "syntax errors: 0"
+            exit /b 1
+          )

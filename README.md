@@ -411,19 +411,44 @@ recompile.
 ## The .bat scripts (Windows, no Maven)
 
 Each demo directory also ships `compile_<demo>.bat` and `run_<demo>.bat`, with
-`setenv/setenv.bat` holding `JAVA_HOME`. The original workflow was:
+`setenv/setenv.bat` holding the shared environment. The workflow:
 
-1. edit `setenv/setenv.bat` and set `JAVA_HOME` to your JDK
-2. `cd` into a demo directory, for example `src/main/java/gudusoft/gsqlparser/demos/checksyntax`
+1. **Put the parser in `external_lib/`.** From the repository root:
+   ```
+   mvn dependency:copy -Dartifact=com.gudusoft:gsqlparser:4.1.6 -DoutputDirectory=external_lib
+   ```
+2. `cd` into a demo directory, e.g. `src\main\java\gudusoft\gsqlparser\demos\checksyntax`
 3. run `compile_checksyntax.bat`, then `run_checksyntax.bat`
 
-These were stale for a long time: they compiled `src\main\java\demos\<demo>\`
-and `cd`-ed up five levels, both correct only before the demos moved under
-`src/main/java/gudusoft/gsqlparser/demos/`. The package rename had to rewrite
-their class names anyway, so their paths and `cd` depths were corrected at the
-same time — 7 levels for most, 8 for the two nested under another demo. They
-have not been run on Windows since, so treat them as repaired-but-unverified;
-Maven remains the tested path.
+You no longer have to edit `setenv.bat` for step 1 of the old instructions:
+it keeps whatever `JAVA_HOME` is already set and only falls back to a fixed path
+when there is none.
+
+**`external_lib/` is not optional, and it must come before `lib/`.** These
+scripts predate the parser being resolved from Maven, and `lib/` now holds only
+*old* parser jars that other things still pin (`gsqlparser-3.1.1.0`,
+`gudusoft.gsqlparser-3.0.2.5`). With `lib/` first on the classpath those shadow
+the current parser and the demos fail to compile on symbols the old jars predate
+— `checksyntax` dies on `EOBTenantMode`. `setenv.bat` therefore puts
+`external_lib\*` ahead of `lib\*`, and `external_lib/` is gitignored so the
+parser is fetched rather than vendored.
+
+### These are now tested on Windows
+
+They had been stale for years — compiling `src\main\java\demos\<demo>\` and
+`cd`-ing up five levels, both correct only before the demos moved under
+`gudusoft/gsqlparser/demos/`. Nothing noticed, because nothing ran them.
+
+The `windows-bat` job in `.github/workflows/build.yml` now does, on
+`windows-latest`: it fetches the parser into `external_lib/`, runs
+`compile_checksyntax.bat`, asserts the `.class` file appears, runs
+`run_checksyntax.bat`, and asserts it reports `syntax errors: 0`. Each script
+ends with `pause`, so CI feeds their stdin from `NUL` to keep them from blocking
+on a runner with no keyboard.
+
+That covers one demo, not all 45. It is enough to catch the failure mode that
+actually happened here — the whole family going stale together after a
+directory move — since they are generated from one template and break as a set.
 
 
 ## Building the dlineage demo on its own
