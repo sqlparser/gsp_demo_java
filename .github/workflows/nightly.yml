@@ -84,22 +84,12 @@ jobs:
         run: .github/scripts/check-test-results.sh
 
 
-      # A second, separate build in the same directory that nothing used to run.
-      # It carried a <parent> pointing at the private gudusoft:gsp_java reactor,
-      # so it only built where that POM happened to be installed. Also asserts it
-      # leaves the root build's target/classes alone (issue #39).
-      - name: Build the separate dlineage POM
-        shell: bash
-        run: |
-          set -euo pipefail
-          before=$(find target/classes -name '*.class' | wc -l)
-          mvn -B -f pom_dlineage.xml package -DskipTests
-          after=$(find target/classes -name '*.class' | wc -l)
-          if [ "$before" != "$after" ]; then
-            echo "::error::pom_dlineage.xml changed the root build's target/classes ($before -> $after); see issue #39"
-            exit 1
-          fi
-          ls -l target-dlineage/*.jar
+      # The standalone lineage tool, run rather than merely built. It was its own
+      # POM until 2026-07-28, and only ever compiled here, which is how it
+      # shipped a missing JAXB dependency (issue #47) and an unrunnable
+      # documented command (issue #46) through green builds.
+      - name: Run the standalone dlineage jar
+        run: .github/scripts/smoke-dlineage-jar.sh
 
       - name: Every demo starts
         run: .github/scripts/run-all-demos.sh --timeout 90
@@ -172,22 +162,13 @@ jobs:
         run: .github/scripts/check-test-results.sh
 
 
-      # A second, separate build in the same directory that nothing used to run.
-      # It carried a <parent> pointing at the private gudusoft:gsp_java reactor,
-      # so it only built where that POM happened to be installed. Also asserts it
-      # leaves the root build's target/classes alone (issue #39).
-      - name: Build the separate dlineage POM against the newest release
-        shell: bash
-        run: |
-          set -euo pipefail
-          before=$(find target/classes -name '*.class' | wc -l)
-          mvn -B -f pom_dlineage.xml package -DskipTests -Dgsp.core.version=${{ steps.ver.outputs.version }}
-          after=$(find target/classes -name '*.class' | wc -l)
-          if [ "$before" != "$after" ]; then
-            echo "::error::pom_dlineage.xml changed the root build's target/classes ($before -> $after); see issue #39"
-            exit 1
-          fi
-          ls -l target-dlineage/*.jar
+      # Same smoke run as the pinned job, against the jar "Compile everything"
+      # just built with -Dgsp.core.version=<newest release>. This is the check
+      # that would notice a new parser breaking data lineage at runtime while
+      # still compiling, which is precisely the failure mode a build-only step
+      # cannot see.
+      - name: Run the standalone dlineage jar against the newest release
+        run: .github/scripts/smoke-dlineage-jar.sh
 
       - name: Every demo starts
         env:
@@ -257,7 +238,7 @@ jobs:
             --title "Bump the parser from $pinned to $NEW" \
             --body "\`$NEW\` is the newest release on sqlparser.com. Tonight's nightly ran it through the same checks the pinned \`$pinned\` gets, and it passed all of them: the full test suite with no failures, every demo starting, and every case in \`.github/scripts/demo-cases.tsv\` producing its expected output.
 
-          This touches the five places the version is written -- \`pom.xml\`, \`pom_dlineage.xml\` and the three \`connector/*/pom.xml\` -- via \`.github/scripts/set-parser-version.sh\`, so they cannot drift apart.
+          This touches the four places the version is written -- \`pom.xml\` and the three \`connector/*/pom.xml\` -- via \`.github/scripts/set-parser-version.sh\`, so they cannot drift apart.
 
           Merge to move the demos to \`$NEW\`. Close to stay on \`$pinned\`; the nightly will go on testing \`$NEW\` and will not reopen this until a newer release appears.
 

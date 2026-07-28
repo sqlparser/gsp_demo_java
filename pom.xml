@@ -30,8 +30,28 @@
         <gsp.core.version>4.1.9</gsp.core.version>
     </properties>
 
-    <!-- Gudu's public Maven repository. The parser is not on Maven Central. -->
     <repositories>
+        <!-- A file-based repository inside this checkout, holding the one
+             dependency that has no coordinate anywhere public. See
+             lib-repo/readme.md for the layout and for why this replaced the
+             `system`-scope jars that used to sit in lib/.
+
+             ${project.baseUri} rather than file://${project.basedir}: baseUri
+             already yields a well-formed file: URI with the right number of
+             slashes on both Unix (file:///home/...) and Windows
+             (file:///C:/...), and the .bat workflow runs Maven on Windows.
+
+             Declared first so a local hit costs a filesystem stat instead of a
+             404 against a remote that deletes artifacts. Everything it does not
+             contain falls through to the two repositories below in order. -->
+        <repository>
+            <id>in-project-vendored</id>
+            <url>${project.baseUri}lib-repo</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+
+        <!-- Gudu's public Maven repository. The parser is not on Maven Central. -->
         <repository>
             <id>gudu-public-releases</id>
             <url>https://www.sqlparser.com/maven/</url>
@@ -91,21 +111,33 @@
         </dependency>
 
 
+        <!-- These two were <scope>system</scope> jars under lib/ until the two
+             POMs were merged. Both are on Maven Central, and the vendored
+             copies were byte-for-byte identical to what Central serves:
+
+                 sha256 7a43d2d5e488e0dac57a6de0284df4413a4733365239649309c4b693f4e429f9
+                        simple-xml-2.7.1.jar
+                 sha256 641a4d65ab32fbfdccd9c718e3f83ebc4caabdb5e4fe5b3d51527c5fe692631d
+                        fastjson-1.2.83.jar
+
+             so this is the same bytes, resolved instead of committed. Three
+             things that did not work before now do: they are included by
+             maven-shade-plugin and dependency:copy-dependencies (system-scope
+             artifacts are silently skipped by both, which is the whole reason
+             the dlineage demo needed a hand-written classpath - issue #46),
+             Dependabot can see and patch them, and their transitive
+             dependencies resolve rather than going missing at runtime. -->
         <dependency>
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
             <version>2.7.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/simple-xml-2.7.1.jar</systemPath>
         </dependency>
 
-<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/fastjson-1.2.83.jar</systemPath>            
         </dependency>
     <!-- Used only by antiSQLInjectionTest to read batches of SQL out of .rar
          archives, hence test scope. Was lib/junrar-0.7.jar on system scope,
@@ -120,31 +152,29 @@
         <scope>test</scope>
     </dependency>
 
-    <!-- The expression evaluator behind demos/antiSQLInjection (GEval).
-         lib/expr4j.jar contains ONLY org/boris/expr/**, that is "Boris Expr",
-         not tk.pratanumandal:expr4j, which this was previously declared as. That
+    <!-- The expression evaluator behind demos/antiSQLInjection (GEval). The jar
+         contains ONLY org/boris/expr/**, that is "Boris Expr", not
+         tk.pratanumandal:expr4j, which this was previously declared as. That
          coordinate named a completely different library and would have misled
          SBOM and vulnerability tooling into scanning the wrong project, so it is
          corrected here to describe the file that is actually on disk.
 
-         The jar carries no version metadata at all (bare MANIFEST.MF, no
-         pom.properties), so the version below is a placeholder, not a real
-         upstream release number. Identify it by content instead:
-             sha256 6267d9cb7cabcb24cf02d5bff1d11fdfea8c60c9ba1840dcb45359fb0165ca1b
-             367 classfiles, Java 5 bytecode (major version 49)
+         This is the one dependency with no coordinate in any public repository
+         - searched and confirmed - so it is served from lib-repo/, a
+         file-based Maven repository inside this checkout, declared above. It
+         was a <scope>system</scope> jar under lib/ until then, which meant no
+         packaging plugin could see it; lib-repo/readme.md has the full
+         reasoning. It is a normal compile-scope dependency now, so the
+         antiSQLInjection demo no longer needs -Dexec.classpathScope=compile.
 
          Until 2026/7/27 this repository also carried all 365 of these classes as
          vendored .java under demos/antiSQLInjection/org/boris/expr/, so the
          library was shipped twice and the jar was dead weight. The sources were
-         removed; this jar is now what actually supplies org.boris.expr. Because
-         system scope is absent from Maven's runtime classpath, the
-         antiSQLInjection demo requires -Dexec.classpathScope=compile. -->
+         removed; this artifact is now what actually supplies org.boris.expr. -->
     <dependency>
         <groupId>org.boris</groupId>
         <artifactId>expr</artifactId>
         <version>0.0.0-vendored</version>
-        <scope>system</scope>
-        <systemPath>${project.basedir}/lib/expr4j.jar</systemPath>
     </dependency>
         <!-- Used only by commonTest/testXmlXSD.java, hence test scope. Was
              lib/jdom.jar (org.jdom:jdom:1.1) on system scope; EVERY version of
@@ -162,7 +192,27 @@
 
         <!-- Carried over from the library-side build when the two demo trees
              were merged: sources under demos/generateLineage need SnakeYAML,
-             and the JAXB API left the JDK after Java 8. -->
+             and the JAXB API left the JDK after Java 8.
+
+             The API stays on the javax.xml.bind namespace, not jakarta.xml.bind:
+             the parser calls javax.xml.bind.JAXBContext directly, so 2.3.3 (the
+             last javax-namespace release of the API) is a compatibility
+             requirement, not a version that has been left to rot.
+
+             jaxb-runtime, though, MUST be 2.3.9 rather than the matching 2.3.3.
+             2.3.3's optimised reflection path,
+             com.sun.xml.bind.v2.runtime.reflect.opt.Injector, calls
+             sun.misc.Unsafe.defineClass, which was removed in JDK 11. On any
+             newer JDK it logs
+
+                 SEVERE  java.security.PrivilegedActionException:
+                         NoSuchMethodException: sun.misc.Unsafe.defineClass
+
+             and then XML2Model.saveXML fails with a NullPointerException and
+             "Output dataflow to xml failed.", so DataFlowAnalyzer's XML
+             output silently produced nothing on every JDK this project claims
+             to support. Verified on OpenJDK 21: 2.3.3 fails, 2.3.9 writes the
+             XML cleanly. Do not "align" these two version numbers. -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
@@ -176,7 +226,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.3</version>
+            <version>2.3.9</version>
         </dependency>
 
     </dependencies>
@@ -216,9 +266,22 @@
                              wildcard compile of that folder, which is how
                              compile_gettablecolumns.bat compiles it. Deleted. -->
 
-                        <!-- DataFlowAnalyzer stays excluded from THIS build: pom_dlineage.xml
-                             compiles it on its own into target-dlineage/ (issue #39). -->
-                        <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
+                        <!-- DataFlowAnalyzer used to be excluded here, and the reason was
+                             circular: it was excluded because pom_dlineage.xml compiled it
+                             separately, and pom_dlineage.xml existed to produce a standalone
+                             lineage jar. That second POM shared ${project.basedir} with this
+                             one, so it also shared target/classes and its incremental-build
+                             cleanup wiped out the root build (issue #39), which is why it had
+                             to be told to write to target-dlineage/ instead.
+
+                             One POM removes the collision at the source rather than working
+                             around it. The class compiles here like every other demo, and
+                             maven-shade-plugin below packages it as a standalone executable
+                             jar. pom_dlineage.xml is deleted; it had drifted twice in ways
+                             nothing caught, missing the JAXB dependency this POM already
+                             carried (issue #47) and keeping a <parent> published nowhere.
+
+                             Nothing is excluded from this build any more. -->
                     </excludes>
                     <testExcludes>
                         <!-- commonTest/testDBVendor.java used to be excluded here: it
@@ -247,6 +310,80 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.1</version>
+            </plugin>
+
+            <!-- Packages DataFlowAnalyzer as a standalone lineage tool:
+                 target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar, an executable
+                 uber jar with every runtime dependency inside it. This replaces
+                 pom_dlineage.xml, which produced a jar holding one .class file
+                 and left the user to assemble a classpath by hand - the
+                 command the README gave for that pointed at external_lib/, a
+                 directory only the Windows .bat route ever creates, so it could
+                 not work for anyone following the Maven instructions
+                 (issue #46). `java -jar` needs no classpath at all, and the
+                 documented command now contains no version number, which
+                 matters because the parser's filename changes on every release
+                 and Gudu's repository deletes the old ones.
+
+                 It attaches as a classifier alongside the ordinary jar rather
+                 than replacing it, so the normal build output is untouched. The
+                 uber jar carries every demo class, not just this one, so
+                 `java -cp <it> <any.MainClass>` also works. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <id>dlineage-standalone</id>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>dlineage</shadedClassifierName>
+                            <!-- Without this, shade rewrites pom.xml into a
+                                 dependency-reduced-pom.xml in the project root
+                                 and hands that to anything downstream. There is
+                                 nothing downstream here, and a generated POM
+                                 appearing next to the real one is pure
+                                 confusion. -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer</mainClass>
+                                </transformer>
+                                <!-- Required, not optional. JAXB finds its
+                                     implementation through
+                                     META-INF/services/javax.xml.bind.JAXBContext,
+                                     and several dependencies ship a file at
+                                     that same path. Without merging them, one
+                                     silently overwrites the others inside the
+                                     uber jar and DataFlowAnalyzer dies at
+                                     XML2Model.saveXML with the same
+                                     NoClassDefFoundError as issue #47 - with
+                                     jaxb-runtime present the whole time. -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <!-- Signed jars carry signatures over
+                                             their own contents. Repacking
+                                             invalidates them, and a stale
+                                             signature block is a
+                                             SecurityException at class load,
+                                             not a warning. -->
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

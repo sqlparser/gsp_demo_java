@@ -43,8 +43,12 @@ trap 'rm -rf "$WORK"' EXIT
 read -r -a EXTRA_MVN <<< "${MVN_ARGS:-}"
 
 echo "== building classpath ${MVN_ARGS:+($MVN_ARGS)} =="
-# system-scope jars are on the compile classpath but not the runtime one, which
-# is why every demo here is documented as needing -Dexec.classpathScope=compile.
+# compile scope covers everything the demos need. It used to be load-bearing for
+# a different reason: three dependencies were <scope>system</scope> jars under
+# lib/, and system scope is on the compile classpath but not the runtime one,
+# which is why the demos were all documented as needing
+# -Dexec.classpathScope=compile. Those became ordinary Maven coordinates when
+# pom_dlineage.xml was merged into pom.xml, so that caveat no longer applies.
 if ! mvn -B -q ${EXTRA_MVN[@]+"${EXTRA_MVN[@]}"} dependency:build-classpath \
         -Dmdep.outputFile="$WORK/cp.txt" \
         -Dmdep.includeScope=compile > "$WORK/cp.log" 2>&1; then
