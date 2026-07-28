@@ -384,9 +384,26 @@ Two things worth keeping in mind for next time:
   1.x release, and it is where the 1.x deserialization advisories were fixed.
   Leave it, or move to `fastjson2`; do not "upgrade" it within 1.x.
 
-What still sits in `lib/` on system scope is what genuinely has no public
-coordinate: `sqlflow-exporter`, `sqlflow-library`, `expr4j` (see above),
-`simple-xml`, and some old parser jars. None of them are currently flagged.
+What still sits in `lib/` is exactly the five jars that genuinely have no public
+coordinate and are declared system-scope in both `pom.xml` and
+`pom_dlineage.xml`: `sqlflow-exporter`, `sqlflow-library`, `expr4j` (see above),
+`simple-xml`, and `fastjson`. None of them are currently flagged.
+
+Eight more jars used to sit alongside them, 5.5 MB of the directory's 7.1 MB.
+None was declared by any POM, imported by any source, or named by any `.bat`
+script, so nothing resolved them — `lib/` was just where they had been dropped:
+
+| removed | why it was dead |
+|---|---|
+| `lib/jdbc/ojdbc-1.1.1.jar`, `lib/jdbc/sqljdbc4-4.0.jar` | the connector POMs resolve `${project.basedir}/lib/`, which is `connector/<module>/lib/` — never this directory. Download the driver into the module's own `lib/`, as its readme says. |
+| `lib/proguard/proguard.jar`, `proguard.pro` | byte-identical to `gsp_java_core/proguard/`, and the `.pro` obfuscates `gudusoft.gsqlparser.jar` — the *library* artifact. Release tooling for the other repository. |
+| `lib/jdk1.5/junit-4.5.jar`, `junit.jar` | JUnit comes from Maven at `4.13.2`. |
+| `lib/commons-logging-1.1.3.jar` | referenced only by `fastjson`'s `support/spring/*` adapters; there is no Spring here. |
+| `lib/jarLoader.jar` | Eclipse's jar-in-jar export loader, used by the IDE wizard, not by any build. |
+
+Vendored driver jars in particular should not come back. They are invisible to
+Dependabot for the same reason the system-scope entries above were, so they age
+in place with no bot to flag them.
 
 ## What is excluded from the build
 
