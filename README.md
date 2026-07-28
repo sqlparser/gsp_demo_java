@@ -1,5 +1,7 @@
 # General SQL Parser — Java Demos
 
+[![Build and test](https://github.com/sqlparser/gsp_demo_java/actions/workflows/build.yml/badge.svg)](https://github.com/sqlparser/gsp_demo_java/actions/workflows/build.yml)
+
 Runnable sample programs for [General SQL Parser](https://www.sqlparser.com):
 syntax checking, SQL formatting, column-level lineage, AST traversal, stored
 procedure analysis and SQL rewriting.
@@ -439,47 +441,66 @@ call.
 `external_lib/` also comes before `lib/` on the classpath, so the fetched parser
 wins over anything dropped into `lib/` later.
 
-### These are now tested on Windows
+### Verification status
+
+**Every `.bat` script is exercised on Windows on every push.** The `windows-bat`
+job in `.github/workflows/build.yml` runs on `windows-latest`; the badge at the
+top of this file covers it.
+
+| phase | covered | current |
+|-------|---------|---------|
+| Bootstrap | assert no parser jar is committed, then `fetch-parser.bat` pulls one into `external_lib/` | passing |
+| Compile | all **39** `compile_<demo>.bat` | **39/39** |
+| Launch | all **50** `run_<demo>.bat`, no arguments | **50/50** |
+| Run for real | 4 demos with arguments, output checked against an expected string | passing |
+
+The launch phase runs each script with no arguments, so most simply print their
+own usage line. What it proves is that the class name in the script still
+resolves — a stale name after a package move shows up as
+`ClassNotFoundException`, which is precisely what had happened. The four driven
+with real arguments cover the distinct argument shapes: `checksyntax`
+(`/f <file> /t <vendor>`), `formatsql` (bare filename), `listGSPInfo` (none),
+and `modifysql`, whose compile and run scripts are named differently
+(`compile_modifysql.bat` builds the folder, `run_replaceTablename.bat` runs one
+class).
+
+Each script ends with `pause`, so CI feeds their stdin from `NUL` to stop them
+blocking on a runner with no keyboard.
+
+**What this does not cover.** 13 of the 49 demo folders ship no `.bat` at all —
+`callgraph`, `evaluator`, `events`, `findConstants`, `findproceduralsql`,
+`generateLineage`, `performance`, `removeSpecialConditions`, `scansql`,
+`scriptwriter`, `snowflake`, `sqlenv` and `utils`. Those are Maven-only, and the
+Linux job covers them. Nor does the launch phase assert on output for the 46
+scripts it does not drive with arguments; it asserts only that they start.
+
+### What testing them found
 
 They had been stale for years — compiling `src\main\java\demos\<demo>\` and
 `cd`-ing up five levels, both correct only before the demos moved under
-`gudusoft/gsqlparser/demos/`. Nothing noticed, because nothing ran them.
+`gudusoft/gsqlparser/demos/`. Nothing noticed, because nothing ran them. Putting
+them under CI turned up five faults, none of which anything else would have
+caught:
 
-The `windows-bat` job in `.github/workflows/build.yml` runs them on
-`windows-latest`, in three phases:
+| fault | scripts |
+|-------|---------|
+| Still compiled `src\main\java\demos\*.java`, a directory the package rename deleted | 2 |
+| Doubled path `analyzesp\sybase\sybase\` | 1 |
+| Named a package that no longer existed after `ColumnImpact` moved | 2 |
+| Passed only their own folder to `javac`, so cross-demo imports failed to resolve — fixed with `-sourcepath src\main\java` | 6 |
+| No `-encoding`, so Windows `javac` used the platform codepage against UTF-8 sources | 39 |
 
-1. **Bootstrap** — assert no parser jar is committed, then let
-   `fetch-parser.bat` pull one into `external_lib/`.
-2. **Compile all 39** `compile_<demo>.bat`. This is the check that matters: it
-   is what would have caught the whole family going stale when the demos moved
-   directory.
-3. **Launch all 50** `run_<demo>.bat` with no arguments, so most print their own
-   usage line. What this proves is that each script's class name still resolves
-   — a stale name after a package move surfaces here as
-   `ClassNotFoundException`, which is exactly what had happened.
-4. **Drive four with real arguments** and check their output contains what it
-   should: `checksyntax` (`/f <file> /t <vendor>`), `formatsql` (bare filename),
-   `listGSPInfo` (no arguments), and `modifysql`, whose compile and run scripts
-   are named differently (`compile_modifysql.bat` builds the folder,
-   `run_replaceTablename.bat` runs one class).
+The last one is the reason a real Windows runner was worth the trouble. `javac`
+there defaults to `Cp1252`, and two demos failed with `unmappable character for
+encoding Cp1252`. `pom.xml` has always declared `project.build.sourceEncoding`
+as UTF-8, so Maven was never affected, and on Linux the default is UTF-8 anyway
+— simulating all 39 scripts there passed cleanly. It only reproduces with the
+encoding forced.
 
-Each script ends with `pause`, so CI feeds their stdin from `NUL` to keep them
-from blocking on a runner with no keyboard.
-
-Bringing all 39 under CI turned up four things that were broken and invisible:
-two scripts still compiled `src\main\java\demos\*.java`, a directory deleted
-in the package rename; `compile_analyzesp.bat` in the nested `sybase` folder had
-picked up a doubled `sybase\sybase\` path; both `run_columnImpact.bat` files
-named a package that no longer existed; and seven demos could not compile at all
-because their scripts pass only their own folder to `javac` while the classes
-import across demos — fixed by adding `-sourcepath src\main\java`, which lets
-`javac` resolve the rest.
-
-One more only a real Windows runner could have found: `javac` there defaults to
-the platform codepage, `Cp1252` on the runner, while the sources are UTF-8. Two
-demos failed with `unmappable character for encoding Cp1252`. `pom.xml` has
-always declared `project.build.sourceEncoding` as UTF-8, so Maven was never
-affected; the `.bat` scripts simply never passed `-encoding`. All 39 now do.
+Also deleted along the way: `TGetTableColumn_notUsed.java`, which redefined
+three classes from the `TGetTableColumn.java` beside it and so broke any
+wildcard compile of that folder, which is exactly how
+`compile_gettablecolumns.bat` compiles it.
 
 ## Building the dlineage demo on its own
 
