@@ -111,14 +111,47 @@ Maven repository, which `pom.xml` declares:
 </dependency>
 ```
 
-To move every demo to a different parser build, change one property:
+To move every demo to a different parser build, run one command:
 
-```xml
-<gsp.core.version>4.1.6</gsp.core.version>
+```bash
+.github/scripts/set-parser-version.sh 4.1.8
 ```
+
+The version is written in **five** files, not one: the `${gsp.core.version}`
+property in `pom.xml` and again in `pom_dlineage.xml`, plus a hardcoded
+`<version>` in each of the three `connector/*/pom.xml`, which are separate
+builds with no parent to inherit a property from. Editing them by hand is how
+one gets left behind, silently building against an older parser, so the script
+owns all five and CI runs `set-parser-version.sh --check` to fail the build if
+they ever disagree.
 
 Available versions:
 <https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml>
+
+### Why the version is pinned, and why you still don't have to bump it
+
+A floating version (`RELEASE`, `LATEST`, or a range like `[4.1,)`) would remove
+the bumps. It is not used here on purpose:
+
+- This repository is what people clone to evaluate GSP. With a floating
+  version, two clones a week apart get different parsers, and a bug report
+  becomes unanswerable without knowing which one. The pin is what makes
+  `git clone && mvn package` a known-good starting point.
+- A range is not dependably "latest" either. It resolves through
+  `maven-metadata.xml`, which Maven caches per the repository's `updatePolicy`,
+  so different machines resolve differently depending on cache age. CI's Maven
+  cache can hold a runner on an older version indefinitely.
+- A bad upstream release would break every clone at once, with no commit here
+  to revert.
+- `RELEASE` and `LATEST` also draw `both of them are being deprecated` from
+  Maven 3 and are gone in Maven 4.
+
+Instead the nightly does the bumping. Its `latest` job resolves the newest
+release, runs the whole suite and every demo against it, and **only if all of
+that passes** opens a PR moving the five files. So you never edit a version:
+you merge a PR that is already proven green, or close it to stay put. Closing it
+leaves the branch on `origin`, which the job treats as "asked and answered", so
+it will not reopen until a newer release appears.
 
 ### Trial edition
 

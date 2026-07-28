@@ -39,6 +39,14 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
+      # The parser version is written in five files: the root and dlineage
+      # properties, and the three connector modules, which are separate builds
+      # with no parent to inherit from. Nothing used to make them agree, so a
+      # bump that missed one left a connector silently building against an older
+      # parser. Use .github/scripts/set-parser-version.sh <version> to move them.
+      - name: Parser version is consistent across all POMs
+        run: .github/scripts/set-parser-version.sh --check
+
       - name: Build
         run: mvn -B package -DskipTests
 

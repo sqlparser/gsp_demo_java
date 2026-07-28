@@ -64,6 +64,9 @@ jobs:
           fi
           echo "ok: no parser jar in the index"
 
+      - name: Parser version is consistent across all POMs
+        run: .github/scripts/set-parser-version.sh --check
+
       - name: Report the parser being used
         run: |
           set -euo pipefail
@@ -89,6 +92,11 @@ jobs:
   latest:
     name: "latest published parser"
     runs-on: ubuntu-latest
+    # Needed only by the last step, which opens the bump PR. Everything above it
+    # is read-only.
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -154,6 +162,70 @@ jobs:
         env:
           MVN_ARGS: -Dgsp.core.version=${{ steps.ver.outputs.version }}
         run: .github/scripts/run-demo-cases.sh --timeout 180
+
+      # Everything above passed against this version, so the bump is already
+      # proven rather than proposed on faith: full suite, every demo started,
+      # and the demo cases checked against expected output. Opening a PR instead
+      # of committing keeps a human in the loop and gives the push-triggered
+      # build.yml a chance to disagree.
+      #
+      # Deliberately the LAST step in the job: any earlier failure means the new
+      # release broke something, and then no PR is what we want.
+      - name: Propose the bump when the newest release is green
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          pinned=$(mvn -B -q help:evaluate -Dexpression=gsp.core.version -DforceStdout)
+          if [ "$NEW" = "$pinned" ]; then
+            echo "already on $NEW, nothing to propose"
+            exit 0
+          fi
+
+          branch="bump-parser-$NEW"
+          if gh pr list --head "$branch" --state open --json number \
+               --jq 'length' | grep -qv '^0$'; then
+            echo "a PR for $branch is already open"
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            echo "branch $branch already exists on origin; leaving it alone"
+            exit 0
+          fi
+
+          .github/scripts/set-parser-version.sh "$NEW"
+          .github/scripts/set-parser-version.sh --check
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -aqm "Bump the parser from $pinned to $NEW
+
+          The nightly ran the newest published release through the same checks
+          the pinned version gets, and it passed all of them:
+
+            - full test suite, no failures
+            - every demo starts
+            - the demo cases in .github/scripts/demo-cases.tsv produce their
+              expected output
+
+          Opened automatically by .github/workflows/nightly.yml. Merge it if you
+          want the demos on $NEW; close it to stay on $pinned, and the nightly
+          will keep testing $NEW without asking again until a newer release
+          appears."
+          git push -q origin "$branch"
+
+          gh pr create --base master --head "$branch" \
+            --title "Bump the parser from $pinned to $NEW" \
+            --body "\`$NEW\` is the newest release on sqlparser.com. Tonight's nightly ran it through the same checks the pinned \`$pinned\` gets, and it passed all of them: the full test suite with no failures, every demo starting, and every case in \`.github/scripts/demo-cases.tsv\` producing its expected output.
+
+          This touches the five places the version is written -- \`pom.xml\`, \`pom_dlineage.xml\` and the three \`connector/*/pom.xml\` -- via \`.github/scripts/set-parser-version.sh\`, so they cannot drift apart.
+
+          Merge to move the demos to \`$NEW\`. Close to stay on \`$pinned\`; the nightly will go on testing \`$NEW\` and will not reopen this until a newer release appears.
+
+          Opened by [\`nightly.yml\`](https://github.com/${{ github.repository }}/actions/workflows/nightly.yml)."
 
   # The .bat family is the original Windows, no-Maven workflow. It went stale
   # for years because nothing ran it; build.yml runs it per push and this runs
