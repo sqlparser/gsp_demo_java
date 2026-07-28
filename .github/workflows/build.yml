@@ -151,7 +151,11 @@ jobs:
           )
           echo.
           echo compiled !COUNT! demos, !FAILED! failed
-          if not !FAILED!==0 exit /b 1
+          rem An explicit exit is required: a trailing `if` whose condition is
+          rem false leaves whatever ERRORLEVEL the loop last set, and the step
+          rem then fails despite reporting 0 failures.
+          if !FAILED! GTR 0 exit /b 1
+          exit /b 0
 
       # Phase 2: every run_<demo>.bat must at least start its class. Run with no
       # arguments, so most print their own usage line; what this proves is that
@@ -177,7 +181,8 @@ jobs:
           )
           echo.
           echo launched !COUNT! demos, !FAILED! failed
-          if not !FAILED!==0 exit /b 1
+          if !FAILED! GTR 0 exit /b 1
+          exit /b 0
 
       # `pause` at the end of each script would block forever on a runner with
       # no keyboard, so stdin is fed from NUL.
