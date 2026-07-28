@@ -257,24 +257,30 @@ pointed SBOM and vulnerability tooling at the wrong project. It now names what
 is actually on disk, with a checksum recorded in `pom.xml` since the jar carries
 no version metadata of its own.
 
-### dbConnect moved to connector/
+### dbConnect was removed
 
 `dbConnect` was a **complete Maven project nested inside `src/main/java`** — its
 own `pom.xml`, its own `src/main/java`, and 10 JDBC driver jars, all sitting in
-the compile root of the project that contains it. It was never built here
-(`pom.xml` excluded it), because it needs JDBC drivers and a live server, and is
-written against `gudusoft.gsqlparser.sqlenv.util` which the public parser no
-longer ships.
+the compile root of the project that contains it. It was moved out to
+`connector/dbConnect/` and then deleted outright, because it had stopped being
+revivable:
 
-It now lives at `connector/dbConnect/`, beside `oracleConnector`,
-`snowflakeConnector` and `sqlServerConnector` — standalone JDBC modules with
-exactly the same `pom.xml` + `src/` + `lib/` shape, none of them part of the
-root build. Nothing in `src/` referenced it, and everything it imports from
-`demos.sqlenv` is inside its own tree, so the move needed no code changes and
-the exclusion in `pom.xml` is simply gone.
+- It is written against `gudusoft.gsqlparser.sqlenv.util`, which the public
+  parser no longer ships, so it needs an API migration rather than a rebuild.
+- `pom.xml` excluded it from the build, and nothing else built it either.
+- Its own parser dependency was pinned to `<version>latest</version>`, which
+  Maven cannot resolve.
+- Its 10 vendored JDBC drivers accounted for **16 of this repository's 28
+  Dependabot advisories**, and none of them could be patched by upgrading a
+  declared version, because the jars were files in git rather than resolvable
+  dependencies.
 
-It also resolved one of the two split packages: 16 of `demos.sqlenv`'s files
-were dbConnect's and 1 (`runSQLEnv.java`) was not.
+Deleting it removed all 16 advisories, 10 binaries and 83 Java files in one go.
+It is in git history if it ever needs reviving, but reviving it means the API
+migration, not a checkout.
+
+Moving it out first also resolved one of the two split packages: 16 of
+`demos.sqlenv`'s files were dbConnect's and 1 (`runSQLEnv.java`) was not.
 
 ### One package root
 
@@ -349,6 +355,36 @@ they cannot move), and a handful of per-demo assets (`tree-view.xsl` and
 `tree-view.css`, referenced by relative href from generated XML;
 `sqlflow-settings.png`; the dlineage PDF). Co-locating documentation and
 per-demo tooling with the demo is the point of this repository's layout.
+
+### Dependencies and security advisories
+
+GitHub reported 28 open Dependabot advisories against this repository. They came
+from one root cause: dependencies declared with `<scope>system</scope>` and a
+`<systemPath>` into `lib/`. **Dependabot cannot patch those** — a system-scope
+dependency is a file on disk, not something Maven resolves, so there is no
+version for a bot to bump.
+
+All 28 are now closed:
+
+| where | count | what was done |
+|---|---|---|
+| `pom.xml` — `junrar` | 4 | `0.7` system-scope → `7.5.10` from Maven Central, `test` scope |
+| `pom.xml` — `jdom` | 1 | every version of `org.jdom:jdom` is affected; migrated to the successor artifact `org.jdom:jdom2:2.0.6.1`, whose classes are `org.jdom2.*` |
+| `pom.xml` — `junit` | 1 | `4.12` → `4.13.2` |
+| `connector/snowflakeConnector` | 6 | `snowflake-jdbc` `3.12.9` → `4.3.2`, resolved from Central instead of a jar you drop into `lib/` |
+| `connector/dbConnect` | 16 | module deleted (see above) |
+
+Two things worth keeping in mind for next time:
+
+- **`junrar` and `jdom` were only ever used by tests**, so they are `test` scope
+  now. Both jars are gone from `lib/`.
+- `fastjson` is pinned at `1.2.83` and is **not** flagged — that is the final
+  1.x release, and it is where the 1.x deserialization advisories were fixed.
+  Leave it, or move to `fastjson2`; do not "upgrade" it within 1.x.
+
+What still sits in `lib/` on system scope is what genuinely has no public
+coordinate: `sqlflow-exporter`, `sqlflow-library`, `expr4j` (see above),
+`simple-xml`, and some old parser jars. None of them are currently flagged.
 
 ## What is excluded from the build
 

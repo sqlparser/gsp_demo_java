@@ -22,7 +22,7 @@ import javax.xml.XMLConstants;
 
 import org.xml.sax.SAXException;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * @deprecated

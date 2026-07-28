@@ -86,7 +86,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -107,13 +107,17 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/fastjson-1.2.83.jar</systemPath>            
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.junrar/junrar -->
+    <!-- Used only by antiSQLInjectionTest to read batches of SQL out of .rar
+         archives, hence test scope. Was lib/junrar-0.7.jar on system scope,
+         which Dependabot flagged for four advisories (the worst fixed in
+         7.4.1) and could not patch, because a system-scope jar is a file on
+         disk rather than something Maven can resolve and upgrade. Now a normal
+         Maven Central dependency. -->
     <dependency>
         <groupId>com.github.junrar</groupId>
         <artifactId>junrar</artifactId>
-        <version>0.7</version>
-        <scope>system</scope>
-        <systemPath>${project.basedir}/lib/junrar-0.7.jar</systemPath>     
+        <version>7.5.10</version>
+        <scope>test</scope>
     </dependency>
 
     <!-- The expression evaluator behind demos/antiSQLInjection (GEval).
@@ -142,13 +146,17 @@
         <scope>system</scope>
         <systemPath>${project.basedir}/lib/expr4j.jar</systemPath>
     </dependency>
-<!-- https://mvnrepository.com/artifact/org.jdom/jdom -->
+        <!-- Used only by commonTest/testXmlXSD.java, hence test scope. Was
+             lib/jdom.jar (org.jdom:jdom:1.1) on system scope; EVERY version of
+             that coordinate carries a high-severity advisory (org.jdom:jdom
+             <= 2.0.2), and the fix is not a version bump but the successor
+             artifact org.jdom:jdom2, whose classes live in org.jdom2.*. The
+             import in that test was moved across with it. -->
         <dependency>
             <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-            <version>1.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/jdom.jar</systemPath>  
+            <artifactId>jdom2</artifactId>
+            <version>2.0.6.1</version>
+            <scope>test</scope>
         </dependency>
 
 
@@ -197,19 +205,17 @@
                 <configuration>
                     <excludes>
                         <!-- dbConnect used to be excluded here as demos/dbConnect/**.
-                             It was never part of this build: it wires the parser up
-                             to live databases over JDBC, needs drivers and a
-                             reachable server, and is written against
-                             gudusoft.gsqlparser.sqlenv.util which the public parser
-                             no longer ships. It was also a whole Maven project
-                             nested inside src/main/java, with its own pom.xml, its
-                             own src/main/java and 10 JDBC driver jars. It now lives
-                             at connector/dbConnect/ next to the other standalone
-                             JDBC modules, so there is nothing left to exclude. -->
+                             It was a whole Maven project nested inside
+                             src/main/java, with its own pom.xml, its own
+                             src/main/java and 10 JDBC driver jars, and it was never
+                             part of this build. It has since been deleted outright:
+                             it needed an API migration against sqlenv.util, which
+                             the public parser no longer ships, and its vendored
+                             drivers carried 16 unpatchable Dependabot advisories.
+                             See the README. Nothing left to exclude. -->
 
                         <!-- Three stragglers that do still sit in this source tree:
-                             they
-                             build a TSQLDataSource / T<Vendor>SQLDataSource to
+                             they build a TSQLDataSource / T<Vendor>SQLDataSource to
                              read metadata straight out of a running database.
                              The public parser ships no *SQLDataSource class at
                              all, so these cannot compile against it, and they
