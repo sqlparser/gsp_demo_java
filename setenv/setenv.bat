@@ -24,17 +24,17 @@ set JAVAC_CMD="%JAVA_HOME%\bin\javac.exe"
 REM #Set the home directory of the GSP library
 set gspDemoHome=.
 
+REM # No parser jar is committed to this repository, so fetch it into
+REM # external_lib\ the first time. This is a no-op once it is there.
+REM #
+REM # A vendored parser is what previously let the demos compile against a build
+REM # years older than their own source, so the jar is resolved from Gudu's
+REM # public Maven repository instead and never checked in.
+for %%f in (%gspDemoHome%\external_lib\gsqlparser-*.jar) do goto :gspFound
+call "%gspDemoHome%\setenv\fetch-parser.bat"
+:gspFound
+
 REM # set classpath to the GSP library Jar files and the database JDBC drivers.
-REM #
-REM # external_lib comes BEFORE lib, and that order matters. lib\ still holds old
-REM # parser jars (gsqlparser-3.1.1.0, gudusoft.gsqlparser-3.0.2.5) that other
-REM # things depend on, and with lib\ first those shadow the current parser: the
-REM # demos then fail to compile on symbols the old jars predate, for example
-REM # EOBTenantMode in checksyntax. Put the parser you actually want to build
-REM # against in external_lib\ and it wins.
-REM #
-REM # To fetch the current parser into external_lib\, from the repository root:
-REM #
-REM #   mvn dependency:copy -Dartifact=com.gudusoft:gsqlparser:4.1.6 -DoutputDirectory=external_lib
-REM #
+REM # external_lib comes before lib so the fetched parser always wins over
+REM # anything that may be dropped into lib\ later.
 set CLASSPATH=.;%gspDemoHome%\build;%gspDemoHome%\external_lib\*;%gspDemoHome%\lib\*

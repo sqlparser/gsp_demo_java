@@ -408,30 +408,36 @@ Everything else in those packages still builds. Reviving them needs an API
 migration against a build that includes the metadata layer, not just a
 recompile.
 
-## The .bat scripts (Windows, no Maven)
+## The .bat scripts (Windows)
 
 Each demo directory also ships `compile_<demo>.bat` and `run_<demo>.bat`, with
-`setenv/setenv.bat` holding the shared environment. The workflow:
+`setenv/setenv.bat` holding the shared environment.
 
-1. **Put the parser in `external_lib/`.** From the repository root:
-   ```
-   mvn dependency:copy -Dartifact=com.gudusoft:gsqlparser:4.1.6 -DoutputDirectory=external_lib
-   ```
-2. `cd` into a demo directory, e.g. `src\main\java\gudusoft\gsqlparser\demos\checksyntax`
-3. run `compile_checksyntax.bat`, then `run_checksyntax.bat`
+```
+cd src\main\java\gudusoft\gsqlparser\demos\checksyntax
+compile_checksyntax.bat
+run_checksyntax.bat /f ..\..\..\..\..\..\..\q.sql /t oracle
+```
 
-You no longer have to edit `setenv.bat` for step 1 of the old instructions:
-it keeps whatever `JAVA_HOME` is already set and only falls back to a fixed path
-when there is none.
+That is the whole workflow now. You no longer edit `setenv.bat` first: it keeps
+whatever `JAVA_HOME` is already set, and it fetches the parser for you.
 
-**`external_lib/` is not optional, and it must come before `lib/`.** These
-scripts predate the parser being resolved from Maven, and `lib/` now holds only
-*old* parser jars that other things still pin (`gsqlparser-3.1.1.0`,
-`gudusoft.gsqlparser-3.0.2.5`). With `lib/` first on the classpath those shadow
-the current parser and the demos fail to compile on symbols the old jars predate
-— `checksyntax` dies on `EOBTenantMode`. `setenv.bat` therefore puts
-`external_lib\*` ahead of `lib\*`, and `external_lib/` is gitignored so the
-parser is fetched rather than vendored.
+**No parser jar is committed to this repository**, so the first script you run
+pulls one down. `setenv.bat` calls `setenv/fetch-parser.bat`, which reads
+`gsp.core.version` out of `pom.xml` and does a `mvn dependency:copy` into
+`external_lib/`. It is a no-op once the jar is there, and `external_lib/` is
+gitignored.
+
+That means the `.bat` route needs Maven **once**, to fetch, and never again.
+That is a deliberate trade. Vendoring a parser under `lib/` is what let these
+scripts quietly compile against a build years older than their own source: the
+jar in `lib/` was 3.1.1.0 while the demos had moved on to APIs like
+`EOBTenantMode`, so `compile_checksyntax.bat` failed on a symbol that a current
+parser has. One artifact, resolved from one place, is worth a one-time Maven
+call.
+
+`external_lib/` also comes before `lib/` on the classpath, so the fetched parser
+wins over anything dropped into `lib/` later.
 
 ### These are now tested on Windows
 
@@ -440,15 +446,24 @@ They had been stale for years — compiling `src\main\java\demos\<demo>\` and
 `gudusoft/gsqlparser/demos/`. Nothing noticed, because nothing ran them.
 
 The `windows-bat` job in `.github/workflows/build.yml` now does, on
-`windows-latest`: it fetches the parser into `external_lib/`, runs
-`compile_checksyntax.bat`, asserts the `.class` file appears, runs
-`run_checksyntax.bat`, and asserts it reports `syntax errors: 0`. Each script
-ends with `pause`, so CI feeds their stdin from `NUL` to keep them from blocking
-on a runner with no keyboard.
+`windows-latest`. It first asserts that **no parser jar is committed** and that
+`fetch-parser.bat` can bootstrap one, then compiles and runs four demos, each
+checked against a string its output must contain:
 
-That covers one demo, not all 45. It is enough to catch the failure mode that
-actually happened here — the whole family going stale together after a
-directory move — since they are generated from one template and break as a set.
+| demo | shape it covers |
+|------|-----------------|
+| `checksyntax` | `/f <file> /t <vendor>` |
+| `formatsql` | bare filename |
+| `listGSPInfo` | no arguments at all |
+| `modifysql` | compile and run scripts named differently (`compile_modifysql.bat` builds the folder, `run_replaceTablename.bat` runs one class) |
+
+Each script ends with `pause`, so CI feeds their stdin from `NUL` to keep them
+from blocking on a runner with no keyboard.
+
+Four demos, not all 45, is a deliberate stopping point: they are generated from
+one template and go stale as a set, which is exactly what happened when the
+demos moved directory. The four cover the distinct argument shapes, so a change
+that breaks the template shows up here.
 
 
 ## Building the dlineage demo on its own
@@ -459,7 +474,7 @@ standalone lineage tool:
 ```bash
 mvn -f pom_dlineage.xml package
 
-java -cp "target-dlineage/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:lib/*" \
+java -cp "target-dlineage/gsp_demo_java_dlineage-1.0-SNAPSHOT.jar:external_lib/*:lib/*" \
      gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer \
      /f demo.sql /o lineage.json /json /graph \
      /simpleShowRelationTypes fdd,fdr /filterRelationTypes fdd
@@ -474,15 +489,16 @@ rather than the root build's `target/`. It shares this repository's
 without a separate output directory the compiler plugin's incremental-build
 cleanup would delete every `.class` file the root build produced that isn't
 part of this smaller source set — wiping out a working root build before this
-one even reaches its own compile error below. See
+one even reaches its own build. See
 [#39](https://github.com/sqlparser/gsp_demo_java/issues/39).
 
-> **This build currently fails**, and did so before the trees were merged. It
-> pins `lib/gsqlparser-3.1.1.0.jar`, but `DataFlowAnalyzer` has moved on and now
-> calls `getOption().setTraceTablePosition(...)` and
-> `ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which
-> that jar has. It needs a parser build carrying both those methods and the
-> metadata layer. Recorded here so the invocations above are not lost.
+**This build used to fail**, and had done since before the demo trees were
+merged. The cause was the pinned jar, not the code: `pom_dlineage.xml` declared
+`lib/gsqlparser-3.1.1.0.jar` on `system` scope, while `DataFlowAnalyzer` had
+moved on to `getOption().setTraceTablePosition(...)` and
+`ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which a
+3.1.1.0 jar has. It now resolves the same parser the root build does, and
+builds and runs.
 
 ## master and dev branches
 

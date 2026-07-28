@@ -17,13 +17,21 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>gudu-public-releases</id>
+			<url>https://www.sqlparser.com/maven/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
+		<!-- The parser is resolved from Gudu's public Maven repository. It used to
+		     point at ../../lib/gudusoft.gsqlparser-2.1.2.x.jar, a file this
+		     repository has not contained for a long time. -->
 		<dependency>
-			<groupId>com.sqlparser</groupId>
-			<artifactId>gsp</artifactId>
-			<version>2.1.2.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/../../lib/gudusoft.gsqlparser-2.1.2.2.jar</systemPath>
+			<groupId>com.gudusoft</groupId>
+			<artifactId>gsqlparser</artifactId>
+			<version>4.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>

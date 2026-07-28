@@ -112,39 +112,63 @@ jobs:
           java-version: "8"
           cache: maven
 
-      # These scripts predate the parser being resolved from Maven. lib\ only
-      # carries old parser jars now, so on its own compile_<demo>.bat fails on
-      # symbols those jars predate. Drop the current parser into external_lib\,
-      # which setenv.bat puts ahead of lib\ on the classpath for exactly this
-      # reason. Not vendored: fetched here, and gitignored.
-      - name: Fetch the parser into external_lib
-        shell: bash
+      # No parser jar is committed, so setenv.bat fetches one into external_lib\
+      # on first use. This step only proves that bootstrap works from a clean
+      # checkout; the demo steps below would trigger it anyway.
+      - name: setenv.bat bootstraps the parser from Maven
+        shell: cmd
         run: |
-          set -euo pipefail
-          ver=$(mvn -q help:evaluate -Dexpression=gsp.core.version -DforceStdout)
-          echo "parser version: $ver"
-          mvn -q dependency:copy \
-            -Dartifact=com.gudusoft:gsqlparser:"$ver" \
-            -DoutputDirectory=external_lib
-          ls external_lib
+          if exist external_lib\gsqlparser-*.jar (
+            echo ::error::a parser jar is committed to this repository; it must be fetched, not vendored
+            exit /b 1
+          )
+          call setenv\fetch-parser.bat
+          dir external_lib
+          for %%f in (external_lib\gsqlparser-*.jar) do exit /b 0
+          echo ::error::fetch-parser.bat produced no parser jar
+          exit /b 1
 
       # `pause` at the end of each script would block forever on a runner with
       # no keyboard, so stdin is fed from NUL.
-      - name: compile_checksyntax.bat then run_checksyntax.bat
+      #
+      # These four cover the shapes the scripts come in: a file+vendor demo, a
+      # bare-filename demo, one that takes no arguments at all, and one nested a
+      # directory deeper (so its cd depth differs). They are generated from one
+      # template and go stale as a set, which is exactly what happened when the
+      # demos moved directory, so this is a canary rather than full coverage.
+      - name: Run the .bat scripts
         shell: cmd
         run: |
-          cd src\main\java\gudusoft\gsqlparser\demos\checksyntax
-          call compile_checksyntax.bat < NUL
-          if not exist "%GITHUB_WORKSPACE%\build\gudusoft\gsqlparser\demos\checksyntax\checksyntax.class" (
-            echo ::error::compile_checksyntax.bat did not produce checksyntax.class
-            exit /b 1
+          echo SELECT a.id FROM ta a; > "%GITHUB_WORKSPACE%\q.sql"
+
+          rem  dir            compile script    run script         args                                      expected in output
+          call :demo checksyntax  checksyntax       checksyntax       "/f %GITHUB_WORKSPACE%\q.sql /t oracle"   "syntax errors: 0" || exit /b 1
+          call :demo formatsql    formatsql         formatsql         "%GITHUB_WORKSPACE%\q.sql"                "SELECT"           || exit /b 1
+          call :demo listGSPInfo  listGSPInfo       listGSPInfo       ""                                        "Supported DBs"    || exit /b 1
+          call :demo modifysql    modifysql         replaceTablename  ""                                        "output sql"       || exit /b 1
+          echo All .bat demos passed.
+          exit /b 0
+
+          :demo
+          setlocal
+          set DEMO=%~1
+          set CSCRIPT=%~2
+          set RSCRIPT=%~3
+          set ARGS=%~4
+          set EXPECT=%~5
+          echo.
+          echo ==== %DEMO% : compile_%CSCRIPT%.bat / run_%RSCRIPT%.bat ====
+          cd /d "%GITHUB_WORKSPACE%\src\main\java\gudusoft\gsqlparser\demos\%DEMO%"
+          call compile_%CSCRIPT%.bat < NUL > "%GITHUB_WORKSPACE%\c.txt" 2>&1
+          type "%GITHUB_WORKSPACE%\c.txt"
+          findstr /i /c:"error" "%GITHUB_WORKSPACE%\c.txt" >NUL && (
+            echo ::error::compile_%CSCRIPT%.bat reported an error
+            endlocal & exit /b 1
           )
-          cd /d "%GITHUB_WORKSPACE%"
-          echo SELECT a.id FROM ta a; > q.sql
-          cd src\main\java\gudusoft\gsqlparser\demos\checksyntax
-          call run_checksyntax.bat /f "%GITHUB_WORKSPACE%\q.sql" /t oracle < NUL > "%GITHUB_WORKSPACE%\out.txt" 2>&1
-          type "%GITHUB_WORKSPACE%\out.txt"
-          findstr /c:"syntax errors: 0" "%GITHUB_WORKSPACE%\out.txt" >NUL || (
-            echo ::error::run_checksyntax.bat did not report "syntax errors: 0"
-            exit /b 1
+          call run_%RSCRIPT%.bat %ARGS% < NUL > "%GITHUB_WORKSPACE%\r.txt" 2>&1
+          type "%GITHUB_WORKSPACE%\r.txt"
+          findstr /c:"%EXPECT%" "%GITHUB_WORKSPACE%\r.txt" >NUL || (
+            echo ::error::run_%RSCRIPT%.bat did not print "%EXPECT%"
+            endlocal & exit /b 1
           )
+          endlocal & exit /b 0
