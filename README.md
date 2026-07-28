@@ -1,6 +1,7 @@
 # General SQL Parser — Java Demos
 
 [![Build and test](https://github.com/sqlparser/gsp_demo_java/actions/workflows/build.yml/badge.svg)](https://github.com/sqlparser/gsp_demo_java/actions/workflows/build.yml)
+[![Nightly](https://github.com/sqlparser/gsp_demo_java/actions/workflows/nightly.yml/badge.svg)](https://github.com/sqlparser/gsp_demo_java/actions/workflows/nightly.yml)
 
 Runnable sample programs for [General SQL Parser](https://www.sqlparser.com):
 syntax checking, SQL formatting, column-level lineage, AST traversal, stored
@@ -500,6 +501,61 @@ class).
 
 Each script ends with `pause`, so CI feeds their stdin from `NUL` to stop them
 blocking on a runner with no keyboard.
+
+## The nightly build
+
+`.github/workflows/build.yml` runs on push and pull request, so it only reports
+on changes made *here*. The other moving part is outside this repository: the
+parser published to <https://www.sqlparser.com/maven/>. A release there can
+change demo output or drop an API without a commit landing here, and nothing
+would notice until someone ran a demo by hand.
+
+`.github/workflows/nightly.yml` runs at 03:17 UTC and closes that gap. Three
+jobs, each proving no parser jar is committed, compiling everything, running the
+full suite, and then running the demos:
+
+| job | parser | JDK |
+|---|---|---|
+| `pinned` | `${gsp.core.version}` from `pom.xml` | 8 and 21 |
+| `latest` | newest `<release>` on sqlparser.com, resolved at run time | 21 |
+| `windows-bat` | fetched by `setenv\fetch-parser.bat` | 8 |
+
+**`latest` is the job that earns the nightly.** If it is red while `pinned` is
+green, a new parser release broke the demos. If it is green and the versions
+differ, `gsp.core.version` can be bumped. Failing to resolve a version is an
+error rather than a fallback to the pinned one: a job that quietly re-tests what
+`pinned` already covers would look green while testing nothing new.
+
+Three scripts under `.github/scripts/`, all runnable locally:
+
+- **`check-test-results.sh`** — parses the surefire XML and asserts the suite
+  failed in exactly the expected way, **by name**. Counting is not enough: if
+  `analyzespTest#testSample1` started passing on the same run a different test
+  started failing, the count would still read 3 and the build would go green
+  over a real regression. A known failure that starts passing also fails the
+  build, so the list gets trimmed instead of rotting.
+- **`run-all-demos.sh`** — launches **every** class with a `main()`, taken from
+  the compiled output so anything `pom.xml` excludes is excluded here too. It
+  checks that each demo *starts*: `NoClassDefFoundError`, `NoSuchMethodError`
+  and friends are the shape a parser upgrade breaks things in, whatever
+  arguments you pass. A demo that prints a usage line and stops is a pass.
+- **`run-demo-cases.sh`** + **`demo-cases.tsv`** — drives a table of demos with
+  real arguments and checks each one's output against a string it must contain,
+  which is what catches a parser upgrade that changes *behaviour* rather than
+  breaking linkage. Every expected string was taken from that demo's actual
+  output. A row with an empty expectation is rejected as an authoring error, so
+  a case cannot silently degrade into asserting nothing.
+
+Set `MVN_ARGS` to point the demo scripts at a different parser, exactly as the
+`latest` job does:
+
+```bash
+mvn -q compile -Dgsp.core.version=4.1.8
+MVN_ARGS="-Dgsp.core.version=4.1.8" .github/scripts/run-demo-cases.sh
+```
+
+Without it they would resolve the version pinned in `pom.xml` and run new
+classes against the old jar, reporting a pass that means nothing.
 
 **What this does not cover.** 13 of the 49 demo folders ship no `.bat` at all —
 `callgraph`, `evaluator`, `events`, `findConstants`, `findproceduralsql`,

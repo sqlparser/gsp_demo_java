@@ -1,0 +1,41 @@
+# Demos driven with real arguments and checked against something their output
+# must contain. This is the layer that proves a demo still WORKS, as opposed to
+# run-all-demos.sh, which only proves every demo still STARTS.
+#
+# Tab-separated: <main class> <TAB> <args> <TAB> <expected substring>
+# Blank args means the demo takes none. A literal - as the expected string means
+# "exit 0 is the whole check" (DumpIR writes files and prints nothing on success);
+# an EMPTY expected string is rejected as an authoring error, so a case can never
+# silently degrade into asserting nothing.
+#
+# Placeholders, substituted by run-demo-cases.sh:
+#   %SQL%    a small generated query file, in a scratch directory
+#   %OUT%    an empty scratch directory the demo may write into
+#   %REPO%   the repository root, for the checked-in files under samples/
+#
+# Every expected string below was taken from that demo's actual output, not
+# guessed. When a parser upgrade changes output legitimately, update the string
+# here in the same commit that bumps gsp.core.version.
+
+gudusoft.gsqlparser.demos.checksyntax.checksyntax	/f %SQL% /t oracle	syntax errors: 0
+gudusoft.gsqlparser.demos.formatsql.formatsql	%SQL%	SELECT
+gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn	/f %SQL% /t mssql	Tables:
+gudusoft.gsqlparser.demos.gettablecolumns.getResultColumn		DATETOSTRING(date_attr_name,'mm/dd/yyyy')
+gudusoft.gsqlparser.demos.analyzescript.analyzeScript	%SQL% /t oracle	Selected SQL dialect: dbvoracle
+gudusoft.gsqlparser.demos.getcrud.getcrud	%SQL%	CRUD: select, Table:ta
+gudusoft.gsqlparser.demos.getTableJoinType.getTableJoinType	%SQL%	Join Type table Name
+gudusoft.gsqlparser.demos.visitors.toXml	%SQL% /t oracle	was generated!
+gudusoft.gsqlparser.demos.sqldetect.SQLDetect	%SQL% /t oracle	SELECT
+gudusoft.gsqlparser.demos.columnMatrix.ColumnMatrix	%SQL%	<matrixResults>
+gudusoft.gsqlparser.demos.dlineageBasic.Dlineage	/f %SQL% /t oracle	<columnImpactResult>
+gudusoft.gsqlparser.demos.sqltranslator.SqlTranslator	%SQL% oracle mysql	Check the input sql file
+gudusoft.gsqlparser.demos.tracedatalineage.traceDataLineage	%REPO%/samples/tracedatalineage	target_tbl.id
+gudusoft.gsqlparser.demos.traceColumn.runTraceColumn		-->a.deptno
+gudusoft.gsqlparser.demos.columninspect.ColumnInspect	/t mssql /f %REPO%/samples/columninspect/sample.sql /metadata %REPO%/samples/columninspect/metadata.json /db testdb /schema dbo	column name:ename
+gudusoft.gsqlparser.demos.dumpir.DumpIR	--sql %SQL% --vendor dbvpostgresql --out-dir %OUT%	-
+gudusoft.gsqlparser.demos.listGSPInfo.listGSPInfo		Supported DBs
+gudusoft.gsqlparser.demos.modifysql.replaceTablename		output sql
+gudusoft.gsqlparser.demos.joinConvert.JoinConverter		SELECT
+gudusoft.gsqlparser.demos.SqlHashDemo		Statement type
+gudusoft.gsqlparser.demos.expressionTraverser.expressionTraverser		pre order
+gudusoft.gsqlparser.demos.modifySelect.ModifySelect		Original SQL

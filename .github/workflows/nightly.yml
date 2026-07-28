@@ -1,0 +1,270 @@
+name: Nightly
+
+# build.yml runs on push and pull_request, so it only tells you about changes
+# made HERE. This repository's other moving part is outside it: the parser
+# artifact published to https://www.sqlparser.com/maven/. A release there can
+# change demo output or drop an API without a single commit landing in this
+# repo, and nothing would notice until someone ran a demo by hand.
+#
+# So this workflow runs on a timer and covers both:
+#   pinned  -- ${gsp.core.version} from pom.xml, the version the README
+#              documents, on the two JDKs the demos claim to support.
+#   latest  -- whatever is newest on sqlparser.com right now. This is the job
+#              that earns the nightly. When it goes red and `pinned` stays
+#              green, a new parser release broke the demos.
+#
+# Both jobs do the same four things: prove no parser jar is committed, compile
+# everything, run the whole test suite, and then actually run the demos --
+# every one of them for launch, and a table of them with real arguments checked
+# against expected output.
+
+on:
+  schedule:
+    # 03:17 UTC. Not on the hour: GitHub drops scheduled runs when too many
+    # repositories ask for the same popular minute.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      parser_version:
+        description: "Parser version for the 'latest' job (blank = resolve newest from sqlparser.com)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pinned:
+    name: "pinned parser (JDK ${{ matrix.java }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The parser jar is Java 8 bytecode and the POM pins source/target 1.8.
+        java: ["8", "21"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      # A vendored parser is what once let these demos compile against a build
+      # years older than their own source, so its absence is an invariant worth
+      # asserting rather than a convention worth documenting.
+      - name: No parser jar is committed
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)(gsqlparser|gudusoft\.gsqlparser)[^/]*\.jar$'; then
+            echo "::error::a parser jar is committed; it must be resolved from Gudu's Maven repository"
+            exit 1
+          fi
+          echo "ok: no parser jar in the index"
+
+      - name: Report the parser being used
+        run: |
+          set -euo pipefail
+          v=$(mvn -B -q help:evaluate -Dexpression=gsp.core.version -DforceStdout)
+          echo "pinned parser version: $v"
+          echo "### Pinned parser \`$v\` (JDK ${{ matrix.java }})" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Compile everything
+        run: mvn -B package -DskipTests
+
+      # Expected to be red on exactly three analyzespTest cases, so the step
+      # itself cannot gate; the checker below decides, by name.
+      - name: Test
+        continue-on-error: true
+        run: mvn -B test
+
+      - name: Only the known failures failed
+        run: .github/scripts/check-test-results.sh
+
+      - name: Every demo starts
+        run: .github/scripts/run-all-demos.sh --timeout 90
+
+      - name: Demos produce their expected output
+        run: .github/scripts/run-demo-cases.sh --timeout 180
+
+  latest:
+    name: "latest published parser"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # <release> is the newest non-snapshot; fall back to <latest>, then to the
+      # last <version> listed. Failing to resolve is an error rather than a
+      # silent fallback to the pinned version: a job that quietly re-tests what
+      # `pinned` already covers looks green while testing nothing new.
+      - name: Resolve the newest published parser
+        id: ver
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.parser_version }}" ]; then
+            v="${{ inputs.parser_version }}"
+            echo "using the version supplied to workflow_dispatch: $v"
+          else
+            url=https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml
+            curl -sSf --retry 3 --retry-delay 5 -o meta.xml "$url"
+            v=$(sed -n 's:.*<release>\(.*\)</release>.*:\1:p' meta.xml | head -1)
+            [ -n "$v" ] || v=$(sed -n 's:.*<latest>\(.*\)</latest>.*:\1:p' meta.xml | head -1)
+            [ -n "$v" ] || v=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' meta.xml | tail -1)
+            if [ -z "$v" ]; then
+              echo "::error::could not read a version out of $url"
+              cat meta.xml
+              exit 1
+            fi
+          fi
+          pinned=$(mvn -B -q help:evaluate -Dexpression=gsp.core.version -DforceStdout)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "newest published: $v / pinned in pom.xml: $pinned"
+          {
+            echo "### Latest published parser \`$v\`"
+            if [ "$v" = "$pinned" ]; then
+              echo "Same as the pinned version, so this job duplicates \`pinned\`."
+            else
+              echo "Pinned version is \`$pinned\`. If this job is red and \`pinned\` is green,"
+              echo "release \`$v\` broke the demos. If it is green, \`gsp.core.version\`"
+              echo "can be bumped to \`$v\`."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Compile everything
+        run: mvn -B package -DskipTests -Dgsp.core.version=${{ steps.ver.outputs.version }}
+
+      - name: Test
+        continue-on-error: true
+        run: mvn -B test -Dgsp.core.version=${{ steps.ver.outputs.version }}
+
+      - name: Only the known failures failed
+        run: .github/scripts/check-test-results.sh
+
+      - name: Every demo starts
+        env:
+          MVN_ARGS: -Dgsp.core.version=${{ steps.ver.outputs.version }}
+        run: .github/scripts/run-all-demos.sh --timeout 90
+
+      - name: Demos produce their expected output
+        env:
+          MVN_ARGS: -Dgsp.core.version=${{ steps.ver.outputs.version }}
+        run: .github/scripts/run-demo-cases.sh --timeout 180
+
+  # The .bat family is the original Windows, no-Maven workflow. It went stale
+  # for years because nothing ran it; build.yml runs it per push and this runs
+  # it nightly, against a parser fetched fresh rather than a cached one.
+  windows-bat:
+    name: "Windows .bat scripts"
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+          cache: maven
+
+      - name: setenv.bat bootstraps the parser from Maven
+        shell: cmd
+        run: |
+          if exist external_lib\gsqlparser-*.jar (
+            echo ::error::a parser jar is committed to this repository; it must be fetched, not vendored
+            exit /b 1
+          )
+          call setenv\fetch-parser.bat
+          dir external_lib
+          for %%f in (external_lib\gsqlparser-*.jar) do exit /b 0
+          echo ::error::fetch-parser.bat produced no parser jar
+          exit /b 1
+
+      - name: Compile every demo via compile_*.bat
+        shell: cmd
+        run: |
+          setlocal enabledelayedexpansion
+          set FAILED=0
+          set COUNT=0
+          for /r "%GITHUB_WORKSPACE%\src\main\java" %%s in (compile_*.bat) do (
+            set /a COUNT+=1
+            pushd "%%~dps"
+            call "%%~nxs" < NUL > "%GITHUB_WORKSPACE%\c.txt" 2>&1
+            findstr /i /c:"error" /c:"file not found" /c:"no source files" "%GITHUB_WORKSPACE%\c.txt" >NUL && (
+              echo ::error::%%~nxs failed
+              type "%GITHUB_WORKSPACE%\c.txt"
+              set /a FAILED+=1
+            ) || echo   ok  %%~nxs
+            popd
+          )
+          echo.
+          echo compiled !COUNT! demos, !FAILED! failed
+          rem An explicit exit is required: a trailing `if` whose condition is
+          rem false leaves whatever ERRORLEVEL the loop last set.
+          if !FAILED! GTR 0 exit /b 1
+          exit /b 0
+
+      - name: Launch every demo via run_*.bat
+        shell: cmd
+        run: |
+          setlocal enabledelayedexpansion
+          set FAILED=0
+          set COUNT=0
+          for /r "%GITHUB_WORKSPACE%\src\main\java" %%s in (run_*.bat) do (
+            set /a COUNT+=1
+            pushd "%%~dps"
+            call "%%~nxs" < NUL > "%GITHUB_WORKSPACE%\r.txt" 2>&1
+            findstr /c:"ClassNotFoundException" /c:"NoClassDefFoundError" /c:"Main method not found" "%GITHUB_WORKSPACE%\r.txt" >NUL && (
+              echo ::error::%%~nxs could not launch its class
+              type "%GITHUB_WORKSPACE%\r.txt"
+              set /a FAILED+=1
+            ) || echo   ok  %%~nxs
+            popd
+          )
+          echo.
+          echo launched !COUNT! demos, !FAILED! failed
+          if !FAILED! GTR 0 exit /b 1
+          exit /b 0
+
+      - name: Run four demos with real arguments
+        shell: cmd
+        run: |
+          echo SELECT a.id FROM ta a; > "%GITHUB_WORKSPACE%\q.sql"
+          call :demo checksyntax  checksyntax       checksyntax       "/f %GITHUB_WORKSPACE%\q.sql /t oracle"   "syntax errors: 0" || exit /b 1
+          call :demo formatsql    formatsql         formatsql         "%GITHUB_WORKSPACE%\q.sql"                "SELECT"           || exit /b 1
+          call :demo listGSPInfo  listGSPInfo       listGSPInfo       ""                                        "Supported DBs"    || exit /b 1
+          call :demo modifysql    modifysql         replaceTablename  ""                                        "output sql"       || exit /b 1
+          echo All .bat demos passed.
+          exit /b 0
+
+          :demo
+          setlocal
+          set DEMO=%~1
+          set CSCRIPT=%~2
+          set RSCRIPT=%~3
+          set ARGS=%~4
+          set EXPECT=%~5
+          echo.
+          echo ==== %DEMO% : compile_%CSCRIPT%.bat / run_%RSCRIPT%.bat ====
+          cd /d "%GITHUB_WORKSPACE%\src\main\java\gudusoft\gsqlparser\demos\%DEMO%"
+          call compile_%CSCRIPT%.bat < NUL > "%GITHUB_WORKSPACE%\c.txt" 2>&1
+          type "%GITHUB_WORKSPACE%\c.txt"
+          findstr /i /c:"error" "%GITHUB_WORKSPACE%\c.txt" >NUL && (
+            echo ::error::compile_%CSCRIPT%.bat reported an error
+            endlocal & exit /b 1
+          )
+          call run_%RSCRIPT%.bat %ARGS% < NUL > "%GITHUB_WORKSPACE%\r.txt" 2>&1
+          type "%GITHUB_WORKSPACE%\r.txt"
+          findstr /c:"%EXPECT%" "%GITHUB_WORKSPACE%\r.txt" >NUL || (
+            echo ::error::run_%RSCRIPT%.bat did not print "%EXPECT%"
+            endlocal & exit /b 1
+          )
+          endlocal & exit /b 0
