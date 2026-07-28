@@ -114,7 +114,7 @@ Maven repository, which `pom.xml` declares:
 To move every demo to a different parser build, run one command:
 
 ```bash
-.github/scripts/set-parser-version.sh 4.1.8
+.github/scripts/set-parser-version.sh 4.1.9
 ```
 
 The version is written in **five** files, not one: the `${gsp.core.version}`
@@ -128,37 +128,57 @@ they ever disagree.
 Available versions:
 <https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml>
 
-### Why the version is pinned, and why you still don't have to bump it
+### The repository keeps only the newest version
 
-A floating version (`RELEASE`, `LATEST`, or a range like `[4.1,)`) would remove
-the bumps. It is not used here on purpose:
+This is the single most important thing to know about the parser dependency.
+`https://www.sqlparser.com/maven/` is **not** an archive. When a release goes
+out, the previous ones are **deleted**, and `maven-metadata.xml` is rewritten to
+list only the new one.
 
-- This repository is what people clone to evaluate GSP. With a floating
-  version, two clones a week apart get different parsers, and a bug report
-  becomes unanswerable without knowing which one. The pin is what makes
-  `git clone && mvn package` a known-good starting point.
-- A range is not dependably "latest" either. It resolves through
-  `maven-metadata.xml`, which Maven caches per the repository's `updatePolicy`,
-  so different machines resolve differently depending on cache age. CI's Maven
-  cache can hold a runner on an older version indefinitely.
-- A bad upstream release would break every clone at once, with no commit here
-  to revert.
+Observed directly on 2026-07-28: at 06:50 UTC the repository served five
+versions, 4.1.4 through 4.1.8, all downloading and checksum-verifying. By 10:23
+UTC, 4.1.9 had been published and **all five of the others returned 404**. A
+build pinned to 4.1.6 that morning could not resolve its parser by lunchtime.
+
+Two consequences:
+
+- **A pin goes stale-broken, not just stale.** Falling behind is not "you are on
+  an older parser", it is "your build no longer resolves", for anyone without
+  that jar already in `~/.m2`. This repository must track the current release
+  closely, which is exactly what the nightly is for.
+- **Ranges do not save you.** `[4.1,)` reads the same rewritten metadata. Worse,
+  it is cached per `updatePolicy`, so a machine holding yesterday's copy resolves
+  a version that no longer exists and fails with no useful explanation. A pin at
+  least names the missing version in the error.
+
+### Why the version is still pinned
+
+A floating version (`RELEASE`, `LATEST`, or a range) would remove the bumps. It
+is not used here on purpose:
+
+- This repository is what people clone to evaluate GSP. With a floating version,
+  two clones a week apart get different parsers, and a bug report becomes
+  unanswerable without knowing which one. The pin is what makes
+  `git clone && mvn package` a reproducible starting point.
+- A range is not dependably "latest" either, for the caching reason above.
+- A bad upstream release would move every clone onto it at once, with no commit
+  here to revert.
 - `RELEASE` and `LATEST` also draw `both of them are being deprecated` from
   Maven 3 and are gone in Maven 4.
 
 Instead the nightly does the bumping. Its `latest` job resolves the newest
 release, runs the whole suite and every demo against it, and **only if all of
-that passes** opens a PR moving the five files. So you never edit a version:
-you merge a PR that is already proven green, or close it to stay put. Closing it
-leaves the branch on `origin`, which the job treats as "asked and answered", so
-it will not reopen until a newer release appears.
+that passes** opens a PR moving the five files. So you never edit a version: you
+merge a PR that is already proven green. Given that old versions are deleted,
+treat a red `pinned` job with a green `latest` job as urgent rather than
+informational: it means the pinned release is gone.
 
 ### Trial edition
 
 `com.gudusoft:gsqlparser` is the **trial** build. It is fully functional for
 evaluation and covers every demo here. Commercial builds may carry newer fixes
 and use a more specific four-part version; the public Maven version is a
-three-part number (for example `4.1.6`) and does not necessarily match the
+three-part number (for example `4.1.9`) and does not necessarily match the
 four-part product version in the release notes. See <https://www.sqlparser.com>
 for licensing.
 
@@ -599,8 +619,8 @@ Set `MVN_ARGS` to point the demo scripts at a different parser, exactly as the
 `latest` job does:
 
 ```bash
-mvn -q compile -Dgsp.core.version=4.1.8
-MVN_ARGS="-Dgsp.core.version=4.1.8" .github/scripts/run-demo-cases.sh
+mvn -q compile -Dgsp.core.version=4.1.9
+MVN_ARGS="-Dgsp.core.version=4.1.9" .github/scripts/run-demo-cases.sh
 ```
 
 Without it they would resolve the version pinned in `pom.xml` and run new

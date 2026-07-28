@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.gudusoft</groupId>
 			<artifactId>gsqlparser</artifactId>
-			<version>4.1.6</version>
+			<version>4.1.9</version>
 		</dependency>
 		<!-- Resolved from Maven Central rather than a jar you drop into lib/.
 		     3.12.9 was named here before, which Dependabot flagged for six

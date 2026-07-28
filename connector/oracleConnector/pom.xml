@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.gudusoft</groupId>
 			<artifactId>gsqlparser</artifactId>
-			<version>4.1.6</version>
+			<version>4.1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com</groupId>
