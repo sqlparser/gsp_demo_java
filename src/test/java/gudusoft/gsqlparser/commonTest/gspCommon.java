@@ -26,10 +26,17 @@ import java.io.File;
  * match the current parser's output exactly, character for character.
  * Corrected on 2026-07-28.
  *
- * <p>Tests reading from here must call {@link #sqlFilesAvailable()} and skip
- * themselves when it returns false. The corpus sits under a directory named
- * {@code private} and is not published, so it is absent on CI and in any clone
- * that does not also have the library checked out beside it.
+ * <p>{@code analyzespTest} no longer reads from here at all. Its four scripts
+ * were copied into {@code src/test/resources/sqlscripts/analyze_sp/}, so it runs
+ * from a plain clone with no sibling repository. **Prefer that for anything
+ * new**: a checked-in fixture cannot silently resolve to nothing.
+ *
+ * <p>What still names these constants is the {@code commonTest} and
+ * {@code sqlenvTest} classes, none of which run: they are named lowercase
+ * {@code testXxx.java}, which Surefire's default includes never match. If you
+ * ever enable one, call {@link #sqlFilesAvailable()} and skip when it returns
+ * false, because the corpus sits under a directory named {@code private}, is not
+ * published, and is absent on CI and in any clone without the library beside it.
  */
 public class gspCommon {
     public static String BASE_SQL_DIR = "../gsp_java/gsp_java_core/gsp_sqlfiles/TestCases/";

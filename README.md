@@ -184,36 +184,28 @@ directories carry their own `readme.md`.
 mvn test
 ```
 
-144 tests, all passing.
+144 tests, all passing, nothing skipped. Every input the suite needs is in the
+repository, so a plain clone runs the whole thing.
 
-Four of them, in `gudusoft.gsqlparser.demosTest.analyzespTest`, read stored
-procedures from a SQL corpus that is **not in this repository**. It belongs to
-the parser library repo and is reached by a relative path, so it only resolves
-when the two sit side by side:
-
-```
-github/
-  gsp_java/          <- library, owns gsp_java_core/gsp_sqlfiles/
-  gsp_demo_java/     <- this repository
-```
-
-Without that neighbour those four **skip**, and `mvn test` still passes. The
-corpus is under a directory named `private` and is not published, so skipping
-is the normal state on CI and in a plain clone. A skip means "not covered
-here", not "passed", which is why `check-test-results.sh` lists what was
-skipped and fails if *everything* was.
-
-> **Correction.** Until 2026-07-28 this section said three of those tests
-> failed because their expected output was written for an older parser and had
-> since drifted. That was wrong, and it sent people looking at parser output
-> for a bug that was never there. `gspCommon.BASE_SQL_DIR` read
-> `../gsp_java_core/`, one level short: it named a sibling of this checkout
-> rather than the module inside `gsp_java`, so it resolved to nothing at all.
-> `Analyze_SP` never found an input file, returned an empty string, and the
-> comparison failed. The expected strings match the current parser's output
-> exactly, character for character, on all three. `testSample7` "passed"
+> **Correction.** Until 2026-07-28 this section said three tests in
+> `gudusoft.gsqlparser.demosTest.analyzespTest` failed because their expected
+> output was written for an older parser and had since drifted, and that they
+> were kept red on purpose as a drift signal. That was wrong, and it sent
+> people looking at parser output for a bug that was never there.
+>
+> Those tests read stored procedures from the library's SQL corpus over a
+> relative path, `gspCommon.BASE_SQL_DIR`. The path read `../gsp_java_core/`,
+> one directory level short: it named a sibling of this checkout rather than
+> the module inside `gsp_java`, so it resolved to nothing at all. `Analyze_SP`
+> never found an input file, returned an empty string, and comparing that with
+> the expected output failed. The expected strings match the current parser's
+> output exactly, character for character, on all three. `testSample7` "passed"
 > throughout only because it expects empty output, which is also what a missing
-> file produces. Fixing the path turned 3 failures into 0.
+> file produces, so it was asserting nothing.
+>
+> The four scripts now live in `src/test/resources/sqlscripts/analyze_sp/`,
+> copied byte for byte from the corpus, which removes the sibling-checkout
+> requirement rather than just correcting it. See that directory's `readme.md`.
 
 Every test here exercises a **demo** in this repository. The tests that
 exercise the *parser* live in the library, not here — see "The library-side
@@ -554,9 +546,10 @@ Three scripts under `.github/scripts/`, all runnable locally:
 - **`check-test-results.sh`** — parses the surefire XML and fails on any
   failure or error. There are no expected failures: the three that used to be
   tolerated were a wrong fixture path, not parser drift (see "Running the
-  tests"). It also lists what was skipped, and fails if *every* test was — a
+  tests"). It also lists anything skipped, and fails if *every* test was — a
   run that proved nothing should not read as a pass just because no assertion
-  got far enough to fail.
+  got far enough to fail. Nothing skips today; that guard is there for whatever
+  gets added next.
 - **`run-all-demos.sh`** — launches **every** class with a `main()`, taken from
   the compiled output so anything `pom.xml` excludes is excluded here too. It
   checks that each demo *starts*: `NoClassDefFoundError`, `NoSuchMethodError`

@@ -10,11 +10,10 @@
 # corrected the expected strings match the current parser's output exactly, and
 # the suite has no expected failures at all. Any failure is now a real one.
 #
-# Skips are reported rather than ignored. Tests that read the shared corpus skip
-# themselves when it is absent, which is the normal state on CI, since the
-# corpus lives in the gsp_java library repository under a directory named
-# private and is not published. A skip is therefore expected on CI and means
-# "not covered here", not "passed".
+# Skips are reported rather than ignored. Nothing skips today -- every input the
+# suite needs is checked in -- but a skip means "not covered here" rather than
+# "passed", so it is surfaced, and a run where EVERYTHING skipped fails outright
+# rather than reading as a pass.
 #
 # Usage:  .github/scripts/check-test-results.sh [surefire-reports-dir]
 #
@@ -76,8 +75,7 @@ for name, kind, msg in sorted(bad):
     print("::error::%s: %s%s" % (kind, name, (" -- " + msg[0]) if msg else ""))
 
 if skipped:
-    print("::notice::%d test(s) skipped, needing the shared SQL corpus from the "
-          "gsp_java repository (expected on CI):" % len(skipped))
+    print("::notice::%d test(s) skipped -- skipped is not passed, check why:" % len(skipped))
     for name in sorted(skipped):
         print("    %s" % name)
 

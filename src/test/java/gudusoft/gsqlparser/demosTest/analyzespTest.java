@@ -2,29 +2,37 @@
 package gudusoft.gsqlparser.demosTest;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import gudusoft.gsqlparser.commonTest.gspCommon;
 import gudusoft.gsqlparser.demos.analyzesp.Analyze_SP;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * These read their input from the shared SQL corpus in the gsp_java library
- * repository, which is absent unless that repository is checked out beside this
- * one, so they skip rather than fail when it is missing. See
- * {@link gspCommon} for why, and for the path bug that made them look like
- * output drift for as long as they did.
+ * Input comes from {@code src/test/resources/sqlscripts/analyze_sp/}, so these
+ * run anywhere the repository is checked out, CI included.
  *
- * <p>JUnit 4 annotations rather than extending TestCase, deliberately:
- * Assume inside a JUnit 3 TestCase is reported by surefire as an ERROR, not as
- * a skip, so the skip would have been indistinguishable from the failure it
- * replaces.
+ * <p>They used to read the shared SQL corpus in the gsp_java library repository
+ * over a relative path, which only resolved when the two repositories sat side
+ * by side. That path was also one directory level short, so it resolved
+ * nowhere at all: no input file was found, {@code Analyze_SP} returned an empty
+ * string, and comparing that with the expected output failed. Those three
+ * failures were written up for a long time as the parser's output drifting away
+ * from stale golden strings, which they never were. The four scripts are now
+ * checked in beside the test, so there is no sibling to get wrong. See
+ * {@code src/test/resources/sqlscripts/analyze_sp/readme.md} for where they
+ * came from.
+ *
+ * <p>JUnit 4 annotations rather than extending {@code TestCase}: kept from when
+ * these skipped on a missing corpus, since {@code Assume} inside a JUnit 3
+ * {@code TestCase} is reported by surefire 2.12.4 as an error rather than a
+ * skip.
  */
 public class analyzespTest
 {
@@ -32,10 +40,12 @@ public class analyzespTest
 	private String basedir;
 
 	@Before
-	public void setUp( )
+	public void setUp( ) throws Exception
 	{
-		Assume.assumeTrue( gspCommon.whySqlFilesMissing( ), gspCommon.sqlFilesAvailable( ) );
-		basedir = gspCommon.BASE_SQL_DIR+"private/sqlscripts/analyze_sp";
+		URL dir = analyzespTest.class.getResource( "/sqlscripts/analyze_sp" );
+		assertNotNull( "test fixtures are missing from src/test/resources/sqlscripts/analyze_sp",
+				dir );
+		basedir = new File( dir.toURI( ) ).getPath( );
 	}
 
 	@Test
