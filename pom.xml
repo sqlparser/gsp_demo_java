@@ -227,7 +227,7 @@
                              redefined myMetaDB / TInfoRecord / SortIgnoreCase,
                              which the retained TGetTableColumn.java in the same
                              package already provides, so it also broke any
-                             wildcard compile of that folder -- which is how
+                             wildcard compile of that folder, which is how
                              compile_gettablecolumns.bat compiles it. Deleted. -->
                         <exclude>gudusoft/gsqlparser/demos/columninspect/ColumnInspect.java</exclude>
                         <exclude>gudusoft/gsqlparser/demos/dlineage/DataFlowAnalyzer.java</exclude>
