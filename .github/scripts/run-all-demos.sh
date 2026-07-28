@@ -100,6 +100,22 @@ run_one() {
         sed 's/^/       /' <<<"$out" | head -15
         return 1
     fi
+
+    # An unhandled exception from a demo invoked with no arguments. Run with
+    # nothing to work on, a demo should print its usage line, not crash: a stack
+    # trace here means it walked into a result it never checked for. That is how
+    # `scriptwriter` looked -- it went straight to sqlstatements.get(0), so the
+    # trial parser's size limit surfaced as IndexOutOfBoundsException on an
+    # empty list, and this script passed it because the message matched none of
+    # the linkage patterns above. Adding this check also caught
+    # `events/ProcessSQLStatement`, which had a hardcoded absolute path into one
+    # developer's Downloads folder. All 77 demos pass it as of 2026-07-28; if
+    # you are adding one, handle the no-argument case.
+    if grep -q 'Exception in thread "main"' <<<"$out"; then
+        printf 'FAIL %s (unhandled exception with no arguments; print a usage line instead)\n' "$cls"
+        sed 's/^/       /' <<<"$out" | head -15
+        return 1
+    fi
     if [ "$rc" = "124" ]; then
         printf 'HANG %s (still running after %ss)\n' "$cls" "$TIMEOUT"
         return 1
