@@ -475,6 +475,12 @@ because their scripts pass only their own folder to `javac` while the classes
 import across demos — fixed by adding `-sourcepath src\main\java`, which lets
 `javac` resolve the rest.
 
+One more only a real Windows runner could have found: `javac` there defaults to
+the platform codepage, `Cp1252` on the runner, while the sources are UTF-8. Two
+demos failed with `unmappable character for encoding Cp1252`. `pom.xml` has
+always declared `project.build.sourceEncoding` as UTF-8, so Maven was never
+affected; the `.bat` scripts simply never passed `-encoding`. All 39 now do.
+
 ## Building the dlineage demo on its own
 
 `pom_dlineage.xml` builds just `DataFlowAnalyzer` into its own jar, for use as a

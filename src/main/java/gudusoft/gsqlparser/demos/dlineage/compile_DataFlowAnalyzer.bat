@@ -35,11 +35,11 @@ REM # Compile the gsp demo
 REM # javac -d needs the output directory to already exist.
 if not exist %targetdir% mkdir %targetdir%
 
-%JAVAC_CMD% -d %targetdir% -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\SqlflowIngester.java
+%JAVAC_CMD% -d %targetdir% -encoding UTF-8 -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\SqlflowIngester.java
 REM # javac -d needs the output directory to already exist.
 if not exist %targetdir% mkdir %targetdir%
 
-%JAVAC_CMD% -d %targetdir% -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\DataFlowAnalyzer.java
+%JAVAC_CMD% -d %targetdir% -encoding UTF-8 -sourcepath src\main\java -classpath %CLASSPATH% src\main\java\gudusoft\gsqlparser\demos\dlineage\DataFlowAnalyzer.java
 
 echo Completed.
 
