@@ -184,13 +184,36 @@ directories carry their own `readme.md`.
 mvn test
 ```
 
-144 tests run. **Three currently fail**, all in
-`gudusoft.gsqlparser.demosTest.analyzespTest` (`testSample1`, `testSample6`,
-`testSample8`). They compare stored-procedure relation output against golden
-strings written for an older parser build, and that output has since changed.
-They are left in place rather than deleted or rewritten, because they are a
-real signal about output drift rather than a broken harness. The other 141
-pass. That is why the getting-started step above uses `-DskipTests`.
+144 tests, all passing.
+
+Four of them, in `gudusoft.gsqlparser.demosTest.analyzespTest`, read stored
+procedures from a SQL corpus that is **not in this repository**. It belongs to
+the parser library repo and is reached by a relative path, so it only resolves
+when the two sit side by side:
+
+```
+github/
+  gsp_java/          <- library, owns gsp_java_core/gsp_sqlfiles/
+  gsp_demo_java/     <- this repository
+```
+
+Without that neighbour those four **skip**, and `mvn test` still passes. The
+corpus is under a directory named `private` and is not published, so skipping
+is the normal state on CI and in a plain clone. A skip means "not covered
+here", not "passed", which is why `check-test-results.sh` lists what was
+skipped and fails if *everything* was.
+
+> **Correction.** Until 2026-07-28 this section said three of those tests
+> failed because their expected output was written for an older parser and had
+> since drifted. That was wrong, and it sent people looking at parser output
+> for a bug that was never there. `gspCommon.BASE_SQL_DIR` read
+> `../gsp_java_core/`, one level short: it named a sibling of this checkout
+> rather than the module inside `gsp_java`, so it resolved to nothing at all.
+> `Analyze_SP` never found an input file, returned an empty string, and the
+> comparison failed. The expected strings match the current parser's output
+> exactly, character for character, on all three. `testSample7` "passed"
+> throughout only because it expects empty output, which is also what a missing
+> file produces. Fixing the path turned 3 failures into 0.
 
 Every test here exercises a **demo** in this repository. The tests that
 exercise the *parser* live in the library, not here — see "The library-side
@@ -528,12 +551,12 @@ error rather than a fallback to the pinned one: a job that quietly re-tests what
 
 Three scripts under `.github/scripts/`, all runnable locally:
 
-- **`check-test-results.sh`** — parses the surefire XML and asserts the suite
-  failed in exactly the expected way, **by name**. Counting is not enough: if
-  `analyzespTest#testSample1` started passing on the same run a different test
-  started failing, the count would still read 3 and the build would go green
-  over a real regression. A known failure that starts passing also fails the
-  build, so the list gets trimmed instead of rotting.
+- **`check-test-results.sh`** — parses the surefire XML and fails on any
+  failure or error. There are no expected failures: the three that used to be
+  tolerated were a wrong fixture path, not parser drift (see "Running the
+  tests"). It also lists what was skipped, and fails if *every* test was — a
+  run that proved nothing should not read as a pass just because no assertion
+  got far enough to fail.
 - **`run-all-demos.sh`** — launches **every** class with a `main()`, taken from
   the compiled output so anything `pom.xml` excludes is excluded here too. It
   checks that each demo *starts*: `NoClassDefFoundError`, `NoSuchMethodError`

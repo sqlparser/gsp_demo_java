@@ -74,13 +74,10 @@ jobs:
       - name: Compile everything
         run: mvn -B package -DskipTests
 
-      # Expected to be red on exactly three analyzespTest cases, so the step
-      # itself cannot gate; the checker below decides, by name.
       - name: Test
-        continue-on-error: true
         run: mvn -B test
 
-      - name: Only the known failures failed
+      - name: Check the results
         run: .github/scripts/check-test-results.sh
 
       - name: Every demo starts
@@ -143,10 +140,9 @@ jobs:
         run: mvn -B package -DskipTests -Dgsp.core.version=${{ steps.ver.outputs.version }}
 
       - name: Test
-        continue-on-error: true
         run: mvn -B test -Dgsp.core.version=${{ steps.ver.outputs.version }}
 
-      - name: Only the known failures failed
+      - name: Check the results
         run: .github/scripts/check-test-results.sh
 
       - name: Every demo starts

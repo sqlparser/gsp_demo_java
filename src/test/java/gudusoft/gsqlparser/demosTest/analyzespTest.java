@@ -6,19 +6,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gudusoft.gsqlparser.commonTest.gspCommon;
-import junit.framework.TestCase;
 import gudusoft.gsqlparser.demos.analyzesp.Analyze_SP;
 
-public class analyzespTest extends TestCase
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+
+/**
+ * These read their input from the shared SQL corpus in the gsp_java library
+ * repository, which is absent unless that repository is checked out beside this
+ * one, so they skip rather than fail when it is missing. See
+ * {@link gspCommon} for why, and for the path bug that made them look like
+ * output drift for as long as they did.
+ *
+ * <p>JUnit 4 annotations rather than extending TestCase, deliberately:
+ * Assume inside a JUnit 3 TestCase is reported by surefire as an ERROR, not as
+ * a skip, so the skip would have been indistinguishable from the failure it
+ * replaces.
+ */
+public class analyzespTest
 {
 
 	private String basedir;
 
-	protected void setUp( )
+	@Before
+	public void setUp( )
 	{
+		Assume.assumeTrue( gspCommon.whySqlFilesMissing( ), gspCommon.sqlFilesAvailable( ) );
 		basedir = gspCommon.BASE_SQL_DIR+"private/sqlscripts/analyze_sp";
 	}
 
+	@Test
 	public void testSample1( )
 	{
 		File file = new File( basedir + "/sample1.sql" );
@@ -50,6 +70,7 @@ public class analyzespTest extends TestCase
 				.equalsIgnoreCase( result ) );
 	}
 	
+	@Test
 	public void testSample6( )
 	{
 		File file = new File( basedir + "/sample6.sql" );
@@ -69,6 +90,7 @@ public class analyzespTest extends TestCase
 				.equalsIgnoreCase( result ) );
 	}
 	
+	@Test
 	public void testSample7( )
 	{
 		File file = new File( basedir + "/sample7.sql" );
@@ -84,6 +106,7 @@ public class analyzespTest extends TestCase
 				.equalsIgnoreCase( result ) );
 	}
 	
+	@Test
 	public void testSample8( )
 	{
 		File file = new File( basedir + "/sample8.sql" );

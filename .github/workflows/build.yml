@@ -42,42 +42,23 @@ jobs:
       - name: Build
         run: mvn -B package -DskipTests
 
-      # Three tests in analyzespTest compare stored-procedure output against
-      # golden strings written for an older parser and currently fail. They are
-      # deliberately not deleted -- see the README -- so the suite is expected
-      # to be red on exactly those three. `|| true` would hide a real
-      # regression, so instead assert the failure count has not grown.
+      # This used to tolerate three failures in analyzespTest, believed to be
+      # golden strings written for an older parser. They were something else:
+      # gspCommon.BASE_SQL_DIR pointed one level short of the shared SQL corpus,
+      # so the input file was never found and the comparison ran against an
+      # empty string. With the path corrected the suite has no expected
+      # failures, and `continue-on-error` is gone with them -- a red test run is
+      # now a red build.
+      #
+      # Those four tests skip themselves on CI, where the corpus is absent: it
+      # lives in the gsp_java repository under a directory named private and is
+      # not published. check-test-results.sh reports what was skipped and fails
+      # if everything was, so a run that proves nothing cannot read as a pass.
       - name: Test
-        id: test
-        continue-on-error: true
         run: mvn -B test
 
-      - name: Check only the known failures are failing
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ ! -d target/surefire-reports ]; then
-            echo "::error::no surefire reports produced"
-            exit 1
-          fi
-          total=$(grep -ho "Tests run: [0-9]*" target/surefire-reports/*.txt | awk '{s+=$3} END {print s+0}')
-          fails=$(grep -hoE "Failures: [0-9]*" target/surefire-reports/*.txt | awk '{s+=$2} END {print s+0}')
-          errs=$(grep -hoE "Errors: [0-9]*"   target/surefire-reports/*.txt | awk '{s+=$2} END {print s+0}')
-          echo "tests=$total failures=$fails errors=$errs"
-
-          if [ "$errs" -ne 0 ]; then
-            echo "::error::$errs test error(s); expected 0"
-            grep -l -E "Errors: [1-9]" target/surefire-reports/*.txt || true
-            exit 1
-          fi
-          if [ "$fails" -gt 3 ]; then
-            echo "::error::$fails failures, expected at most the 3 known analyzespTest ones"
-            grep -l -E "Failures: [1-9]" target/surefire-reports/*.txt || true
-            exit 1
-          fi
-          if [ "$fails" -lt 3 ]; then
-            echo "::notice::only $fails failures — if analyzespTest was fixed, lower the threshold in this workflow and update the README"
-          fi
+      - name: Check the results
+        run: .github/scripts/check-test-results.sh
 
       - name: Smoke test a demo
         shell: bash

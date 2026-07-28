@@ -1,33 +1,30 @@
 #!/usr/bin/env bash
 #
-# Assert the test suite failed in exactly the way it is expected to, by NAME.
+# Assert the test suite came out clean, and report what was skipped.
 #
-# Three tests in analyzespTest compare stored-procedure output against golden
-# strings written for an older parser build, and are kept deliberately as a
-# drift signal rather than deleted (see the README). So "all tests pass" here
-# means "nothing fails except those three".
+# Until 2026-07-28 this asserted "exactly three known analyzespTest failures",
+# because those three were believed to be golden strings written for an older
+# parser. They were not: gspCommon.BASE_SQL_DIR pointed one directory level
+# short of the shared SQL corpus, so the input file was never found,
+# Analyze_SP returned an empty string, and the comparison failed. With the path
+# corrected the expected strings match the current parser's output exactly, and
+# the suite has no expected failures at all. Any failure is now a real one.
 #
-# Counting failures is not enough: if analyzespTest#testSample1 started passing
-# on the same run that a different test started failing, the count would still
-# read 3 and the build would go green over a real regression. This checks the
-# identities.
+# Skips are reported rather than ignored. Tests that read the shared corpus skip
+# themselves when it is absent, which is the normal state on CI, since the
+# corpus lives in the gsp_java library repository under a directory named
+# private and is not published. A skip is therefore expected on CI and means
+# "not covered here", not "passed".
 #
 # Usage:  .github/scripts/check-test-results.sh [surefire-reports-dir]
 #
 # Exit codes:
-#   0  only the known failures failed
-#   1  an unexpected test failed, or a known failure started passing without
-#      this list being updated, or no reports were produced
+#   0  no failures and no errors
+#   1  something failed, or no reports were produced, or every test was skipped
 
 set -uo pipefail
 
 REPORTS="${1:-target/surefire-reports}"
-
-# Keep in step with the README and pom.xml. When these are fixed, remove them
-# here in the same commit that updates the README.
-export KNOWN="gudusoft.gsqlparser.demosTest.analyzespTest#testSample1
-gudusoft.gsqlparser.demosTest.analyzespTest#testSample6
-gudusoft.gsqlparser.demosTest.analyzespTest#testSample8"
 
 if [ ! -d "$REPORTS" ]; then
     echo "::error::no surefire reports at $REPORTS -- the test run did not get far enough to produce any"
@@ -43,9 +40,10 @@ PYTHON=$(command -v python3 || command -v python) || {
 import glob, os, sys, xml.etree.ElementTree as ET
 
 reports = sys.argv[1]
-known = set(os.environ["KNOWN"].split("\n"))
+total = 0
+bad = []
+skipped = []
 
-total, failing = 0, set()
 files = glob.glob(os.path.join(reports, "*.xml"))
 if not files:
     print("::error::no surefire XML reports found in %s" % reports)
@@ -59,32 +57,38 @@ for f in files:
         sys.exit(1)
     for tc in root.iter("testcase"):
         total += 1
+        name = "%s#%s" % (tc.get("classname"), tc.get("name"))
+        if tc.find("skipped") is not None:
+            skipped.append(name)
+            continue
         for kind in ("failure", "error"):
-            if tc.find(kind) is not None:
-                failing.add("%s#%s" % (tc.get("classname"), tc.get("name")))
+            node = tc.find(kind)
+            if node is not None:
+                bad.append((name, kind, (node.get("message") or "").strip().splitlines()[:1]))
 
-print("%d tests, %d failing" % (total, len(failing)))
+print("%d tests, %d failed, %d skipped" % (total, len(bad), len(skipped)))
 
 if total == 0:
     print("::error::the reports contain no test cases at all")
     sys.exit(1)
 
-unexpected = sorted(failing - known)
-fixed      = sorted(known - failing)
+for name, kind, msg in sorted(bad):
+    print("::error::%s: %s%s" % (kind, name, (" -- " + msg[0]) if msg else ""))
 
-for t in unexpected:
-    print("::error::unexpected test failure: %s" % t)
-for t in fixed:
-    print("::notice::%s now passes -- drop it from KNOWN in "
-          ".github/scripts/check-test-results.sh and update the README" % t)
+if skipped:
+    print("::notice::%d test(s) skipped, needing the shared SQL corpus from the "
+          "gsp_java repository (expected on CI):" % len(skipped))
+    for name in sorted(skipped):
+        print("    %s" % name)
 
-if unexpected:
-    sys.exit(1)
-# A known failure starting to pass is good news, but silently tolerating it
-# would let the list rot until it protects nothing. Make it a build failure so
-# the list gets trimmed.
-if fixed:
+# Everything skipped means the run proved nothing, which should not read as a
+# pass just because no assertion got as far as failing.
+if len(skipped) == total:
+    print("::error::every test was skipped; the suite proved nothing")
     sys.exit(1)
 
-print("only the %d known analyzespTest failures failed" % len(known))
+if bad:
+    sys.exit(1)
+
+print("clean: no failures, no errors")
 PY
