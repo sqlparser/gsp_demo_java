@@ -190,23 +190,31 @@ version (e.g. `4.1.9`) does not necessarily match the one in the release notes.
 > is ~49 KB on purpose — give it your own smaller file, or use a licensed
 > parser. The limit is on a single parse, not on total throughput.
 
-### ⚠️ The repository keeps only the newest version
+### Published versions are kept; one batch was recalled in July 2026
 
-This is the single most important thing to know about this dependency.
-`https://www.sqlparser.com/maven/` is **not an archive**. When a release goes
-out, the previous ones are **deleted** and `maven-metadata.xml` is rewritten to
-list only the new one.
+**Releases are additive: a published version stays downloadable at its original
+URL.** Nothing in the publish pipeline deletes: the upload mirrors the new
+version directory in without `--delete`, `maven-metadata.xml` is rebuilt by
+*merging* the existing version list and aborts if the result would be shorter,
+and an already-published coordinate cannot be overwritten without an explicit
+`force`. Since 2026-07-30 each release also asserts, after uploading, that every
+previously published version still returns 200 for both its `.jar` and `.pom`,
+checked against an append-only ledger in the parser repo rather than against the
+server's own metadata.
 
-Observed directly on 2026-07-28: at 06:50 UTC it served 4.1.4 through 4.1.8, all
-downloading and checksum-verifying. By 10:23 UTC 4.1.9 had been published and
-**all five others returned 404**. A build pinned to 4.1.6 that morning could not
-resolve its parser by lunchtime.
+**One exception happened, and it is why the paragraph above is now enforced
+rather than assumed.** On 2026-07-28 at 06:50 UTC the repository served 4.1.4
+through 4.1.8; by 10:23 UTC 4.1.9 was published and **all five returned 404**. A
+build pinned to 4.1.6 that morning could not resolve its parser by lunchtime.
+That was **not** the release mechanism — it was a deliberate one-time recall:
+those builds did not carry the trial restrictions they were supposed to, so they
+were withdrawn. The publish workflow now compiles a probe against the jar and
+refuses to upload unless the restrictions actually bite, so that class of recall
+cannot recur.
 
-So a pin here goes *stale-broken*, not merely stale: falling behind means your
-build stops resolving, for anyone without that jar already in `~/.m2`. Version
-ranges do not help — they read the same rewritten metadata, and Maven's
-`updatePolicy` cache can hand you a version that no longer exists, with a worse
-error message than a pin gives you.
+The residue is that `4.1.9` is currently the only version on the server. Treat a
+future removal as what it would be — a security or licensing recall, announced —
+not as routine cleanup after a release.
 
 Available versions:
 <https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml>
@@ -232,7 +240,9 @@ bumping is merging a pre-verified PR. The pin is what keeps a fresh clone
 reproducible for evaluation.
 
 > **If the `pinned` job goes red while `latest` is green, treat it as urgent.**
-> It means the pinned release has been deleted from the repository.
+> The pinned version has stopped resolving while the newest one still does —
+> normally that means it was recalled (see above), so anyone pinned to it is
+> broken too and needs to hear about it.
 
 ### Building against a local parser
 
