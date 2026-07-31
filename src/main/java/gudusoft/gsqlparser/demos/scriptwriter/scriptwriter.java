@@ -3,10 +3,33 @@ package gudusoft.gsqlparser.demos.scriptwriter;
 import gudusoft.gsqlparser.EDbVendor;
 import gudusoft.gsqlparser.TGSqlParser;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
+/**
+ * Rebuilds a SQL statement from its parse tree: parse, then write the tree back
+ * out with {@code toScript()}.
+ *
+ * <p>The built-in query is a large, densely formatted Oracle statement with
+ * optimiser hints, correlated scalar subqueries, {@code CASE} expressions and a
+ * {@code UNION} — deliberately harder than a toy example. It is about 49 KB,
+ * which is <em>over the trial parser's 10,000-byte limit</em>, so with the
+ * public {@code com.gudusoft:gsqlparser} jar the built-in query cannot be
+ * parsed and this demo reports that rather than running. Pass your own smaller
+ * file to see it work:
+ *
+ * <pre>
+ *     scriptwriter                       # built-in query, needs a licensed parser
+ *     scriptwriter my.sql                # your own SQL
+ *     scriptwriter my.sql /t mssql       # ...in another dialect
+ * </pre>
+ */
 public class scriptwriter {
-    public static void main(String args[]) {
-        TGSqlParser sqlparser = new TGSqlParser( EDbVendor.dbvoracle);
-        sqlparser.sqltext = "             SELECT /*+ leading(dirs inpt ptbs dmpg) index(dirs IX_MNDHDIRS_03) use_nl(dmpg)  */ --(20140625 DBA 튜닝 반영)\n" +
+
+    /** Roughly 49 KB of Oracle SQL. See the class comment about the trial limit. */
+    private static final String DEFAULT_SQL =
+                "             SELECT /*+ leading(dirs inpt ptbs dmpg) index(dirs IX_MNDHDIRS_03) use_nl(dmpg)  */ --(20140625 DBA 튜닝 반영)\n" +
                 "                       nvl( (select /*+index_desc(icdr PK_pmihicdr ) */ icdr.ordtype  \n" +
                 "                               from pam.pmihicdr icdr\n" +
                 "                             where icdr.instcd= :1 \n" +
@@ -685,10 +708,83 @@ public class scriptwriter {
                 "            \n" +
                 "   /* himed/his/emr/dialmgr/dialpatmngtmgt/dao/sqls/dialpatmngtdao_sqls.xml getScheInfo */";
 
-        sqlparser.parse( );
+    public static void main(String args[]) {
+        EDbVendor vendor = EDbVendor.dbvoracle;
+        String sqlfile = null;
 
-         System.out.println(sqlparser.sqlstatements.get(0).toScript());
-        // assertTrue(verifyScript(EDbVendor.dbvoracle,sqlparser.sqlstatements.get(0).toString(),sqlparser.sqlstatements.get(0).toScript()));
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("/?") || args[i].equals("-h") || args[i].equals("--help")) {
+                usage();
+                return;
+            } else if (args[i].equals("/t")) {
+                if (i + 1 >= args.length) {
+                    System.out.println("/t needs a database type, e.g. /t mssql");
+                    return;
+                }
+                vendor = TGSqlParser.getDBVendorByName(args[++i]);
+            } else {
+                // Anything that is not a recognised flag is the input file. Note
+                // this cannot test startsWith("/"): on Unix that is every
+                // absolute path.
+                sqlfile = args[i];
+            }
+        }
 
+        String sqltext;
+        String source;
+        if (sqlfile == null) {
+            sqltext = DEFAULT_SQL;
+            source = "the built-in demo query";
+        } else {
+            File f = new File(sqlfile);
+            if (!f.isFile()) {
+                System.out.println("No such file: " + sqlfile);
+                return;
+            }
+            try {
+                sqltext = new String(Files.readAllBytes(f.toPath()), "UTF-8");
+            } catch (IOException e) {
+                System.out.println("Could not read " + sqlfile + ": " + e.getMessage());
+                return;
+            }
+            source = sqlfile;
+        }
+
+        TGSqlParser sqlparser = new TGSqlParser(vendor);
+        sqlparser.sqltext = sqltext;
+
+        // Always check the return code. This used to go straight to
+        // sqlstatements.get(0), so a failed parse surfaced as an
+        // IndexOutOfBoundsException on an empty list rather than as the real
+        // error, which for the built-in query is the trial parser's size limit.
+        if (sqlparser.parse() != 0) {
+            System.out.println("Failed to parse " + source + ":");
+            System.out.println(sqlparser.getErrormessage());
+            if (sqltext.length() > TRIAL_SQL_LIMIT) {
+                System.out.println();
+                System.out.println("That input is " + sqltext.length() + " characters. The trial parser"
+                        + " stops at " + TRIAL_SQL_LIMIT + ", so this needs a licensed build —"
+                        + " or pass a smaller file: scriptwriter <file.sql> [/t <vendor>]");
+            }
+            return;
+        }
+
+        if (sqlparser.sqlstatements.size() == 0) {
+            System.out.println(source + " parsed, but contains no SQL statement.");
+            return;
+        }
+
+        System.out.println(sqlparser.sqlstatements.get(0).toScript());
+    }
+
+    /** The trial build refuses input larger than this. */
+    private static final int TRIAL_SQL_LIMIT = 10000;
+
+    private static void usage() {
+        System.out.println("Usage: java scriptwriter [<file.sql>] [/t <database type>]");
+        System.out.println("  <file.sql>  Optional. SQL to parse and write back out.");
+        System.out.println("              Defaults to a large built-in Oracle query that");
+        System.out.println("              exceeds the trial parser's " + TRIAL_SQL_LIMIT + "-byte limit.");
+        System.out.println("  /t <type>   Optional. Database dialect, default oracle.");
     }
 }

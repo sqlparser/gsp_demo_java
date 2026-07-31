@@ -5,25 +5,71 @@ import gudusoft.gsqlparser.ISQLStatementHandle;
 import gudusoft.gsqlparser.TCustomSqlStatement;
 import gudusoft.gsqlparser.TGSqlParser;
 
+import java.io.File;
+
+/**
+ * Handles each statement as the parser reaches it, instead of waiting for the
+ * whole script.
+ *
+ * <p>{@link TGSqlParser#setSqlStatementHandle} registers a callback that fires
+ * per statement during the parse, which is what you want for a script too large
+ * to hold as a finished tree, or when you want to stop early: returning
+ * {@code true} from the callback aborts the parse.
+ */
 public class ProcessSQLStatement {
     public static void main(String args[]) {
-        String sqlfile = "C:\\Users\\DELL\\Downloads\\20240311110800487_mssql_sql\\data.sql";
-        mySQLStatementHandle sqlStatementHandle = new mySQLStatementHandle();
-        sqlStatementHandle.lastTime = System.currentTimeMillis();
-
-
-        TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmssql);
-        sqlparser.sqlfilename = sqlfile;
-        sqlparser.setSqlStatementHandle(sqlStatementHandle);
-
-
-        int ret = sqlparser.parse();
-        if (ret != 0){
-            System.out.println("\n\n"+sqlparser.getErrormessage().substring(0,1000));
+        // This used to be a hardcoded absolute path into one developer's
+        // Downloads folder, so the demo could not run anywhere else: the file
+        // was missing, parse() failed, and the error branch below then threw
+        // StringIndexOutOfBoundsException instead of printing the error.
+        if (args.length < 1) {
+            System.out.println("Usage: java ProcessSQLStatement <sqlfile> [/t <database type>]");
+            System.out.println("  <sqlfile>   The SQL script to parse.");
+            System.out.println("  /t <type>   Optional. Database dialect, default mssql.");
+            System.out.println();
+            System.out.println("Prints one line per statement as the parser reaches it,");
+            System.out.println("rather than after the whole script has been parsed.");
             return;
         }
 
-        System.out.println("Time Escaped: "+ (System.currentTimeMillis() - sqlStatementHandle.lastTime)  );
+        String sqlfile = null;
+        EDbVendor vendor = EDbVendor.dbvmssql;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("/t")) {
+                if (i + 1 >= args.length) {
+                    System.out.println("/t needs a database type, e.g. /t oracle");
+                    return;
+                }
+                vendor = TGSqlParser.getDBVendorByName(args[++i]);
+            } else {
+                sqlfile = args[i];
+            }
+        }
+
+        if (sqlfile == null || !new File(sqlfile).isFile()) {
+            System.out.println("No such file: " + sqlfile);
+            return;
+        }
+
+        mySQLStatementHandle sqlStatementHandle = new mySQLStatementHandle();
+        sqlStatementHandle.lastTime = System.currentTimeMillis();
+
+        TGSqlParser sqlparser = new TGSqlParser(vendor);
+        sqlparser.sqlfilename = sqlfile;
+        sqlparser.setSqlStatementHandle(sqlStatementHandle);
+
+        int ret = sqlparser.parse();
+        if (ret != 0) {
+            // substring(0, 1000) unconditionally was the second half of the bug:
+            // it throws whenever the message is shorter than that, which is most
+            // of the time.
+            String msg = sqlparser.getErrormessage();
+            System.out.println();
+            System.out.println(msg.length() > 1000 ? msg.substring(0, 1000) + "..." : msg);
+            return;
+        }
+
+        System.out.println("Time Escaped: " + (System.currentTimeMillis() - sqlStatementHandle.lastTime));
     }
 }
 
