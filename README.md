@@ -76,7 +76,7 @@ arguments and it prints its own usage line.**
 
 > **Finding the `-Dexec.mainClass` value.** Every demo is
 > `gudusoft.gsqlparser.demos.<demo>.<Class>`, and the directory path under
-> `src/main/java/` *is* the package, for all 190 files — so read it straight off
+> `src/main/java/` *is* the package for every demo source file — so read it straight off
 > the file's location.
 > `src/main/java/gudusoft/gsqlparser/demos/checksyntax/checksyntax.java` is
 > `gudusoft.gsqlparser.demos.checksyntax.checksyntax`.
@@ -104,6 +104,7 @@ starting points:
 | `analyzesp` | Analyze stored procedures |
 | `analyzescript` | Walk a multi-statement script |
 | `scriptwriter` / `modifysql` / `sqlrefactor` | Rewrite SQL through the AST |
+| `modifySqlAst` | Apply a SELECT policy, modify its AST, regenerate and revalidate SQL |
 | `joinConvert` | Convert between old-style and ANSI JOIN syntax |
 | `expressionTraverser` / `visitors` | Walk the AST with a visitor |
 | `sqltranslator` | Translate SQL between dialects |
@@ -134,6 +135,7 @@ read as worked examples you can run immediately:
 | Want to | Look at | Input |
 |---|---|---|
 | Add a condition to a `WHERE` clause | [`modifySelect/ModifySelect.java`](src/main/java/gudusoft/gsqlparser/demos/modifySelect/ModifySelect.java) | inline |
+| Build a pre-execution policy and rewrite gate | [`modifySqlAst/ModifySqlAst.java`](src/main/java/gudusoft/gsqlparser/demos/modifySqlAst/ModifySqlAst.java) | inline |
 | Rename a table throughout a statement | [`modifysql/replaceTablename.java`](src/main/java/gudusoft/gsqlparser/demos/modifysql/replaceTablename.java) | inline |
 | Replace a literal constant | [`modifysql/replaceConstant.java`](src/main/java/gudusoft/gsqlparser/demos/modifysql/replaceConstant.java) | inline |
 | Append to an existing statement | [`modifysql/add2SQL.java`](src/main/java/gudusoft/gsqlparser/demos/modifysql/add2SQL.java) | inline |
@@ -150,12 +152,12 @@ mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifySelect.ModifyS
 ## Running the tests
 
 ```bash
-mvn test                                   # all 144
+mvn test                                   # all 149
 mvn test -Dtest=ClassName                  # one class
 mvn test -Dtest=ClassName#methodName       # one method
 ```
 
-**144 tests, all passing, nothing skipped.** There are no expected failures, and
+**149 tests, all passing, nothing skipped.** There are no expected failures, and
 every input the suite needs is checked in, so a plain clone runs the whole
 thing. Any red test is a real one.
 
@@ -359,7 +361,7 @@ than only building them.
 | check | detail |
 |---|---|
 | Parser version consistency | `set-parser-version.sh --check` across all four POMs |
-| Build and test | JDK 8 and 21; 144 tests, and a run that skipped everything fails |
+| Build and test | JDK 8 and 21; 149 tests, and a run that skipped everything fails |
 | Demo smoke test | `checksyntax` against known SQL |
 | Standalone lineage jar | `smoke-dlineage-jar.sh` on JDK 8 and 21 — asserts on **output**, in JSON *and* XML |
 | Windows `.bat` | `windows-latest`: bootstrap, 39 compile scripts, 50 run scripts, 4 driven with real arguments |

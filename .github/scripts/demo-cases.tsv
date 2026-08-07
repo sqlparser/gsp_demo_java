@@ -39,3 +39,4 @@ gudusoft.gsqlparser.demos.joinConvert.JoinConverter		SELECT
 gudusoft.gsqlparser.demos.SqlHashDemo		Statement type
 gudusoft.gsqlparser.demos.expressionTraverser.expressionTraverser		pre order
 gudusoft.gsqlparser.demos.modifySelect.ModifySelect		Original SQL
+gudusoft.gsqlparser.demos.modifySqlAst.ModifySqlAst		Validation: regenerated SQL parsed successfully as one SELECT statement.
