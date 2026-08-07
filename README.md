@@ -46,12 +46,17 @@ cat > q.sql <<'SQL'
 SELECT a.id, b.name FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1;
 SQL
 
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.checksyntax \
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.OfflineSyntaxCheck \
     -Dexec.args="/f q.sql /t oracle"
 ```
 
 ```text
-Time Escaped: 1546, file processed: 1, syntax errors: 0
+Offline SQL syntax validation
+Input: .../q.sql
+Dialect: oracle
+Database connection used: no
+Result: ACCEPTED
+Statements parsed: 1
 ```
 
 Reformat it:
@@ -70,16 +75,16 @@ FROM   ta a
 WHERE  a.x > 1;
 ```
 
-Argument conventions differ between demos — `checksyntax` takes `/f <file>` and
-`/t <vendor>`, `formatsql` takes a bare filename. **Run any demo with no
-arguments and it prints its own usage line.**
+Argument conventions differ between demos — `OfflineSyntaxCheck` takes
+`/f <file>` and `/t <vendor>`, while `formatsql` takes a bare filename. The
+offline validator runs a built-in Oracle query when no file is supplied.
 
 > **Finding the `-Dexec.mainClass` value.** Every demo is
 > `gudusoft.gsqlparser.demos.<demo>.<Class>`, and the directory path under
 > `src/main/java/` *is* the package for every demo source file — so read it straight off
 > the file's location.
-> `src/main/java/gudusoft/gsqlparser/demos/checksyntax/checksyntax.java` is
-> `gudusoft.gsqlparser.demos.checksyntax.checksyntax`.
+> `src/main/java/gudusoft/gsqlparser/demos/checksyntax/OfflineSyntaxCheck.java`
+> is `gudusoft.gsqlparser.demos.checksyntax.OfflineSyntaxCheck`.
 >
 > Instructions written before 2026-07-27 say things like
 > `demos.checksyntax.checksyntax`. Those need the `gudusoft.gsqlparser.` prefix
@@ -95,7 +100,7 @@ starting points:
 
 | Demo | What it does |
 |------|--------------|
-| `checksyntax` | Parse SQL and report syntax errors |
+| `checksyntax` | Validate SQL offline and return parser diagnostics without a database connection |
 | `formatsql` | Pretty-print / reformat SQL |
 | `gettablecolumns` | Extract table and column names |
 | `columnImpact` | Trace column-level impact through SELECTs |
@@ -152,7 +157,7 @@ mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifySelect.ModifyS
 ## Running the tests
 
 ```bash
-mvn test                                   # all 149
+mvn test                                   # all 155
 mvn test -Dtest=ClassName                  # one class
 mvn test -Dtest=ClassName#methodName       # one method
 ```

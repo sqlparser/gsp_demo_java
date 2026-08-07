@@ -18,6 +18,7 @@
 # here in the same commit that bumps gsp.core.version.
 
 gudusoft.gsqlparser.demos.checksyntax.checksyntax	/f %SQL% /t oracle	syntax errors: 0
+gudusoft.gsqlparser.demos.checksyntax.OfflineSyntaxCheck		Result: ACCEPTED
 gudusoft.gsqlparser.demos.formatsql.formatsql	%SQL%	SELECT
 gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn	/f %SQL% /t mssql	Tables:
 gudusoft.gsqlparser.demos.gettablecolumns.getResultColumn		DATETOSTRING(date_attr_name,'mm/dd/yyyy')
