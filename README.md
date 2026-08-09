@@ -63,7 +63,7 @@ Reformat it:
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
-    -Dexec.args="q.sql"
+    -Dexec.args="q.sql /t oracle"
 ```
 
 ```text
@@ -75,9 +75,33 @@ FROM   ta a
 WHERE  a.x > 1;
 ```
 
+Java also includes the fault-tolerant `pp2` formatter. It formats parseable
+regions through the normal AST formatter and recovers malformed regions with a
+token-preserving lexical formatter. The SQL does not need to pass `parse()`
+first:
+
+```bash
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
+    -Dexec.args="samples/formatsql/mixed-valid-invalid.sql /t oracle /tolerant"
+```
+
+```sql
+SELECT 1
+FROM   dual;
+SELECT FROM
+WHERE;
+SELECT 2
+FROM   dual;
+```
+
+The demo writes `Formatter status: OK_WITH_RECOVERY` and the recovered-region
+diagnostics to stderr. Formatting is deliberately non-destructive: `pp2`
+preserves the invalid tokens; it does not claim to repair or validate them.
+
 Argument conventions differ between demos — `OfflineSyntaxCheck` takes
-`/f <file>` and `/t <vendor>`, while `formatsql` takes a bare filename. The
-offline validator runs a built-in Oracle query when no file is supplied.
+`/f <file>` and `/t <vendor>`, while `formatsql` takes a bare filename followed
+by optional `/t <vendor>` and `/tolerant` flags. The offline validator runs a
+built-in Oracle query when no file is supplied.
 
 > **Finding the `-Dexec.mainClass` value.** Every demo is
 > `gudusoft.gsqlparser.demos.<demo>.<Class>`, and the directory path under
@@ -101,7 +125,7 @@ starting points:
 | Demo | What it does |
 |------|--------------|
 | `checksyntax` | Validate SQL offline and return parser diagnostics without a database connection |
-| `formatsql` | Pretty-print / reformat SQL |
+| `formatsql` | Pretty-print SQL, including malformed input with `/tolerant` |
 | `gettablecolumns` | Extract table and column names |
 | `columnImpact` | Trace column-level impact through SELECTs |
 | `dlineage` / `dlineageBasic` | Data lineage analysis |
