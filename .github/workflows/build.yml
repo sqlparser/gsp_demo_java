@@ -47,6 +47,15 @@ jobs:
       - name: Parser version is consistent across all POMs
         run: .github/scripts/set-parser-version.sh --check
 
+      # The same check as a pre-commit hook, so the drift never reaches a push
+      # in the first place. It is opt-in per clone (`git config core.hooksPath
+      # .githooks`), which means nothing would notice if it quietly stopped
+      # working -- it fails open by design. So CI drives it: a clone, a
+      # deliberately drifting bump, and an assertion that the commit is refused.
+      - name: The pre-commit hook still catches a drifting bump
+        if: matrix.java == '21'
+        run: .github/scripts/test-pre-commit-hook.sh
+
       - name: Build
         run: mvn -B package -DskipTests
 

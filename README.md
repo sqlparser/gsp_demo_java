@@ -181,12 +181,12 @@ mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifySelect.ModifyS
 ## Running the tests
 
 ```bash
-mvn test                                   # all 155
+mvn test                                   # all 156
 mvn test -Dtest=ClassName                  # one class
 mvn test -Dtest=ClassName#methodName       # one method
 ```
 
-**149 tests, all passing, nothing skipped.** There are no expected failures, and
+**156 tests, all passing, nothing skipped.** There are no expected failures, and
 every input the suite needs is checked in, so a plain clone runs the whole
 thing. Any red test is a real one.
 
@@ -269,6 +269,18 @@ In practice **you never edit a version at all**: the nightly's `latest` job
 tests the newest release and opens a bump PR only when everything passes, so
 bumping is merging a pre-verified PR. The pin is what keeps a fresh clone
 reproducible for evaluation.
+
+There is a pre-commit hook for the moments you edit one anyway. It runs the same
+`--check` against what you have *staged* and refuses the commit if the POMs
+disagree, which is a shorter feedback loop than a red build:
+
+```bash
+git config core.hooksPath .githooks   # once per clone; .git/hooks is not versioned
+git commit --no-verify                # bypass, for a deliberately half-done bump
+```
+
+It stays out of the way of any commit that touches no POM, and fails open if
+python is missing rather than blocking you.
 
 > **If the `pinned` job goes red while `latest` is green, treat it as urgent.**
 > The pinned version has stopped resolving while the newest one still does —
@@ -390,7 +402,8 @@ than only building them.
 | check | detail |
 |---|---|
 | Parser version consistency | `set-parser-version.sh --check` across all four POMs |
-| Build and test | JDK 8 and 21; 149 tests, and a run that skipped everything fails |
+| The pre-commit hook | `test-pre-commit-hook.sh`: a drifting bump is refused in a throwaway clone |
+| Build and test | JDK 8 and 21; 156 tests, and a run that skipped everything fails |
 | Demo smoke test | `checksyntax` against known SQL |
 | Standalone lineage jar | `smoke-dlineage-jar.sh` on JDK 8 and 21 — asserts on **output**, in JSON *and* XML |
 | Windows `.bat` | `windows-latest`: bootstrap, 39 compile scripts, 50 run scripts, 4 driven with real arguments |
@@ -408,9 +421,25 @@ part that lives outside this repository:
 means a new parser release broke the demos. Green `latest` with a newer version
 means `gsp.core.version` can be bumped, and it opens that PR itself.
 
+`.github/workflows/red-master.yml` — after either of those finishes on `master`:
+
+| conclusion | what happens |
+|---|---|
+| first failure | opens **one** issue labelled `ci-red`, assigned to whoever triggered the run |
+| further failures | a comment on that issue, not a second issue |
+| green again | closes it, but only once the newest completed run of *both* workflows passed |
+
+It exists because the checks were never the weak part. In August 2026 a bad
+parser bump was caught by the push build inside a minute and stayed on master
+for 21 hours regardless, because a red run leaves no trace in any view you open
+for another reason. To see it work without breaking master, run it from the
+Actions tab: it defaults to a dry run that makes every query and prints the
+mutations instead of applying them.
+
 Every check is a script under `.github/scripts/`, runnable locally:
 
 ```bash
+.github/scripts/test-pre-commit-hook.sh    # the hook refuses a drifting version bump
 .github/scripts/check-test-results.sh      # surefire XML: no failures, not all skipped
 .github/scripts/run-all-demos.sh           # every class with a main() starts
 .github/scripts/run-demo-cases.sh          # demos driven with real args, output checked

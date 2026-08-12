@@ -480,6 +480,22 @@ another working directory, so every demo failed to load and matched no pattern.
 
 Newest first.
 
+- **[2026/8/12]** A pre-commit hook (`.githooks/pre-commit`, opt in with
+  `git config core.hooksPath .githooks`) and a red-master tracker
+  (`.github/workflows/red-master.yml`). Both come out of one incident and
+  neither is a new check: `afb6f3a` bumped `${gsp.core.version}` by hand and
+  missed the three connector POMs, the push build went red **within the same
+  minute**, and master stayed broken for 21 hours anyway because nobody opens
+  the Actions tab of a repository that is usually green. The hook moves the
+  existing check earlier — it reads the *index*, since staging `pom.xml` while
+  leaving the connector edits unstaged is the exact drift in question — and the
+  tracker turns a failure into an assigned issue that closes itself when both
+  watched workflows are green again. The hook fails open by design (no python,
+  no POM staged, no readable index and it stands aside), so
+  `test-pre-commit-hook.sh` drives it through four cases in a throwaway clone
+  and `build.yml` runs that; a hook that quietly stopped working would
+  otherwise be invisible until the next bad bump.
+
 - **[2026/7/28]** `pom_dlineage.xml` merged into `pom.xml`; the standalone
   lineage tool is now a `maven-shade-plugin` uber jar produced by the normal
   build, and CI *runs* it on JDK 8 and 21 rather than only building it. Closed

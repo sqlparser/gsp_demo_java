@@ -1,0 +1,84 @@
+name: Red master
+
+# build.yml and nightly.yml decide whether master is broken. This decides
+# whether anyone finds out.
+#
+# On 2026-08-10 a parser bump missed three of the four POMs. The push build went
+# red in the same minute -- the guard worked perfectly -- and master stayed
+# broken for 21 hours anyway, through a second failing run, because nobody
+# loaded the Actions tab. GitHub's own email goes to the actor and is easy to
+# filter into nothing; a red run leaves no trace in any view you visit for
+# another reason.
+#
+# So a failure on master opens an issue, assigns it, and keeps it open until
+# every watched workflow is green again -- at which point it closes itself, so
+# nobody has to remember to. All the logic is in
+# .github/scripts/red-master-issue.sh; this file only feeds it the payload.
+
+on:
+  workflow_run:
+    # Must match each workflow's `name:`, and the WATCHED list in the script.
+    workflows: ["Build and test", "Nightly"]
+    types: [completed]
+
+  # For proving the thing works without breaking master to do it. Defaults to a
+  # dry run: it performs every read, needs every permission the real path needs,
+  # and prints the mutations instead of making them.
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: "Conclusion to simulate"
+        type: choice
+        options: [failure, success]
+        default: failure
+      dry_run:
+        description: "Print what would happen instead of doing it"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: "Track whether master is red"
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write     # the tracking issue
+      actions: read     # reading the other workflows' latest results
+      contents: read
+
+    # A cancelled run says nothing about the code, and a run on a branch or a
+    # pull request is not master going red. The script re-checks the branch, so
+    # this is a cheap filter rather than the guarantee.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      ((github.event.workflow_run.conclusion == 'success' ||
+        github.event.workflow_run.conclusion == 'failure') &&
+       github.event.workflow_run.head_branch == 'master' &&
+       github.event.workflow_run.event != 'pull_request')
+
+    steps:
+      # Only the scripts are needed, and checking out the workflow_run's commit
+      # would mean running a script version that a pull request could have
+      # rewritten. Always the default branch.
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Open, update, or close the tracking issue
+        # Explicit, for the pipefail: with the default shell, `script | tee`
+        # would report tee's exit status and swallow a failure in the script.
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          CONCLUSION: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate || github.event.workflow_run.conclusion }}
+          BRANCH: ${{ github.event_name == 'workflow_dispatch' && 'master' || github.event.workflow_run.head_branch }}
+          RUN_NAME: ${{ github.event_name == 'workflow_dispatch' && 'a simulated run' || github.event.workflow_run.name }}
+          RUN_URL: ${{ github.event_name == 'workflow_dispatch' && '' || github.event.workflow_run.html_url }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          SHA: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
+          ACTOR: ${{ github.event.workflow_run.actor.login }}
+          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '0' }}
+        run: .github/scripts/red-master-issue.sh | tee -a "$GITHUB_STEP_SUMMARY"

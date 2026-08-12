@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# Refuse a commit that would leave the parser version disagreeing across the
+# four POMs that write it down.
+#
+# This is the same check both workflows run, moved earlier. CI already catches
+# the drift -- when it last happened, on 2026-08-10, the push build went red
+# within the same minute as the commit -- but nobody read that build for 21
+# hours, and the nightly failed too before anyone noticed. A hook cannot be
+# ignored for 21 hours: it costs about 50ms and it runs before the mistake
+# leaves the machine.
+#
+# Install it (once per clone -- .git/hooks is not versioned, so this is the
+# only way a hook can ship in the repository):
+#
+#     git config core.hooksPath .githooks
+#
+# Bypass it, if you are deliberately committing a half-done bump:
+#
+#     git commit --no-verify
+#
+# It checks the *index*, not the working tree, because the index is what you
+# are about to commit. Staging pom.xml while leaving the matching
+# connector/*/pom.xml edits unstaged is precisely the drift being guarded
+# against, and a working-tree check would call that clean.
+
+set -uo pipefail
+
+# Nothing to say about a commit that touches no POM. Keeps the hook free for
+# the other 99% of commits.
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '(^|/)pom\.xml$'; then
+    exit 0
+fi
+
+# set-parser-version.sh needs python. Warn rather than block if it is missing:
+# a hook that refuses every commit on a machine without python would just get
+# uninstalled, and CI still covers this.
+if ! command -v python3 >/dev/null 2>&1 && ! command -v python >/dev/null 2>&1; then
+    echo "pre-commit: python not found, skipping the parser version check" >&2
+    exit 0
+fi
+
+tmp=$(mktemp -d) || exit 0
+trap 'rm -rf "$tmp"' EXIT
+
+# Extract the staged content of every POM plus the checker itself, then run
+# that copy against that copy: the script resolves its targets relative to its
+# own location, so it sees the index and nothing else.
+# A plain loop rather than mapfile: macOS still ships bash 3.2.
+staged_files=()
+while IFS= read -r f; do
+    staged_files+=("$f")
+done < <(git ls-files -- '*pom.xml' '.github/scripts/set-parser-version.sh')
+if [ ${#staged_files[@]} -eq 0 ]; then
+    exit 0
+fi
+if ! git checkout-index -f --prefix="$tmp/" -- "${staged_files[@]}" 2>/dev/null; then
+    echo "pre-commit: could not read the index, skipping the parser version check" >&2
+    exit 0
+fi
+
+checker="$tmp/.github/scripts/set-parser-version.sh"
+[ -x "$checker" ] || exit 0
+
+# The script prints ::error:: annotations, which are for GitHub's log viewer and
+# read as noise in a terminal.
+if output=$("$checker" --check 2>&1); then
+    exit 0
+fi
+
+sed 's/^::error:://' <<<"$output" >&2
+cat >&2 <<'EOF'
+
+pre-commit: the parser version disagrees across the POMs you are committing.
+
+  .github/scripts/set-parser-version.sh <version>   move all four together
+  git add -u && git commit                          then commit again
+
+Never edit a version by hand: it is written in pom.xml and in each of the three
+connector/*/pom.xml, which are separate builds with no parent to inherit it.
+In practice you should not be editing one at all -- the nightly tests the newest
+release and opens a pre-verified bump PR.
+
+  git commit --no-verify    commit anyway
+EOF
+exit 1
