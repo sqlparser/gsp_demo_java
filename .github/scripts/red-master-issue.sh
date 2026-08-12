@@ -71,10 +71,18 @@ failure|timed_out)
     if [ -z "$existing" ]; then
         # The label may not exist yet on a fresh repository. --force makes this
         # idempotent instead of failing the second time.
-        run gh label create "$LABEL" \
-            --color B60205 \
-            --description "master is failing CI" \
-            --force >/dev/null 2>&1 || true
+        #
+        # Deliberately NOT behind `run`: this is the one write a dry run still
+        # makes. It notifies nobody and changes nothing anyone reads, and it is
+        # the only way a dry run can prove the token really has issues:write --
+        # which is the failure this whole workflow cannot afford, since it would
+        # surface at exactly the moment master is already broken.
+        if gh label create "$LABEL" --color B60205 \
+             --description "master is failing CI" --force >/dev/null 2>&1; then
+            say "label '$LABEL' exists (issues:write confirmed)"
+        else
+            say "::warning::could not create the '$LABEL' label; check the token's issues:write permission"
+        fi
 
         body="**\`$RUN_NAME\` failed on \`master\`.**
 
