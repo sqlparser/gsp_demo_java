@@ -55,7 +55,7 @@ jobs:
       # gspCommon.BASE_SQL_DIR pointed one level short of the library's SQL
       # corpus, so the input file was never found and the comparison ran against
       # an empty string. Those four scripts are now checked in under
-      # src/test/resources/, so the suite is self-contained: 144 tests, no
+      # src/test/resources/, so the suite is self-contained: 156 tests, no
       # expected failures, nothing skipped. `continue-on-error` went with the
       # threshold -- a red test run is now a red build.
       - name: Test
