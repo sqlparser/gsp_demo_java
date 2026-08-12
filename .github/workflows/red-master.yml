@@ -39,6 +39,19 @@ on:
 permissions:
   contents: read
 
+# Serialised, because the whole design rests on there being exactly one open
+# issue. Two watched workflows can finish seconds apart -- the nightly runs
+# `pinned` and `latest` together, and a push can land while one is running --
+# and two concurrent runs would each look for an open issue, each find none, and
+# each open one.
+#
+# cancel-in-progress is false, and explicitly so: cancelling the earlier run
+# would drop a notification about a failure, which is the one thing this
+# workflow exists to prevent.
+concurrency:
+  group: red-master
+  cancel-in-progress: false
+
 jobs:
   notify:
     name: "Track whether master is red"
