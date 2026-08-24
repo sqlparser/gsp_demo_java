@@ -243,9 +243,13 @@ were withdrawn. The publish workflow now compiles a probe against the jar and
 refuses to upload unless the restrictions actually bite, so that class of recall
 cannot recur.
 
-The residue is that `4.1.9` is currently the only version on the server. Treat a
-future removal as what it would be — a security or licensing recall, announced —
-not as routine cleanup after a release.
+The residue is that those five are still 404 and are not coming back; everything
+published since has stayed put. As of 2026-08-24 the server serves `4.1.9`,
+`4.1.11` and `4.2.6` — all three returning 200 for `.jar` and `.pom`, all three
+listed in `maven-metadata.xml` — and `4.1.11` went on resolving after `4.2.6`
+was published on 2026-08-23. Treat a future removal as what it would be — a
+security or licensing recall, announced — not as routine cleanup after a
+release.
 
 Available versions:
 <https://www.sqlparser.com/maven/com/gudusoft/gsqlparser/maven-metadata.xml>
@@ -419,7 +423,11 @@ part that lives outside this repository:
 
 **`latest` is the job that earns the nightly.** Red `latest` with green `pinned`
 means a new parser release broke the demos. Green `latest` with a newer version
-means `gsp.core.version` can be bumped, and it opens that PR itself.
+means `gsp.core.version` can be bumped, and it opens that PR itself — then
+approves the PR's own `build.yml` run, which GitHub otherwise parks in
+`action_required` because `github-actions[bot]` counts as a first-time
+contributor. Check that a bump PR's build really ran before merging: a blocked
+run reports as "no checks reported", not as blocked.
 
 `.github/workflows/red-master.yml` — after either of those finishes on `master`:
 
