@@ -100,11 +100,12 @@ jobs:
   latest:
     name: "latest published parser"
     runs-on: ubuntu-latest
-    # Needed only by the last step, which opens the bump PR. Everything above it
-    # is read-only.
+    # Needed only by the last two steps, which open the bump PR and unblock its
+    # build. Everything above them is read-only.
     permissions:
       contents: write
       pull-requests: write
+      actions: write
 
     steps:
       - uses: actions/checkout@v4
@@ -189,6 +190,7 @@ jobs:
       # Deliberately the LAST step in the job: any earlier failure means the new
       # release broke something, and then no PR is what we want.
       - name: Propose the bump when the newest release is green
+        id: bump
         if: github.ref == 'refs/heads/master'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -243,6 +245,81 @@ jobs:
           Merge to move the demos to \`$NEW\`. Close to stay on \`$pinned\`; the nightly will go on testing \`$NEW\` and will not reopen this until a newer release appears.
 
           Opened by [\`nightly.yml\`](https://github.com/${{ github.repository }}/actions/workflows/nightly.yml)."
+
+          # Read by the step below, which has to find the run this push
+          # triggered. Set only on the path that actually opened a PR.
+          {
+            echo "branch=$branch"
+            echo "sha=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+      # The step above says build.yml "gets a chance to disagree". On its own it
+      # does not. GitHub gates workflow runs from first-time contributors --
+      # this repository's policy is `first_time_contributors`, read back from
+      # /actions/permissions/fork-pr-contributor-approval -- and
+      # github-actions[bot] counts as one, so the pull_request run for the
+      # branch pushed above is created in `action_required` at 0s and never
+      # starts.
+      #
+      # The failure mode is quiet in the worst way: `gh pr checks` on the PR
+      # reports "no checks reported", which reads as "this workflow does not
+      # apply here" rather than "this workflow is blocked". PR #51
+      # (4.1.11 -> 4.2.6) sat like that on 2026-08-24 and was only caught
+      # because somebody happened to look. Merging in that state loses every
+      # part of build.yml this job does not already duplicate: the JDK 8 build,
+      # the pre-commit hook test, and the whole windows-bat job.
+      #
+      # So approve it here. If the token is not allowed to, leave the notice on
+      # the PR itself, where whoever is about to merge will actually see it --
+      # a warning annotation on an otherwise green nightly is the same kind of
+      # thing nobody reads.
+      - name: Let the PR's build actually run
+        if: steps.bump.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.bump.outputs.branch }}
+          SHA: ${{ steps.bump.outputs.sha }}
+        run: |
+          set -euo pipefail
+          runs_url="https://github.com/${{ github.repository }}/actions"
+
+          # The run does not exist the instant `gh pr create` returns.
+          id=""
+          for _ in $(seq 1 12); do
+            id=$(gh api \
+                   "/repos/${{ github.repository }}/actions/runs?event=pull_request&branch=$BRANCH" \
+                   --jq ".workflow_runs[] | select(.head_sha == \"$SHA\") | .id" \
+                   2>/dev/null | head -1 || true)
+            if [ -n "$id" ]; then
+              break
+            fi
+            sleep 10
+          done
+
+          if [ -z "$id" ]; then
+            echo "::warning::no pull_request run appeared for $BRANCH within two minutes; check $runs_url"
+            exit 0
+          fi
+
+          status=$(gh api "/repos/${{ github.repository }}/actions/runs/$id" --jq .status)
+          echo "run $id is '$status'"
+          if [ "$status" != "action_required" ]; then
+            echo "not gated, nothing to approve"
+            exit 0
+          fi
+
+          if gh api --method POST \
+               "/repos/${{ github.repository }}/actions/runs/$id/approve" >/dev/null; then
+            echo "approved run $id; the PR's build will start"
+            exit 0
+          fi
+
+          echo "::warning::could not approve run $id; the bump PR has no checks until someone does"
+          gh pr comment "$BRANCH" --body \
+            "This PR's \`build.yml\` run is **blocked**, not missing: GitHub parked it in \`action_required\` because \`github-actions[bot]\` counts as a first-time contributor, and \`nightly.yml\` could not approve it with its own token.
+
+          Approve it at $runs_url/runs/$id before merging. Until then \`gh pr checks\` will say *no checks reported*, which is not the same as green: the JDK 8 build, the pre-commit hook test and the \`windows-bat\` job have not run against this version." || \
+            echo "::warning::could not comment on the PR either; approve $runs_url/runs/$id by hand"
 
   # The .bat family is the original Windows, no-Maven workflow. It went stale
   # for years because nothing ran it; build.yml runs it per push and this runs
