@@ -1,88 +1,151 @@
-
 # DataFlowAnalyzer
-Collects the end-to-end column-level data lineage in the Data Warehouses environment by connecting to database or 
-analyzing SQL script especially stored procedure like PL/SQL.
 
+Collects end-to-end, column-level data lineage from SQL scripts — including
+stored procedures such as PL/SQL — by parsing them, with no database
+connection. It is the demo form of the engine behind
+[Gudu SQLFlow](https://sqlflow.gudusoft.com).
 
-This tool is built from the scratch, it is the main part of the backend of [the SQLFlow Cloud](https://sqlflow.gudusoft.com).
+## Build and run
 
-## Building it on its own
-
-`DataFlowAnalyzer` is **excluded from the root build** — it needs a parser
-carrying the metadata layer, which the public trial artifact does not ship. The
-standalone build for it is `pom_dlineage.xml` in the repository root:
+`DataFlowAnalyzer` is part of the ordinary root build. Nothing about it is
+excluded, and there is no separate POM: from the repository root,
 
 ```bash
-mvn -f pom_dlineage.xml package
+mvn package -DskipTests
 ```
 
-**That build currently fails**, and did before this demo was reorganised: it
-pins `lib/gsqlparser-3.1.1.0.jar`, while `DataFlowAnalyzer` has moved on to
-`getOption().setTraceTablePosition(...)` and
-`ProcessUtility.generateColumnLevelLineageCsvSimple(...)`, neither of which that
-jar has. See the root `README.md`.
+produces `target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar`, an executable uber
+jar with every runtime dependency inside it. Analyze the sample script:
 
-> This section used to say `mvn package` against a `pom.xml` in this folder,
-> producing `target\dlineage-1.0.jar`, run with a classpath pointing into
-> `c:\prg\maven_repo\…\gsqlparser-3.1.0.2.jar` and a main class of
-> `gsp.gudusoft.gsqlparser.demos.dlineage.DataFlowAnalyzer`. All three were
-> wrong: that POM referenced a parser jar that is not in this repository, the
-> Windows path was the original author's, and the class name carried a stray
-> `gsp.` prefix. The POM has been removed.
-
-
-## Quick start
-
-### 1. Analyze data lineage from SQL files	
-
-Analyze demo.sql under sample directory and save the data lineage outpout in out.xml file.
-
-```
-java -jar gudusoft.dlineage.jar /t oracle /f ../sample/demo.sql /o out.xml
+```bash
+java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     /f samples/dlineage/demo.sql /o lineage.json /json
 ```
 
-### 2. Analyze data lineage from a database
-The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
+On parser 4.2.6 that writes 24 relationships. Drop `/json` for the XML form.
+Run it with no arguments to print the full option list for the parser version
+you have; the list under "Options" below is reproduced from that output.
 
-for example, connect to an Oracle database and analzye the data lineage, and save the data lineage in out.xml.
+> **Use the jar, not `mvn exec:java`, for this demo.** Most demos in this
+> repository run happily through `exec:java`, but this one marshals its output
+> with JAXB, and `exec:java` loads it in a child classloader while
+> `javax.xml.datatype` comes from the boot classloader. On JDK 21 that fails
+> before any lineage is printed:
+>
+> ```
+> loader constraint violation: when resolving field "DATETIME" of type
+> javax.xml.namespace.QName ... have different Class objects
+> ```
+>
+> The uber jar has no such split, which is the reason it exists and the reason
+> CI exercises it through `.github/scripts/smoke-dlineage-jar.sh`. Any other
+> demo class runs from the same jar too:
+> `java -cp target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar <main.Class> …`
 
-a metadata.json file that includes all metadata extracted from Oracle database will be saved to the current directory.
+> **The jars on [the Releases page](https://github.com/sqlparser/gsp_demo_java/releases)
+> are not this build.** The newest, `gudusoft.dlineage-3.0.2.3`, was published
+> 2024-11-02 — before the 2026-07 package reorganisation and several parser
+> releases. Build from source with the command above rather than downloading
+> one.
+
+### Output formats
+
+Column-level XML (the default), column-level JSON (`/json`), and table-level
+CSV:
+
+```bash
+java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     /f samples/dlineage/demo.sql /tableLineage /csv
+```
 
 ```
-java -jar gudusoft.dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o out.xml
+source_db,source_schema,source_table,source_column,target_db,...,target_column,process_type,...
+default,default,dept,deptno;dname,default,default,deptsal,dept_no;dept_name,sstinsert,...
+default,default,emp,sal;comm,default,default,deptsal,salary,sstinsert,...
 ```
 
-### 3.2  Export the meatadata from database only
+`/s` drops the intermediate result sets and reports only tables and columns,
+which is usually what you want when the lineage is going into another tool.
 
-You can also export the meatadata from database only use this tool and then upload this metadata to [the Gudu SQLFlow Cloud](https://sqlflow.gudusoft.com)
-to analyze the lineage.
+## The trial parser's 10,000-byte limit
 
-- Only export the metadta
+This repository resolves the **trial** parser, which refuses any single script
+over 10,000 bytes:
+
 ```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
+trial version can only process query with size of at most 10000 bytes,
+and expired after 90 days after first usage.
 ```
 
+You do not get a crash — you get a `<dlineage>` document whose only content is
+an `<error>` element, which is easy to mistake for "no lineage found".
 
-## Usage
+`samples/dlineage/demo.sql` is 366 bytes and works. **16 of the 89 `.sql` files
+under `samples/` are over the limit, and every one of them is a vendor schema
+dump under `samples/dlineageBasic/`** — `hr_cre.sql`, `sakila-schema.sql`,
+`instawdbdw.sql` and the rest, from 10,378 up to 99,139 bytes. Pointing this
+demo at one of those to "try lineage on a real schema" produces the licence
+error above, not lineage. Those need a licensed parser.
+
+## `/fromdb` does not work in this repository
+
+The `/fromdb`, `/exportonly` and `/metadataoutput` flags are still parsed, and
+the option list still describes them, but **the export itself is gone**: the
+call to `SqlflowIngester.export(...)` in `DataFlowAnalyzer.java` is commented
+out and that class has been deleted from this repository. Run it and you get an
+empty document, having written no `metadata.json`:
+
+```console
+$ java -jar ...-dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host ..." /o out.xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dlineage/>
 ```
-"Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/s [/topselectlist] [/text] ] [/i] [/ic] [/lof] [/j] [/json] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>] [/tableLineage [/csv]] [/transform [/coor]]");
 
+Live JDBC catalog extraction also needs `gudusoft.gsqlparser.sqlenv.T*SQLDataSource`,
+which the public trial jar does not ship. To feed real metadata to this demo,
+export it elsewhere and pass the JSON with `/env` — see "Resolving ambiguous
+columns" below.
+
+## Options
+
+Reproduced verbatim from the tool's own output on parser **4.2.6** — run it
+with no arguments to get the authoritative list for the version you have,
+rather than trusting this copy.
+
+```
+Usage: java DataFlowAnalyzer [/f <path_to_sql_file>] [/d <path_to_directory_includes_sql_files>] [/stat] [/removeResultSetTypes <resultset_types>] [/removeVariable /removeCursor] [/removeUnusedSynonym] [/n] [/s [/topselectlist] [/text] [/withTemporaryTable] [/simpleShowRelationTypes <relationTypes>]] [/i] [/showResultSetTypes <resultset_types>] [/showVariable] [/showCursor] [/showSynonym] [/ic] [/lof] [/j] [/json /graph] [/traceView] [/t <database type>] [/o <output file path>] [/version] [/env <path_to_metadata.json>]  [/tableLineage [/csv [/delimeter <delimeter>]]] [/csv-simple] [/transform [/coor]] [/showConstant] [/showER] [/treatArgumentsInCountFunctionAsDirectDataflow] [/showCaseWhenAsIndirect] [/filterRelationTypes <relationTypes>] [/lv] [/traceTablePosition]
 /f: Optional, the full path to SQL file.
 /d: Optional, the full path to the directory includes the SQL files.
 /j: Optional, return the result including the join relation.
+/n: Optional, normalize output.
 /s: Optional, simple output, ignore the intermediate results.
 /topselectlist: Optional, simple output with top select results.
-/i: Optional, the same as /s option, but will keep the resultset generated by the SQL function.
-/if: Optional, keep all the intermediate resultset, but remove the resultset generated by the SQL function
+/simpleShowRelationTypes: Optional, simple output with specified relation types, support fdd, fdr.
+/withTemporaryTable: Optional, determine whether to output the temporary tables in simple output, default is false.
+/i: Optional, the same as /s option, but will keep the result set generated by the SQL function, this parameter will have the same effect as /s /topselectlist + keep result set generated by the sql function.
+/showResultSetTypes: Optional. This option is valid only when /s or /i option is used, and is used to specify the result set types to be output, separate with commas, result set types contains array,  struct, result_of, cte, insert_select, update_select, merge_update, merge_insert, output, update_set,
+	pivot_table, unpivot_table, alias, rs, function, case_when
+/showVariable: Optional. This option is valid only when /s or /i option is used, and is used to reserve all the variables and cursors.
+/showCursor: Optional. This option is valid only when /s or /i option is used, and is used to reserve all the cursors.
+/showSynonym: Optional. This option is valid only when /s or /i option is used, and is used to reserve all the synonyms.
+/removeResultSetTypes: Optional. This option is used to remove the specified result set types to be output, separate with commas, result set types contains array,  struct, result_of, cte, insert_select, update_select, merge_update, merge_insert, output, update_set,
+	pivot_table, unpivot_table, alias, rs, function, case_when
+/removeVariable: Optional. This option is remove all the variables and cursors.
+/removeCursor: Optional. This option is remove all the cursors.
+/removeUnusedSynonym: Optional. This option is remove all the unused synonym.
+/if: Optional, keep all the intermediate result set, but remove the result set generated by the SQL function
 /ic: Optional, ignore the coordinates in the output.
 /lof: Option, link orphan column to the first table.
 /traceView: Optional, only output the name of source tables and views, ignore all intermediate data.
 /text: Optional, this option is valid only /s is used, output the column dependency in text mode.
 /json: Optional, print the json format output.
+/graph: Optional, print the json format output with graph information.
 /stat: Optional, output the analysis statistic information.
-/tableLineage [/csv]: Optional, output table level lineage.
+/tableLineage [/csv /delimiter]: Optional, output table level lineage.
 /csv: Optional, output column level lineage in csv format.
-/t: Option, set the database type. Support access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,
+/csv-simple: Optional, output column level lineage in a simplified csv format (source schema.table.column, target schema.table.column, relation type), excluding records that reference the synthetic RelationRows column.
+/delimiter: Optional, the delimiter of output column level lineage in csv format.
+/t: Option, set the database type. Support access,bigquery,couchbase,dax,db2,gaussdb,greenplum,hana,hive,impala,informix,mdx,mssql,
 sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,
 sybase,teradata,soql,vertica
 , the default value is oracle
@@ -94,121 +157,32 @@ sybase,teradata,soql,vertica
 /defaultDatabase: Optional, specify the default schema.
 /defaultSchema: Optional, specify the default schema.
 /showImplicitSchema: Optional, show implicit schema.
+/showConstant: Optional, show constant table.
+/treatArgumentsInCountFunctionAsDirectDataflow: Optional, treat arguments in count function as direct dataflow. Default is false.
+/showER: Optional, show entity relationship.
 /fromdb: Optional, specifies the database connection parameters.
 /exportonly: Optional, just export metadata.json, no further data analysis.
 /metadataoutput: Optional, specifies the metadata output directory and file name.
+/showCaseWhenAsIndirect: Optional, treat CASE WHEN conditions as indirect dataflow. Default is false.
 /filterRelationTypes: Optional, specify the relation types to be output, support fdd, fdr, join, call, er, multiple relation types separated by commas
 /lv: Optional, output lineage for visualize
+/traceTablePosition: Optional, trace all table positions. Default is false.
 ```
 
+## Resolving ambiguous columns
 
-Here is the list of available database after /t option:
-```
-access,bigquery,couchbase,dax,db2,greenplum,hana,hive,impala,informix,mdx,mssql,
-sqlserver,mysql,netezza,odbc,openedge,oracle,postgresql,postgres,redshift,snowflake,
-sybase,teradata,soql,vertica
-```
-
-## 1. Binary version
-https://github.com/sqlparser/gsp_demo_java/releases/ 
-> update date: 2022/11/01
-
-In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
-	
-## 2. Analyze data lineage from SQL files	
-Please use `/f` parameter to specify a single SQL file,
-or use `/d` parameter to specfify a directory that inculdes multiple SQL files.
-
-```
-java -jar gudusoft.dlineage.jar /t mssql /f path_to_sql_file
-```
-
-## 3. Analyze data lineage from a database
-The dlineage tool can connect to the database instance and analyze the metadata to generate the data lineage automatically.
-
-
-### 3.1 connect and analyze data lineage
-Please use `/fromdb` parameter to export metadta from the database.
-
-`/fromdb` parameter:
-
--dbVendor: Database type, Use colon to split dbVendor and version if specific version is required. (<dbVendor>:<version>, such as dbvmysql:5.7)
-
--host: Database host name (ip address or domain name)
-
--port: Port number
-
--db: Database name
-
--user: User name
-
--pwd: User password
-
--extractedDbsSchemas: Export metadata under the specific schema. Use comma to split if multiple schema required (such as <schema1>,<schema2>). We can use this flag to improve the export performance.
-
--excludedDbsSchemas:  Exclude metadata under the specific schema during the export. Use comma to split if multiple schema required (such as <schema1>,<schema2>). We can use this flag to improve the export performance.
-
--extractedViews: Export metadata under the specific view. Use comma to split if multiple views required (such as <view1>,<view2>). We can use this flag to improve the export performance.
-
-`/exportonly` just export metadata.json, no further data analysis.
-
-`/metadataoutput` specifies the metadata output directory and file name.
-
-for example, connect to an Oracle database and analzye the data lineage.
-
-- Oracle
-```
-java -jar gudusoft.dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /o oracle.xml
-```
-
-- SQL Server
-```
-java -jar gudusoft.dlineage.jar /t mssql /fromdb "-dbVendor dbvmssql -host 127.0.0.1 -port 1433 -db AdventureWorksDW2019 -user sa -pwd sa" /o sqlserver.xml
-```
-
-- MySQL
-```
-java -jar gudusoft.dlineage.jar /t mysql /fromdb "-dbVendor dbvmysql -host 127.0.0.1 -port 3306 -db employees -user mysqluser -pwd mysqlpwd" /o mysql.xml
-```
-
-- PostgreSQL
-```
-java -jar gudusoft.dlineage.jar /t postgresql /fromdb "-dbVendor dbvpostgresql -host 127.0.0.1 -port 5432 -db kingland -user pguser -pwd pgpwd" /o pg.xml
-```
-
-
-### 3.2  Export the meatadata only 
-
-You can also export the meatadata from database and analzye the metadata in two steps:
-
-- Only export the metadta
-```
-java -jar gudusoft.dlineage.jar /fromdb "-dbVendor dbvoracle -host 127.0.0.1 -port 1521 -db orcl -user scott -pwd tiger" /exportonly  /metadataoutput metadata.json
-```
-
-the metadata.json exported in this step can also be used with `/env` paramter to resolve the ambiguous columns problem in SQL query.
-
-- analyze the metadta that generated in the previous step
-
-```
-java -jar gudusoft.dlineage.jar /t oracle /f metadata.json
-```
-
-
-
-## 4. Resolve the ambiguous columns in SQL query
 ```sql
 select ename
 from emp, dept
 where emp.deptid = dept.id
 ```
 
-column `ename` in the first line is not qualified by table name `emp`, so it’s ambiguous to know which table this column belongs to?
+`ename` is not qualified, so on its own the analyzer cannot know which table it
+belongs to. There are two ways to tell it.
 
-### solution 1, provides create table DDL 
+### Solution 1 — put the DDL in the same script
 
-Put the following DDL before the above SQL statement in the same SQL file.
-the column `ename` will be linked to the table `emp` correctly.
+Prepend the `CREATE TABLE` statements and `ename` links to `emp` correctly:
 
 ```sql
 create table emp(
@@ -223,53 +197,59 @@ create table dept(
 );
 ```
 
-### solution 2: provide metadata exported from database
-Since dlineage v2.2.0 (2022/7/21), This dlineage tool supports `/env` parameter to accept a metadata json file
-which includes the metadata exported from a database.
+Watch the 10,000-byte trial limit: DDL plus query counts as one script.
 
-By providing metadata.json that includes the metadata, column `ename` should be linked to the table `emp` correctly.
+### Solution 2 — supply metadata with `/env`
 
-You can use `/env` to specify a metadata.json like this:
-
-```
-java -jar gudusoft.dlineage.jar /t oracle /f path_to_sql_file /env metadata.json
+```bash
+java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     /t oracle /f path_to_sql_file /env metadata.json
 ```
 
-You can always extract metadata from the database use the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) tool.
+The same metadata JSON also drives the `columninspect` demo, which has a
+runnable pair checked in at `samples/columninspect/`. Note that `/fromdb`
+cannot produce this file here (see above); export it with a licensed build or
+the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases)
+tool.
 
-## 5. Relationship between this demo and the setting choices in SQLFlow
+## How the options map to SQLFlow's settings
+
 ![sqlflow setting](./sqlflow-settings.png)
 
-### direct dataflow (fdd), indirect dataflow (fdr)
-In this demo, there is no corresponding parameter. 
-You must filter out the relation types that you don't require because this dataflowAnalyzer demo will generate data lineage with all relation types, including fdd, fdr, join, and call.
+### Direct dataflow (fdd), indirect dataflow (fdr)
 
-### args in count function
-related arg: `/treatArgumentsInCountFunctionAsDirectDataflow`
+No corresponding option: this demo emits every relation type — fdd, fdr, join
+and call. Use `/filterRelationTypes` to narrow the output.
 
-### show intermediate recordset, show function
-The settings for "show intermediate recordset" and "show function" have no corresponding arguments in the demo
-But by using those args, you can get the same outcome:
+### Arguments in the count function
 
-- don't specify any related args, this will output the same result as if you set `show intermediate recordset = true` and set `show function = true`
-- /if, this will output the same result as if you set `show intermediate recordset = true` and set `show function = false`
-- /i,  this will output the same result as if you set `show intermediate recordset = false` and set `show function = true` 
-- /topselectlist, this will output the same result as if you set `show intermediate recordset = false` and set `show function = false` 
+`/treatArgumentsInCountFunctionAsDirectDataflow`
 
-### show constant
-/showConstant
+### Show intermediate recordset, show function
 
-### show transform
-/transform /coor
+No single option, but the combinations cover it:
 
+| options | equivalent settings |
+|---|---|
+| *(none)* | show intermediate recordset = true, show function = true |
+| `/if` | show intermediate recordset = true, show function = false |
+| `/i` | show intermediate recordset = false, show function = true |
+| `/topselectlist` | show intermediate recordset = false, show function = false |
 
-## 6. Links
-- [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
+### Show constant
 
-## 8、List of Supported dbVendors
+`/showConstant`
 
-| dbVendor      | databases     |
-|---------------| ---------- |
+### Show transform
+
+`/transform /coor`
+
+## Supported `dbVendor` values
+
+Used in the `dbVendor` field of a metadata JSON, and by SQLFlow itself:
+
+| dbVendor      | database   |
+|---------------|------------|
 | dbvoracle     | oracle     |
 | dbvredshift   | redshift   |
 | dbvpostgresql | postgresql |
@@ -282,4 +262,8 @@ But by using those args, you can get the same outcome:
 | dbvteradata   | teradata   |
 | dbvhive       | hive       |
 | dbvimpala     | impala     |
-| dbvdb2        | db2     |
+| dbvdb2        | db2        |
+
+## Links
+
+- [First version, 2017-8](https://github.com/sqlparser/wings/issues/494)
