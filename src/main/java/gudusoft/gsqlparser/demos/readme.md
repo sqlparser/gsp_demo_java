@@ -1,148 +1,58 @@
-## GsqlParser Use Guide
+# The demo programs
 
-### 一、Script running mode
+One directory per topic — syntax checking, formatting, lineage, AST traversal,
+stored-procedure analysis, rewriting, dialect translation, and so on. Most
+carry their own `readme.md`. Start from [the root README](../../../../../../README.md)
+for the full tour; this page is only about how to run what is in here.
 
-#### 1.Example Modify the java environment directory in setenv/setenv.bat
+**The directory path under `src/main/java/` is the package.** Every class here
+is `gudusoft.gsqlparser.demos.<demo>.<Class>`, so you can read the
+`-Dexec.mainClass` value straight off the file's location without opening it.
+
+## Maven (any platform)
+
+Nothing to edit first. The parser and every other dependency resolve from
+Maven, so a fresh clone runs a demo directly:
 
 ```bash
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_201
+mvn package -DskipTests
+
+mvn -q exec:java \
+    -Dexec.mainClass=gudusoft.gsqlparser.demos.checksyntax.OfflineSyntaxCheck \
+    -Dexec.args="/f samples/checksyntax/valid-mssql.sql /t mssql"
 ```
 
-#### 2.Compile Class
-eg：run the script `src/main/java/demos/checksyntax/compile_checksyntax.bat`
+Argument conventions differ per demo — `checksyntax` takes `/f <file> /t <vendor>`,
+`formatsql` takes a bare filename. **Run a demo with no arguments to see its
+usage line.** Sample SQL lives in `samples/` at the repository root.
+
+The one demo that does not run this way is `dlineage/DataFlowAnalyzer`: it
+marshals its output with JAXB, which collides with `exec:java`'s classloader.
+Run it from the packaged uber jar instead — see
+[its readme](./dlineage/readme.md).
+
+## Windows `.bat` scripts
+
+The original no-Maven workflow, still maintained and exercised in CI on
+`windows-latest`. Each demo directory has a `compile_<demo>.bat` and a
+`run_<demo>.bat` — 39 and 50 of them respectively:
 
 ```
-compile_checksyntax.bat
+src\main\java\gudusoft\gsqlparser\demos\checksyntax\compile_checksyntax.bat
+src\main\java\gudusoft\gsqlparser\demos\checksyntax\run_checksyntax.bat /f C:\data.sql /t oracle
 ```
 
-#### 3.Run Class
-eg：run the script `src/main/java/demos/analyzeview/run_analyzeview.bat`
+`setenv\setenv.bat` bootstraps itself: it keeps an existing `JAVA_HOME`, and
+when `external_lib\` holds no parser it calls `setenv\fetch-parser.bat`, which
+runs `mvn dependency:copy-dependencies` to populate it. So Maven is needed once,
+to fetch jars; after that the scripts are plain `javac`/`java`. No version is
+named in any script — they read `pom.xml`.
 
-```
-run_checksyntax.bat /f C:\data.sql /t oracle
-/f sql file path
-/t databse type
-/d Output results folder address
-```
-
-### 二、Maven running mode
-
-#### 1.modify the pom.xml
-
-##### 1.1 Comment parent project
-
-```xml
-<!--  <parent>-->
-<!--        <groupId>gudusoft</groupId>-->
-<!--        <artifactId>gsp_java</artifactId>-->
-<!--        <version>1.0-SNAPSHOT</version>-->
-<!--    </parent>-->
-```
-
-##### 1.2 Annotated build configuration
-
-```xml
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>local</id>-->
-<!--            <activation>-->
-<!--                <activeByDefault>true</activeByDefault>-->
-<!--            </activation>-->
-<!--            <dependencies>-->
-<!--                <dependency>-->
-<!--                    <groupId>gudusoft</groupId>-->
-<!--                    <artifactId>gsqlparser</artifactId>-->
-<!--                    <version>${gsp.core.version}</version>-->
-<!--                </dependency>-->
-<!--            </dependencies>-->
-<!--        </profile>-->
-<!--        <profile>-->
-<!--            <id>remote</id>-->
-<!--            <dependencies>-->
-<!--                <dependency>-->
-<!--                    <groupId>gudusoft</groupId>-->
-<!--                    <artifactId>gsqlparser</artifactId>-->
-<!--                    <version>${gsp.core.version}</version>-->
-<!--                </dependency>-->
-<!--            </dependencies>-->
-<!--        </profile>-->
-<!--    </profiles>-->
-```
-
-##### 1.3 Change the dependent jar package directory from lib to external_lib
-
-```xml
-  <dependency>
-            <groupId>org.simpleframework</groupId>
-            <artifactId>simple-xml</artifactId>
-            <version>2.6.2</version>
-            <scope>system</scope>
-<!--    Original path：  <systemPath>${project.basedir}/external_lib/simple-xml-2.6.2.jar</systemPath>  -->
-            <systemPath>${project.basedir}/external_lib/simple-xml-2.6.2.jar</systemPath>
-        </dependency>
-
-<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.41</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/external_lib/fastjson-1.2.41.jar</systemPath>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.junrar/junrar -->
-    <dependency>
-        <groupId>com.github.junrar</groupId>
-        <artifactId>junrar</artifactId>
-        <version>0.7</version>
-        <scope>system</scope>
-        <systemPath>${project.basedir}/external_lib/junrar-0.7.jar</systemPath>
-    </dependency>
-
-    <!-- https://mvnrepository.com/artifact/tk.pratanumandal/expr4j -->
-    <dependency>
-        <groupId>tk.pratanumandal</groupId>
-        <artifactId>expr4j</artifactId>
-        <version>0.0.3</version>
-                <scope>system</scope>
-        <systemPath>${project.basedir}/external_lib/expr4j.jar</systemPath>
-    </dependency>
-<!-- https://mvnrepository.com/artifact/org.jdom/jdom -->
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-            <version>1.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/external_lib/jdom.jar</systemPath>
-        </dependency>
-
-
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>exporter</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/external_lib/sqlflow-exporter.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>sqlflow</groupId>
-            <artifactId>library</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/external_lib/sqlflow-library.jar</systemPath>
-        </dependency>
-```
-
-##### 1.4  Added gsqlparser dependency, which is in the lib path
-
-```xml
-<dependency>
-    <groupId>sqlflow</groupId>
-    <artifactId>gsqlparser</artifactId>
-    <version>3.0.1.5</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/gudusoft.gsqlparser-3.0.1.5.jar</systemPath>
-</dependency>
-```
-
-##### 2.Run
-Execute each demo class directly
+> This page used to describe a third route: commenting out a `<parent>` block,
+> switching a list of `system`-scope dependencies to `external_lib\`, and adding
+> a vendored `lib/gudusoft.gsqlparser-3.0.1.5.jar`. None of that applies. The
+> private parent POM, the `system` scopes, the vendored parser and the
+> `sqlflow-*` jars were all removed during the 2026-07 and 2026-08 cleanups, and
+> the `.bat` paths it quoted pointed into a second `demos` package root that no
+> longer exists. Dependencies are ordinary Maven coordinates now; there
+> is nothing to edit before building.

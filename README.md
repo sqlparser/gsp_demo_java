@@ -407,6 +407,7 @@ than only building them.
 |---|---|
 | Parser version consistency | `set-parser-version.sh --check` across all four POMs |
 | The pre-commit hook | `test-pre-commit-hook.sh`: a drifting bump is refused in a throwaway clone |
+| Documentation | `check-stale-docs.sh`: no readme names `pom_dlineage.xml`, `gudusoft.dlineage.jar` or the old `demos` package root; `--self-test` first, so a check that matches nothing cannot pass as a clean repo |
 | Build and test | JDK 8 and 21; 156 tests, and a run that skipped everything fails |
 | Demo smoke test | `checksyntax` against known SQL |
 | Standalone lineage jar | `smoke-dlineage-jar.sh` on JDK 8 and 21 — asserts on **output**, in JSON *and* XML |
