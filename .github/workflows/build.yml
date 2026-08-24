@@ -56,6 +56,23 @@ jobs:
         if: matrix.java == '21'
         run: .github/scripts/test-pre-commit-hook.sh
 
+      # Prose does not compile, so a readme can name a file that was deleted two
+      # releases ago and every build stays green. The lineage demo's own readme
+      # did exactly that: it told visitors the demo "cannot be built", handed
+      # them `mvn -f pom_dlineage.xml package` for a POM removed on 2026-07-28
+      # and `java -jar gudusoft.dlineage.jar` for a jar this build has never
+      # produced. Someone evaluating GSP for the first time reasonably concluded
+      # the product was broken.
+      #
+      # --self-test runs first and on purpose: a fixed-string check that matches
+      # nothing looks identical to a clean repository.
+      - name: Documentation does not point at deleted things
+        if: matrix.java == '21'
+        run: |
+          .github/scripts/check-stale-docs.sh --self-test
+          echo
+          .github/scripts/check-stale-docs.sh
+
       - name: Build
         run: mvn -B package -DskipTests
 
