@@ -4,9 +4,10 @@
 # it down.
 #
 # The version lives in four files. The root build declares it as a
-# ${gsp.core.version} property, and the three connector/ modules hardcode the
-# version in their gsqlparser dependency, because they are separate builds with
-# no parent to inherit a property from. Nothing made them agree, so they could
+# ${gsp.core.version} property, and the three licensed-only/ connector modules
+# hardcode the version in their gsqlparser dependency, because they are separate
+# builds with no parent to inherit a property from. (They lived under
+# connector/ until 2026-08-24; see licensed-only/README.md for why they moved.) Nothing made them agree, so they could
 # drift apart silently -- and a bump meant four hand edits, which is most of why
 # bumping felt expensive.
 #
@@ -61,8 +62,8 @@ TARGETS = [
 ]
 for mod in ("oracleConnector", "snowflakeConnector", "sqlServerConnector"):
     TARGETS.append((
-        "connector/%s/pom.xml" % mod,
-        "connector/%s dependency" % mod,
+        "licensed-only/%s/pom.xml" % mod,
+        "licensed-only/%s dependency" % mod,
         # Anchor on the gsqlparser dependency so we never touch the JDBC
         # driver's <version> sitting a few lines below it.
         r"(?s)(<artifactId>gsqlparser</artifactId>\s*<version>)([^<]+)(</version>)",

@@ -240,7 +240,7 @@ jobs:
             --title "Bump the parser from $pinned to $NEW" \
             --body "\`$NEW\` is the newest release on sqlparser.com. Tonight's nightly ran it through the same checks the pinned \`$pinned\` gets, and it passed all of them: the full test suite with no failures, every demo starting, and every case in \`.github/scripts/demo-cases.tsv\` producing its expected output.
 
-          This touches the four places the version is written -- \`pom.xml\` and the three \`connector/*/pom.xml\` -- via \`.github/scripts/set-parser-version.sh\`, so they cannot drift apart.
+          This touches the four places the version is written -- \`pom.xml\` and the three \`licensed-only/*/pom.xml\` -- via \`.github/scripts/set-parser-version.sh\`, so they cannot drift apart.
 
           Merge to move the demos to \`$NEW\`. Close to stay on \`$pinned\`; the nightly will go on testing \`$NEW\` and will not reopen this until a newer release appears.
 

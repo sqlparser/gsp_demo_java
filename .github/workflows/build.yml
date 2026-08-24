@@ -73,6 +73,17 @@ jobs:
           echo
           .github/scripts/check-stale-docs.sh
 
+      # The three licensed-only/ modules cannot compile against the public
+      # trial parser, and used to say so only in javac's words -- "cannot find
+      # symbol", or worse, a dependency-resolution error about a JDBC jar
+      # nobody had. An evaluator read that as a broken library. Each POM now
+      # stops at validate with a message naming the licensing boundary, and the
+      # message is the feature, so this asserts on the message: failing for the
+      # old confusing reason also exits non-zero.
+      - name: Licensed-only modules refuse the trial build, with a reason
+        if: matrix.java == '21'
+        run: .github/scripts/check-licensed-only-guard.sh
+
       - name: Build
         run: mvn -B package -DskipTests
 

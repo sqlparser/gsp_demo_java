@@ -146,14 +146,23 @@ any individual demo.
 
 `samples/` holds sample `.sql` files to feed them.
 
-### Demos that connect to a database
+### Demos that connect to a database — licensed parser only
 
-`connector/{oracleConnector,snowflakeConnector,sqlServerConnector}/` are
+`licensed-only/{oracleConnector,snowflakeConnector,sqlServerConnector}/` are
 separate, independently built Maven modules showing JDBC-connected metadata
-extraction. They are **not** part of `mvn package` or `mvn test` at the root;
-build each on its own. Each module's `lib/` holds only a readme — you download
-the JDBC driver yourself, and the version in that module's `pom.xml` tells you
-which.
+extraction. **They cannot be built with the trial parser**, which does not ship
+`gudusoft.gsqlparser.sqlenv.T*SQLDataSource`; each stops at `validate` with a
+message saying so, and `-Plicensed` turns that guard off once you have a
+licensed parser. They are not part of `mvn package` or `mvn test` at the root.
+See [`licensed-only/README.md`](licensed-only/README.md).
+
+They sat in `connector/` until 2026-08-24, where they read as part of the
+ordinary demo set: a first-time evaluation started there, met `cannot find
+symbol`, and concluded the library did not compile.
+
+**On the trial parser, `columninspect` is the thing to run instead.** It does
+the same metadata-aware column resolution from a JSON catalog export rather
+than a live connection, and `samples/columninspect/` has a runnable pair.
 
 ## Rewriting SQL through the parse tree
 
@@ -217,9 +226,19 @@ version (e.g. `4.1.9`) does not necessarily match the one in the release notes.
 
 > **The trial build refuses input larger than 10,000 bytes**, reporting
 > `trial version can only process query with size of at most 10000 bytes`.
+> The limit is on a single parse, not on total throughput.
+>
 > Every demo here works within that except `scriptwriter`, whose built-in query
 > is ~49 KB on purpose — give it your own smaller file, or use a licensed
-> parser. The limit is on a single parse, not on total throughput.
+> parser. **16 of the 89 `.sql` files under `samples/` are also over the
+> limit**, all of them vendor schema dumps under `samples/dlineageBasic/`
+> (10,378 to 99,139 bytes). Those are for licensed evaluation; the rejection
+> arrives as an `<error>` inside otherwise-normal output, which reads as "no
+> lineage found" rather than as a licence limit. For schema-scale lineage on
+> the trial jar use
+> [`samples/dlineageBasic/oracle/hr_mini/`](samples/dlineageBasic/oracle/hr_mini/readme.md)
+> — 5,212 bytes, 120 relationships, added for that purpose and size-checked in
+> CI.
 
 ### Published versions are kept; one batch was recalled in July 2026
 
@@ -265,7 +284,7 @@ One command, never by hand:
 
 The version lives in **four** files — the `${gsp.core.version}` property in
 `pom.xml`, plus a hardcoded `<version>` in each of the three
-`connector/*/pom.xml`, which are separate builds with no parent to inherit a
+`licensed-only/*/pom.xml`, which are separate builds with no parent to inherit a
 property from. Both workflows run `--check`, so a missed file is a red build
 rather than a connector quietly compiling against an older parser.
 
@@ -314,7 +333,7 @@ src/main/java/gudusoft/gsqlparser/demos/<demo>/   the demos, one dir per topic
 src/main/resources/                               classpath resources (one file)
 src/test/java/gudusoft/gsqlparser/                tests, all exercising demos
 samples/                                          sample .sql for the demos
-connector/<vendor>Connector/                      separate JDBC-connected modules
+licensed-only/<vendor>Connector/                  JDBC modules, licensed parser only
 lib-repo/                                         in-project Maven repository
 setenv/ + per-demo *.bat                          the Windows route
 .github/scripts/                                  CI checks, all runnable locally
@@ -408,9 +427,10 @@ than only building them.
 | Parser version consistency | `set-parser-version.sh --check` across all four POMs |
 | The pre-commit hook | `test-pre-commit-hook.sh`: a drifting bump is refused in a throwaway clone |
 | Documentation | `check-stale-docs.sh`: no readme names `pom_dlineage.xml`, `gudusoft.dlineage.jar` or the old `demos` package root; `--self-test` first, so a check that matches nothing cannot pass as a clean repo |
+| Licensed-only guard | `check-licensed-only-guard.sh`: each `licensed-only/*` module stops at `validate` **with the licence message**, not with `cannot find symbol` |
 | Build and test | JDK 8 and 21; 156 tests, and a run that skipped everything fails |
 | Demo smoke test | `checksyntax` against known SQL |
-| Standalone lineage jar | `smoke-dlineage-jar.sh` on JDK 8 and 21 — asserts on **output**, in JSON *and* XML |
+| Standalone lineage jar | `smoke-dlineage-jar.sh` on JDK 8 and 21 — asserts on **output**, in JSON *and* XML, and that `hr_mini.sql` stays under the trial parser's 10,000-byte cap |
 | Windows `.bat` | `windows-latest`: bootstrap, 39 compile scripts, 50 run scripts, 4 driven with real arguments |
 
 `.github/workflows/nightly.yml` — at 03:17 UTC, because the parser is the moving
@@ -476,7 +496,7 @@ drive with arguments.
 - **Don't commit jars**; add dependencies by coordinate.
 - **Don't add a live-JDBC path to a demo** under `src/main/java`. It can't run
   in CI, and it is what got two demos excluded from the build for years. The
-  `connector/*` modules are where database connections belong.
+  `licensed-only/*` modules are where database connections belong.
 - **Don't add parser tests here**; they belong in `gsp_java_core`.
 
 `master` tracks released GSP versions from
