@@ -21,7 +21,7 @@
 #
 # It checks the *index*, not the working tree, because the index is what you
 # are about to commit. Staging pom.xml while leaving the matching
-# connector/*/pom.xml edits unstaged is precisely the drift being guarded
+# licensed-only/*/pom.xml edits unstaged is precisely the drift being guarded
 # against, and a working-tree check would call that clean.
 
 set -uo pipefail
@@ -77,7 +77,7 @@ pre-commit: the parser version disagrees across the POMs you are committing.
   git add -u && git commit                          then commit again
 
 Never edit a version by hand: it is written in pom.xml and in each of the three
-connector/*/pom.xml, which are separate builds with no parent to inherit it.
+licensed-only/*/pom.xml, which are separate builds with no parent to inherit it.
 In practice you should not be editing one at all -- the nightly tests the newest
 release and opens a pre-verified bump PR.
 

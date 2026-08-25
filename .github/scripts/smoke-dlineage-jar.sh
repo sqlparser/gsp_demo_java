@@ -96,4 +96,43 @@ if not rel:
 print("ok: XML output, %d relationships" % len(rel))
 PY
 
+# --- a whole schema, under the trial cap -----------------------------------
+# samples/dlineage/demo.sql is 366 bytes. Every real schema dump under
+# samples/dlineageBasic/ is over the trial parser's 10,000-byte limit, so a
+# visitor who tried "lineage on a real schema" got a licence error and no
+# lineage. hr_mini exists to be the one that fits, which makes its size the
+# thing worth guarding: grow it past the cap and the demo silently stops
+# working for every trial user, while the tool goes on exiting 0.
+SCHEMA="samples/dlineageBasic/oracle/hr_mini/hr_mini.sql"
+CAP=10000
+
+[ -f "$SCHEMA" ] || fail "$SCHEMA is missing"
+
+bytes=$(wc -c <"$SCHEMA")
+if [ "$bytes" -ge "$CAP" ]; then
+    fail "$SCHEMA is $bytes bytes, at or over the trial parser's $CAP-byte limit; it exists precisely so schema-scale lineage is runnable on the trial jar. Shrink it, or put the addition in one of the licensed-only dumps."
+fi
+echo "ok: $SCHEMA is $bytes bytes, under the $CAP-byte trial limit"
+
+java -jar "$JAR" /f "$SCHEMA" /t oracle /o "$OUT/schema.json" /json
+
+[ -s "$OUT/schema.json" ] || fail "schema.json is empty or missing"
+
+python3 - "$OUT/schema.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+rel = d.get("relationships") or []
+if not rel:
+    sys.exit("hr_mini parsed but produced no relationships")
+# A licence rejection is not an exception: the tool reports it as an error
+# inside an otherwise well-formed document and exits 0, which reads as
+# "no lineage found" unless something goes looking for it.
+if "trial version can only process" in json.dumps(d):
+    sys.exit("hr_mini hit the trial size limit; it is no longer trial-evaluable")
+if len(rel) < 50:
+    sys.exit("hr_mini produced only %d relationships; it produced 120 when it "
+             "was added, so the schema or the analyzer has regressed" % len(rel))
+print("ok: schema-scale lineage, %d relationships from hr_mini" % len(rel))
+PY
+
 echo "ok: the standalone dlineage jar runs and produces lineage in both formats"

@@ -83,28 +83,40 @@ an `<error>` element, which is easy to mistake for "no lineage found".
 `samples/dlineage/demo.sql` is 366 bytes and works. **16 of the 89 `.sql` files
 under `samples/` are over the limit, and every one of them is a vendor schema
 dump under `samples/dlineageBasic/`** — `hr_cre.sql`, `sakila-schema.sql`,
-`instawdbdw.sql` and the rest, from 10,378 up to 99,139 bytes. Pointing this
-demo at one of those to "try lineage on a real schema" produces the licence
-error above, not lineage. Those need a licensed parser.
+`instawdbdw.sql` and the rest, from 10,378 up to 99,139 bytes. Those need a
+licensed parser.
 
-## `/fromdb` does not work in this repository
+For schema-scale lineage on the trial jar, use
+[`samples/dlineageBasic/oracle/hr_mini/`](../../../../../../../samples/dlineageBasic/oracle/hr_mini/readme.md),
+added for exactly this reason — 5,212 bytes, and 120 relationships:
 
-The `/fromdb`, `/exportonly` and `/metadataoutput` flags are still parsed, and
-the option list still describes them, but **the export itself is gone**: the
-call to `SqlflowIngester.export(...)` in `DataFlowAnalyzer.java` is commented
-out and that class has been deleted from this repository. Run it and you get an
-empty document, having written no `metadata.json`:
-
-```console
-$ java -jar ...-dlineage.jar /t oracle /fromdb "-dbVendor dbvoracle -host ..." /o out.xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<dlineage/>
+```bash
+java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
+     /f samples/dlineageBasic/oracle/hr_mini/hr_mini.sql /t oracle /json
 ```
 
-Live JDBC catalog extraction also needs `gudusoft.gsqlparser.sqlenv.T*SQLDataSource`,
-which the public trial jar does not ship. To feed real metadata to this demo,
-export it elsewhere and pass the JSON with `/env` — see "Resolving ambiguous
-columns" below.
+It carries staging tables, a view over a `LEFT JOIN`, a CTE, aggregates, `CASE
+WHEN` and a correlated subquery, with all its DDL in the file so every column
+resolves. CI runs it and fails if it ever crosses the 10,000-byte line.
+
+## There is no `/fromdb`
+
+It was removed on 2026-08-24, along with `/exportonly` and `/metadataoutput`.
+The flags parsed and then did nothing: the call they existed for,
+`SqlflowIngester.export(...)`, had been commented out and that class deleted, so
+the tool emitted an empty `<dlineage/>` and wrote no `metadata.json` while this
+readme taught the feature in two sections with four vendor examples. Passing
+`/fromdb` now gets the same answer as passing nothing:
+
+```
+Please specify a sql file path or directory path to analyze dlineage.
+```
+
+Live JDBC catalog extraction needs `gudusoft.gsqlparser.sqlenv.T*SQLDataSource`,
+which the public trial parser does not ship — see
+[`licensed-only/`](../../../../../../../licensed-only/README.md). To give this
+demo real metadata, export it elsewhere and pass the JSON with `/env`; see
+"Resolving ambiguous columns" below.
 
 ## Options
 
@@ -160,9 +172,6 @@ sybase,teradata,soql,vertica
 /showConstant: Optional, show constant table.
 /treatArgumentsInCountFunctionAsDirectDataflow: Optional, treat arguments in count function as direct dataflow. Default is false.
 /showER: Optional, show entity relationship.
-/fromdb: Optional, specifies the database connection parameters.
-/exportonly: Optional, just export metadata.json, no further data analysis.
-/metadataoutput: Optional, specifies the metadata output directory and file name.
 /showCaseWhenAsIndirect: Optional, treat CASE WHEN conditions as indirect dataflow. Default is false.
 /filterRelationTypes: Optional, specify the relation types to be output, support fdd, fdr, join, call, er, multiple relation types separated by commas
 /lv: Optional, output lineage for visualize
@@ -207,10 +216,9 @@ java -jar target/gsp_demo_java-1.0-SNAPSHOT-dlineage.jar \
 ```
 
 The same metadata JSON also drives the `columninspect` demo, which has a
-runnable pair checked in at `samples/columninspect/`. Note that `/fromdb`
-cannot produce this file here (see above); export it with a licensed build or
-the [sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases)
-tool.
+runnable pair checked in at `samples/columninspect/`. Nothing in this
+repository can produce the file — export it with a licensed build or the
+[sqlflow-ingester](https://github.com/sqlparser/sqlflow_public/releases) tool.
 
 ## How the options map to SQLFlow's settings
 

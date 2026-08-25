@@ -83,11 +83,6 @@ public class DataFlowAnalyzer {
 			System.out.println("/showConstant: Optional, show constant table.");
 			System.out.println("/treatArgumentsInCountFunctionAsDirectDataflow: Optional, treat arguments in count function as direct dataflow. Default is false.");
 			System.out.println("/showER: Optional, show entity relationship.");
-			//add by grq 2022.10.25 issue=I5X3KO
-			System.out.println("/fromdb: Optional, specifies the database connection parameters.");
-			System.out.println("/exportonly: Optional, just export metadata.json, no further data analysis.");
-			System.out.println("/metadataoutput: Optional, specifies the metadata output directory and file name.");
-			//end by grq
 			System.out.println("/showCaseWhenAsIndirect: Optional, treat CASE WHEN conditions as indirect dataflow. Default is false.");
 			System.out.println("/filterRelationTypes: Optional, specify the relation types to be output, support fdd, fdr, join, call, er, multiple relation types separated by commas");
 			System.out.println("/lv: Optional, output lineage for visualize");
@@ -125,21 +120,14 @@ public class DataFlowAnalyzer {
 				return;
 			}
 		}
-		//add by grq 2022.10.25 issue=I5X3KO
-		else if (argList.indexOf("/fromdb") != -1 && argList.size() > argList.indexOf("/fromdb") + 1){
-			String metadataoutput = "metadata.json";
-			if(argList.indexOf("/metadataoutput") != -1 && argList.size() > argList.indexOf("/metadataoutput") + 1){
-				metadataoutput = args[argList.indexOf("/metadataoutput") + 1];
-			}
-			// if(!SqlflowIngester.export(vendor.name(), args[argList.indexOf("/fromdb") + 1].split("\\s+"), metadataoutput)){
-			// 	return;
-			// }
-			if(argList.indexOf("/exportonly") != -1 ){
-				return;
-			}
-			sqlFiles = new File(metadataoutput );
-		}
-		//end by grq
+		// /fromdb, /exportonly and /metadataoutput were removed on 2026-08-24.
+		// They exported a database catalog through SqlflowIngester.export(...),
+		// a call that had been commented out and whose class was deleted from
+		// this repository, so the flags parsed and then did nothing: an empty
+		// <dlineage/> and no metadata.json, while the readme taught them in two
+		// sections with four vendor examples. Live JDBC extraction also needs
+		// gudusoft.gsqlparser.sqlenv.T*SQLDataSource, which the public trial
+		// parser does not ship. Pass metadata you exported elsewhere with /env.
 		else {
 			System.out.println("Please specify a sql file path or directory path to analyze dlineage.");
 			return;

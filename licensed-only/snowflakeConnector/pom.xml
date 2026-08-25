@@ -76,4 +76,54 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!-- These modules need a LICENSED parser. The public trial artifact this
+	     repository resolves does not ship gudusoft.gsqlparser.sqlenv.T*SQLDataSource
+	     or sqlenv.metadata.DDL, so the sources here cannot compile against it:
+	     javac reports "cannot find symbol", which reads as a broken repository
+	     rather than a licensing boundary. That is what a first-time evaluation
+	     concluded in August 2026.
+
+	     So the default build stops with an explanation instead. Build with
+	     -Plicensed once you have a licensed parser installed and the JDBC
+	     driver in lib/. -->
+	<profiles>
+		<profile>
+			<id>trial-guard</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<version>3.4.1</version>
+						<executions>
+							<execution>
+								<id>licensed-parser-required</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>enforce</goal>
+								</goals>
+								<configuration>
+									<rules>
+										<alwaysFail>
+											<message>This module needs a LICENSED General SQL Parser, not the public trial jar this repository resolves by default. The trial artifact does not ship gudusoft.gsqlparser.sqlenv.T*SQLDataSource, so these sources cannot compile against it. See licensed-only/README.md. To evaluate metadata-aware column resolution on the trial parser instead, run the columninspect demo with samples/columninspect/metadata.json. Once you have a licensed parser installed, build with -Plicensed.</message>
+										</alwaysFail>
+									</rules>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- Activating any profile switches off activeByDefault above, which is
+		     the whole mechanism: -Plicensed removes the guard. -->
+		<profile>
+			<id>licensed</id>
+		</profile>
+	</profiles>
+
 </project>
