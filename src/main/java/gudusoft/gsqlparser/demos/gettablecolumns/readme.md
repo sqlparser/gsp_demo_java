@@ -3,14 +3,13 @@ Get all table and columns involved in the input SQL script, tells how table is e
 the clause where the column located such as select list. join condition, shows the datatype if a column is defined in create table
 statement.
 
-For more detailed information about how this tools works, please check [this article](http://support.sqlparser.com/tutorials/gsp-demo-get-table-column/).
 
 ## Usage
-`java runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]`
+`runGetTableColumn [/f <path_to_sql_file>] [/t <database type>] [/<show option>]`
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn \
-    -Dexec.classpathScope=compile -Dexec.args="/f your.sql /t mssql"
+    -Dexec.args="/f your.sql /t mssql"
 ```
 
 > **This demo opens no database connection.** It used to accept `/h /P /u /p`
@@ -25,18 +24,19 @@ mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.gettablecolumns.runG
 > can still be resolved without a server, by handing the analyser a `TSQLEnv`:
 > build one in code, as the `TSQLServerEnv` / `THiveEnv` classes at the bottom
 > of `runGetTableColumn.java` do, or parse one from a metadata JSON file with
-> `gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser`. The standalone
-> "Binary version" below still ships the live-connection build.
+> `gudusoft.gsqlparser.sqlenv.parser.TJSONSQLEnvParser`.
 
-## Binary version
-https://www.gudusoft.com/gsp_java/gettablecolumn.zip
+## There is no separate binary
 
-In order to run this utility, please install Oracle JDK1.8 or higher on your computer correctly.
-Then, run this utility like this:
+This readme used to point at `https://www.gudusoft.com/gsp_java/gettablecolumn.zip`
+for a standalone build that carried the live-JDBC path. That URL returns **404**
+(checked 2026-08-25), and the JDBC flags it documented — `/h /P /u /p /db
+/schema` — were removed from this demo on 2026-07-28 along with the vendored
+`sqlflow-exporter.jar` behind them. Live catalog extraction needs
+`gudusoft.gsqlparser.sqlenv.T*SQLDataSource`, which the public trial parser does
+not ship; see [`licensed-only/`](../../../../../../../licensed-only/README.md).
 
-```
-java -jar gudusoft.gettablecolumns.jar /t mssql /f path_to_sql_file
-```
+Build from source instead — the demo is part of the ordinary build.
 
 ## Resolve the ambiguous columns in SQL query
 ```sql
@@ -82,31 +82,7 @@ version"** above, not to the build in this repository; they were removed here on
 /schema: Optional, specify the schema which is used for extracting metadata.
 ```
 
-When you use this feature, you should put the jdbc driver to your java classpath, and use java -cp command to load the jdbc driver jar.
-
-Currently, gsp able to connect to the following databases with the proper JDBC driver
-```
-azuresql, greenplum, mysql, netezza, oracle, postgresql, redshift, snowflake, sqlserver, teradata
-```
-
-
-### connect to SQL Server
-Tables are under this schema: `AdventureWorksDW2019/dbo`.
-
-```sh
-java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t mssql /h localhost /P 1433 /u root /p password /schema AdventureWorksDW2019/dbo /f sample.sql /showDetail
-```
-
-### connect to Oracle
-Tables are under `HR` schema and connect to database using `orcl` instance.
-
-```sh
-java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t oracle /h localhost /P 1521 /u root /p password /db orcl /schema HR /f sample.sql /showDetail
-```
-
-### connect to MySQL
-Tables are under `employees` database.
-
-```sh
-java -cp .;lib/*;external_lib/* gudusoft.gsqlparser.demos.gettablecolumns.runGetTableColumn /t mysql /h localhost /P 3306 /u root /p password /db employees /f sample.sql /showDetail
-```
+Those flags are gone from this build. To resolve ambiguous columns without a
+database, hand the analyser a `TSQLEnv` as described above, or use the
+`columninspect` demo, which reads the same metadata from a JSON file —
+`samples/columninspect/` has a runnable pair.

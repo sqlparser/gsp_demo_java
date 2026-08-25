@@ -431,7 +431,7 @@ than only building them.
 |---|---|
 | Parser version consistency | `set-parser-version.sh --check` across all four POMs |
 | The pre-commit hook | `test-pre-commit-hook.sh`: a drifting bump is refused in a throwaway clone |
-| Documentation | `check-stale-docs.sh`: no readme names `pom_dlineage.xml`, `gudusoft.dlineage.jar` or the old `demos` package root; `--self-test` first, so a check that matches nothing cannot pass as a clean repo |
+| Documentation | `check-stale-docs.sh`: no readme names a deleted thing (`pom_dlineage.xml`, `gudusoft.dlineage.jar`, the old `demos` package root, the Ant builds, two dead download hosts), and every relative link resolves; `--self-test` first, so a check that matches nothing cannot pass as a clean repo |
 | Licensed-only guard | `check-licensed-only-guard.sh`: each `licensed-only/*` module stops at `validate` **with the licence message**, not with `cannot find symbol` |
 | Build and test | JDK 8 and 21; 156 tests, and a run that skipped everything fails |
 | Demo smoke test | `checksyntax` against known SQL |

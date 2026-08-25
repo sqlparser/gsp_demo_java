@@ -26,7 +26,27 @@ WHERE  ID = (SELECT sales_person
 ```
 
 ## Usage
-`java formatsql sqlfile.sql`
+
+The demo takes a bare filename — no `/f`:
+
+```bash
+mvn package -DskipTests
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
+    -Dexec.args="your.sql"
+```
+
+Add `/tolerant` to keep formatting a file that contains statements the parser
+rejects. `samples/formatsql/mixed-valid-invalid.sql` is checked in for exactly
+that: without the flag it stops at the bad statement and tells you to add it,
+and with it you get the formatted output plus `Formatter status:
+OK_WITH_RECOVERY`.
+
+```bash
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.formatsql.formatsql \
+    -Dexec.args="samples/formatsql/mixed-valid-invalid.sql /tolerant"
+```
+
+`formatsqlInHtml` in this directory writes the same output as HTML.
 
 ## [Format options](formatoptions.md)
  
