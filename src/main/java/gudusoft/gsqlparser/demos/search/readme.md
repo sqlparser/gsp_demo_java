@@ -2,7 +2,7 @@
 Search the specified parse tree node name in sql files under the directory recursively . 
 The file name will be printed out if it include the specified parse tree node name. 
 
-Please check [toXML demo](./visitors) to find out more information on how to use the visitor pattern introduced in this library.
+Please check [toXML demo](../visitors/readme.md) to find out more information on how to use the visitor pattern introduced in this library.
 
 ## Usage
 `java searchClause parse_tree_node_name directory`

@@ -23,8 +23,7 @@ mvn package -DskipTests
 [Project layout](#project-layout) ·
 [Standalone lineage tool](#the-standalone-lineage-tool) ·
 [Windows .bat scripts](#the-windows-bat-scripts) · [CI](#what-ci-checks) ·
-[Contributing](#contributing) ·
-[Maintenance notes](docs/maintenance-notes.md)
+[Contributing](#contributing)
 
 ## What the library does
 
@@ -112,7 +111,9 @@ built-in Oracle query when no file is supplied.
 >
 > Instructions written before 2026-07-27 say things like
 > `demos.checksyntax.checksyntax`. Those need the `gudusoft.gsqlparser.` prefix
-> now; see [One package root](docs/maintenance-notes.md#one-package-root).
+> now. Before that rename this tree carried four package roots and 263 files
+> whose path contradicted their own `package` line; there is one root now, and
+> the path under `src/main/java/` *is* the package.
 
 If you have older notes telling you to add `-Dexec.classpathScope=compile`, you
 no longer need it. It worked around `system`-scope dependencies that are gone.
@@ -337,7 +338,6 @@ licensed-only/<vendor>Connector/                  JDBC modules, licensed parser 
 lib-repo/                                         in-project Maven repository
 setenv/ + per-demo *.bat                          the Windows route
 .github/scripts/                                  CI checks, all runnable locally
-docs/maintenance-notes.md                         why things are the way they are
 ```
 
 Four rules worth knowing before you add anything:
@@ -388,8 +388,13 @@ Check it yourself with `.github/scripts/smoke-dlineage-jar.sh`, which is what CI
 runs.
 
 > This replaced `pom_dlineage.xml`, a second POM that broke four separate times
-> without a build ever going red. If you are tempted to add a second POM, read
-> [that story first](docs/maintenance-notes.md#pom_dlineagexml-four-breakages-and-a-merge).
+> without a build ever going red: it pinned a parser jar predating the APIs its
+> own source used; it inherited from a private parent published nowhere, so
+> nobody outside Gudu could read it at all; its documented run command needed a
+> directory only the Windows route creates; and it lacked a JAXB dependency the
+> root POM already had, so it compiled and then died on every JDK past 8. Each
+> was invisible because CI only ever *built* it. Think hard before adding a
+> second POM.
 
 ## The Windows .bat scripts
 
@@ -489,9 +494,9 @@ drive with arguments.
 
 ## Contributing
 
-- **Wire new things into CI in the same commit.** Every bug in
-  [the maintenance notes](docs/maintenance-notes.md) shares one cause: something
-  nothing ran. Building is not running — assert on output, not exit status.
+- **Wire new things into CI in the same commit.** Nearly every bug this
+  repository has had shares one cause: something nothing ran. Building is not
+  running — assert on output, not exit status.
 - **One package root**, path equals package. Don't add a second.
 - **Don't commit jars**; add dependencies by coordinate.
 - **Don't add a live-JDBC path to a demo** under `src/main/java`. It can't run
@@ -509,5 +514,3 @@ compile against the parser `pom.xml` pins.
 - Java documentation: <https://docs.sqlparser.com>
 - Quick start: <https://docs.sqlparser.com/quick-start/>
 - .NET demos: <https://github.com/sqlparser/gsp_demo_dotnet>
-- [Maintenance notes](docs/maintenance-notes.md) — why this repository is shaped
-  the way it is, and the mistakes that are easy to make again

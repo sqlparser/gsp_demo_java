@@ -100,7 +100,7 @@ Please try your own SQL with [this online live demo](http://www.sqlparser.com/li
 
 ## Related projects
 If you need to handle more complicated SQL and get all dataflow information of table and columns,
-please check this demo [Dataflow Analyzer](../dlineage#dataflowanalyzer).
+please check this demo [Dataflow Analyzer](../../dlineage/readme.md).
 
 ## Changes
 -  [2012-01-11, first version](https://github.com/sqlparser/wings/issues/1)
