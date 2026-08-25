@@ -27,7 +27,7 @@ usage line.
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.visitors.SearchSelect \
-    -Dexec.args="q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="q.sql /t oracle"
 ```
 
 ```text

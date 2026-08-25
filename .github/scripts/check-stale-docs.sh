@@ -43,6 +43,7 @@ DEAD=(
     "build.xml"
     "ftp.gudusoft.com"
     "support.sqlparser.com"
+    "-Dexec.classpathScope"
 )
 
 WHY=(
@@ -54,6 +55,7 @@ WHY=(
     "both Ant builds were deleted on 2026-08-25; Maven and the .bat scripts are the two supported routes"
     "does not resolve (NXDOMAIN, checked 2026-08-25)"
     "does not resolve (NXDOMAIN, checked 2026-08-25)"
+    "unnecessary since the system-scope dependencies went; plain exec:java works"
 )
 
 # scan <file>...  -- prints every hit, returns 1 if there was any

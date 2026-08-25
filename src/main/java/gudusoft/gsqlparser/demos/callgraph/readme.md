@@ -12,7 +12,7 @@ java CallGraphDemo /f <path_to_sql_file> [/o <output file path>]
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.callgraph.CallGraphDemo \
-    -Dexec.args="/f samples/callgraph/sample_package.sql" -Dexec.classpathScope=compile
+    -Dexec.args="/f samples/callgraph/sample_package.sql"
 ```
 
 ```json

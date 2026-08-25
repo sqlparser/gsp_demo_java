@@ -18,7 +18,7 @@ SELECT * FROM ta WHERE ((a.x > 1));
 SQL
 
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.sqlrefactor.rmdupParenthesis \
-    -Dexec.args="paren.sql /t mssql" -Dexec.classpathScope=runtime
+    -Dexec.args="paren.sql /t mssql"
 ```
 
 ```

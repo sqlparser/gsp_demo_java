@@ -15,7 +15,7 @@ java SQLDetect <scriptfile> [/o <output file path>] [/t <database type>]
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.sqldetect.SQLDetect \
-    -Dexec.args="q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="q.sql /t oracle"
 ```
 
 ```text

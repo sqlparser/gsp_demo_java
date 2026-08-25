@@ -14,8 +14,7 @@ and `sqlrefactor`, which cleans up redundant parentheses.
 Takes no arguments; the query is inline in `removeCondition.java`.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.removeCondition.removeCondition \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.removeCondition.removeCondition
 ```
 
 ```text

@@ -17,7 +17,7 @@ java runSQLEnv [/f <path_to_sql_file>]
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.sqlenv.runSQLEnv \
-    -Dexec.args="/f schema.json" -Dexec.classpathScope=compile
+    -Dexec.args="/f schema.json"
 ```
 
 The `/f` argument is the **JSON metadata file**, not a SQL script. `TJsonSQLEnv`

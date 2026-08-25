@@ -19,7 +19,7 @@ a file.
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.sqltranslator.SqlTranslator \
-    -Dexec.args="q.sql oracle mysql" -Dexec.classpathScope=compile
+    -Dexec.args="q.sql oracle mysql"
 ```
 
 ```text

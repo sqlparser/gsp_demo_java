@@ -14,7 +14,7 @@ java findConstants <scriptfile> [/t <database type>]
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.findConstants.findConstants \
-    -Dexec.args="q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="q.sql /t oracle"
 ```
 
 For `SELECT a.id, b.name, 100 AS n FROM ta a JOIN tb b ON a.id = b.id WHERE a.x > 1 AND 'k' = 'k';`
