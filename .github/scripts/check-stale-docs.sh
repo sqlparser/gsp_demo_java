@@ -23,9 +23,15 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 # Documents whose subject IS the removal. They have to name what was removed.
+#
+# docs/maintenance-notes.md was the other entry until 2026-08-25, when it was
+# moved out of this repository -- it was maintainer history, not evaluation
+# material, and it sat in the README nav bar of a repo people clone to decide
+# whether to buy the parser. It also showed the cost of being on this list: it
+# was exempt from this check and had quietly drifted (a stale test count, and a
+# directory renamed out from under it). Keep this list short.
 ALLOW=(
     "README.md"
-    "docs/maintenance-notes.md"
 )
 
 DEAD=(
