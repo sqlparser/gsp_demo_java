@@ -70,6 +70,8 @@ public class JoinConverterTest extends TestCase {
                 "   and a.id=?\n" +
                 " )";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
+        // MantisBT 4685: a (+) in a single-table query block has no join
+        // partner, Oracle ignores it, and the converter now strips it.
         assertTrue(joinConverter.convert() == 0);
         assertTrue(joinConverter.getQuery()
                 .trim()
@@ -78,7 +80,7 @@ public class JoinConverterTest extends TestCase {
                         "FROM\n" +
                         " ai_course a\n" +
                         "WHERE\n" +
-                        " a.algorithmt(+) = (\n" +
+                        " a.algorithmt = (\n" +
                         "  SELECT\n" +
                         "   b.coverUrl\n" +
                         "  FROM\n" +
@@ -127,6 +129,8 @@ public class JoinConverterTest extends TestCase {
                 "   a.id=?\n" +
                 " )\n";
         JoinConverter joinConverter = new JoinConverter(sql, vendor);
+        // MantisBT 4685: outer (+) against a scalar subquery in a
+        // single-table block is a no-op and is stripped.
         assertTrue(joinConverter.convert() == 0);
         assertTrue(joinConverter.getQuery()
                 .trim()
@@ -135,7 +139,7 @@ public class JoinConverterTest extends TestCase {
                         "FROM\n" +
                         " ai_course a\n" +
                         "WHERE\n" +
-                        " a.algorithmt(+) = (\n" +
+                        " a.algorithmt = (\n" +
                         "  SELECT\n" +
                         "   b.coverUrl\n" +
                         "  FROM\n" +
@@ -437,13 +441,17 @@ public class JoinConverterTest extends TestCase {
                 + "       AND altname.grad_name_ind(+) = '*'";
 
         JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
-        assertTrue(converter.convert() == 1);
+        // MantisBT 4685: a table without any join condition is now CROSS
+        // JOINed (comma join + WHERE filters is equivalent), instead of
+        // failing with "This table has no join condition".
+        assertTrue(converter.convert() == 0);
         assertTrue(converter.getQuery()
                 .trim()
                 .equalsIgnoreCase("SELECT * \n" +
                         "FROM   summit.mstr m\n" +
                         "left outer join summit.alt_name altname on m.id = altname.id and altname.grad_name_ind = '*'\n" +
-                        "left outer join smmtccon.ccn_user ccu on m.id = ccu.id and 'N' = ccu.admin \n" +
+                        "left outer join smmtccon.ccn_user ccu on m.id = ccu.id and 'N' = ccu.admin\n" +
+                        "cross join uhelp.deg_coll deg \n" +
                         "          WHERE  m.id = ?"));
     }
 
@@ -693,6 +701,9 @@ public class JoinConverterTest extends TestCase {
                 "           , CHECK_ACT_DAY B";
 
         JoinConverter converter = new JoinConverter(sqltext, EDbVendor.dbvoracle);
+        // MantisBT 4685: CTE bodies are converted, and the same-table
+        // filter A.CHECK_SEQ(+) = A.MAX_CHECK_SEQ(+) now lands in the ON
+        // clause (leaving it in the WHERE would discard NULL-extended rows).
         assertTrue(converter.convert() == 0);
         assertTrue(converter.getQuery()
                 .trim()
@@ -710,9 +721,8 @@ public class JoinConverterTest extends TestCase {
                         "               , A.CHECK_DT\n" +
                         "               , TO_CHAR(SYSDATE, 'YYYYMMDD') CHECK_DAY\n" +
                         "            FROM tablea A\n" +
-                        "right outer join DB_PRIV B on A.DBID = B.DBID\n" +
-                        "                 WHERE A.CHECK_SEQ = A.MAX_CHECK_SEQ\n" +
-                        "      )\n" +
+                        "right outer join DB_PRIV B on A.DBID = B.DBID and A.CHECK_SEQ = A.MAX_CHECK_SEQ\n" +
+                        "                 )\n" +
                         "      SELECT A.DB_NAME\n" +
                         "           , B.CHECK_DAY\n" +
                         "        FROM DB_PRIV A\n" +
