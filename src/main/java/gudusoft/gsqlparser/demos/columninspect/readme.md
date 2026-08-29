@@ -23,7 +23,6 @@ works from a fresh clone with no database:
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.columninspect.ColumnInspect \
-    -Dexec.classpathScope=compile \
     -Dexec.args="/t mssql /f samples/columninspect/sample.sql /metadata samples/columninspect/metadata.json /db testdb /schema dbo"
 ```
 

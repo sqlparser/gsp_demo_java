@@ -14,7 +14,7 @@ java SnowflakeSQLExtractor [/f <path_to_sql_file>] [/d <path_to_directory_includ
 ```bash
 mvn -q exec:java \
     -Dexec.mainClass=gudusoft.gsqlparser.demos.snowflake.sqlextract.SnowflakeSQLExtractor \
-    -Dexec.args="/f proc.sql" -Dexec.classpathScope=compile
+    -Dexec.args="/f proc.sql"
 ```
 
 > **Needs Java 8–14.** It evaluates the JavaScript with Nashorn, which was

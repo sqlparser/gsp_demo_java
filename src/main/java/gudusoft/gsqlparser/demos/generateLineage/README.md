@@ -9,8 +9,7 @@ be re-baselined after parser output changes.
 ```bash
 mvn -q exec:java \
     -Dexec.mainClass=gudusoft.gsqlparser.demos.generateLineage.GenerateLineageExpected \
-    -Dexec.args="<path to a *_lineage_test_cases.yaml>" \
-    -Dexec.classpathScope=compile
+    -Dexec.args="<path to a *_lineage_test_cases.yaml>"
 ```
 
 The YAML it operates on is the library's own lineage fixture data

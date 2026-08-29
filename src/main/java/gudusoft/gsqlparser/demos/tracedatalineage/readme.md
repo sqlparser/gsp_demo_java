@@ -22,8 +22,7 @@ writes the result to a file instead of stdout.
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.tracedatalineage.traceDataLineage \
-    -Dexec.args="samples/tracedatalineage" \
-    -Dexec.classpathScope=compile
+    -Dexec.args="samples/tracedatalineage"
 ```
 
 ```

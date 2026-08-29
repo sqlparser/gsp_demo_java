@@ -18,8 +18,7 @@ prints exactly that.
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.findproceduralsql.FindProceduralSqlFiles \
-    -Dexec.args="oracle /path/to/scripts /path/to/procedural-only" \
-    -Dexec.classpathScope=compile
+    -Dexec.args="oracle /path/to/scripts /path/to/procedural-only"
 ```
 
 Both directories are filesystem paths; the output directory receives copies, so

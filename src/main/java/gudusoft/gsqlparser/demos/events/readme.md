@@ -17,8 +17,7 @@ name, `}` into a single identifier token first.
 Neither takes arguments; both are configured inline.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.events.processTokenList \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.events.processTokenList
 ```
 
 > **Both demos fail as shipped.**

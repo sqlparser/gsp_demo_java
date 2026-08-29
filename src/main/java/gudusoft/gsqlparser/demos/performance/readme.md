@@ -17,8 +17,7 @@ many statements.
 Neither takes arguments.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.performance.ParserPoolDemo \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.performance.ParserPoolDemo
 ```
 
 ```text

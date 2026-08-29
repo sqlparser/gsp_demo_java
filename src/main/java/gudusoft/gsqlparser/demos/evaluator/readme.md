@@ -12,7 +12,7 @@ java EvaluatorDemo [/f <path_to_sql_file>] [/t <database type>]
 
 ```bash
 mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.evaluator.EvaluatorDemo \
-    -Dexec.args="/f q.sql /t oracle" -Dexec.classpathScope=compile
+    -Dexec.args="/f q.sql /t oracle"
 ```
 
 ```text

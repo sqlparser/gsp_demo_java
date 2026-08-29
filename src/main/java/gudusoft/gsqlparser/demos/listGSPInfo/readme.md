@@ -11,8 +11,7 @@ come down to the parser version or the trial-vs-full distinction.
 Takes no arguments.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.listGSPInfo.listGSPInfo \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.listGSPInfo.listGSPInfo
 ```
 
 ```text

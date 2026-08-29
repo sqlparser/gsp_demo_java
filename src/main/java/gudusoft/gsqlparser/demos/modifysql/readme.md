@@ -12,8 +12,7 @@ manipulation. Each takes no arguments; the query is inline in its source.
 ## Usage
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifysql.replaceTablename \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifysql.replaceTablename
 ```
 
 ```text

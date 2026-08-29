@@ -12,8 +12,7 @@ already non-trivial, where appending ` AND ...` to the text would not be.
 Takes no arguments; the query is inline in `ModifySelect.java`.
 
 ```bash
-mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifySelect.ModifySelect \
-    -Dexec.classpathScope=compile
+mvn -q exec:java -Dexec.mainClass=gudusoft.gsqlparser.demos.modifySelect.ModifySelect
 ```
 
 ```text

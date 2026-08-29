@@ -64,9 +64,13 @@ jobs:
       # produced. Someone evaluating GSP for the first time reasonably concluded
       # the product was broken.
       #
+      # It also resolves every relative markdown link, which is the other half of
+      # the same problem -- not a document naming something deleted, but one
+      # pointing at something that moved. Two had rotted unnoticed.
+      #
       # --self-test runs first and on purpose: a fixed-string check that matches
       # nothing looks identical to a clean repository.
-      - name: Documentation does not point at deleted things
+      - name: Documentation does not point at deleted or missing things
         if: matrix.java == '21'
         run: |
           .github/scripts/check-stale-docs.sh --self-test
